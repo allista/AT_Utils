@@ -158,7 +158,7 @@ namespace AT_Utils
 
 	class NamedStopwatch
 	{
-		readonly System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+		readonly Stopwatch sw = new Stopwatch();
 		readonly string name;
 
 		public NamedStopwatch(string name)
@@ -176,7 +176,7 @@ namespace AT_Utils
 		public void Stamp()
 		{
 			Utils.Log("{0}: elapsed time: {1}us", name, 
-			          sw.ElapsedTicks/(System.Diagnostics.Stopwatch.Frequency/(1000000L)));
+			          sw.ElapsedTicks/(Stopwatch.Frequency/(1000000L)));
 		}
 
 		public void Stop() { sw.Stop(); Stamp(); }
@@ -218,7 +218,7 @@ namespace AT_Utils
 
 		public void Log(string name)
 		{
-			var current = sw.ElapsedTicks/(System.Diagnostics.Stopwatch.Frequency/(1000000L));
+			var current = sw.ElapsedTicks/(Stopwatch.Frequency/(1000000L));
 			Counter v;
 			if(counters.TryGetValue(name, out v)) 
 				v.Add(current-last);

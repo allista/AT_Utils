@@ -6,7 +6,7 @@
     <ProjectGuid>{64CC36A2-0610-4F74-9F31-3D4E22866B7E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>AT_Utils</RootNamespace>
-    <AssemblyName>AT_Utils</AssemblyName>
+    <AssemblyName>000_AT_Utils</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -88,6 +88,7 @@
     <Compile Include="Math\ConvexHull3D.cs" />
     <Compile Include="GUI\GraphicsUtils.cs" />
     <Compile Include="Metric.cs" />
+    <Compile Include="TechFloat.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

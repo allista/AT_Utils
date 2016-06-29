@@ -15,6 +15,20 @@ namespace AT_Utils
 	{
 		public static string ModName = "MyMod";
 
+		const string ElectricChargeName = "ElectricCharge";
+		static PartResourceDefinition _electric_charge;
+		public static PartResourceDefinition ElectricCharge
+		{ 
+			get 
+			{ 
+				if(_electric_charge == null)
+					_electric_charge = PartResourceLibrary.Instance.GetDefinition(ElectricChargeName);	
+				return _electric_charge; 
+			} 
+		}
+		public static int ElectricChargeID { get { return ElectricCharge.id; } }
+
+
 		/// <summary>
 		/// The camel case components matching regexp.
 		/// From: http://stackoverflow.com/questions/155303/net-how-can-you-split-a-caps-delimited-string-into-an-array
@@ -180,18 +194,6 @@ namespace AT_Utils
 				Debug.Log(string.Format(msg, args)); 
 			}
 			else Debug.Log(msg);
-		}
-
-		public static void Log(this MonoBehaviour mb, string msg, params object[] args)
-		{ Utils.Log(string.Format("{0}: {1}", mb.name, msg), args); }
-
-		public static void Log(this Vessel v, string msg, params object[] args)
-		{ Utils.Log(string.Format("{0}: {1}", v.vesselName, msg), args); }
-
-		public static void Log(this PartModule pm, string msg, params object[] args)
-		{ 
-			var vn = pm.vessel == null? "_vessel" : (string.IsNullOrEmpty(pm.vessel.vesselName)? pm.vessel.id.ToString() : pm.vessel.vesselName);
-			Utils.Log(string.Format("{0}:{1}:{2}: {3}", vn, pm.part == null? "_part" : pm.part.Title(), pm.moduleName, msg), args); 
 		}
 
 		public static void LogF(string msg, params object[] args) { Log(Format(msg, args)); }
