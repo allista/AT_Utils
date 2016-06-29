@@ -4,6 +4,7 @@
 //  Copyright (c) 2015 Allis Tauri
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -22,7 +23,7 @@ namespace AT_Utils
 		static Regex CCR = new Regex(CamelCaseRegexp);
 		public static string ParseCamelCase(string s) { return CCR.Replace(s, "$1 "); }
 
-		public static string FormatVeryBigValue(float value, string unit, string format = "F1")
+		public static string formatVeryBigValue(float value, string unit, string format = "F1")
 		{
 			string mod = "";
 			if(value > 1e24) { value /= 1e24f; mod = "Y"; }
@@ -30,11 +31,11 @@ namespace AT_Utils
 			else if(value > 1e18) { value /= 1e18f; mod = "E"; }
 			else if(value > 1e15) { value /= 1e15f; mod = "P"; }
 			else if(value > 1e12) { value /= 1e12f; mod = "T"; }
-			else return FormatBigValue(value, unit, format);
+			else return formatBigValue(value, unit, format);
 			return value.ToString(format)+mod+unit;
 		}
 
-		public static string FormatBigValue(float value, string unit, string format = "F1")
+		public static string formatBigValue(float value, string unit, string format = "F1")
 		{
 			string mod = "";
 			if     (value > 1e9) { value /= 1e9f; mod = "G"; }
@@ -43,13 +44,45 @@ namespace AT_Utils
 			return value.ToString(format)+mod+unit;
 		}
 
-		public static string FormatSmallValue(float value, string unit, string format = "F1")
+		public static string formatSmallValue(float value, string unit, string format = "F1")
 		{
 			string mod = "";
 			if(value > 1e-3) { value *= 1e3f; mod = "m"; }
 			else if(value > 1e-6) { value *= 1e6f; mod = "μ"; }
 			else if(value > 1e-9) { value *= 1e9f; mod = "n"; }
 			return value.ToString(format)+mod+unit;
+		}
+
+		public static string formatMass(float mass)
+		{
+			if(mass >= 0.1f)
+				return mass.ToString("n2") + "t";
+			if(mass >= 0.001f)
+				return (mass * 1e3f).ToString("n1") + "kg";
+			return (mass * 1e6f).ToString("n0") + "g";
+		}
+
+		public static string formatVolume(double volume)
+		{
+			if(volume < 1f)
+				return (volume * 1e3f).ToString ("n0") + "L";
+			return volume.ToString("n1") + "m3";
+		}
+
+		public static string formatUnits(float units)
+		{
+			units = Mathf.Abs(units);
+			if(units >= 1f)
+				return units.ToString ("n2") + "u";
+			if(units >= 1e-3f)
+				return (units * 1e3f).ToString ("n1") + "mu";
+			if(units >= 1e-6f)
+				return (units * 1e6f).ToString ("n1") + "mku";
+			if(units >= 1e-9f)
+				return (units * 1e9f).ToString ("n1") + "nu";
+			if(units >= 1e-13f) //to fully use the last digit 
+				return (units * 1e12f).ToString ("n1") + "pu";
+			return "0.0u"; //effectivly zero
 		}
 
 //		public static string FormatTimeDelta(double value)
@@ -70,6 +103,9 @@ namespace AT_Utils
 			}
 			return string.Format(s.Replace("{}", "[no arg]"), args);
 		}
+
+		public static string formatDimensions(Vector3 size)
+		{ return string.Format("{0:F2}m x {1:F2}m x {2:F2}m", size.x, size.y, size.z); }
 
 		public static string formatVector(Vector3 v)
 		{ return string.Format("({0}, {1}, {2}); |v| = {3}", v.x, v.y, v.z, v.magnitude); }
@@ -100,7 +136,7 @@ namespace AT_Utils
 				"Vel: {} m/s\n" +
 				"Pos: {} m\n",
 				o.referenceBody.bodyName, o.referenceBody.rotationPeriod,
-				FormatBigValue((float)o.referenceBody.Radius, "m"),
+				formatBigValue((float)o.referenceBody.Radius, "m"),
 				o.PeA, o.ApA,
 				o.PeR, o.ApR, 
 				o.eccentricity, o.inclination, o.LAN, o.meanAnomaly, o.trueAnomaly, o.argumentOfPeriapsis,
@@ -159,7 +195,6 @@ namespace AT_Utils
 		}
 
 		public static void LogF(string msg, params object[] args) { Log(Format(msg, args)); }
-		#endregion
 
 		//from http://stackoverflow.com/questions/716399/c-sharp-how-do-you-get-a-variables-name-as-it-was-physically-typed-in-its-dec
 		//second answer
@@ -189,6 +224,44 @@ namespace AT_Utils
 			edges[6] = new Vector3(max.x, max.y, min.z); //right-top-back
 			edges[7] = new Vector3(max.x, max.y, max.z); //right-top-front
 			return edges;
+		}
+
+		public static Vector3[] BoundCorners(Vector3 center, Vector3 size)
+		{
+			var b = new Bounds(center, size);
+			return BoundCorners(b);
+		}
+
+		public static string PathChain(params string[] paths)
+		{
+			string path = "";
+			for(int p = 0, len = paths.Length; p < len; p++)
+				path = Path.Combine(path, paths[p]);
+			return path;
+		}
+	}
+
+	public static class WaitWithPhysics
+	{
+		public static void DelayPhysicsForSeconds(float dt)
+		{ OrbitPhysicsManager.HoldVesselUnpack(Mathf.CeilToInt(dt/TimeWarp.fixedDeltaTime)+1); }
+
+		public static WaitForSeconds ForSeconds(float dt)
+		{
+			DelayPhysicsForSeconds(dt);
+			return new WaitForSeconds(dt);
+		}
+
+		public static WaitForFixedUpdate ForFixedUpdate()
+		{
+			OrbitPhysicsManager.HoldVesselUnpack(2);
+			return new WaitForFixedUpdate();
+		}
+
+		public static YieldInstruction ForNextUpdate()
+		{
+			DelayPhysicsForSeconds(TimeWarp.deltaTime);
+			return null;
 		}
 	}
 

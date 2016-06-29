@@ -52,6 +52,39 @@ namespace AT_Utils
 			return ret;
 		}
 
+		public static int LeftRightChooser(string text, int width = 0)
+		{
+			var left  = GUILayout.Button("<", Styles.yellow_button, GUILayout.Width(20));
+			if(width > 0) GUILayout.Label(text, Styles.white, GUILayout.Width(width));
+			else GUILayout.Label(text, Styles.white);
+			var right = GUILayout.Button(">", Styles.yellow_button, GUILayout.Width(20));
+			return left? -1 : (right? 1 : 0);
+		}
+
+		#region KSP_UI
+		public static void EnableField(BaseField field, bool enable = true, UI_Scene scene = UI_Scene.All)
+		{
+			if((scene & UI_Scene.Flight) == UI_Scene.Flight) field.guiActive       = enable;
+			if((scene & UI_Scene.Editor) == UI_Scene.Editor) field.guiActiveEditor = enable;
+			if(field.uiControlEditor != null) field.uiControlEditor.controlEnabled = enable;
+			if(field.uiControlFlight != null) field.uiControlFlight.controlEnabled = enable;
+		}
+
+		static void setup_chooser_control(string[] names, string[] values, UI_Control control)
+		{
+			var current_editor = control as UI_ChooseOption;
+			if(current_editor == null) return;
+			current_editor.display = names;
+			current_editor.options = values;
+		}
+
+		public static void SetupChooser(string[] names, string[] values, BaseField field)
+		{
+			setup_chooser_control(names, values, field.uiControlEditor);
+			setup_chooser_control(names, values, field.uiControlFlight);
+		}
+		#endregion
+
 		#region ControlLock
 		//modified from Kerbal Alarm Clock mod
 		public static void LockEditor(string LockName, bool Lock=true)
@@ -67,6 +100,9 @@ namespace AT_Utils
 			Lock &= WindowRect.Contains(Event.current.mousePosition);
 			LockEditor(LockName, Lock);
 		}
+
+		public static void UpdateEditorGUI()
+		{ if(EditorLogic.fetch != null)	GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship); }
 		#endregion
 
 		public static void Message(float duration, string msg, params object[] args)

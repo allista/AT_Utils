@@ -9,7 +9,6 @@
 
 #if DEBUG
 using System;
-using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -58,6 +57,86 @@ namespace AT_Utils
 
 		public static void LogF(string msg, params object[] args)
 		{ Utils.Log("{0}\n{1}", Utils.Format(msg, args), getStacktrace(1)); }
+
+		public static void logStamp(string msg = "") { Utils.Log("=== " + msg); }
+
+		public static void logCrewList(List<ProtoCrewMember> crew)
+		{
+			string crew_str = "";
+			foreach(ProtoCrewMember c in crew)
+				crew_str += string.Format("\n{0}, seat {1}, seatIdx {2}, roster {3}, ref {4}", 
+				                          c.name, c.seat, c.seatIdx, c.rosterStatus, c.KerbalRef);
+			Utils.Log("Crew List:{0}", crew_str);
+		}
+
+		public static void logVectors(IEnumerable<Vector3> vecs)
+		{ 
+			string vs = "";
+			foreach(Vector3 v in vecs) vs += "\n"+Utils.formatVector(v);
+			Utils.Log("Vectors:{0}", vs);
+		}
+
+		public static Vector3d planetaryPosition(Vector3 v, CelestialBody planet) 
+		{ 
+			double lng = planet.GetLongitude(v);
+			double lat = planet.GetLatitude(v);
+			double alt = planet.GetAltitude(v);
+			return planet.GetWorldSurfacePosition(lat, lng, alt);
+		}
+
+		public static void logPlanetaryPosition(Vector3 v, CelestialBody planet) 
+		{ Utils.Log("Planetary position: {0}", planetaryPosition(v, planet));	}
+
+		public static void logLongLatAlt(Vector3 v, CelestialBody planet) 
+		{ 
+			double lng = planet.GetLongitude(v);
+			double lat = planet.GetLatitude(v);
+			double alt = planet.GetAltitude(v);
+			Utils.Log("Long: {0}, Lat: {1}, Alt: {2}", lng, lat, alt);
+		}
+
+		public static void logProtovesselCrew(ProtoVessel pv)
+		{
+			for(int i = 0; i < pv.protoPartSnapshots.Count; i++)
+			{
+				ProtoPartSnapshot p = pv.protoPartSnapshots[i];
+				Utils.Log(string.Format("Part{0}: {1}", i, p.partName));
+				if(p.partInfo.partPrefab != null)
+					Utils.Log(string.Format("partInfo.partPrefab.CrewCapacity {0}",p.partInfo.partPrefab.CrewCapacity));
+				Utils.Log(string.Format("partInfo.internalConfig: {0}", p.partInfo.internalConfig));
+				Utils.Log(string.Format("partStateValues.Count: {0}", p.partStateValues.Count));
+				foreach(string k in p.partStateValues.Keys)
+					Utils.Log (string.Format("{0} : {1}", k, p.partStateValues[k]));
+				Utils.Log(string.Format("modules.Count: {0}", p.modules.Count));
+				foreach(ProtoPartModuleSnapshot pm in p.modules)
+					Utils.Log (string.Format("{0} : {1}", pm.moduleName, pm.moduleValues));
+				foreach(string k in p.partStateValues.Keys)
+					Utils.Log (string.Format("{0} : {1}", k, p.partStateValues[k]));
+				Utils.Log(string.Format("customPartData: {0}", p.customPartData));
+			}
+		}
+
+		public static void logTransfrorm(Transform T)
+		{
+			Utils.Log
+			(
+				"Transform: {0}\n" +
+				"Position: {1}\n" +
+				"Rotation: {2}\n"+
+				"Local Position: {3}\n" +
+				"Local Rotation: {4}",
+				T.name, 
+				T.position, T.eulerAngles,
+				T.localPosition, T.localEulerAngles
+			);
+		}
+
+		public static void logShipConstruct(ShipConstruct ship)
+		{
+			Utils.Log("ShipConstruct: {0}\n{1}",
+			          ship.shipName,
+			          ship.parts.Aggregate("", (s, p) => s + p.Title() + "\n"));
+		}
 
 		//does not work with monodevelop generated .mdb files =(
 //		public static void LogException(Action action)
@@ -231,51 +310,13 @@ namespace AT_Utils
 		}
 	}
 
-	[KSPAddon(KSPAddon.Startup.MainMenu, false)]
-	public class LoadTestGame : MonoBehaviour
+	public class TemperatureReporter : PartModule
 	{
-		static readonly string config   = TCAScenario.PluginFolder("LoadTestGame.conf");
-		static readonly string savesdir = KSPUtil.ApplicationRootPath+"saves";
+		[KSPField(isPersistant=false, guiActiveEditor=true, guiActive=true, guiName="T", guiUnits = "C")]
+		public float temperatureDisplay;
 
-		void Awake()
-		{
-			var game = "";
-			var save = "";
-			if(File.Exists(config))
-			{
-				var cfg = ConfigNode.Load(config);
-				if(cfg != null)
-				{
-					var val = cfg.GetValue("game");
-					if(val != null) game = val;
-					val = cfg.GetValue("save");
-					if(val != null) save = val;
-				}
-				else 
-				{
-					Utils.LogF("LoadTestGame: Configuration file is empty: {}", config);
-					return;
-				}
-			}
-			else 
-			{
-				Utils.LogF("LoadTestGame: Configuration file not found: {}", config);
-				return;
-			}
-			var savefile = savesdir+"/"+game+"/"+save+".sfs";
-			if(!File.Exists(savefile)) 
-			{
-				Utils.LogF("No such file: {}", savefile);
-				return;
-			}
-			HighLogic.CurrentGame = GamePersistence.LoadGame(save, game, false, false);
-			if (HighLogic.CurrentGame != null)
-			{
-				GamePersistence.UpdateScenarioModules(HighLogic.CurrentGame);
-				HighLogic.SaveFolder = game;
-				HighLogic.CurrentGame.Start();
-			}
-		}
+		public override void OnUpdate()
+		{ temperatureDisplay = (float)part.temperature; }
 	}
 }
 #endif

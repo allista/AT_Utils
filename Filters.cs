@@ -398,5 +398,30 @@ namespace AT_Utils
 			}
 		}
 	}
+
+	public class State<T>
+	{
+		T _current, _old;
+
+		public T current 
+		{ 
+			get	{ return _current; }
+			set
+			{
+				_old = _current;
+				_current = value;
+			}
+		}
+
+		public T old { get { return _old; } }
+
+		public State(T cur, T old = default(T))
+		{
+			_current = cur;
+			_old = EqualityComparer<T>.Default.Equals(old, default(T)) ? cur : old;
+		}
+
+		public static implicit operator T(State<T> s) { return s._current; }
+	}
 }
 

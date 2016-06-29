@@ -30,12 +30,12 @@ namespace AT_Utils
 		public void setPI(PI_Controller other) { p = other.P; i = other.I; }
 		public void setMaster(PI_Controller master) { this.master = master; }
 
-		public virtual void DrawControls(string name)
+		public virtual void DrawControls(string name, float maxP, float maxI)
 		{
 			GUILayout.BeginHorizontal();
 			GUILayout.Label(name, GUILayout.ExpandWidth(false));
-			p = Utils.FloatSlider(" P", P, 0, TCAScenario.Globals.ENG.MaxP, "F2");
-			i = Utils.FloatSlider(" I", I, 0, TCAScenario.Globals.ENG.MaxI, "F2");
+			p = Utils.FloatSlider(" P", P, 0, maxP, "F2");
+			i = Utils.FloatSlider(" I", I, 0, maxI, "F2");
 			GUILayout.EndHorizontal();
 		}
 

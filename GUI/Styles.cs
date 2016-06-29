@@ -87,13 +87,13 @@ namespace AT_Utils
 
 		public static void ConfigureButtons()
 		{
-			enabled_button  = find_button_style(TCAScenario.Globals.EnabledButtonColor)  ?? green_button;
-			active_button   = find_button_style(TCAScenario.Globals.ActiveButtonColor)   ?? yellow_button;
-			inactive_button = find_button_style(TCAScenario.Globals.InactiveButtonColor) ?? grey_button;
-			confirm_button  = find_button_style(TCAScenario.Globals.ConfirmButtonColor)  ?? green_button;
-			add_button      = find_button_style(TCAScenario.Globals.AddButtonColor)      ?? green_button;
-			close_button    = find_button_style(TCAScenario.Globals.CloseButtonColor)    ?? red_button;
-			danger_button   = find_button_style(TCAScenario.Globals.DangerButtonColor)   ?? red_button;
+//			enabled_button  = find_button_style(TCAScenario.Globals.EnabledButtonColor)  ?? green_button;
+//			active_button   = find_button_style(TCAScenario.Globals.ActiveButtonColor)   ?? yellow_button;
+//			inactive_button = find_button_style(TCAScenario.Globals.InactiveButtonColor) ?? grey_button;
+//			confirm_button  = find_button_style(TCAScenario.Globals.ConfirmButtonColor)  ?? green_button;
+//			add_button      = find_button_style(TCAScenario.Globals.AddButtonColor)      ?? green_button;
+//			close_button    = find_button_style(TCAScenario.Globals.CloseButtonColor)    ?? red_button;
+//			danger_button   = find_button_style(TCAScenario.Globals.DangerButtonColor)   ?? red_button;
 		}
 
 		static GUIStyle OtherColor(this GUIStyle style, Color normal)

@@ -34,7 +34,7 @@ namespace AT_Utils
         //properties to use
 		string widest_item;
 		List<string> items = new List<string>();
-		internal List<string> Items 
+		public List<string> Items 
 		{ 
 			get { return items; }
 			set
@@ -46,21 +46,21 @@ namespace AT_Utils
 				SelectItem(SelectedIndex);
 			}
 		}
-        internal int SelectedIndex { get; private set; }
-        internal string SelectedValue { get { return Items[SelectedIndex]; } }
+        public int SelectedIndex { get; private set; }
+        public string SelectedValue { get { return Items[SelectedIndex]; } }
 
-        internal bool ListVisible;
+        public bool ListVisible;
 
-		internal Rect windowRect;
+		public Rect windowRect;
         Rect rectButton = new Rect();
         Rect rectListBox = new Rect();
 		Rect rectScrollView = new Rect();
 		Vector2 scroll_view;
 
-        internal GUIStyle styleListItem = new GUIStyle();
-        internal GUIStyle styleListBox = new GUIStyle();
-        internal GUIStyle styleListBlocker = new GUIStyle();
-        internal int ListItemHeight = 25;
+        public GUIStyle styleListItem = new GUIStyle();
+        public GUIStyle styleListBox = new GUIStyle();
+        public GUIStyle styleListBlocker = new GUIStyle();
+        public int ListItemHeight = 25;
 
         //Constructors
         public DropDownList()
@@ -80,7 +80,7 @@ namespace AT_Utils
 		}
 
         //Draw the button behind everything else to catch the first mouse click
-        internal void DrawBlockingSelector()
+        public void DrawBlockingSelector()
         {
             //do we need to draw the blocker
             if(ListVisible)
@@ -96,7 +96,7 @@ namespace AT_Utils
         }
 
         //Draw the actual button for the list
-        internal bool DrawButton()
+        public bool DrawButton()
         {
             bool blnReturn = false;
             //this is the dropdown button - toggle list visible if clicked
@@ -122,7 +122,7 @@ namespace AT_Utils
         }
 
         //Draw the hovering dropdown
-        internal void DrawDropDown()
+        public void DrawDropDown()
         {
             if (ListVisible)
             {
@@ -159,7 +159,7 @@ namespace AT_Utils
 
         }
 
-        internal bool CloseOnOutsideClick()
+        public bool CloseOnOutsideClick()
         {
 			if(ListVisible && Event.current.type == EventType.mouseDown && !rectScrollView.Contains(Event.current.mousePosition))
             {

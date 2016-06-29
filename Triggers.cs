@@ -2,12 +2,11 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2016 Allis Tauri
-//
-// This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
-// To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ 
-// or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
-//
+
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace AT_Utils
 {
@@ -95,6 +94,36 @@ namespace AT_Utils
 		public Timer(double period = 1) : base(period) { next_time = default_time; }
 		public override void Start() { next_time = now+Period; }
 		public override double Remaining { get { return next_time-now; } }
+	}
+
+	class MemoryTimer : IEnumerator<YieldInstruction>
+	{
+		public delegate void Callback();
+
+		public bool  Active = true;
+		public float WaitPeriod = 1f;
+		public Callback EndAction = null;
+
+		public YieldInstruction Current
+		{
+			get
+			{
+				Active = false;
+				return new WaitForSeconds(WaitPeriod);
+			}
+		}
+		object IEnumerator.Current { get { return Current; } }
+
+		public bool MoveNext() 
+		{ 
+			if(!Active && EndAction != null) 
+				EndAction();
+			return Active; 
+		}
+
+		public void Reset() { Active = true; }
+
+		public void Dispose() {}
 	}
 	#endregion
 
