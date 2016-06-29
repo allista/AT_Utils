@@ -94,4 +94,7 @@
     <Folder Include="Math\" />
     <Folder Include="GUI\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitignore" />
+  </ItemGroup>
 </Project>
