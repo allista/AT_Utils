@@ -234,6 +234,7 @@ namespace AT_Utils
 			return BoundCorners(b);
 		}
 
+		//KSP-provided System.dll declares Path.Combine(strin[]) as internal O_o
 		public static string PathChain(params string[] paths)
 		{
 			string path = "";

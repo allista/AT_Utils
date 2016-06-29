@@ -89,6 +89,7 @@
     <Compile Include="GUI\GraphicsUtils.cs" />
     <Compile Include="Metric.cs" />
     <Compile Include="TechFloat.cs" />
+    <Compile Include="PluginConfig.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

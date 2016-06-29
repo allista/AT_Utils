@@ -15,6 +15,19 @@ namespace AT_Utils
 {
 	public static class Styles 
 	{
+		public class Config : ConfigNodeObject
+		{
+			[Persistent] public string EnabledButtonColor  = "green";
+			[Persistent] public string ActiveButtonColor   = "yellow";
+			[Persistent] public string InactiveButtonColor = "grey";
+			[Persistent] public string ConfirmButtonColor  = "green";
+			[Persistent] public string AddButtonColor      = "green";
+			[Persistent] public string CloseButtonColor    = "red";
+			[Persistent] public string DangerButtonColor   = "red";
+		}
+
+		public static Config ButtonColors = new Config();
+
 		//This code is based on Styles class from Extraplanetary Launchpad plugin.
 		public static GUISkin skin;
 
@@ -87,13 +100,14 @@ namespace AT_Utils
 
 		public static void ConfigureButtons()
 		{
-//			enabled_button  = find_button_style(TCAScenario.Globals.EnabledButtonColor)  ?? green_button;
-//			active_button   = find_button_style(TCAScenario.Globals.ActiveButtonColor)   ?? yellow_button;
-//			inactive_button = find_button_style(TCAScenario.Globals.InactiveButtonColor) ?? grey_button;
-//			confirm_button  = find_button_style(TCAScenario.Globals.ConfirmButtonColor)  ?? green_button;
-//			add_button      = find_button_style(TCAScenario.Globals.AddButtonColor)      ?? green_button;
-//			close_button    = find_button_style(TCAScenario.Globals.CloseButtonColor)    ?? red_button;
-//			danger_button   = find_button_style(TCAScenario.Globals.DangerButtonColor)   ?? red_button;
+			if(!initialized) return;
+			enabled_button  = find_button_style(ButtonColors.EnabledButtonColor)  ?? green_button;
+			active_button   = find_button_style(ButtonColors.ActiveButtonColor)   ?? yellow_button;
+			inactive_button = find_button_style(ButtonColors.InactiveButtonColor) ?? grey_button;
+			confirm_button  = find_button_style(ButtonColors.ConfirmButtonColor)  ?? green_button;
+			add_button      = find_button_style(ButtonColors.AddButtonColor)      ?? green_button;
+			close_button    = find_button_style(ButtonColors.CloseButtonColor)    ?? red_button;
+			danger_button   = find_button_style(ButtonColors.DangerButtonColor)   ?? red_button;
 		}
 
 		static GUIStyle OtherColor(this GUIStyle style, Color normal)
@@ -114,7 +128,6 @@ namespace AT_Utils
 		public static void InitGUI()
 		{
 			if (initialized) return;
-			initialized = true;
 
 			var b_texture = new Texture2D(1, 1);
 			b_texture.SetPixel(0, 0, new Color(0.15f, 0.15f, 0.15f, 1f));
@@ -190,6 +203,7 @@ namespace AT_Utils
 			list_box.onNormal.textColor = list_box.onFocused.textColor = list_box.onHover.textColor = list_box.onActive.textColor = Color.green;
 			list_box.padding = new RectOffset (4, 4, 4, 4);
 
+			initialized = true;
 			ConfigureButtons();
 		}
 

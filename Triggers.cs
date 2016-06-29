@@ -96,7 +96,7 @@ namespace AT_Utils
 		public override double Remaining { get { return next_time-now; } }
 	}
 
-	class MemoryTimer : IEnumerator<YieldInstruction>
+	public class MemoryTimer : IEnumerator<YieldInstruction>
 	{
 		public delegate void Callback();
 

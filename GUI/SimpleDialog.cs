@@ -2,7 +2,7 @@
 
 namespace AT_Utils
 {
-	class SimpleDialog : MonoBehaviour
+	public class SimpleDialog : MonoBehaviour
 	{
 		public enum Answer { None, Yes, No }
 

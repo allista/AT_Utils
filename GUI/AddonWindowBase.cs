@@ -1,11 +1,9 @@
+//   AddonWindowBase.cs
+//
 //  Author:
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2015 Allis Tauri
-//
-// This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
-// To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ 
-// or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 using System;
 using System.Reflection;
@@ -21,8 +19,10 @@ namespace AT_Utils
 		protected static Rect drag_handle = new Rect(0,0, 10000, 20);
 		protected static string tooltip = "";
 
-		void onShowUI() { HUD_enabled = true; }
-		void onHideUI() { HUD_enabled = false; }
+		protected virtual void onShowUI() { HUD_enabled = true; UpdateContent(); }
+		protected virtual void onHideUI() { HUD_enabled = false; UpdateContent(); }
+
+		protected virtual void UpdateContent() {}
 
 		public virtual void Awake()
 		{
@@ -78,25 +78,28 @@ namespace AT_Utils
 
 	abstract public class AddonWindowBase<T> : AddonWindowBase where T : AddonWindowBase<T>
 	{
-		protected static T instance;
+		protected static T instance { get; private set; }
 		protected static PluginConfiguration GUI_CFG = PluginConfiguration.CreateForType<T>();
 
 		protected static int  width = 550, height = 100;
 		protected static Rect MainWindow = new Rect();
 		public static bool window_enabled { get; protected set; } = false;
 		public static bool do_show { get { return window_enabled && HUD_enabled; } }
-		static protected string TCATitle;
+		public static string Title { get; protected set; }
 
-		public static void Show(bool show) { window_enabled = show; }
-		public static void Toggle() { window_enabled = !window_enabled; }
+		static void update_content() 
+		{ if(instance != null) instance.UpdateContent(); }
+
+		public static void Show(bool show) { window_enabled = show; update_content(); }
+		public static void Toggle() { window_enabled = !window_enabled; update_content(); }
 
 		public override void Awake()
 		{
 			base.Awake();
 			instance = (T)this;
 			LoadConfig();
-			TCATitle = "Throttle Controlled Avionics - " + 
-				Assembly.GetCallingAssembly().GetName().Version;
+			var assembly = Assembly.GetCallingAssembly().GetName();
+			Title = string.Concat(assembly.Name, " - ", assembly.Version);
 		}
 
 		public override void OnDestroy()
@@ -118,12 +121,13 @@ namespace AT_Utils
 		virtual public void LoadConfig()
 		{
 			GUI_CFG.load();
-			MainWindow = GetConfigValue<Rect>(Utils.PropertyName(new {MainWindow}), 
-				new Rect(100, 50, width, height));
+			window_enabled = GetConfigValue<bool>(Utils.PropertyName(new {window_enabled}), window_enabled);
+			MainWindow = GetConfigValue<Rect>(Utils.PropertyName(new {MainWindow}), new Rect(100, 50, width, height));
 		}
 
-		virtual public void SaveConfig(ConfigNode node = null)
+		virtual public void SaveConfig()
 		{
+			SetConfigValue(Utils.PropertyName(new {window_enabled}), window_enabled);
 			SetConfigValue(Utils.PropertyName(new {MainWindow}), MainWindow);
 			GUI_CFG.save();
 		}
