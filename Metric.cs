@@ -89,6 +89,10 @@ namespace AT_Utils
 			foreach(Part p in parts)
 			{
 				if(p == null) continue; //EditorLogic.SortedShipList returns List<Part>{null} when all parts are deleted
+				//if it's a wheel, get all meshes under the wheel collider
+				var wheel = p.GetModule<ModuleWheelBase>();
+				var wheel_meshes = wheel != null && wheel.Wheel != null && wheel.Wheel.wheelCollider != null && wheel.Wheel.wheelCollider.wheelTransform != null?  
+					new HashSet<MeshFilter>(wheel.Wheel.wheelCollider.wheelTransform.GetComponentsInChildren<MeshFilter>()) : null;
 				foreach(MeshFilter m in p.FindModelComponents<MeshFilter>())
 				{
 					//skip meshes from the blacklist
@@ -100,19 +104,19 @@ namespace AT_Utils
 						skip_mesh = m.name.IndexOf(mesh_name, StringComparison.OrdinalIgnoreCase) >= 0;
 						if(skip_mesh) break;
 					} if(skip_mesh) continue;
-					//wheels are round and rotating >_<
-					//TODO: rework this block for more efficiency: do not call Mesh.vertices twice
+					var is_wheel = wheel_meshes != null && wheel_meshes.Contains(m);
 					Vector3[] edges;
 					if(compute_hull)
 					{
 						float m_size = Vector3.Scale(m.sharedMesh.bounds.size, m.transform.lossyScale).sqrMagnitude;
-						edges = local2local(m.transform, vT, (m_size > b_size/10? uniqueVertices(m.sharedMesh) : 
+						edges = local2local(m.transform, vT, 
+						                    (is_wheel || m_size > b_size/10? uniqueVertices(m.sharedMesh) : 
 						                                      Utils.BoundCorners(m.sharedMesh.bounds)));
 						hull_points.AddRange(edges);
 						b_size = b.size.sqrMagnitude;
 					}
-					else edges = local2local(m.transform, vT, (m.name.IndexOf("wheel", StringComparison.OrdinalIgnoreCase) >= 0? 
-					                                           uniqueVertices(m.sharedMesh) : Utils.BoundCorners(m.sharedMesh.bounds)));
+					else edges = local2local(m.transform, vT, (is_wheel? uniqueVertices(m.sharedMesh) : 
+					                                           Utils.BoundCorners(m.sharedMesh.bounds)));
 					updateBounds(ref b, edges);
 				}
 				CrewCapacity += p.CrewCapacity;
@@ -188,7 +192,7 @@ namespace AT_Utils
 		{
 			if(string.IsNullOrEmpty(mesh_name)) return;
 			MeshFilter m = part.FindModelComponent<MeshFilter>(mesh_name);
-			if(m == null) { Utils.Log("[Metric] {0} does not have '{1}' mesh", part.name, mesh_name); return; }
+			if(m == null) { Utils.Log("[Metric] {} does not have '{}' mesh", part.name, mesh_name); return; }
 			if(compute_hull) hull = new ConvexHull3D(uniqueVertices(m.sharedMesh));
 			Vector3[] edges = Utils.BoundCorners(m.sharedMesh.bounds);
 			local2local(m.transform, part.partTransform, edges);
@@ -389,7 +393,7 @@ namespace AT_Utils
 		#endregion
 
 		#if DEBUG
-		public void DrawBox(Transform vT) { Utils.DrawBounds(bounds, vT, Color.white); }
+		public void DrawBox(Transform vT) { Utils.GLBounds(bounds, vT, Color.white); }
 
 		public void DrawCenter(Transform vT) { Utils.DrawPoint(center, vT); }
 		#endif

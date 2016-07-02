@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace AT_Utils
 {
-	public abstract class TechValue<T> : IConfigNode
+	public abstract class TechValue<T> : ConfigNodeObject
 	{
 		public readonly Dictionary<string, T> Values = new Dictionary<string, T>();
 		public Func<T, T, bool> Compare;
@@ -18,27 +18,23 @@ namespace AT_Utils
 		#region ConfigNode
 		protected abstract T parse(string val);
 
-		public void Load(ConfigNode node)
+		public override void Load(ConfigNode node)
 		{
 			if(node == null) return;
+			base.Load(node);
 			foreach(ConfigNode.Value tech in node.values)
 				Values[tech.name] = parse(tech.value);
 		}
 
-		public void Save(ConfigNode node) {}
+		public override void Save(ConfigNode node) 
+		{  
+			base.Save(node);
+			foreach(var v in Values) 
+				node.AddValue(v.Key, v.Value); 
+		}
 		#endregion
 
 		#region TechTree
-		//ResearchAndDevelopment.PartModelPurchased is broken and always returns 'true'
-		public static bool PartIsPurchased(string name)
-		{
-			var info = PartLoader.getPartInfoByName(name);
-			if(info == null) return false;
-			if(HighLogic.CurrentGame.Mode != Game.Modes.CAREER) return true;
-			var tech = ResearchAndDevelopment.Instance.GetTechState(info.TechRequired);
-			return tech != null && tech.state == RDTech.State.Available && tech.partsPurchased.Contains(info);
-		}
-
 		//current_value is needed to preserve scale of an existing vessel when configuration is changed
 		public bool TryGetValue(out T value, bool ignore_tech_tree = false, Func<T, T, bool> compare = null)
 		{
@@ -46,7 +42,7 @@ namespace AT_Utils
 			value = default(T); var first = true;
 			foreach(var pair in Values)
 			{
-				if((ignore_tech_tree || PartIsPurchased(pair.Key)) &&
+				if((ignore_tech_tree || Utils.PartIsPurchased(pair.Key)) &&
 				   (first || compare(pair.Value, value)))
 				{ value = pair.Value; first = false; }
 			}

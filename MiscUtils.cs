@@ -7,13 +7,15 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Reflection;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace AT_Utils
 {
 	public static partial class Utils
 	{
-		public static string ModName = "MyMod";
+		static Assembly this_assembly = Assembly.GetExecutingAssembly();
 
 		const string ElectricChargeName = "ElectricCharge";
 		static PartResourceDefinition _electric_charge;
@@ -105,19 +107,6 @@ namespace AT_Utils
 //			if(value > 3600) h
 //		}
 
-		public static string Format(string s, params object[] args)
-		{
-			if(args == null || args.Length == 0) return s;
-			convert_args(args);
-			for(int i = 0, argsLength = args.Length; i < argsLength; i++)
-			{
-				var ind = s.IndexOf("{}"); 
-				if(ind >= 0) s = s.Substring(0, ind)+"{"+i+"}"+s.Substring(ind+2);
-				else s += string.Format(" arg{0}: {{{0}}}", i);
-			}
-			return string.Format(s.Replace("{}", "[no arg]"), args);
-		}
-
 		public static string formatDimensions(Vector3 size)
 		{ return string.Format("{0:F2}m x {1:F2}m x {2:F2}m", size.x, size.y, size.z); }
 
@@ -170,6 +159,19 @@ namespace AT_Utils
 			                     b.size.x*b.size.y*b.size.z);
 		}
 
+		public static string Format(string s, params object[] args)
+		{
+			if(args == null || args.Length == 0) return s;
+			convert_args(args);
+			for(int i = 0, argsLength = args.Length; i < argsLength; i++)
+			{
+				var ind = s.IndexOf("{}"); 
+				if(ind >= 0) s = s.Substring(0, ind)+"{"+i+"}"+s.Substring(ind+2);
+				else s += string.Format(" arg{0}: {{{0}}}", i);
+			}
+			return string.Format(s.Replace("{}", "[no arg]"), args);
+		}
+
 		static void convert_args(object[] args)
 		{
 			for(int i = 0, argsL = args.Length; i < argsL; i++) 
@@ -186,17 +188,23 @@ namespace AT_Utils
 
 		public static void Log(string msg, params object[] args)
 		{ 
-			
-			msg = string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", ModName, DateTime.Now, msg);
+			var mod_name = "AT_Utils";
+			var stack = new StackTrace(1);
+			foreach(var f in stack.GetFrames())
+			{
+				var assembly = f.GetMethod().DeclaringType.Assembly;
+				if(assembly == this_assembly) continue;
+				mod_name = assembly.GetName().Name;
+				break;
+			}
+			msg = string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", mod_name, DateTime.Now, msg);
 			if(args.Length > 0)
 			{
 				convert_args(args);
-				Debug.Log(string.Format(msg, args)); 
+				UnityEngine.Debug.Log(Format(msg, args)); 
 			}
-			else Debug.Log(msg);
+			else UnityEngine.Debug.Log(msg);
 		}
-
-		public static void LogF(string msg, params object[] args) { Log(Format(msg, args)); }
 
 		//from http://stackoverflow.com/questions/716399/c-sharp-how-do-you-get-a-variables-name-as-it-was-physically-typed-in-its-dec
 		//second answer
@@ -241,6 +249,25 @@ namespace AT_Utils
 			for(int p = 0, len = paths.Length; p < len; p++)
 				path = Path.Combine(path, paths[p]);
 			return path;
+		}
+
+		//sound (from the KAS mod; KAS_Shared class)
+		public static bool createFXSound(Part part, FXGroup group, string sndPath, bool loop, float maxDistance = 30f)
+		{
+			group.audio = part.gameObject.AddComponent<AudioSource>();
+			group.audio.volume = GameSettings.SHIP_VOLUME;
+			group.audio.rolloffMode = AudioRolloffMode.Logarithmic;
+			group.audio.dopplerLevel = 0f;
+			group.audio.maxDistance = maxDistance;
+			group.audio.loop = loop;
+			group.audio.playOnAwake = false;
+			if(GameDatabase.Instance.ExistsAudioClip(sndPath))
+			{
+				group.audio.clip = GameDatabase.Instance.GetAudioClip(sndPath);
+				return true;
+			}
+			Utils.Message(10, "Sound file : {0} has not been found, please check your Hangar installation", sndPath);
+			return false;
 		}
 	}
 

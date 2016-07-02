@@ -41,8 +41,8 @@ namespace AT_Utils
 			#if DEBUG
 			public void Log()
 			{
-				Utils.Log("Edge{0}: {1}, {2}\n" +
-					"NeighbourEdge{3}: {4}, {5}", 
+				Utils.Log("Edge{0}: {}, {}\n" +
+					"NeighbourEdge{}: {}, {}", 
 					Index, v0, v1, NeighbourIndex, NeigbourEdge.v0, NeigbourEdge.v1);
 			}
 			#endif
@@ -134,14 +134,14 @@ namespace AT_Utils
 		public void Log()
 		{
 			Utils.Log("Face:\n" +
-				"{0}\n" +
-				"{1}\n" +
-				"{2}\n" +
-				"n: {3}\n" +
-				"d: {4}\n" +
-				"Visible Points: {5}\n" +
-				"Furthest one:   {6}\n" +
-				"Distance to it: {7}", 
+				"{}\n" +
+				"{}\n" +
+				"{}\n" +
+				"n: {}\n" +
+				"d: {}\n" +
+				"Visible Points: {}\n" +
+				"Furthest one:   {}\n" +
+				"Distance to it: {}", 
 				v0, v1, v2, P.normal, P.distance,
 				VisiblePoints.Count, Furthest, FurthestDistance,
 				edges.Length);
@@ -178,10 +178,10 @@ namespace AT_Utils
 		public void Log()
 		{
 			Utils.Log("Line:\n" +
-				"s: {0}\n" +
-				"e: {1}\n" +
-				"n: {2}\n" +
-				"l: {3}", s, e, n, l);
+				"s: {}\n" +
+				"e: {}\n" +
+				"n: {}\n" +
+				"l: {}", s, e, n, l);
 		}
 		#endif
 	}

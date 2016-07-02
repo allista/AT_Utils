@@ -98,7 +98,7 @@ namespace AT_Utils
 			m.RecalculateBounds();
 			m.RecalculateNormals();
 			//make own material
-			if(mat == null) mat = no_z_material;
+			if(mat == null) mat = no_z_material.New;
 			mat.color = (c == default(Color))? Color.white : c;
 			//draw mesh in the world space
 			Graphics.DrawMesh(m, t.localToWorldMatrix, mat, 0);
@@ -152,12 +152,15 @@ namespace AT_Utils
 				verts.AddRange(f);
 				tris.AddRange(new []{0+tris.Count, 1+tris.Count, 2+tris.Count});
 			}
-			DrawMesh(verts.ToArray(), tris, T, c, diffuse_material);
+			DrawMesh(verts.ToArray(), tris, T, c, diffuse_material.New);
 		}
 
 		static Camera GLBeginWorld(out float far)
 		{
-			var camera = MapView.MapIsEnabled? PlanetariumCamera.Camera : FlightCamera.fetch.mainCamera;
+			Camera camera;
+			if(HighLogic.LoadedSceneIsEditor) camera = EditorLogic.fetch.editorCamera;
+			else if(MapView.MapIsEnabled) camera = PlanetariumCamera.Camera;
+			else camera = FlightCamera.fetch.mainCamera;
 			far = camera.farClipPlane;
 			camera.farClipPlane = far*100;
 			GL.PushMatrix();
@@ -225,24 +228,39 @@ namespace AT_Utils
 		//		edges[6] = new Vector3(max.x, max.y, min.z); //right-top-back
 		//		edges[7] = new Vector3(max.x, max.y, max.z); //right-top-front
 
+		static void gl_line(Vector3 ori, Vector3 end)
+		{ GL.Vertex(ori); GL.Vertex(end); }
+
 		public static void GLBounds(Bounds b, Transform T, Color col)
 		{
 			var c = Utils.BoundCorners(b);
-			for(int i = 0; i < 8; i++) c[i] = T.TransformPoint(c[i]);
-			GLLine(c[0], c[1], col);
-			GLLine(c[1], c[5], col);
-			GLLine(c[5], c[4], col);
-			GLLine(c[4], c[0], col);
+			for(int i = 0; i < 8; i++) 
+			{
+				c[i] = T.TransformPoint(c[i]);
+				if(MapView.MapIsEnabled)
+					c[i] = ScaledSpace.LocalToScaledSpace(c[i]);
+			}
+			float far;
+			var camera = GLBeginWorld(out far);
+			GL.Begin(GL.LINES);
+			GL.Color(col);
+			gl_line(c[0], c[1]);
+			gl_line(c[1], c[5]);
+			gl_line(c[5], c[4]);
+			gl_line(c[4], c[0]);
 
-			GLLine(c[2], c[3], col);
-			GLLine(c[3], c[7], col);
-			GLLine(c[7], c[6], col);
-			GLLine(c[6], c[2], col);
+			gl_line(c[2], c[3]);
+			gl_line(c[3], c[7]);
+			gl_line(c[7], c[6]);
+			gl_line(c[6], c[2]);
 
-			GLLine(c[2], c[0], col);
-			GLLine(c[3], c[1], col);
-			GLLine(c[7], c[5], col);
-			GLLine(c[6], c[4], col);
+			gl_line(c[2], c[0]);
+			gl_line(c[3], c[1]);
+			gl_line(c[7], c[5]);
+			gl_line(c[6], c[4]);
+			GL.End();
+			GL.PopMatrix();
+			camera.farClipPlane = far;
 		}
 	}
 }

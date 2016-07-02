@@ -26,7 +26,7 @@ namespace AT_Utils
 			[Persistent] public string DangerButtonColor   = "red";
 		}
 
-		public static Config ButtonColors = new Config();
+		public static Config CFG { get { return AT_UtilsGlobals.Instance.StylesConfig; } }
 
 		//This code is based on Styles class from Extraplanetary Launchpad plugin.
 		public static GUISkin skin;
@@ -101,13 +101,13 @@ namespace AT_Utils
 		public static void ConfigureButtons()
 		{
 			if(!initialized) return;
-			enabled_button  = find_button_style(ButtonColors.EnabledButtonColor)  ?? green_button;
-			active_button   = find_button_style(ButtonColors.ActiveButtonColor)   ?? yellow_button;
-			inactive_button = find_button_style(ButtonColors.InactiveButtonColor) ?? grey_button;
-			confirm_button  = find_button_style(ButtonColors.ConfirmButtonColor)  ?? green_button;
-			add_button      = find_button_style(ButtonColors.AddButtonColor)      ?? green_button;
-			close_button    = find_button_style(ButtonColors.CloseButtonColor)    ?? red_button;
-			danger_button   = find_button_style(ButtonColors.DangerButtonColor)   ?? red_button;
+			enabled_button  = find_button_style(CFG.EnabledButtonColor)  ?? green_button;
+			active_button   = find_button_style(CFG.ActiveButtonColor)   ?? yellow_button;
+			inactive_button = find_button_style(CFG.InactiveButtonColor) ?? grey_button;
+			confirm_button  = find_button_style(CFG.ConfirmButtonColor)  ?? green_button;
+			add_button      = find_button_style(CFG.AddButtonColor)      ?? green_button;
+			close_button    = find_button_style(CFG.CloseButtonColor)    ?? red_button;
+			danger_button   = find_button_style(CFG.DangerButtonColor)   ?? red_button;
 		}
 
 		static GUIStyle OtherColor(this GUIStyle style, Color normal)

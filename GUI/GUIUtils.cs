@@ -106,7 +106,13 @@ namespace AT_Utils
 		#endregion
 
 		public static void Message(float duration, string msg, params object[] args)
-		{ ScreenMessages.PostScreenMessage(string.Format(msg, args), duration, ScreenMessageStyle.UPPER_CENTER); }
+		{ 
+			msg = string.Format(msg, args);
+			ScreenMessages.PostScreenMessage(msg, duration, ScreenMessageStyle.UPPER_CENTER);
+			#if DEBUG
+			Log(msg);
+			#endif
+		}
 
 		public static void Message(string msg, params object[] args) { Message(5, msg, args); }
 	}

@@ -1,0 +1,13 @@
+
+{
+	StylesConfig
+	{
+		EnabledButtonColor = green
+		ActiveButtonColor = yellow
+		InactiveButtonColor = grey
+		ConfirmButtonColor = green
+		AddButtonColor = green
+		CloseButtonColor = red
+		DangerButtonColor = red
+	}
+}

@@ -313,6 +313,9 @@ namespace AT_Utils
 				                  select m);
 			return passages;
 		}
+
+		public static ResourcePump CreateSocket(this Part p)
+		{ return new ResourcePump(p, Utils.ElectricChargeID); }
 		#endregion
 
 		#region Resources and Phys-Props
@@ -450,6 +453,13 @@ namespace AT_Utils
 
 		public static bool PartsStarted(this Vessel v)
 		{ return v.parts.TrueForAll(p => p.started); }
+
+		public static bool HasLaunchClamp(this IShipconstruct ship)
+		{
+			foreach(Part p in ship.Parts)
+			{ if(p.HasModule<LaunchClamp>()) return true; }
+			return false;
+		}
 
 		public static Bounds Bounds(this Vessel vessel, Transform refT)
 		{

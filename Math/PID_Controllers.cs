@@ -163,7 +163,7 @@ namespace AT_Utils
 					);
 				if(act != action) integral_error = old_ierror;
 			}
-//			Utils.LogF("{}\nPe {}\nIe {}\nDe {}\nerror {}\nact {}\naction {}\nact==action {}", 
+//			Utils.Log("{}\nPe {}\nIe {}\nDe {}\nerror {}\nact {}\naction {}\nact==action {}", 
 //			           this, P*error, I*integral_error, 
 //			           D*(error-last_error)/TimeWarp.fixedDeltaTime, 
 //			           error, act, action, act == action);//debug
@@ -193,7 +193,7 @@ namespace AT_Utils
 			if(Mathf.Abs(act-action) > 1e-5) integral_error = old_ierror;
 			#if DEBUG
 			if(debug)
-				Utils.Log("{0}\nPe {1}; Ie {2}; De {3}; error {4}, action {5}", 
+				Utils.Log("{}\nPe {}; Ie {}; De {}; error {}, action {}", 
 				          this, P*error, I*integral_error, D*(error-last_error)/TimeWarp.fixedDeltaTime, error, action);
 			#endif
 			last_error = error;
@@ -214,7 +214,7 @@ namespace AT_Utils
 			integral_error = Mathf.Clamp((Math.Abs(derivative) < 0.6f * Max) ? integral_error + (error * I * TimeWarp.fixedDeltaTime) : 0.9f * integral_error, Min, Max);
 			var act = error * P + integral_error + derivative;
 			if(!float.IsNaN(act)) action = Mathf.Clamp(act, Min, Max);
-//			Utils.LogF("error {}; Pe {}; Ie {}; De {}; action {}", error, P*error, integral_error, derivative, action);//debug
+//			Utils.Log("error {}; Pe {}; Ie {}; De {}; action {}", error, P*error, integral_error, derivative, action);//debug
 			last_error = error;
 		}
 	}

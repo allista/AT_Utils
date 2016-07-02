@@ -98,7 +98,7 @@ namespace AT_Utils
 			base.Awake();
 			instance = (T)this;
 			LoadConfig();
-			var assembly = Assembly.GetCallingAssembly().GetName();
+			var assembly = Assembly.GetAssembly(typeof(T)).GetName();
 			Title = string.Concat(assembly.Name, " - ", assembly.Version);
 		}
 

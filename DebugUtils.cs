@@ -16,7 +16,7 @@ using UnityEngine;
 
 namespace AT_Utils
 {
-	static class DebugUtils
+	public static class DebugUtils
 	{
 		public static void CSV(params object[] args)
 		{ 
@@ -38,13 +38,10 @@ namespace AT_Utils
 			Utils.Log(s);
 		}
 
-		public static void logOrbit(string name, Orbit o)
-		{ Utils.Log("Orbit: {0}\n{1}", name, Utils.formatOrbit(o)); }
-
-		public static string FormatSteering(Vector3 steering)
+		public static string formatSteering(Vector3 steering)
 		{ return Utils.Format("[pitch {}, roll {}, yaw {}]", steering.x, steering.y, steering.z); }
 
-		public static string FormatSteering(FlightCtrlState s)
+		public static string formatSteering(FlightCtrlState s)
 		{ return Utils.Format("[pitch {}, roll {}, yaw {}]", s.pitch, s.roll, s.yaw); }
 
 		public static string FormatActions(BaseActionList actions)
@@ -55,8 +52,8 @@ namespace AT_Utils
 
 		public static string getStacktrace(int skip = 0) { return new StackTrace(skip+1, true).ToString(); }
 
-		public static void LogF(string msg, params object[] args)
-		{ Utils.Log("{0}\n{1}", Utils.Format(msg, args), getStacktrace(1)); }
+		public static void Log(string msg, params object[] args)
+		{ Utils.Log("{}\n{}", Utils.Format(msg, args), getStacktrace(2)); }
 
 		public static void logStamp(string msg = "") { Utils.Log("=== " + msg); }
 
@@ -66,14 +63,7 @@ namespace AT_Utils
 			foreach(ProtoCrewMember c in crew)
 				crew_str += string.Format("\n{0}, seat {1}, seatIdx {2}, roster {3}, ref {4}", 
 				                          c.name, c.seat, c.seatIdx, c.rosterStatus, c.KerbalRef);
-			Utils.Log("Crew List:{0}", crew_str);
-		}
-
-		public static void logVectors(IEnumerable<Vector3> vecs)
-		{ 
-			string vs = "";
-			foreach(Vector3 v in vecs) vs += "\n"+Utils.formatVector(v);
-			Utils.Log("Vectors:{0}", vs);
+			Utils.Log("Crew List:{}", crew_str);
 		}
 
 		public static Vector3d planetaryPosition(Vector3 v, CelestialBody planet) 
@@ -85,14 +75,14 @@ namespace AT_Utils
 		}
 
 		public static void logPlanetaryPosition(Vector3 v, CelestialBody planet) 
-		{ Utils.Log("Planetary position: {0}", planetaryPosition(v, planet));	}
+		{ Utils.Log("Planetary position: {}", planetaryPosition(v, planet));	}
 
 		public static void logLongLatAlt(Vector3 v, CelestialBody planet) 
 		{ 
 			double lng = planet.GetLongitude(v);
 			double lat = planet.GetLatitude(v);
 			double alt = planet.GetAltitude(v);
-			Utils.Log("Long: {0}, Lat: {1}, Alt: {2}", lng, lat, alt);
+			Utils.Log("Long: {}, Lat: {}, Alt: {}", lng, lat, alt);
 		}
 
 		public static void logProtovesselCrew(ProtoVessel pv)
@@ -100,19 +90,19 @@ namespace AT_Utils
 			for(int i = 0; i < pv.protoPartSnapshots.Count; i++)
 			{
 				ProtoPartSnapshot p = pv.protoPartSnapshots[i];
-				Utils.Log(string.Format("Part{0}: {1}", i, p.partName));
+				Utils.Log("Part{}: {}", i, p.partName);
 				if(p.partInfo.partPrefab != null)
-					Utils.Log(string.Format("partInfo.partPrefab.CrewCapacity {0}",p.partInfo.partPrefab.CrewCapacity));
-				Utils.Log(string.Format("partInfo.internalConfig: {0}", p.partInfo.internalConfig));
-				Utils.Log(string.Format("partStateValues.Count: {0}", p.partStateValues.Count));
+					Utils.Log("partInfo.partPrefab.CrewCapacity {}",p.partInfo.partPrefab.CrewCapacity);
+				Utils.Log("partInfo.internalConfig: {}", p.partInfo.internalConfig);
+				Utils.Log("partStateValues.Count: {}", p.partStateValues.Count);
 				foreach(string k in p.partStateValues.Keys)
-					Utils.Log (string.Format("{0} : {1}", k, p.partStateValues[k]));
-				Utils.Log(string.Format("modules.Count: {0}", p.modules.Count));
+					Utils.Log ("{} : {}", k, p.partStateValues[k]);
+				Utils.Log("modules.Count: {}", p.modules.Count);
 				foreach(ProtoPartModuleSnapshot pm in p.modules)
-					Utils.Log (string.Format("{0} : {1}", pm.moduleName, pm.moduleValues));
+					Utils.Log("{} : {}", pm.moduleName, pm.moduleValues);
 				foreach(string k in p.partStateValues.Keys)
-					Utils.Log (string.Format("{0} : {1}", k, p.partStateValues[k]));
-				Utils.Log(string.Format("customPartData: {0}", p.customPartData));
+					Utils.Log("{} : {}", k, p.partStateValues[k]);
+				Utils.Log("customPartData: {}", p.customPartData);
 			}
 		}
 
@@ -120,11 +110,11 @@ namespace AT_Utils
 		{
 			Utils.Log
 			(
-				"Transform: {0}\n" +
-				"Position: {1}\n" +
-				"Rotation: {2}\n"+
-				"Local Position: {3}\n" +
-				"Local Rotation: {4}",
+				"Transform: {}\n" +
+				"Position: {}\n" +
+				"Rotation: {}\n"+
+				"Local Position: {}\n" +
+				"Local Rotation: {}",
 				T.name, 
 				T.position, T.eulerAngles,
 				T.localPosition, T.localEulerAngles
@@ -133,7 +123,7 @@ namespace AT_Utils
 
 		public static void logShipConstruct(ShipConstruct ship)
 		{
-			Utils.Log("ShipConstruct: {0}\n{1}",
+			Utils.Log("ShipConstruct: {}\n{}",
 			          ship.shipName,
 			          ship.parts.Aggregate("", (s, p) => s + p.Title() + "\n"));
 		}
@@ -149,7 +139,7 @@ namespace AT_Utils
 //				// Get the top stack frame
 //				var frame = st.GetFrame(st.FrameCount-1);
 //				// Log exception coordinates and stacktrace
-//				Utils.Log("\nException in {0} at line {1}, column {2}\n{3}", 
+//				Utils.Log("\nException in {} at line {}, column {}\n{}", 
 //				          frame.GetFileName(), frame.GetFileLineNumber(), frame.GetFileColumnNumber(), 
 //				          st.ToString());
 //			}
@@ -169,13 +159,13 @@ namespace AT_Utils
 
 		public void Start()
 		{
-			Utils.Log("{0}: start counting time", name);
+			Utils.Log("{}: start counting time", name);
 			sw.Start();
 		}
 
 		public void Stamp()
 		{
-			Utils.Log("{0}: elapsed time: {1}us", name, 
+			Utils.Log("{}: elapsed time: {}us", name, 
 			          sw.ElapsedTicks/(Stopwatch.Frequency/(1000000L)));
 		}
 
@@ -236,7 +226,7 @@ namespace AT_Utils
 			var report = "\nName, NumCalls, Avg.Time (us)\n";
 			foreach(var c in clist)
 				report += string.Format("{0}, {1}, {2}\n", c.Key, c.Value.Count, c.Value.Avg);
-			Utils.Log("Profiler Report:"+report);
+			Utils.Log("Profiler Report:{}", report);
 		}
 
 		public void PlainReport()
@@ -280,8 +270,8 @@ namespace AT_Utils
 		public DebugCounter(string name = "Debug", params object[] args) { this.name = string.Format(name, args); }
 		public void Log(string msg="", params object[] args) 
 		{ 
-			if(msg == "") Utils.Log("{0}: {1}", name, count++); 
-			else Utils.Log("{0}: {1} {2}", name, count++, string.Format(msg, args)); 
+			if(msg == "") Utils.Log("{}: {}", name, count++); 
+			else Utils.Log("{}: {} {}", name, count++, string.Format(msg, args)); 
 		}
 		public void Reset() { count = 0; }
 	}
@@ -291,20 +281,20 @@ namespace AT_Utils
 		public override void OnStart(StartState state)
 		{
 			base.OnStart(state);
-			this.Log("ThrusterTransforms:\n{0}",
+			this.Log("ThrusterTransforms:\n{}",
 			         thrusterTransforms.Aggregate("", (s, t) => s+t.name+": "+t.position+"\n"));
 		}
 
 		public new void FixedUpdate()
 		{
 			base.FixedUpdate();
-			this.Log("Part: enabled {2}, shielded {0}, controllable {1}", 
-			         part.ShieldedFromAirstream, part.isControllable, enabled);
+			this.Log("Part: enabled {}, shielded {}, controllable {}", 
+			         enabled, part.ShieldedFromAirstream, part.isControllable);
 			if(thrustForces.Length > 0)
 			{
-				this.Log("ThrustForces:\n{0}",
+				this.Log("ThrustForces:\n{}",
 				         thrustForces.Aggregate("", (s, f) => s+f+", "));
-				this.Log("FX.Power:\n{0}",
+				this.Log("FX.Power:\n{}",
 				         thrusterFX.Aggregate("", (s, f) => s+f.Power+", "+f.Active+"; "));
 			}
 		}

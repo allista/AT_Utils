@@ -81,6 +81,7 @@ namespace AT_Utils
 			set 
 			{ 
 				if(Paused) return;
+//				DebugUtils.Log("\n{}.Toggle: {} ({})", GetType(), key, state);//debug
 				if(value) On(key);
 				else if(key.Equals(state)) Off();
 			}
@@ -90,7 +91,7 @@ namespace AT_Utils
 		{ 
 			if(Paused) return;
 			if(!key.Equals(state)) Off();
-//			DebugUtils.LogF("\n{}.On: {}->{}", GetType(), state, key);//debug
+//			DebugUtils.Log("\n{}.On: {}->{}", GetType(), state, key);//debug
 			state = key;
 			Callback callback;
 			if(callbacks.TryGetValue(key, out callback))
@@ -100,7 +101,7 @@ namespace AT_Utils
 		public override void Off() 
 		{ 
 			if(Paused || state.Equals(default(T))) return;
-//			DebugUtils.LogF("\n{}.Off: {}->None", GetType(), state);//debug
+//			DebugUtils.Log("\n{}.Off: {}->None", GetType(), state);//debug
 			var old_state = state; //prevents recursion
 			state = default(T);
 			Callback callback;
@@ -164,7 +165,7 @@ namespace AT_Utils
 			var callback = GetCallback(handler, key.ToString());
 			if(callback == null)
 			{
-				Utils.Log("{0}: no public method named {1}", handler.GetType().Name, key);
+				Utils.Log("{}: no public method named {}", handler.GetType().Name, key);
 				return;
 			}
 			AddCallback(callback, key);

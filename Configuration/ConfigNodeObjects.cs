@@ -117,10 +117,10 @@ namespace AT_Utils
 			if(type == null) return obj;
 			try 
 			{ 
-				obj = Assembly.GetCallingAssembly().CreateInstance(type) as TypedConfigNodeObject;
+				obj = Assembly.GetAssembly(Type.GetType(type)).CreateInstance(type) as TypedConfigNodeObject;
 				obj.Load(node);
 			}
-			catch(Exception ex) { Utils.Log("Unable to create {0}: {1}", type, ex.Message); }
+			catch(Exception ex) { Utils.Log("Unable to create {}: {}", type, ex.Message); }
 			return obj;
 		}
 	}
