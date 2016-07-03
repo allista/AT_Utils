@@ -171,11 +171,17 @@ namespace AT_Utils
 			return ret;
 		}
 
-		public static Vector3 MaxComponent(this Vector3 v)
+		public static Vector3 MaxComponentV(this Vector3 v)
 		{ return v.Component(v.MaxI()); }
 
-		public static Vector3 MinComponent(this Vector3 v)
+		public static Vector3 MinComponentV(this Vector3 v)
 		{ return v.Component(v.MinI()); }
+
+		public static float MaxComponentF(this Vector3 v)
+		{ return v[v.MaxI()]; }
+
+		public static float MinComponentF(this Vector3 v)
+		{ return v[v.MinI()]; }
 	}
 
 

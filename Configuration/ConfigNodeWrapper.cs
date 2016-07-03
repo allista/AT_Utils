@@ -41,7 +41,7 @@ namespace AT_Utils
 		{ 
 			byte[] data = null;
 			try { data = IOUtils.SerializeToBinary(new ConfigNodeWrapper(node)); }
-			catch(System.Exception ex) { Utils.Log("{}\n{}\n{}", ex.Message, ex.Source, ex.StackTrace); }
+			catch(System.Exception ex) { Utils.Log("{}", ex); }
 			return data;
 		}
 
@@ -49,7 +49,7 @@ namespace AT_Utils
 		{ 
 			ConfigNodeWrapper node = null;
 			try { node = IOUtils.DeserializeFromBinary(data) as ConfigNodeWrapper; }
-			catch(System.Exception ex) { Utils.Log("{}\n{}\n{}", ex.Message, ex.Source, ex.StackTrace); }
+			catch(System.Exception ex) { Utils.Log("{}", ex); }
 			return node != null? node.ToConfigNode() : null;
 		}
 	}

@@ -65,7 +65,7 @@ namespace AT_Utils
 				using(var file = new StreamWriter(filename)) file.Write(node);
 			}
 			catch(Exception ex) 
-			{ Utils.Log("Error writing {} file:\n{}\n{}", filename, ex.Message, ex.StackTrace); }
+			{ Utils.Log("Error writing {} file:\n{}", filename, ex); }
 		}
 		public void CreateDefaultFile() { Create(DefaultFile); }
 	}

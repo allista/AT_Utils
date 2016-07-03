@@ -159,6 +159,9 @@ namespace AT_Utils
 			                     b.size.x*b.size.y*b.size.z);
 		}
 
+		public static string formatException(Exception ex)
+		{ return string.Format("{0}\n{1}\n{2}", ex.Message, ex.Source, ex.StackTrace); }
+
 		public static string Format(string s, params object[] args)
 		{
 			if(args == null || args.Length == 0) return s;
@@ -181,6 +184,7 @@ namespace AT_Utils
 				else if(arg is Vector3d) args[i] = formatVector((Vector3d)arg);
 				else if(arg is Orbit) args[i] = formatOrbit((Orbit)arg);
 				else if(arg is Bounds) args[i] = formatBounds((Bounds)arg);
+				else if(arg is Exception) args[i] = formatException((Exception)arg);
 				else if(arg == null) args[i] = "null";
 				else args[i] = arg.ToString();
 			}

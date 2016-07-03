@@ -21,9 +21,8 @@ namespace AT_Utils
 		public static void CSV(params object[] args)
 		{ 
 			var row = "tag: ";
-			for(int i = 0; i < args.Length-1; i++) 
-			{ row += "{"+i+"}, "; }
-			row += "{"+(args.Length-1)+"}\n";
+			for(int i = 0; i < args.Length-1; i++) row += "{}, ";
+			row += "{}\n";
 			Utils.Log(row, args);
 		}
 
@@ -53,7 +52,7 @@ namespace AT_Utils
 		public static string getStacktrace(int skip = 0) { return new StackTrace(skip+1, true).ToString(); }
 
 		public static void Log(string msg, params object[] args)
-		{ Utils.Log("{}\n{}", Utils.Format(msg, args), getStacktrace(2)); }
+		{ Utils.Log("{}\n{}", Utils.Format(msg, args), getStacktrace(1)); }
 
 		public static void logStamp(string msg = "") { Utils.Log("=== " + msg); }
 

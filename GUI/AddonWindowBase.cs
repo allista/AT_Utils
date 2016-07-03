@@ -40,7 +40,7 @@ namespace AT_Utils
 		//adapted from blizzy's Toolbar
 		protected static void GetToolTip()
 		{
-			if(Event.current.type == EventType.repaint)
+			if(Event.current.type == EventType.Repaint)
 				tooltip = GUI.tooltip.Trim();
 		}
 
