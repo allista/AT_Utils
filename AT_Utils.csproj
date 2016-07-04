@@ -89,7 +89,6 @@
     <Compile Include="Configuration\ConfigNodeObjects.cs" />
     <Compile Include="Configuration\ConfigNodeWrapper.cs" />
     <Compile Include="Configuration\PluginConfig.cs" />
-    <Compile Include="Configuration\TechFloat.cs" />
     <Compile Include="Math\Filters.cs" />
     <Compile Include="ControlFlow\Multiplexer.cs" />
     <Compile Include="ControlFlow\Triggers.cs" />
@@ -104,5 +103,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>
