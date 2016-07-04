@@ -1,0 +1,12 @@
+[submodule "MultiAnimators"]
+	path = MultiAnimators
+	url = git@github.com:allista/MultiAnimators.git
+[submodule "AnisotropicPartResizer"]
+	path = AnisotropicPartResizer
+	url = git@github.com:allista/AnisotropicPartResizer.git
+[submodule "ConfigurableContainers"]
+	path = ConfigurableContainers
+	url = git@github.com:allista/ConfigurableContainers.git
+[submodule "AnimatedConverters"]
+	path = AnimatedConverters
+	url = git@github.com:allista/AnimatedConverters.git
