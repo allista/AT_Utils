@@ -35,16 +35,15 @@ using System.Reflection;
 
 namespace AT_Utils
 {
-	public class ModInfo : KSP_AVC_Info//FIXME: fill in ConfigurableContainers credentials
+	public class ModInfo : KSP_AVC_Info
 	{
 		public ModInfo()
 		{
-			MinKSPVersion = new Version(1,0,4);
-			MaxKSPVersion = new Version(1,0,4);
+			MinKSPVersion = new Version(1,1,3);
+			MaxKSPVersion = new Version(1,1,3);
 
-			VersionURL   = "https://raw.githubusercontent.com/allista/hangar/master/GameData/Hangar/Hangar.version";
-			UpgradeURL   = "https://kerbalstuff.com/mod/270/Hangar";
-			ChangeLogURL = "https://github.com/allista/hangar/blob/master/ChangeLog.md";
+			VersionURL   = "https://raw.githubusercontent.com/allista/AT_Utils/master/GameData/000_AT_Utils/000_AT_Utils.version";
+			UpgradeURL   = "https://github.com/allista/AT_Utils/releases";
 		}
 	}
 }

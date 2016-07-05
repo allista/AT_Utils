@@ -1,8 +1,8 @@
 { 
     "NAME":"000_AT_Utils",
-    "URL":"https://raw.githubusercontent.com/allista/hangar/master/GameData/Hangar/Hangar.version",
-    "DOWNLOAD":"https://kerbalstuff.com/mod/270/Hangar",
-    "CHANGE_LOG_URL":"https://github.com/allista/hangar/blob/master/ChangeLog.md",
+    "URL":"https://raw.githubusercontent.com/allista/AT_Utils/master/GameData/000_AT_Utils/000_AT_Utils.version",
+    "DOWNLOAD":"https://github.com/allista/AT_Utils/releases",
+    "CHANGE_LOG_URL":"",
     "VERSION":
      {
          "MAJOR":1,
@@ -13,13 +13,13 @@
     "KSP_VERSION_MIN":
      {
          "MAJOR":1,
-         "MINOR":0,
-         "PATCH":4
+         "MINOR":1,
+         "PATCH":3
      },
     "KSP_VERSION_MAX":
      {
          "MAJOR":1,
-         "MINOR":0,
-         "PATCH":4
+         "MINOR":1,
+         "PATCH":3
      }
 }
