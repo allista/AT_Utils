@@ -526,6 +526,27 @@ namespace AT_Utils
 		}
 	}
 
+	public class AtmosphereParams
+	{
+		public readonly CelestialBody Body;
+		public readonly double Alt;
+		public readonly double P = 0;
+		public readonly double T = -273;
+		public readonly double Rho = 0;
+		public readonly double Mach1 = 0;
+
+		public AtmosphereParams(CelestialBody body, double altitude)
+		{
+			Alt = altitude;
+			Body = body;
+			if(!Body.atmosphere) return;
+			P = Body.GetPressure(Alt);
+			T = Body.GetTemperature(Alt);
+			Rho = Body.GetDensity(P, T);
+			Mach1 = Body.GetSpeedOfSound(P, Rho);
+		}
+	}
+
 	public static class OrbitalExtensions
 	{
 		public static bool ApAhead(this Orbit obt) { return obt.timeToAp < obt.timeToPe; }
@@ -545,6 +566,9 @@ namespace AT_Utils
 
 		public static double TerrainAltitude(this CelestialBody body, Vector3d wpos)
 		{ return TerrainAltitude(body, body.GetLatitude(wpos), body.GetLongitude(wpos)); }
+
+		public static AtmosphereParams AtmoParamsAtAltitude(this CelestialBody body, double alt) 
+		{ return new AtmosphereParams(body, alt); }
 	}
 }
 
