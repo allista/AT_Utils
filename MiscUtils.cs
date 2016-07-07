@@ -273,6 +273,12 @@ namespace AT_Utils
 			Utils.Message(10, "Sound file : {0} has not been found, please check your Hangar installation", sndPath);
 			return false;
 		}
+
+		public static void SaveGame(string name)
+		{ 
+			GamePersistence.SaveGame(name, HighLogic.SaveFolder, SaveMode.OVERWRITE);
+			Message("Game saved as: {0}", name);
+		}
 	}
 
 	public static class WaitWithPhysics
