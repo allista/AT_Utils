@@ -1,6 +1,6 @@
 {
     "spec_version" : 1,
-    "identifier"   : "AT-utils",
+    "identifier"   : "AT-Utils",
     "$kref"        : "#/ckan/github/allista/AT_Utils",
     "name"         : "AT Utils",
     "author"       : [ "allista" ],
