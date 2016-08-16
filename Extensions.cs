@@ -74,6 +74,17 @@ namespace AT_Utils
 		public static bool IsNaN(this Vector3 v)
 		{ return float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z); }
 
+		public static bool IsInf(this Vector3d v)
+		{ return double.IsInfinity(v.x) || double.IsInfinity(v.y) || double.IsInfinity(v.z); }
+
+		public static bool IsInf(this Vector3 v)
+		{ return float.IsInfinity(v.x) || float.IsInfinity(v.y) || float.IsInfinity(v.z); }
+
+		public static bool Invalid(this Vector3d v) { return v.IsNaN() || v.IsInf(); }
+
+		public static bool Invalid(this Vector3 v) { return v.IsNaN() || v.IsInf(); }
+
+
 		public static Vector3 CubeNorm(this Vector3 v)
 		{
 			if(v.IsZero()) return v;
