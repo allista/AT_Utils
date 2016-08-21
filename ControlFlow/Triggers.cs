@@ -31,7 +31,7 @@ namespace AT_Utils
 		public abstract void Start();
 		public abstract double Remaining { get; }
 
-		public bool Check
+		public bool TimePassed
 		{
 			get 
 			{
@@ -47,7 +47,7 @@ namespace AT_Utils
 
 		public bool RunIf(Action action, bool predicate)
 		{
-			if(predicate) { if(Check) { action(); Reset(); return true; } }
+			if(predicate) { if(TimePassed) { action(); Reset(); return true; } }
 			else Reset(); 
 			return false;
 		}
@@ -94,6 +94,25 @@ namespace AT_Utils
 		public Timer(double period = 1) : base(period) { next_time = default_time; }
 		public override void Start() { next_time = now+Period; }
 		public override double Remaining { get { return next_time-now; } }
+	}
+
+	public class Blinker : RealTimer
+	{
+		public Blinker(double period = 1) : base(period) { next_time = default_time; }
+
+		bool state = false;
+		public bool On 
+		{ 
+			get
+			{
+				if(TimePassed) 
+				{
+					state = !state;
+					Reset();
+				}
+				return state;
+			}
+		}
 	}
 
 	public class MemoryTimer : IEnumerator<YieldInstruction>
