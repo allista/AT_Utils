@@ -136,6 +136,8 @@ namespace AT_Utils
 				"epoch:   {}\n" +
 				"T@epoch: {} s\n" +
 				"T:       {} s\n" +
+				"T2Pe     {} per\n" +
+				"T2Ap     {} per\n" +
 				"Vel: {} m/s\n" +
 				"Pos: {} m\n",
 				o.referenceBody.bodyName, o.referenceBody.rotationPeriod,
@@ -144,6 +146,7 @@ namespace AT_Utils
 				o.PeR, o.ApR, 
 				o.eccentricity, o.inclination, o.LAN, o.meanAnomaly, o.trueAnomaly, o.argumentOfPeriapsis,
 				o.period, o.epoch, o.ObTAtEpoch, o.ObT,
+				o.timeToPe/o.period, o.timeToAp/o.period,
 				formatVector(o.vel), formatVector(o.pos));
 		}
 
