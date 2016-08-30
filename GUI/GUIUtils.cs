@@ -108,10 +108,11 @@ namespace AT_Utils
 		public static void Message(float duration, string msg, params object[] args)
 		{ 
 			msg = string.Format(msg, args);
-			ScreenMessages.PostScreenMessage(msg, duration, ScreenMessageStyle.UPPER_CENTER);
 			#if DEBUG
 			Log(msg);
+			msg = string.Format("[{0:HH:mm:ss.fff}] {1}", DateTime.Now, msg);
 			#endif
+			ScreenMessages.PostScreenMessage(msg, duration, ScreenMessageStyle.UPPER_CENTER);
 		}
 
 		public static void Message(string msg, params object[] args) { Message(5, msg, args); }
