@@ -120,6 +120,17 @@ namespace AT_Utils
 			);
 		}
 
+		public static string formatTransformTree(Transform T, string indent = "")
+		{
+			var log = new List<string>();
+			log.Add(string.Format("{0}{1}, scl: {2}, pos: {3}, rot: {4}\n", 
+			                      indent, T, T.localScale, T.localPosition, T.localRotation.eulerAngles));
+			indent += "\t";
+			for(int i = 0; i < T.childCount; i++)
+				log.Add(formatTransformTree(T.GetChild(i), indent));
+			return string.Concat(log.ToArray());
+		}
+
 		public static void logShipConstruct(ShipConstruct ship)
 		{
 			Utils.Log("ShipConstruct: {}\n{}",
