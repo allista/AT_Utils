@@ -81,12 +81,31 @@ namespace AT_Utils
 		public static implicit operator Material(MaterialWrapper mw) { return mw.This; }
 	}
 
-	//adapted from MechJeb
+	[KSPAddon(KSPAddon.Startup.Instantly, false)]
+	class MeshCleaner : MonoBehaviour
+	{
+		void OnPostRender()
+		{
+			Utils.CleanMeshes();
+		}
+	}
+
 	public static partial class Utils
 	{
-		static MaterialWrapper gl_material = new MaterialWrapper("Particles/Additive");
-		static MaterialWrapper no_z_material = new MaterialWrapper("GUI/Text Shader");
-		static MaterialWrapper diffuse_material = new MaterialWrapper("Diffuse");
+		public static MaterialWrapper gl_material = new MaterialWrapper("Particles/Additive");
+		public static MaterialWrapper no_z_material = new MaterialWrapper("GUI/Text Shader");
+		public static MaterialWrapper diffuse_material = new MaterialWrapper("Diffuse");
+
+		static List<Mesh> meshes = new List<Mesh>();
+		public static void CleanMeshes()
+		{
+			if(meshes.Count > 0)
+			{
+				Log("Cleaning {} meshes.", meshes.Count);//debug
+				meshes.ForEach(Object.Destroy);
+				meshes.Clear();
+			}
+		}
 
 		public static void DrawMesh(Vector3[] edges, IEnumerable<int> tris, Transform t, Color c = default(Color), Material mat = null)
 		{
@@ -101,7 +120,9 @@ namespace AT_Utils
 			if(mat == null) mat = no_z_material.New;
 			mat.color = (c == default(Color))? Color.white : c;
 			//draw mesh in the world space
-			Graphics.DrawMesh(m, t.localToWorldMatrix, mat, 0);
+			mat.SetPass(0);
+			Graphics.DrawMeshNow(m, t.localToWorldMatrix);
+			meshes.Add(m);
 		}
 
 		public static void DrawMeshArrow(Vector3 ori, Vector3 dir, Transform T, Color c = default(Color))
@@ -143,7 +164,7 @@ namespace AT_Utils
 		public static void DrawPoint(Vector3 point, Transform T, Color c = default(Color))
 		{ DrawBounds(new Bounds(point, Vector3.one*0.1f), T, c); }
 
-		public static void DrawHull(ConvexHull3D h, Transform T, Color c = default(Color))
+		public static void DrawHull(ConvexHull3D h, Transform T, Color c = default(Color), Material mat = null)
 		{
 			var verts = new List<Vector3>(h.Faces.Count*3);
 			var tris  = new List<int>(h.Faces.Count*3);
@@ -152,7 +173,7 @@ namespace AT_Utils
 				verts.AddRange(f);
 				tris.AddRange(new []{0+tris.Count, 1+tris.Count, 2+tris.Count});
 			}
-			DrawMesh(verts.ToArray(), tris, T, c, diffuse_material.New);
+			DrawMesh(verts.ToArray(), tris, T, c, mat ?? diffuse_material.New);
 		}
 
 		static Camera GLBeginWorld(out float far)
@@ -168,6 +189,50 @@ namespace AT_Utils
 			GL.LoadProjectionMatrix(camera.projectionMatrix);
 			GL.modelview = camera.worldToCameraMatrix;
 			return camera;
+		}
+
+		public static void GLLine(Vector3 ori, Vector3 end, Color c)
+		{
+			float far;
+			var camera = GLBeginWorld(out far);
+			if(MapView.MapIsEnabled)
+			{
+				ori = ScaledSpace.LocalToScaledSpace(ori);
+				end = ScaledSpace.LocalToScaledSpace(end);
+			}
+			GL.Begin(GL.LINES);
+			GL.Color(c);
+			GL.Vertex(ori);
+			GL.Vertex(end);
+			GL.End();
+			GL.PopMatrix();
+			camera.farClipPlane = far;
+		}
+
+		public static void GLVec(Vector3 ori, Vector3 vec, Color c)
+		{ GLLine(ori, ori+vec, c); }
+
+		public static void GLTriangleLines(Vector3[] worldVertices, Color c)
+		{
+			float far;
+			var camera = GLBeginWorld(out far);
+			if(MapView.MapIsEnabled)
+			{
+				worldVertices[0] = ScaledSpace.LocalToScaledSpace(worldVertices[0]);
+				worldVertices[1] = ScaledSpace.LocalToScaledSpace(worldVertices[1]);
+				worldVertices[2] = ScaledSpace.LocalToScaledSpace(worldVertices[2]);
+			}
+			GL.Begin(GL.LINES);
+			GL.Color(c);
+			GL.Vertex(worldVertices[0]);
+			GL.Vertex(worldVertices[1]);
+			GL.Vertex(worldVertices[1]);
+			GL.Vertex(worldVertices[2]);
+			GL.Vertex(worldVertices[2]);
+			GL.Vertex(worldVertices[0]);
+			GL.End();
+			GL.PopMatrix();
+			camera.farClipPlane = far;
 		}
 
 		public static void GLTriangleMap(Vector3d[] worldVertices, Color c)
@@ -198,45 +263,23 @@ namespace AT_Utils
 			camera.farClipPlane = far;
 		}
 
-		public static void GLLine(Vector3 ori, Vector3 end, Color c)
-		{
-			float far;
-			var camera = GLBeginWorld(out far);
-			if(MapView.MapIsEnabled)
-			{
-				ori = ScaledSpace.LocalToScaledSpace(ori);
-				end = ScaledSpace.LocalToScaledSpace(end);
-			}
-			GL.Begin(GL.LINES);
-			GL.Color(c);
-			GL.Vertex(ori);
-			GL.Vertex(end);
-			GL.End();
-			GL.PopMatrix();
-			camera.farClipPlane = far;
-		}
-
-		public static void GLVec(Vector3 ori, Vector3 vec, Color c)
-		{ GLLine(ori, ori+vec, c); }
-
-		//		edges[0] = new Vector3(min.x, min.y, min.z); //left-bottom-back
-		//		edges[1] = new Vector3(min.x, min.y, max.z); //left-bottom-front
-		//		edges[2] = new Vector3(min.x, max.y, min.z); //left-top-back
-		//		edges[3] = new Vector3(min.x, max.y, max.z); //left-top-front
-		//		edges[4] = new Vector3(max.x, min.y, min.z); //right-bottom-back
-		//		edges[5] = new Vector3(max.x, min.y, max.z); //right-bottom-front
-		//		edges[6] = new Vector3(max.x, max.y, min.z); //right-top-back
-		//		edges[7] = new Vector3(max.x, max.y, max.z); //right-top-front
-
 		static void gl_line(Vector3 ori, Vector3 end)
 		{ GL.Vertex(ori); GL.Vertex(end); }
 
-		public static void GLBounds(Bounds b, Transform T, Color col)
+		public static void GLDrawBounds(Bounds b, Transform T, Color col)
 		{
+			//		edges[0] = new Vector3(min.x, min.y, min.z); //left-bottom-back
+			//		edges[1] = new Vector3(min.x, min.y, max.z); //left-bottom-front
+			//		edges[2] = new Vector3(min.x, max.y, min.z); //left-top-back
+			//		edges[3] = new Vector3(min.x, max.y, max.z); //left-top-front
+			//		edges[4] = new Vector3(max.x, min.y, min.z); //right-bottom-back
+			//		edges[5] = new Vector3(max.x, min.y, max.z); //right-bottom-front
+			//		edges[6] = new Vector3(max.x, max.y, min.z); //right-top-back
+			//		edges[7] = new Vector3(max.x, max.y, max.z); //right-top-front
 			var c = Utils.BoundCorners(b);
 			for(int i = 0; i < 8; i++) 
 			{
-				c[i] = T.TransformPoint(c[i]);
+				c[i] = T.TransformDirection(c[i])+T.position;
 				if(MapView.MapIsEnabled)
 					c[i] = ScaledSpace.LocalToScaledSpace(c[i]);
 			}
@@ -261,6 +304,20 @@ namespace AT_Utils
 			GL.End();
 			GL.PopMatrix();
 			camera.farClipPlane = far;
+		}
+
+		public static void GLDrawPoint(Vector3 point, Transform T, Color c = default(Color))
+		{ GLDrawBounds(new Bounds(point, Vector3.one*0.1f), T, c); }
+
+		public static void GLDrawHullLines(ConvexHull3D h, Transform T, Vector3 offset = default(Vector3), Color c = default(Color))
+		{ 
+			foreach(var f in h.Faces) 
+			{
+				var verts = f.ToArray();
+				for(int i=0; i<verts.Length; i++) 
+					verts[i] = T.TransformDirection(verts[i]-offset)+T.position;
+				GLTriangleLines(verts, c);
+			}
 		}
 	}
 }
