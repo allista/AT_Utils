@@ -105,19 +105,19 @@ namespace AT_Utils
 						if(skip_mesh) break;
 					} if(skip_mesh) continue;
 					var is_wheel = wheel_meshes != null && wheel_meshes.Contains(m);
-					Vector3[] edges;
+					Vector3[] verts;
 					if(compute_hull)
 					{
 						float m_size = Vector3.Scale(m.sharedMesh.bounds.size, m.transform.lossyScale).sqrMagnitude;
-						edges = local2local(m.transform, vT, 
+						verts = local2local(m.transform, vT, 
 						                    (is_wheel || m_size > b_size/10? uniqueVertices(m.sharedMesh) : 
 						                                      Utils.BoundCorners(m.sharedMesh.bounds)));
-						hull_points.AddRange(edges);
+						hull_points.AddRange(verts);
 						b_size = b.size.sqrMagnitude;
 					}
-					else edges = local2local(m.transform, vT, (is_wheel? uniqueVertices(m.sharedMesh) : 
+					else verts = local2local(m.transform, vT, (is_wheel? uniqueVertices(m.sharedMesh) : 
 					                                           Utils.BoundCorners(m.sharedMesh.bounds)));
-					updateBounds(ref b, edges);
+					updateBounds(ref b, verts);
 				}
 				CrewCapacity += p.CrewCapacity;
 				if(p.IsPhysicallySignificant())	mass += p.TotalMass();
@@ -139,26 +139,24 @@ namespace AT_Utils
 			mass   = m.mass;
 			CrewCapacity = m.CrewCapacity;
 		}
-		
+
 		//metric from bounds
-		public Metric(Bounds b, float m = 0f, int crew_capacity = 0) : this()
+		void init_with_bounds(Bounds b, float m, int crew_capacity)
 		{
-			bounds = new Bounds(b.center, b.size);
-			volume = boundsVolume(bounds);
-			area   = boundsArea(bounds);
+			bounds = b;
+			volume = boundsVolume(b);
+			area   = boundsArea(b);
 			mass   = m;
 			CrewCapacity = crew_capacity;
 		}
+
+		public Metric(Bounds b, float m = 0f, int crew_capacity = 0) : this()
+		{ init_with_bounds(b, m, crew_capacity); }
 		
 		//metric from size
-		public Metric(Vector3 center, Vector3 size, float m = 0f, int crew_capacity = 0) : this()
-		{
-			bounds = new Bounds(center, size);
-			volume = boundsVolume(bounds);
-			area   = boundsArea(bounds);
-			mass   = m;
-			CrewCapacity = crew_capacity;
-		}
+		public Metric(Vector3 center, Vector3 size, float m = 0f, int crew_capacity = 0)
+			: this(new Bounds(center, size), m, crew_capacity) {}
+
 		public Metric(Vector3 size, float m = 0f, int crew_capacity = 0) 
 			: this(Vector3.zero, size, m, crew_capacity) {}
 
@@ -166,18 +164,14 @@ namespace AT_Utils
 		public Metric(float V, float m = 0f, int crew_capacity = 0) : this()
 		{
 			var a  = Mathf.Pow(V, 1/3f);
-			bounds = new Bounds(Vector3.zero, new Vector3(a,a,a));
-			volume = boundsVolume(bounds);
-			area   = boundsArea(bounds);
-			mass   = m;
-			CrewCapacity = crew_capacity;
+			init_with_bounds(new Bounds(Vector3.zero, new Vector3(a,a,a)), m, crew_capacity);
 		}
 		
-		//metric form edges
-		public Metric(Vector3[] edges, float m = 0f, int crew_capacity = 0, bool compute_hull=false) : this()
+		//metric form vertices
+		public Metric(Vector3[] verts, float m = 0f, int crew_capacity = 0, bool compute_hull=false) : this()
 		{
-			if(compute_hull) hull = new ConvexHull3D(edges);
-			bounds = initBounds(edges);
+			if(compute_hull) hull = new ConvexHull3D(verts);
+			bounds = initBounds(verts);
 			volume = boundsVolume(bounds);
 			area   = boundsArea(bounds);
 			mass   = m;
@@ -188,18 +182,32 @@ namespace AT_Utils
 		public Metric(ConfigNode node) : this() { Load(node); }
 		
 		//mesh metric
-		public Metric(Part part, string mesh_name, bool compute_hull=false) : this()
+		void init_with_mesh(MeshFilter mesh, Transform refT, bool compute_hull)
 		{
-			if(string.IsNullOrEmpty(mesh_name)) return;
-			MeshFilter m = part.FindModelComponent<MeshFilter>(mesh_name);
-			if(m == null) { Utils.Log("[Metric] {} does not have '{}' mesh", part.name, mesh_name); return; }
-			if(compute_hull) hull = new ConvexHull3D(uniqueVertices(m.sharedMesh));
-			Vector3[] edges = Utils.BoundCorners(m.sharedMesh.bounds);
-			local2local(m.transform, part.partTransform, edges);
-			bounds = initBounds(edges);
+			if(compute_hull) hull = new ConvexHull3D(uniqueVertices(mesh.sharedMesh));
+			Vector3[] verts = Utils.BoundCorners(mesh.sharedMesh.bounds);
+			if(refT != null) local2local(mesh.transform, refT, verts);
+			bounds = initBounds(verts);
 			volume = boundsVolume(bounds);
 			area   = boundsArea(bounds);
 			mass   = 0f;
+		}
+
+		public Metric(MeshFilter mesh, Transform refT=null, bool compute_hull=false) : this()
+		{ init_with_mesh(mesh, refT, compute_hull); }
+
+		public Metric(Transform transform, bool compute_hull=false) : this()
+		{
+			MeshFilter m = transform.gameObject.GetComponent<MeshFilter>();
+			if(m == null) { Utils.Log("[Metric] {} does not have MeshFilter component", transform.gameObject); return; }
+			init_with_mesh(m, transform, compute_hull);
+		}
+
+		public Metric(Part part, string mesh_name, bool compute_hull=false) : this()
+		{
+			MeshFilter m = part.FindModelComponent<MeshFilter>(mesh_name);
+			if(m == null) { Utils.Log("[Metric] {} does not have '{}' mesh", part.name, mesh_name); return; }
+			init_with_mesh(m, part.transform, compute_hull);
 		}
 		
 		//part metric
@@ -313,15 +321,17 @@ namespace AT_Utils
 		/// <param name="this_T">Transform of this metric.</param>
 		/// <param name="other_T">Transform of the other metric.</param>
 		/// <param name="other">Metric acting as a container.</param>
-		public bool FitsAligned(Transform this_T, Transform other_T, Metric other)
+		/// <param name="offset">Places the center of THIS metric at the offset in this_T coordinates</param>
+		public bool FitsAligned(Transform this_T, Transform other_T, Metric other, Vector3 offset = default(Vector3))
 		{
-			var edges = hull != null? hull.Points.ToArray() : Utils.BoundCorners(bounds);
-			for(int i = 0; i < edges.Length; i++) 
+			offset -= center;
+			var verts = hull != null? hull.Points.ToArray() : Utils.BoundCorners(bounds);
+			for(int i = 0; i < verts.Length; i++) 
 			{
-				Vector3 edge = other_T.InverseTransformPoint(this_T.position+this_T.TransformDirection(edges[i]-center));
+				var v = other_T.InverseTransformPoint(this_T.position+this_T.TransformDirection(verts[i]+offset));
 				if(other.hull != null) 
-				{ if(!other.hull.Contains(edge)) return false; }
-				else if(!other.bounds.Contains(edge)) return false;
+				{ if(!other.hull.Contains(v)) return false; }
+				else if(!other.bounds.Contains(v)) return false;
 			}
 			return true;
 		}
@@ -330,29 +340,31 @@ namespace AT_Utils
 		/// Returns true if THIS metric fits inside the given CONTAINER mesh.
 		/// </summary>
 		/// <param name="this_T">Transform of this metric.</param>
-		/// <param name="other_T">Transform of the given mesh.</param>
+		/// <param name="container_T">Transform of the given mesh.</param>
 		/// <param name="container">Mesh acting as a container.</param>
+		/// <param name="offset">Places the center of THIS metric at the offset in this_T coordinates</param>
 		/// Implemeted using algorithm described at
 		/// http://answers.unity3d.com/questions/611947/am-i-inside-a-volume-without-colliders.html
-		public bool FitsAligned(Transform this_T, Transform other_T, Mesh container)
+		public bool FitsAligned(Transform this_T, Transform container_T, Mesh container, Vector3 offset = default(Vector3))
 		{
-			//get edges in containers reference frame
-			var edges = hull != null? hull.Points.ToArray() : Utils.BoundCorners(bounds);
+			offset -= center;
+			//get vertices in containers reference frame
+			var verts = hull != null? hull.Points.ToArray() : Utils.BoundCorners(bounds);
 			//check each triangle of container
-			var c_edges   = container.vertices;
+			var c_verts   = container.vertices;
 			var triangles = container.triangles;
-			if(triangles.Length/3 > edges.Length)
+			if(triangles.Length/3 > verts.Length)
 			{
-				for(int i = 0; i < edges.Length; i++) 
-					edges[i] = other_T.InverseTransformPoint(this_T.position+this_T.TransformDirection(edges[i]-center));
+				for(int i = 0; i < verts.Length; i++) 
+					verts[i] = container_T.InverseTransformPoint(this_T.position+this_T.TransformDirection(verts[i]+offset));
 				for(int i = 0; i < triangles.Length/3; i++)
 				{
-					var V1 = c_edges[triangles[i*3]];
-					var V2 = c_edges[triangles[i*3+1]];
-					var V3 = c_edges[triangles[i*3+2]];
+					var V1 = c_verts[triangles[i*3]];
+					var V2 = c_verts[triangles[i*3+1]];
+					var V3 = c_verts[triangles[i*3+2]];
 					var P  = new Plane(V1, V2, V3);
-					foreach(Vector3 edge in edges)
-					{ if(!P.GetSide(edge)) return false; }
+					foreach(var v in verts)
+					{ if(!P.GetSide(v)) return false; }
 				}
 			}
 			else
@@ -360,16 +372,16 @@ namespace AT_Utils
 				var planes = new Plane[triangles.Length/3];
 				for(int i = 0; i < triangles.Length/3; i++)
 				{
-					var V1 = c_edges[triangles[i*3]];
-					var V2 = c_edges[triangles[i*3+1]];
-					var V3 = c_edges[triangles[i*3+2]];
+					var V1 = c_verts[triangles[i*3]];
+					var V2 = c_verts[triangles[i*3+1]];
+					var V3 = c_verts[triangles[i*3+2]];
 					planes[i] = new Plane(V1, V2, V3);
 				}
-				for(int i = 0; i < edges.Length; i++) 
+				for(int i = 0; i < verts.Length; i++) 
 				{
-					var edge = other_T.InverseTransformPoint(this_T.position+this_T.TransformDirection(edges[i]-center));
-					foreach(Plane P in planes)
-					{ if(!P.GetSide(edge)) return false; }
+					var v = container_T.InverseTransformPoint(this_T.position+this_T.TransformDirection(verts[i]+offset));
+					foreach(var P in planes)
+					{ if(!P.GetSide(v)) return false; }
 				}
 			}
 			return true;
@@ -393,9 +405,25 @@ namespace AT_Utils
 		#endregion
 
 		#if DEBUG
-		public void DrawBox(Transform vT) { Utils.GLBounds(bounds, vT, Color.white); }
+		public void DrawBox(Transform vT) { Utils.GLDrawBounds(bounds, vT, Color.white); }
 
-		public void DrawCenter(Transform vT) { Utils.DrawPoint(center, vT); }
+		public void DrawCenter(Transform vT) { Utils.GLDrawPoint(center, vT); }
+
+		public override string ToString()
+		{
+			return Utils.Format("hull:    {}\n" +
+			                    "bounds:  {}\n" +
+			                    "center:  {}\n" +
+			                    "extents: {}\n" +
+			                    "size:    {}\n" +
+			                    "volume:  {}\n" +
+			                    "area:    {}\n" +
+			                    "mass:    {}\n" +
+			                    "cost:    {}\n" +
+			                    "CrewCapacity: {}\n" +
+			                    "Empty:   {}\n", 
+			                    hull, bounds, center, extents, size, volume, area, mass, cost, CrewCapacity, Empty);
+		}
 		#endif
 	}
 }
