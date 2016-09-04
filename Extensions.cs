@@ -270,10 +270,7 @@ namespace AT_Utils
 	{
 		#region from MechJeb2 PartExtensions
 		public static bool HasModule<T>(this Part p) where T : PartModule
-		{ return p.Modules.OfType<T>().Any(); }
-
-		public static T GetModule<T>(this Part p) where T : PartModule
-		{ return p.Modules.OfType<T>().FirstOrDefault(); }
+		{ return p.Modules.GetModule<T>() != null; }
 
 		public static bool IsPhysicallySignificant(this Part p)
 		{
@@ -316,7 +313,14 @@ namespace AT_Utils
 		public static Part AttachedPartWithModule<T>(this Part p) where T : PartModule
 		{
 			if(p.parent != null && p.parent.HasModule<T>()) return p.parent;
-			foreach(var c in p.children) if(c.HasModule<T>()) return c;
+			foreach(var c in p.children) { if(c.HasModule<T>()) return c; }
+			return null;
+		}
+
+		public static T GetModuleInAttachedPart<T>(this Part p) where T : PartModule
+		{
+			if(p.parent != null) { var m = p.parent.Modules.GetModule<T>(); if(m != null) return m; }
+			foreach(var c in p.children) { var m = c.Modules.GetModule<T>(); if(m != null) return m; }
 			return null;
 		}
 
@@ -451,6 +455,16 @@ namespace AT_Utils
 
 		public static void EnableModule(this PartModule pm, bool enable)
 		{ pm.enabled = pm.isEnabled = enable; }
+
+		public static void ConfigurationInvalid(this PartModule pm, string msg, params object[] args)
+		{
+			Utils.Message(6, "WARNING: {0}.\n" +
+			              "Configuration of \"{1}\" is INVALID.", 
+			              string.Format(msg, args), 
+			              pm.Title());
+			pm.enabled = pm.isEnabled = false;
+			return;
+		}
 
 		public static void Log(this PartModule pm, string msg, params object[] args)
 		{ 

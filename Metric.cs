@@ -90,7 +90,7 @@ namespace AT_Utils
 			{
 				if(p == null) continue; //EditorLogic.SortedShipList returns List<Part>{null} when all parts are deleted
 				//if it's a wheel, get all meshes under the wheel collider
-				var wheel = p.GetModule<ModuleWheelBase>();
+				var wheel = p.Modules.GetModule<ModuleWheelBase>();
 				var wheel_meshes = wheel != null && wheel.Wheel != null && wheel.Wheel.wheelCollider != null && wheel.Wheel.wheelCollider.wheelTransform != null?  
 					new HashSet<MeshFilter>(wheel.Wheel.wheelCollider.wheelTransform.GetComponentsInChildren<MeshFilter>()) : null;
 				foreach(MeshFilter m in p.FindModelComponents<MeshFilter>())
