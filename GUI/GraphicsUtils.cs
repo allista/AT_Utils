@@ -107,6 +107,16 @@ namespace AT_Utils
 			}
 		}
 
+		public static void DrawMesh(Mesh m, Transform t, Color c = default(Color), Material mat = null)
+		{
+			//make own material
+			if(mat == null) mat = no_z_material.New;
+			mat.color = (c == default(Color))? Color.white : c;
+			//draw mesh in the world space
+			mat.SetPass(0);
+			Graphics.DrawMeshNow(m, t.localToWorldMatrix);
+		}
+
 		public static void DrawMesh(Vector3[] edges, IEnumerable<int> tris, Transform t, Color c = default(Color), Material mat = null)
 		{
 			//make a mesh
@@ -212,52 +222,78 @@ namespace AT_Utils
 		public static void GLVec(Vector3 ori, Vector3 vec, Color c)
 		{ GLLine(ori, ori+vec, c); }
 
-		public static void GLTriangleLines(Vector3[] worldVertices, Color c)
+		public static void GLTriangle(Vector3 j, Vector3 k, Vector3 l, Color c, bool filled = true)
 		{
 			float far;
 			var camera = GLBeginWorld(out far);
 			if(MapView.MapIsEnabled)
 			{
-				worldVertices[0] = ScaledSpace.LocalToScaledSpace(worldVertices[0]);
-				worldVertices[1] = ScaledSpace.LocalToScaledSpace(worldVertices[1]);
-				worldVertices[2] = ScaledSpace.LocalToScaledSpace(worldVertices[2]);
+				j = ScaledSpace.LocalToScaledSpace(j);
+				k = ScaledSpace.LocalToScaledSpace(k);
+				l = ScaledSpace.LocalToScaledSpace(l);
 			}
-			GL.Begin(GL.LINES);
+			GL.Begin(filled? GL.TRIANGLES : GL.LINES);
 			GL.Color(c);
-			GL.Vertex(worldVertices[0]);
-			GL.Vertex(worldVertices[1]);
-			GL.Vertex(worldVertices[1]);
-			GL.Vertex(worldVertices[2]);
-			GL.Vertex(worldVertices[2]);
-			GL.Vertex(worldVertices[0]);
+			GL.Vertex(j);
+			GL.Vertex(k);
+			GL.Vertex(k);
+			GL.Vertex(l);
+			GL.Vertex(l);
+			GL.Vertex(j);
 			GL.End();
 			GL.PopMatrix();
 			camera.farClipPlane = far;
 		}
 
-		public static void GLTriangleMap(Vector3d[] worldVertices, Color c)
+		public static void GLTriangles(Vector3[] worldVertices, Color c, bool filled = true)
 		{
 			float far;
 			var camera = GLBeginWorld(out far);
-			GL.Begin(GL.TRIANGLES);
+			if(MapView.MapIsEnabled)
+			{
+				for(int i = 0, len = worldVertices.Length; i < len; i++)
+					worldVertices[i] = ScaledSpace.LocalToScaledSpace(worldVertices[i]);
+			}
+			GL.Begin(filled? GL.TRIANGLES : GL.LINES);
 			GL.Color(c);
-			GL.Vertex(worldVertices[0]);
-			GL.Vertex(worldVertices[1]);
-			GL.Vertex(worldVertices[2]);
+			for(int i = 0, len = worldVertices.Length/3; i < len; i++)
+			{
+				int j = i*3; int k = j+1, l = j+2;
+				GL.Vertex(worldVertices[j]);
+				GL.Vertex(worldVertices[k]);
+				GL.Vertex(worldVertices[k]);
+				GL.Vertex(worldVertices[l]);
+				GL.Vertex(worldVertices[l]);
+				GL.Vertex(worldVertices[j]);
+			}
 			GL.End();
 			GL.PopMatrix();
 			camera.farClipPlane = far;
 		}
 
-		public static void GLTriangleMap(Vector3[] worldVertices, Color c)
+		public static void GLTriangles(Vector3[] worldVertices, int[] tris, Color c, bool filled = true)
 		{
 			float far;
 			var camera = GLBeginWorld(out far);
-			GL.Begin(GL.TRIANGLES);
+			if(MapView.MapIsEnabled)
+			{
+				for(int i = 0, len = worldVertices.Length; i < len; i++)
+					worldVertices[i] = ScaledSpace.LocalToScaledSpace(worldVertices[i]);
+			}
+			GL.Begin(filled? GL.TRIANGLES : GL.LINES);
 			GL.Color(c);
-			GL.Vertex(worldVertices[0]);
-			GL.Vertex(worldVertices[1]);
-			GL.Vertex(worldVertices[2]);
+			for(int i = 0, len = tris.Length/3; i < len; i++)
+			{
+				int j = i*3; 
+				int k = tris[j+1], l = tris[j+2];
+				j = tris[j];
+				GL.Vertex(worldVertices[j]);
+				GL.Vertex(worldVertices[k]);
+				GL.Vertex(worldVertices[k]);
+				GL.Vertex(worldVertices[l]);
+				GL.Vertex(worldVertices[l]);
+				GL.Vertex(worldVertices[j]);
+			}
 			GL.End();
 			GL.PopMatrix();
 			camera.farClipPlane = far;
@@ -268,14 +304,14 @@ namespace AT_Utils
 
 		public static void GLDrawBounds(Bounds b, Transform T, Color col)
 		{
-			//		edges[0] = new Vector3(min.x, min.y, min.z); //left-bottom-back
-			//		edges[1] = new Vector3(min.x, min.y, max.z); //left-bottom-front
-			//		edges[2] = new Vector3(min.x, max.y, min.z); //left-top-back
-			//		edges[3] = new Vector3(min.x, max.y, max.z); //left-top-front
-			//		edges[4] = new Vector3(max.x, min.y, min.z); //right-bottom-back
-			//		edges[5] = new Vector3(max.x, min.y, max.z); //right-bottom-front
-			//		edges[6] = new Vector3(max.x, max.y, min.z); //right-top-back
-			//		edges[7] = new Vector3(max.x, max.y, max.z); //right-top-front
+			//edges[0] = new Vector3(min.x, min.y, min.z); //left-bottom-back
+			//edges[1] = new Vector3(min.x, min.y, max.z); //left-bottom-front
+			//edges[2] = new Vector3(min.x, max.y, min.z); //left-top-back
+			//edges[3] = new Vector3(min.x, max.y, max.z); //left-top-front
+			//edges[4] = new Vector3(max.x, min.y, min.z); //right-bottom-back
+			//edges[5] = new Vector3(max.x, min.y, max.z); //right-bottom-front
+			//edges[6] = new Vector3(max.x, max.y, min.z); //right-top-back
+			//edges[7] = new Vector3(max.x, max.y, max.z); //right-top-front
 			var c = Utils.BoundCorners(b);
 			for(int i = 0; i < 8; i++) 
 			{
@@ -309,15 +345,24 @@ namespace AT_Utils
 		public static void GLDrawPoint(Vector3 point, Transform T, Color c = default(Color))
 		{ GLDrawBounds(new Bounds(point, Vector3.one*0.1f), T, c); }
 
-		public static void GLDrawHullLines(ConvexHull3D h, Transform T, Vector3 offset = default(Vector3), Color c = default(Color))
+		public static void GLDrawHull(ConvexHull3D h, Transform T, Vector3 offset = default(Vector3), Color c = default(Color), bool filled = true)
 		{ 
 			foreach(var f in h.Faces) 
 			{
 				var verts = f.ToArray();
 				for(int i=0; i<verts.Length; i++) 
 					verts[i] = T.TransformDirection(verts[i]-offset)+T.position;
-				GLTriangleLines(verts, c);
+				GLTriangles(verts, c, filled);
 			}
+		}
+
+		public static void GLDrawMesh(Mesh m, Transform T, Vector3 offset = default(Vector3), Color c = default(Color), bool filled = true)
+		{
+			var verts = m.vertices;
+			var tris = m.triangles;
+			for(int i = 0, len = verts.Length; i < len; i++)
+				verts[i] = T.TransformDirection(verts[i]-offset)+T.position;
+			GLTriangles(verts, tris, c, filled);
 		}
 	}
 }
