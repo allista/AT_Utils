@@ -93,6 +93,7 @@
     <Compile Include="ControlFlow\Multiplexer.cs" />
     <Compile Include="ControlFlow\Triggers.cs" />
     <Compile Include="Math\OscillationDetector.cs" />
+    <Compile Include="Math\VectorCurve.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
