@@ -22,6 +22,7 @@ namespace AT_Utils
 		AnimationCurve x, y, z;
 		public float minTime { get; private set; }
 		public float maxTime { get; private set; }
+		public int Length { get { return x.keys.Length; } }
 
 		public VectorCurve() { init_curves(); }
 
@@ -81,6 +82,16 @@ namespace AT_Utils
 
 		public Vector3 Evaluate(float time) 
 		{ return new Vector3(x.Evaluate(time), y.Evaluate(time), z.Evaluate(time)); }
+
+		public void Scale(Vector3 scale)
+		{
+			for(int i = 0; i < x.keys.Length; i++)
+			{
+				x.keys[i].value = x.keys[i].value*scale.x;
+				y.keys[i].value = y.keys[i].value*scale.y;
+				z.keys[i].value = z.keys[i].value*scale.z;
+			}
+		}
 
 		public override void Load(ConfigNode node)
 		{
