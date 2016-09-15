@@ -12,27 +12,29 @@ using System.Collections.Generic;
 
 namespace AT_Utils
 {
-	public abstract class PluginConfig : ConfigNodeObject
+	public abstract class CustomConfig : ConfigNodeObject
 	{
+		public static string GameDataRoot
+		{ get { return Path.Combine(KSPUtil.ApplicationRootPath, "GameData"); } }
+
+		public static string GameDataFolder(params string[] path)
+		{ return Path.Combine(GameDataRoot, Utils.PathChain(path)); }
+
+		public string AssemblyName
+		{ get { return Assembly.GetAssembly(GetType()).GetName().Name; } }
+
+		public string AssemblyLocation
+		{ get { return Assembly.GetAssembly(GetType()).Location; } }
+
+		public string AssemblyFolder
+		{ get { return Path.GetDirectoryName(AssemblyLocation); } }
+
 		public string PluginFolder(string filename = "")
 		{ return Utils.PathChain(AssemblyFolder, "..", filename); }
 
 		public string PluginData(string filename = "")
 		{ return Utils.PathChain(AssemblyFolder, "PluginData", AssemblyName, filename); }
 
-		public String AssemblyName
-		{ get { return Assembly.GetAssembly(GetType()).GetName().Name; } }
-
-		public String AssemblyLocation
-		{ get { return Assembly.GetAssembly(GetType()).Location; } }
-
-		public String AssemblyFolder
-		{ get { return Path.GetDirectoryName(AssemblyLocation); } }
-
-		public string DefaultFile { get { return PluginData(AssemblyName+".glob"); } }
-		public string DefaultOverride { get { return PluginFolder(AssemblyName+".user"); } }
-		public bool   DefaultFileExists { get { return File.Exists(DefaultFile); } }
-		public virtual List<string> AllConfigFiles { get { return new List<string>{DefaultFile, DefaultOverride}; } }
 
 		public static ConfigNode LoadNode(string filepath)
 		{
@@ -40,6 +42,36 @@ namespace AT_Utils
 			if(node == null) Utils.Log("Unable to read {}", filepath);
 			return node;
 		}
+
+		public static bool SaveNode(ConfigNode node, string filepath)
+		{
+			try
+			{
+				Directory.CreateDirectory(Path.GetDirectoryName(filepath));
+				node.Save(filepath);
+				return true;
+			}
+			catch(Exception ex) 
+			{ 
+				Utils.Log("Error writing {} file:\n{}", filepath, ex); 
+				return false;
+			}
+		}
+
+		public bool Create(string filepath)
+		{
+			var node = new ConfigNode();
+			Save(node);
+			return SaveNode(node, filepath);
+		}
+	}
+
+	public abstract class PluginConfig : CustomConfig
+	{
+		public string DefaultFile { get { return PluginData(AssemblyName+".glob"); } }
+		public string DefaultOverride { get { return PluginFolder(AssemblyName+".user"); } }
+		public bool   DefaultFileExists { get { return File.Exists(DefaultFile); } }
+		public virtual List<string> AllConfigFiles { get { return new List<string>{DefaultFile, DefaultOverride}; } }
 
 		public virtual void Init() {}
 
@@ -54,19 +86,6 @@ namespace AT_Utils
 			Init();
 		}
 		public void LoadDefaultFile() { Load(DefaultFile); }
-
-		public void Create(string filename)
-		{
-			var node = new ConfigNode();
-			Save(node);
-			try
-			{
-				Directory.CreateDirectory(Path.GetDirectoryName(filename));
-				using(var file = new StreamWriter(filename)) file.Write(node);
-			}
-			catch(Exception ex) 
-			{ Utils.Log("Error writing {} file:\n{}", filename, ex); }
-		}
 		public void CreateDefaultFile() { Create(DefaultFile); }
 	}
 
