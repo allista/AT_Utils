@@ -5,6 +5,8 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Reflection;
@@ -38,6 +40,19 @@ namespace AT_Utils
 		const string CamelCaseRegexp = "([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))";
 		static Regex CCR = new Regex(CamelCaseRegexp);
 		public static string ParseCamelCase(string s) { return CCR.Replace(s, "$1 "); }
+
+		public static readonly char[] Delimiters = {' ', '\t', ',', ';'};
+		public static readonly char[] Whitespace = {' ', '\t'};
+		public static readonly char[] Semicolon = {';'};
+		public static readonly char[] Comma = {','};
+
+		public static string[] ParseLine(string line, char[] delims, bool trim = true)
+		{
+			if(string.IsNullOrEmpty(line)) return null;
+			var array = line.Split(delims, StringSplitOptions.RemoveEmptyEntries);
+			if(trim) { for(int i = 0, len = array.Length; i < len; i++) array[i] = array[i].Trim(); }
+			return array;
+		}
 
 		public static string formatVeryBigValue(float value, string unit, string format = "F1")
 		{
@@ -183,12 +198,21 @@ namespace AT_Utils
 			for(int i = 0, argsL = args.Length; i < argsL; i++) 
 			{
 				var arg = args[i];
-				if(arg is Vector3) args[i] = formatVector((Vector3)arg);
+				if(arg is string) continue;
+				else if(arg == null) args[i] = "null";
+				else if(arg is Vector3) args[i] = formatVector((Vector3)arg);
 				else if(arg is Vector3d) args[i] = formatVector((Vector3d)arg);
 				else if(arg is Orbit) args[i] = formatOrbit((Orbit)arg);
 				else if(arg is Bounds) args[i] = formatBounds((Bounds)arg);
 				else if(arg is Exception) args[i] = formatException((Exception)arg);
-				else if(arg == null) args[i] = "null";
+				else if(arg is IEnumerable) 
+				{
+					var arr = (arg as IEnumerable).Cast<object>().ToArray();
+					convert_args(arr);
+					args[i] = string.Concat("[ ", 
+					                        arr.Aggregate("", (s, el) => string.Concat(s, ", ", el)),
+					                        " ]");
+				}
 				else args[i] = arg.ToString();
 			}
 		}
