@@ -244,24 +244,44 @@ namespace AT_Utils
 			return max;
 		}
 
-		public static TValue Next<TKey, TValue>(this SortedList<TKey,TValue> list, TKey key)
+		public static V Next<K, V>(this SortedList<K,V> list, K key)
 		{
 			try
 			{
 				var i = list.IndexOfKey(key);
 				var ni = (i+1) % list.Count;
 				return list.Values[ni];
-			} catch { return default(TValue); }
+			} catch { return default(V); }
 		}
 
-		public static TValue Prev<TKey, TValue>(this SortedList<TKey,TValue> list, TKey key)
+		public static V Prev<K, V>(this SortedList<K,V> list, K key)
 		{
 			try
 			{
 				var i = list.IndexOfKey(key);
 				var ni = i > 0? i-1 : list.Count-1;
 				return list.Values[ni];
-			} catch { return default(TValue); }
+			} catch { return default(V); }
+		}
+
+		public static T Next<T>(this IList<T> list, T key)
+		{
+			try
+			{
+				var i = list.IndexOf(key);
+				var ni = (i+1) % list.Count;
+				return list[ni];
+			} catch { return default(T); }
+		}
+
+		public static T Prev<T>(this IList<T> list, T key)
+		{
+			try
+			{
+				var i = list.IndexOf(key);
+				var ni = i > 0? i-1 : list.Count-1;
+				return list[ni];
+			} catch { return default(T); }
 		}
 	}
 
