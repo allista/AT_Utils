@@ -62,6 +62,22 @@ namespace AT_Utils
 		}
 
 		#region KSP_UI
+		public static void EnableEvent(BaseEvent evt, bool enable, bool gui, bool editor)
+		{
+			evt.active = enable;
+			evt.guiActive = gui;
+			evt.guiActiveEditor = editor;
+		}
+
+		public static void EnableEvent(BaseEvent evt, bool enable = true)
+		{ EnableEvent(evt, enable, enable, enable); }
+
+		public static void EnableEventGUI(BaseEvent evt, bool enable = true)
+		{ EnableEvent(evt, enable, enable, false); }
+
+		public static void EnableEventEditor(BaseEvent evt, bool enable = true)
+		{ EnableEvent(evt, enable, false, enable); }
+
 		public static void EnableField(BaseField field, bool enable = true, UI_Scene scene = UI_Scene.All)
 		{
 			if((scene & UI_Scene.Flight) == UI_Scene.Flight) field.guiActive       = enable;
