@@ -217,15 +217,16 @@ namespace AT_Utils
 			}
 		}
 
+		static readonly Regex log_re = new Regex("[Ll]og");
 		public static void Log(string msg, params object[] args)
 		{ 
 			var mod_name = "AT_Utils";
 			var stack = new StackTrace(1);
 			foreach(var f in stack.GetFrames())
 			{
-				var assembly = f.GetMethod().DeclaringType.Assembly;
-				if(assembly == this_assembly) continue;
-				mod_name = assembly.GetName().Name;
+				var method = f.GetMethod();
+				if(log_re.IsMatch(method.Name)) continue;
+				mod_name = method.DeclaringType.Assembly.GetName().Name;
 				break;
 			}
 			msg = string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", mod_name, DateTime.Now, msg);
@@ -235,6 +236,9 @@ namespace AT_Utils
 				UnityEngine.Debug.Log(Format(msg, args)); 
 			}
 			else UnityEngine.Debug.Log(msg);
+			#if DEBUG
+			UnityEngine.Debug.Log(stack);//debug
+			#endif
 		}
 
 		//from http://stackoverflow.com/questions/716399/c-sharp-how-do-you-get-a-variables-name-as-it-was-physically-typed-in-its-dec
