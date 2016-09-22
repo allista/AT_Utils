@@ -94,6 +94,7 @@
     <Compile Include="ControlFlow\Triggers.cs" />
     <Compile Include="Math\OscillationDetector.cs" />
     <Compile Include="Math\VectorCurve.cs" />
+    <Compile Include="Modules\SimpleTextureSwitcher.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -102,6 +103,7 @@
     <Folder Include="Resources\" />
     <Folder Include="Configuration\" />
     <Folder Include="ControlFlow\" />
+    <Folder Include="Modules\" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
