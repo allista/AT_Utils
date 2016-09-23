@@ -17,8 +17,6 @@ namespace AT_Utils
 {
 	public static partial class Utils
 	{
-		static Assembly this_assembly = Assembly.GetExecutingAssembly();
-
 		const string ElectricChargeName = "ElectricCharge";
 		static PartResourceDefinition _electric_charge;
 		public static PartResourceDefinition ElectricCharge
