@@ -207,9 +207,11 @@ namespace AT_Utils
 				{
 					var arr = (arg as IEnumerable).Cast<object>().ToArray();
 					convert_args(arr);
-					args[i] = string.Concat("[ ", 
-					                        arr.Aggregate("", (s, el) => string.Concat(s, ", ", el)),
-					                        " ]");
+					args[i] = string.Concat("[\n", 
+					                        arr.Aggregate("", (s, el) => 
+					                                      string.IsNullOrEmpty(s)? 
+					                                      el.ToString() : string.Concat(s, ",\n", el)),
+					                        "\n]");
 				}
 				else args[i] = arg.ToString();
 			}
@@ -235,7 +237,7 @@ namespace AT_Utils
 			}
 			else UnityEngine.Debug.Log(msg);
 			#if DEBUG
-			UnityEngine.Debug.Log(stack);//debug
+			UnityEngine.Debug.Log(stack);
 			#endif
 		}
 
