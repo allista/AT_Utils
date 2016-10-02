@@ -72,7 +72,6 @@
     <Compile Include="GUI\GUIUtils.cs" />
     <Compile Include="GUI\MD2Unity.cs" />
     <Compile Include="GUI\Styles.cs" />
-    <Compile Include="GUI\AddonWindowBase.cs" />
     <Compile Include="GUI\DropDownList.cs" />
     <Compile Include="Math\Matrix3.cs" />
     <Compile Include="Math\MathUtils.cs" />
@@ -95,6 +94,7 @@
     <Compile Include="Math\OscillationDetector.cs" />
     <Compile Include="Math\VectorCurve.cs" />
     <Compile Include="Modules\SimpleTextureSwitcher.cs" />
+    <Compile Include="GUI\GUIWindowBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
