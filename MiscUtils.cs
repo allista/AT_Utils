@@ -217,11 +217,10 @@ namespace AT_Utils
 			}
 		}
 
-		static readonly Regex log_re = new Regex("[Ll]og");
-		public static void Log(string msg, params object[] args)
-		{ 
+		static string prepare_message(string msg)
+		{
 			var mod_name = "AT_Utils";
-			var stack = new StackTrace(1);
+			var stack = new StackTrace(2);
 			foreach(var f in stack.GetFrames())
 			{
 				var method = f.GetMethod();
@@ -229,16 +228,36 @@ namespace AT_Utils
 				mod_name = method.DeclaringType.Assembly.GetName().Name;
 				break;
 			}
-			msg = string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", mod_name, DateTime.Now, msg);
+			#if DEBUG
+			UnityEngine.Debug.Log(stack);
+			#endif
+			return string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", mod_name, DateTime.Now, msg);
+		}
+
+		static readonly Regex log_re = new Regex("[Ll]og");
+		public static void Log(string msg, params object[] args)
+		{ 
+			msg = prepare_message(msg);
 			if(args.Length > 0)
 			{
 				convert_args(args);
 				UnityEngine.Debug.Log(Format(msg, args)); 
 			}
 			else UnityEngine.Debug.Log(msg);
-			#if DEBUG
-			UnityEngine.Debug.Log(stack);
-			#endif
+		}
+
+		public static void Log2File(string filename, string msg, params object[] args)
+		{
+			using(var f = new StreamWriter(filename, true))
+			{
+				msg = prepare_message(msg);
+				if(args.Length > 0)
+				{
+					convert_args(args);
+					f.WriteLine(Format(msg, args));
+				}
+				else f.WriteLine(msg);
+			}
 		}
 
 		//from http://stackoverflow.com/questions/716399/c-sharp-how-do-you-get-a-variables-name-as-it-was-physically-typed-in-its-dec
