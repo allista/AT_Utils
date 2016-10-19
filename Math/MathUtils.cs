@@ -96,6 +96,12 @@ namespace AT_Utils
 
 		public static Vector3 EWA(Vector3 old, Vector3 cur, float ratio = 0.7f)
 		{ return (1-ratio)*old + ratio*cur; }
+
+		public static float CubeSurface(float volume)
+		{ return 6*Mathf.Pow(volume, 2/3f); }
+
+		public static double CubeSurface(double volume)
+		{ return 6*Math.Pow(volume, 2/3.0); }
 	}
 }
 

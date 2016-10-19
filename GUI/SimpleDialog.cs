@@ -2,12 +2,15 @@
 
 namespace AT_Utils
 {
-	public class SimpleDialog : MonoBehaviour
+	public class SimpleDialog : GUIWindowBase
 	{
 		public enum Answer { None, Yes, No }
 
-		const int width = 400;
-		Rect windowPos = new Rect(Screen.width/2-width/2, 100, width, 50);
+		public SimpleDialog()
+		{ 
+			width = 400;
+			WindowPos = new Rect(Screen.width/2-width/2, 100, width, 50); 
+		}
 
 		string message;
 		public Answer Result { get; private set; }
@@ -26,14 +29,16 @@ namespace AT_Utils
 			GUI.DragWindow(new Rect(0, 0, Screen.width, 20));
 		}
 
-		public Rect Show(string message, string title = "Warning")
+		public Answer Show(string message, string title = "Warning")
 		{
 			this.message = message;
-			windowPos = GUILayout.Window(GetInstanceID(), 
-			                             windowPos, DialogWindow,
+			LockControls();
+			WindowPos = GUILayout.Window(GetInstanceID(), 
+			                             WindowPos, DialogWindow,
 			                             title,
 			                             GUILayout.Width(width)).clampToScreen();
-			return windowPos;
+			if(Result != Answer.None) UnlockControls();
+			return Result;
 		}
 	}
 }

@@ -4,5 +4,6 @@
 *.mdb
 *.dll
 
+.idea/**
 Releases/**
 obj/**

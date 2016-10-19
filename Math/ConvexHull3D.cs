@@ -19,6 +19,7 @@ using UnityEngine;
 //And profiling confirms it.
 namespace AT_Utils
 {
+	//TODO: convert faces and edges to store point indexes instead of points themselves
 	public class Face : IEnumerable<Vector3>
 	{
 		public class Edge

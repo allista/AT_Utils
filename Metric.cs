@@ -353,15 +353,17 @@ namespace AT_Utils
 			//check each triangle of container
 			var c_verts   = container.vertices;
 			var triangles = container.triangles;
-			if(triangles.Length/3 > verts.Length)
+			var ntris = triangles.Length/3;
+			if(ntris > verts.Length)
 			{
 				for(int i = 0; i < verts.Length; i++) 
 					verts[i] = container_T.InverseTransformPoint(this_T.position+this_T.TransformDirection(verts[i]+offset));
-				for(int i = 0; i < triangles.Length/3; i++)
+				for(int i = 0; i < ntris; i++)
 				{
-					var V1 = c_verts[triangles[i*3]];
-					var V2 = c_verts[triangles[i*3+1]];
-					var V3 = c_verts[triangles[i*3+2]];
+					int j = i*3;
+					var V1 = c_verts[triangles[j]];
+					var V2 = c_verts[triangles[j+1]];
+					var V3 = c_verts[triangles[j+2]];
 					var P  = new Plane(V1, V2, V3);
 					foreach(var v in verts)
 					{ if(!P.GetSide(v)) return false; }
@@ -370,17 +372,18 @@ namespace AT_Utils
 			else
 			{
 				var planes = new Plane[triangles.Length/3];
-				for(int i = 0; i < triangles.Length/3; i++)
+				for(int i = 0; i < ntris; i++)
 				{
-					var V1 = c_verts[triangles[i*3]];
-					var V2 = c_verts[triangles[i*3+1]];
-					var V3 = c_verts[triangles[i*3+2]];
+					int j = i*3;
+					var V1 = c_verts[triangles[j]];
+					var V2 = c_verts[triangles[j+1]];
+					var V3 = c_verts[triangles[j+2]];
 					planes[i] = new Plane(V1, V2, V3);
 				}
 				for(int i = 0; i < verts.Length; i++) 
 				{
 					var v = container_T.InverseTransformPoint(this_T.position+this_T.TransformDirection(verts[i]+offset));
-					foreach(var P in planes)
+					foreach(var P in planes) 
 					{ if(!P.GetSide(v)) return false; }
 				}
 			}

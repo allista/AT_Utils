@@ -38,6 +38,9 @@ namespace AT_Utils
 			Value = -Value;
 		}
 
+		public void ClampValue()
+		{ Value = Utils.Clamp(Value, Min, Max); }
+
 		public override void Load(ConfigNode node)
 		{
 			base.Load(node);

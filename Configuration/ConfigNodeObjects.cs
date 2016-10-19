@@ -19,6 +19,8 @@ namespace AT_Utils
 
 		static readonly string cnode_name = typeof(IConfigNode).Name;
 
+		public string NodeName { get { return GetType().GetField("NODE_NAME").GetValue(null) as string; } }
+
 		protected bool not_persistant(FieldInfo fi)
 		{ return fi.GetCustomAttributes(typeof(Persistent), true).Length == 0; }
 

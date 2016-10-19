@@ -244,24 +244,44 @@ namespace AT_Utils
 			return max;
 		}
 
-		public static TValue Next<TKey, TValue>(this SortedList<TKey,TValue> list, TKey key)
+		public static V Next<K, V>(this SortedList<K,V> list, K key)
 		{
 			try
 			{
 				var i = list.IndexOfKey(key);
 				var ni = (i+1) % list.Count;
 				return list.Values[ni];
-			} catch { return default(TValue); }
+			} catch { return default(V); }
 		}
 
-		public static TValue Prev<TKey, TValue>(this SortedList<TKey,TValue> list, TKey key)
+		public static V Prev<K, V>(this SortedList<K,V> list, K key)
 		{
 			try
 			{
 				var i = list.IndexOfKey(key);
 				var ni = i > 0? i-1 : list.Count-1;
 				return list.Values[ni];
-			} catch { return default(TValue); }
+			} catch { return default(V); }
+		}
+
+		public static T Next<T>(this IList<T> list, T key)
+		{
+			try
+			{
+				var i = list.IndexOf(key);
+				var ni = (i+1) % list.Count;
+				return list[ni];
+			} catch { return default(T); }
+		}
+
+		public static T Prev<T>(this IList<T> list, T key)
+		{
+			try
+			{
+				var i = list.IndexOf(key);
+				var ni = i > 0? i-1 : list.Count-1;
+				return list[ni];
+			} catch { return default(T); }
 		}
 	}
 
@@ -365,19 +385,16 @@ namespace AT_Utils
 		#endregion
 
 		#region Actions
-		public static void BreakConnectedStruts(this Part p)
+		public static void BreakConnectedCompoundParts(this Part p)
 		{
-			//break strut connectors
+			//break connected compound parts
 			foreach(Part part in p.AllConnectedParts())
 			{
-				var s = part as StrutConnector;
-				if(s == null || s.target == null) continue;
-				if(s.parent == p || s.target == p)
-				{
-					s.BreakJoint();
-					s.targetAnchor.gameObject.SetActive(false);
-					s.direction = Vector3.zero;
-				}
+				var cp = part as CompoundPart;
+				if(cp == null) continue;
+				var cpm = cp.Modules.GetModule<CompoundParts.CompoundPartModule>();
+				if(cpm == null) continue;
+				cpm.OnTargetLost();
 			}
 		}
 
@@ -386,7 +403,7 @@ namespace AT_Utils
 			if(node == null) return;
 			var ap = node.attachedPart; 
 			if(ap == null) return;
-			var an = ap.findAttachNodeByPart(p);	
+			var an = ap.FindAttachNodeByPart(p);	
 			if(an == null) return;
 			var dp =
 				p.transform.TransformPoint(node.position) -
@@ -503,7 +520,7 @@ namespace AT_Utils
 				Part p = parts[i];
 				if(p == null) continue;
 				var meshes = p.FindModelComponents<MeshFilter>();
-				for(int mi = 0, meshesLength = meshes.Length; mi < meshesLength; mi++)
+				for(int mi = 0, meshesLength = meshes.Count; mi < meshesLength; mi++)
 				{
 					var m = meshes[mi];
 					var bounds = Utils.BoundCorners(m.sharedMesh.bounds);

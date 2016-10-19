@@ -5,6 +5,8 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Reflection;
@@ -15,8 +17,6 @@ namespace AT_Utils
 {
 	public static partial class Utils
 	{
-		static Assembly this_assembly = Assembly.GetExecutingAssembly();
-
 		const string ElectricChargeName = "ElectricCharge";
 		static PartResourceDefinition _electric_charge;
 		public static PartResourceDefinition ElectricCharge
@@ -38,6 +38,19 @@ namespace AT_Utils
 		const string CamelCaseRegexp = "([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))";
 		static Regex CCR = new Regex(CamelCaseRegexp);
 		public static string ParseCamelCase(string s) { return CCR.Replace(s, "$1 "); }
+
+		public static readonly char[] Delimiters = {' ', '\t', ',', ';'};
+		public static readonly char[] Whitespace = {' ', '\t'};
+		public static readonly char[] Semicolon = {';'};
+		public static readonly char[] Comma = {','};
+
+		public static string[] ParseLine(string line, char[] delims, bool trim = true)
+		{
+			if(string.IsNullOrEmpty(line)) return null;
+			var array = line.Split(delims, StringSplitOptions.RemoveEmptyEntries);
+			if(trim) { for(int i = 0, len = array.Length; i < len; i++) array[i] = array[i].Trim(); }
+			return array;
+		}
 
 		public static string formatVeryBigValue(float value, string unit, string format = "F1")
 		{
@@ -183,34 +196,68 @@ namespace AT_Utils
 			for(int i = 0, argsL = args.Length; i < argsL; i++) 
 			{
 				var arg = args[i];
-				if(arg is Vector3) args[i] = formatVector((Vector3)arg);
+				if(arg is string) continue;
+				else if(arg == null) args[i] = "null";
+				else if(arg is Vector3) args[i] = formatVector((Vector3)arg);
 				else if(arg is Vector3d) args[i] = formatVector((Vector3d)arg);
 				else if(arg is Orbit) args[i] = formatOrbit((Orbit)arg);
 				else if(arg is Bounds) args[i] = formatBounds((Bounds)arg);
 				else if(arg is Exception) args[i] = formatException((Exception)arg);
-				else if(arg == null) args[i] = "null";
+				else if(arg is IEnumerable) 
+				{
+					var arr = (arg as IEnumerable).Cast<object>().ToArray();
+					convert_args(arr);
+					args[i] = string.Concat("[\n", 
+					                        arr.Aggregate("", (s, el) => 
+					                                      string.IsNullOrEmpty(s)? 
+					                                      el.ToString() : string.Concat(s, ",\n", el)),
+					                        "\n]");
+				}
 				else args[i] = arg.ToString();
 			}
 		}
 
-		public static void Log(string msg, params object[] args)
-		{ 
+		static string prepare_message(string msg)
+		{
 			var mod_name = "AT_Utils";
-			var stack = new StackTrace(1);
+			var stack = new StackTrace(2);
 			foreach(var f in stack.GetFrames())
 			{
-				var assembly = f.GetMethod().DeclaringType.Assembly;
-				if(assembly == this_assembly) continue;
-				mod_name = assembly.GetName().Name;
+				var method = f.GetMethod();
+				if(log_re.IsMatch(method.Name)) continue;
+				mod_name = method.DeclaringType.Assembly.GetName().Name;
 				break;
 			}
-			msg = string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", mod_name, DateTime.Now, msg);
+			#if DEBUG
+			UnityEngine.Debug.Log(stack);
+			#endif
+			return string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", mod_name, DateTime.Now, msg);
+		}
+
+		static readonly Regex log_re = new Regex("[Ll]og");
+		public static void Log(string msg, params object[] args)
+		{ 
+			msg = prepare_message(msg);
 			if(args.Length > 0)
 			{
 				convert_args(args);
 				UnityEngine.Debug.Log(Format(msg, args)); 
 			}
 			else UnityEngine.Debug.Log(msg);
+		}
+
+		public static void Log2File(string filename, string msg, params object[] args)
+		{
+			using(var f = new StreamWriter(filename, true))
+			{
+				msg = prepare_message(msg);
+				if(args.Length > 0)
+				{
+					convert_args(args);
+					f.WriteLine(Format(msg, args));
+				}
+				else f.WriteLine(msg);
+			}
 		}
 
 		//from http://stackoverflow.com/questions/716399/c-sharp-how-do-you-get-a-variables-name-as-it-was-physically-typed-in-its-dec
