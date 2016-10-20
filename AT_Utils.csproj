@@ -87,6 +87,7 @@
     <Compile Include="Math\VectorCurve.cs" />
     <Compile Include="Modules\SimpleTextureSwitcher.cs" />
     <Compile Include="GUI\GUIWindowBase.cs" />
+    <Compile Include="ToolbarWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
