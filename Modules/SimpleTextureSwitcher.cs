@@ -16,21 +16,21 @@ namespace AT_Utils
 	public class SimpleTextureSwitcher : PartModule
 	{
 		/// <summary>
-		/// The folder in which textures are locatged. 
+		/// The folder in which textures are located. 
 		/// Relative to GameData folder.
 		/// </summary>
 		[KSPField] public string RootFolder = string.Empty;
 
 		/// <summary>
-		/// The name of the material which texture should be replaced.
+		/// The names of the game objects which main texture should be replaced.
+		/// Divided by commas. May be regular expressions.
 		/// </summary>
 		[KSPField] public string AffectedObjects = string.Empty;
 		List<Regex> affected_objects;
 		readonly List<Renderer> renderers = new List<Renderer>();
 
 		/// <summary>
-		/// Names of the textures to switch. 
-		/// All materials that use this texture will be affected.
+		/// Names of the textures to choose from. 
 		/// </summary>
 		[KSPField] public string Textures = string.Empty;
 		readonly List<string> textures = new List<string>();
