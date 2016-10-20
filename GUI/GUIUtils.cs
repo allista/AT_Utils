@@ -54,6 +54,7 @@ namespace AT_Utils
 
 		public static int LeftRightChooser(string text, int width = 0)
 		{
+			width -= 40;
 			var left  = GUILayout.Button("<", Styles.yellow_button, GUILayout.Width(20));
 			if(width > 0) GUILayout.Label(text, Styles.white, GUILayout.Width(width));
 			else GUILayout.Label(text, Styles.white);
@@ -115,6 +116,12 @@ namespace AT_Utils
 		{
 			Lock &= WindowRect.Contains(Event.current.mousePosition);
 			LockEditor(LockName, Lock);
+		}
+
+		public static void UpdatePartMenu(this Part part)
+		{
+			MonoUtilities.RefreshContextWindows(part);
+			Utils.UpdateEditorGUI();
 		}
 
 		public static void UpdateEditorGUI()
