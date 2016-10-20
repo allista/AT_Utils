@@ -143,8 +143,10 @@ namespace AT_Utils
 		public override void Awake()
 		{
 			base.Awake();
-			LoadConfig();
+			if(instance != null)
+			{ Destroy(gameObject); return; }
 			instance = (T)this;
+			LoadConfig();
 			var assembly = Assembly.GetAssembly(typeof(T)).GetName();
 			Title = string.Concat(assembly.Name, " - ", assembly.Version);
 		}
