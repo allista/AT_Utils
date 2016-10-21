@@ -264,14 +264,12 @@ namespace AT_Utils
 		//second answer
 		public static string PropertyName<T>(T obj) { return typeof(T).GetProperties()[0].Name; }
 
-		//ResearchAndDevelopment.PartModelPurchased is broken and always returns 'true'
 		public static bool PartIsPurchased(string name)
 		{
+			if(PartLoader.Instance == null) return false;
 			var info = PartLoader.getPartInfoByName(name);
 			if(info == null || HighLogic.CurrentGame == null) return false;
-			if(HighLogic.CurrentGame.Mode != Game.Modes.CAREER) return true;
-			var tech = ResearchAndDevelopment.Instance.GetTechState(info.TechRequired);
-			return tech != null && tech.state == RDTech.State.Available && tech.partsPurchased.Contains(info);
+			return HighLogic.CurrentGame.Mode != Game.Modes.CAREER || ResearchAndDevelopment.PartModelPurchased(info);
 		}
 
 		public static Vector3[] BoundCorners(Bounds b)
