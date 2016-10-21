@@ -94,7 +94,8 @@ namespace AT_Utils
 	{
 		public override void Save(ConfigNode node)
 		{
-			node.AddValue("type", GetType().FullName);
+			var type = GetType();
+			node.AddValue("type", string.Format("{0}, {1}", type.FullName, type.Assembly.GetName().Name));
 			base.Save(node);
 		}
 
@@ -115,14 +116,20 @@ namespace AT_Utils
 		public static TypedConfigNodeObject FromConfig(ConfigNode node)
 		{
 			TypedConfigNodeObject obj = null;
-			var type = node.GetValue("type");
-			if(type == null) return obj;
+			var typename = node.GetValue("type");
+			if(typename == null) return obj;
+			var type = Type.GetType(typename);
+			if(type == null)
+			{
+				Utils.Log("Unable to create {}: Type not found.", typename);
+				return obj;
+			}
 			try 
 			{ 
-				obj = Assembly.GetAssembly(Type.GetType(type)).CreateInstance(type) as TypedConfigNodeObject;
+				obj = Activator.CreateInstance(type) as TypedConfigNodeObject;
 				obj.Load(node);
 			}
-			catch(Exception ex) { Utils.Log("Unable to create {}: {}", type, ex.Message); }
+			catch(Exception ex) { Utils.Log("Unable to create {}: {}\n{}", typename, ex.Message, ex.StackTrace); }
 			return obj;
 		}
 	}
