@@ -125,6 +125,8 @@ namespace AT_Utils
 		public static bool window_enabled { get; protected set; } = false;
 		public static bool do_show { get { return window_enabled && HUD_enabled; } }
 
+		readonly ActionDamper save_timer = new ActionDamper(10);
+
 		protected virtual void show(bool show)
 		{
 			window_enabled = show;
@@ -149,14 +151,19 @@ namespace AT_Utils
 			LoadConfig();
 			var assembly = Assembly.GetAssembly(typeof(T)).GetName();
 			Title = string.Concat(assembly.Name, " - ", assembly.Version);
+			GameEvents.onGameStateSave.Add(onGameStateSave);
+			save_timer.action = SaveConfig;
 		}
 
 		public override void OnDestroy()
 		{
 			SaveConfig();
+			GameEvents.onGameStateSave.Remove(onGameStateSave);
 			if(this == instance) instance = null;
 			base.OnDestroy();
 		}
+
+		void onGameStateSave(ConfigNode node) { SaveConfig(); }
 
 		//settings
 		public override void LoadConfig()
@@ -181,6 +188,7 @@ namespace AT_Utils
 			{
 				Styles.Init();
 				draw_gui();
+				save_timer.Run();
 			}
 			else UnlockControls();
 		}
