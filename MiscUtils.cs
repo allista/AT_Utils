@@ -133,8 +133,9 @@ namespace AT_Utils
 		{
 			return Utils.Format(
 				"Body:   {}\n" +
-				"\trotation: {}s\n" +
+				"\trotation: {} s\n" +
 				"\tradius:   {}\n" +
+				"\trot angle {} deg\n" +
 				"PeA:    {} m\n" +
 				"ApA:    {} m\n" +
 				"PeR:    {} m\n" +
@@ -153,7 +154,7 @@ namespace AT_Utils
 				"T2Ap     {} per\n" +
 				"Vel: {} m/s\n" +
 				"Pos: {} m\n",
-				o.referenceBody.bodyName, o.referenceBody.rotationPeriod,
+				o.referenceBody.bodyName, o.referenceBody.rotationPeriod, o.referenceBody.rotationAngle,
 				formatBigValue((float)o.referenceBody.Radius, "m"),
 				o.PeA, o.ApA,
 				o.PeR, o.ApR, 
@@ -324,7 +325,9 @@ namespace AT_Utils
 
 		public static void SaveGame(string name)
 		{ 
-			GamePersistence.SaveGame(name, HighLogic.SaveFolder, SaveMode.OVERWRITE);
+			Game game = HighLogic.CurrentGame.Updated();
+			game.startScene = GameScenes.FLIGHT;
+			GamePersistence.SaveGame(game, name, HighLogic.SaveFolder, SaveMode.OVERWRITE);
 			Message("Game saved as: {0}", name);
 		}
 	}
