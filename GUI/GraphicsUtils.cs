@@ -342,6 +342,23 @@ namespace AT_Utils
 			camera.farClipPlane = far;
 		}
 
+		public static void GLDrawPoint(Vector3 ori, Color c = default(Color), float r=0.1f)
+		{
+			float far;
+			Vector3 i = new Vector3(r, 0, 0);
+			Vector3 j = new Vector3(0, r, 0);
+			Vector3 k = new Vector3(0, 0, r);
+			var camera = GLBeginWorld(out far);
+			GL.Begin(GL.LINES);
+			GL.Color(c);
+			gl_line(ori-i, ori+i);
+			gl_line(ori-j, ori+j);
+			gl_line(ori-k, ori+k);
+			GL.End();
+			GL.PopMatrix();
+			camera.farClipPlane = far;
+		}
+
 		public static void GLDrawPoint(Vector3 point, Transform T, Color c = default(Color))
 		{ GLDrawBounds(new Bounds(point, Vector3.one*0.1f), T, c); }
 
