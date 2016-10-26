@@ -323,12 +323,12 @@ namespace AT_Utils
 			return false;
 		}
 
-		public static void SaveGame(string name)
+		public static void SaveGame(string name, bool with_message = true)
 		{ 
 			Game game = HighLogic.CurrentGame.Updated();
 			game.startScene = GameScenes.FLIGHT;
 			GamePersistence.SaveGame(game, name, HighLogic.SaveFolder, SaveMode.OVERWRITE);
-			Message("Game saved as: {0}", name);
+			if(with_message) Message("Game saved as: {0}", name);
 		}
 	}
 
