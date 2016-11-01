@@ -185,5 +185,54 @@ namespace AT_Utils
 				Math.Abs(s.z) > Threshold;
 		}
 	}
+
+	public class OscillationDetector3D
+	{
+		double threshold;
+		readonly OscillationDetectorD x_OD, y_OD, z_OD;
+
+		public double Threshold
+		{
+			get { return threshold; }
+			set 
+			{
+				threshold = value;
+				x_OD.Threshold = threshold;
+				y_OD.Threshold = threshold;
+				z_OD.Threshold = threshold;
+			}
+		}
+
+		public Vector3d Value { get; private set; }
+
+		public OscillationDetector3D(double low_freq, double high_freq, int freq_bins, int time_window, float smoothing, double threshold)
+		{ 
+			this.threshold = threshold; 
+			x_OD = new OscillationDetectorD(low_freq, high_freq, freq_bins, time_window, smoothing, threshold);
+			y_OD = new OscillationDetectorD(low_freq, high_freq, freq_bins, time_window, smoothing, threshold);
+			z_OD = new OscillationDetectorD(low_freq, high_freq, freq_bins, time_window, smoothing, threshold);
+		}
+
+		public Vector3d Update(Vector3d input, double dt)
+		{
+			Value = new Vector3d(x_OD.Update(input.x, dt),
+			             	     y_OD.Update(input.y, dt),
+			                     z_OD.Update(input.z, dt));
+			return Value;
+		}
+
+		public Vector3 Update(Vector3 input, double dt)
+		{ return Update((Vector3d)input, dt); }
+
+		public override string ToString()
+		{
+			return Utils.Format("OscillationDetector3D: Threshold={}, Value={}", Threshold, Value);
+//			return Utils.Format("OscillationDetector3D: Threshold={}, Value={}\n" +
+//			                    "\nx_OD:\n{}" +
+//			                    "\ny_OD:\n{}" +
+//			                    "\nz_OD:\n{}", 
+//			                    Threshold, Value, x_OD, y_OD, z_OD);
+		}
+	}
 }
 
