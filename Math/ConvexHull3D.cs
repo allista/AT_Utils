@@ -382,10 +382,7 @@ namespace AT_Utils
 		}
 
 		public void Save(ConfigNode node)
-		{
-			foreach(Vector3 p in Points)
-				node.AddValue("point", ConfigNode.WriteVector(p));
-		}
+		{ Points.ForEach(p => node.AddValue("point", ConfigNode.WriteVector(p))); }
 
 		public static ConvexHull3D Load(ConfigNode node)
 		{
