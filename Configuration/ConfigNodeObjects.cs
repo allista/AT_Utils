@@ -19,7 +19,21 @@ namespace AT_Utils
 
 		static readonly string cnode_name = typeof(IConfigNode).Name;
 
-		public string NodeName { get { return GetType().GetField("NODE_NAME").GetValue(null) as string; } }
+		string node_name = null;
+		public string NodeName 
+		{ 
+			get 
+			{ 
+				if(node_name == null)
+				{
+					var T = GetType();
+					var name_field = T.GetField("NODE_NAME", BindingFlags.Public|BindingFlags.Static|BindingFlags.FlattenHierarchy);
+					node_name = name_field != null? name_field.GetValue(null) as string : T.Name;
+//					Utils.Log("{}, field {}, name {}", T.Name, name_field, node_name);//debug
+				}
+				return node_name;
+			}
+		}
 
 		protected bool not_persistant(FieldInfo fi)
 		{ return fi.GetCustomAttributes(typeof(Persistent), true).Length == 0; }
@@ -58,6 +72,9 @@ namespace AT_Utils
 				method.Invoke(f, new [] {n});
 			}
 		}
+
+		virtual public void SaveInto(ConfigNode parent)
+		{ Save(parent.AddNode(NodeName)); }
 
 		virtual public void Copy(ConfigNodeObject other)
 		{
