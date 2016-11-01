@@ -105,12 +105,47 @@ namespace AT_Utils
 				v.z.Equals(0)? nan : 1f/v.z); 
 		}
 
+		public static Vector3 Scale(this Vector3 vec, params Vector3[] vectors)
+		{
+			var result = vec;
+			for(int i = 0, vectorsLength = vectors.Length; i < vectorsLength; i++)
+			{
+				var v = vectors[i];
+				result.x *= v.x;
+				result.y *= v.y;
+				result.z *= v.z;
+			}
+			return result;
+		}
+
 		public static Vector3 ClampComponents(this Vector3 v, float min, float max) 
 		{ 
 			return new Vector3(Mathf.Clamp(v.x, min, max), 
 			                   Mathf.Clamp(v.y, min, max), 
 			                   Mathf.Clamp(v.z, min, max)); 
 		}
+
+		public static Vector3 ClampMagnitude(this Vector3 v, Vector3 min, Vector3 max) 
+		{ 
+			return new Vector3(Mathf.Clamp(v.x, min.x, max.x), 
+			                   Mathf.Clamp(v.y, min.y, max.y), 
+			                   Mathf.Clamp(v.z, min.z, max.z)); 
+		}
+
+		public static Vector3 ClampComponentsH(this Vector3 v, float max) 
+		{ 
+			return new Vector3(Utils.ClampH(v.x, max), 
+			                   Utils.ClampH(v.y, max), 
+			                   Utils.ClampH(v.z, max)); 
+		}
+
+		public static Vector3 ClampComponentsL(this Vector3 v, float min) 
+		{ 
+			return new Vector3(Utils.ClampL(v.x, min), 
+			                   Utils.ClampL(v.y, min), 
+			                   Utils.ClampL(v.z, min)); 
+		}
+
 
 		public static Vector3 ClampMagnitudeH(this Vector3 v, float max)
 		{ 
@@ -168,6 +203,37 @@ namespace AT_Utils
 				(v.y > v.z? 1 : (v.z < v.x? 2 : 0));
 		}
 
+		public static int MaxI(this Vector3d v)
+		{
+			var maxi = 0;
+			var max  = 0.0;
+			for(int i = 0; i < 3; i++)
+			{
+				if(Math.Abs(v[i]) > Math.Abs(max))
+				{ max = v[i]; maxi = i; }
+			}
+			return maxi;
+		}
+
+		public static int MinI(this Vector3d v)
+		{
+			var mini = 0;
+			var min   = double.MaxValue;
+			for(int i = 0; i < 3; i++)
+			{
+				if(Math.Abs(v[i]) < Math.Abs(min))
+				{ min = v[i]; mini = i; }
+			}
+			return mini;
+		}
+
+		public static int MedI(this Vector3d v)
+		{
+			return v.x < v.y? 
+				(v.x > v.z? 0 : (v.z < v.y? 2 : 1)) : 
+				(v.y > v.z? 1 : (v.z < v.x? 2 : 0));
+		}
+
 		public static Vector3 Component(this Vector3 v, int i)
 		{
 			var ret = Vector3.zero;
@@ -182,16 +248,42 @@ namespace AT_Utils
 			return ret;
 		}
 
+		public static Vector3d Component(this Vector3d v, int i)
+		{
+			var ret = Vector3d.zero;
+			ret[i] = v[i];
+			return ret;
+		}
+
+		public static Vector3d Exclude(this Vector3d v, int i)
+		{
+			var ret = v;
+			ret[i] = 0;
+			return ret;
+		}
+
 		public static Vector3 MaxComponentV(this Vector3 v)
 		{ return v.Component(v.MaxI()); }
 
 		public static Vector3 MinComponentV(this Vector3 v)
 		{ return v.Component(v.MinI()); }
 
+		public static Vector3d MaxComponentV(this Vector3d v)
+		{ return v.Component(v.MaxI()); }
+
+		public static Vector3d MinComponentV(this Vector3d v)
+		{ return v.Component(v.MinI()); }
+
 		public static float MaxComponentF(this Vector3 v)
 		{ return v[v.MaxI()]; }
 
 		public static float MinComponentF(this Vector3 v)
+		{ return v[v.MinI()]; }
+
+		public static double MaxComponentD(this Vector3d v)
+		{ return v[v.MaxI()]; }
+
+		public static double MinComponentD(this Vector3d v)
 		{ return v[v.MinI()]; }
 	}
 
@@ -216,8 +308,11 @@ namespace AT_Utils
 			while(en.MoveNext()) action(en.Current);
 		}
 
+		public static void ForEach<TSource>(this IList<TSource> a, Action<TSource> action)
+		{ for(int i = 0, len = a.Count; i < len; i++) action(a[i]); }
+
 		public static void ForEach<TSource>(this TSource[] a, Action<TSource> action)
-		{ for(int i = 0; i < a.Length; i++) action(a[i]); }
+		{ for(int i = 0, len = a.Length; i < len; i++) action(a[i]); }
 
 		public static TSource Pop<TSource>(this LinkedList<TSource> l)
 		{
