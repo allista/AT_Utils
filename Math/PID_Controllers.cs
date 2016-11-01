@@ -68,18 +68,18 @@ namespace AT_Utils
 	#endregion
 
 	#region PID Controllers
-	public class PID_Controller : ConfigNodeObject
+	public class PID_Controller<T> : ConfigNodeObject
 	{
 		new public const string NODE_NAME = "PIDCONTROLLER";
 
-		[Persistent] public float Min = -1, Max = 1;
-		[Persistent] public float P = 0.9f, I = 0.1f, D = 0.02f;
+		[Persistent] public T Min, Max;
+		[Persistent] public T P, I, D;
 
 		public PID_Controller() {}
-		public PID_Controller(float p, float i, float d, float min, float max)
+		public PID_Controller(T p, T i, T d, T min, T max)
 		{ P = p; I = i; D = d; Min = min; Max = max; }
 
-		public void setPID(PID_Controller c)
+		public void setPID(PID_Controller<T> c)
 		{ P = c.P; I = c.I; D = c.D; Min = c.Min; Max = c.Max; }
 
 		public virtual void Reset() {}
@@ -88,7 +88,7 @@ namespace AT_Utils
 		{ return string.Format("[P={0}, I={1}, D={2}, Min={3}, Max={4}]", P, I, D, Min, Max); }
 	}
 
-	public class PID_Controller<T> : PID_Controller
+	public class PID_Controller<T, C> : PID_Controller<C>
 	{
 		protected T action;
 		protected T last_error;
@@ -99,7 +99,7 @@ namespace AT_Utils
 
 		//access
 		public T Action { get { return action; } }
-		public static implicit operator T(PID_Controller<T> c) { return c.action; }
+		public static implicit operator T(PID_Controller<T, C> c) { return c.action; }
 
 		public override string ToString()
 		{
@@ -114,7 +114,7 @@ namespace AT_Utils
 	}
 
 	//separate implementation of the strange PID controller from MechJeb2
-	public class PIDv_Controller2 : PID_Controller<Vector3>
+	public class PIDv_Controller2 : PID_Controller<Vector3, float>
 	{
 		public PIDv_Controller2() {}
 		public PIDv_Controller2(float p, float i, float d, float min, float max)
@@ -137,10 +137,10 @@ namespace AT_Utils
 		}
 	}
 
-	public class PIDvd_Controller : PID_Controller<Vector3d>
+	public class PIDvd_Controller : PID_Controller<Vector3d, double>
 	{
 		public PIDvd_Controller() {}
-		public PIDvd_Controller(float p, float i, float d, float min, float max)
+		public PIDvd_Controller(double p, double i, double d, double min, double max)
 		{ P = p; I = i; D = d; Min = min; Max = max; }
 
 		public void Update(Vector3d error)
@@ -171,7 +171,7 @@ namespace AT_Utils
 		}
 	}
 
-	public class PIDf_Controller : PID_Controller<float>
+	public class PIDf_Controller : PID_Controller<float, float>
 	{
 		public PIDf_Controller() {}
 		public PIDf_Controller(float p, float i, float d, float min, float max)
@@ -200,7 +200,7 @@ namespace AT_Utils
 		}
 	}
 
-	public class PIDf_Controller2 : PID_Controller<float>
+	public class PIDf_Controller2 : PID_Controller<float, float>
 	{
 		public PIDf_Controller2() {}
 		public PIDf_Controller2(float p, float i, float d, float min, float max)
@@ -216,6 +216,28 @@ namespace AT_Utils
 			if(!float.IsNaN(act)) action = Mathf.Clamp(act, Min, Max);
 //			Utils.Log("error {}; Pe {}; Ie {}; De {}; action {}", error, P*error, integral_error, derivative, action);//debug
 			last_error = error;
+		}
+	}
+
+	public class PIDv_Controller3 : PID_Controller<Vector3, Vector3>
+	{
+		public PIDv_Controller3() {}
+		public PIDv_Controller3(Vector3 p, Vector3 i, Vector3 d, Vector3 min, Vector3 max)
+		{ P = p; I = i; D = d; Min = min; Max = max; }
+
+		public void Update(Vector3 error, Vector3 omega)
+		{
+			var derivative   = Vector3.Scale(omega, D)/TimeWarp.fixedDeltaTime;
+			integral_error.x = (Mathf.Abs(derivative.x) < 0.6f * Max.x) ? integral_error.x + (error.x * I.x * TimeWarp.fixedDeltaTime) : 0.9f * integral_error.x;
+			integral_error.y = (Mathf.Abs(derivative.y) < 0.6f * Max.y) ? integral_error.y + (error.y * I.y * TimeWarp.fixedDeltaTime) : 0.9f * integral_error.y;
+			integral_error.z = (Mathf.Abs(derivative.z) < 0.6f * Max.z) ? integral_error.z + (error.z * I.z * TimeWarp.fixedDeltaTime) : 0.9f * integral_error.z;
+			var act = Vector3.Scale(error, P) + integral_error.ClampMagnitude(Min, Max) + derivative;
+			action = new Vector3
+				(
+					float.IsNaN(act.x)? 0f : Mathf.Clamp(act.x, Min.x, Max.x),
+					float.IsNaN(act.y)? 0f : Mathf.Clamp(act.y, Min.y, Max.y),
+					float.IsNaN(act.z)? 0f : Mathf.Clamp(act.z, Min.z, Max.z)
+				);
 		}
 	}
 	#endregion
