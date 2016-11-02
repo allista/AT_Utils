@@ -105,7 +105,7 @@ namespace AT_Utils
 				v.z.Equals(0)? nan : 1f/v.z); 
 		}
 
-		public static Vector3 Scale(this Vector3 vec, params Vector3[] vectors)
+		public static Vector3 ScaleChain(this Vector3 vec, params Vector3[] vectors)
 		{
 			var result = vec;
 			for(int i = 0, vectorsLength = vectors.Length; i < vectorsLength; i++)
