@@ -9,6 +9,7 @@
 
 #if DEBUG
 using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
@@ -19,9 +20,9 @@ namespace AT_Utils
 {
 	public static class DebugUtils
 	{
-		public static void CSV(params object[] args)
+		public static void CSV(string filename, params object[] args)
 		{ 
-			var row = new StringBuilder("tag: ");
+			var row = new StringBuilder();
 			var len = args.Length;
 			var last_i = len-1;
 			for(int i = 0; i < len; i++) 
@@ -70,7 +71,8 @@ namespace AT_Utils
 				else row.Append(arg);
 				if(i < last_i) row.Append(", ");
 			}
-			UnityEngine.Debug.Log(row.ToString());
+			using(var f = new StreamWriter(filename, true))
+				f.WriteLine(row);
 		}
 
 		public static void logVectors(string tag, bool normalize = true, params Vector3[] vecs)
