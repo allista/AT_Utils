@@ -422,6 +422,11 @@ namespace AT_Utils
 		}
 
 		public static implicit operator T(State<T> s) { return s._current; }
+
+		public override string ToString()
+		{
+			return string.Format("[State: current={0}, old={1}]", current, old);
+		}
 	}
 }
 
