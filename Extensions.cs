@@ -84,7 +84,6 @@ namespace AT_Utils
 
 		public static bool Invalid(this Vector3 v) { return v.IsNaN() || v.IsInf(); }
 
-
 		public static Vector3 CubeNorm(this Vector3 v)
 		{
 			if(v.IsZero()) return v;
@@ -97,12 +96,32 @@ namespace AT_Utils
 			return v/max;
 		}
 
+		public static Vector3d CubeNorm(this Vector3d v)
+		{
+			if(v.IsZero()) return v;
+			var max = -1.0;
+			for(int i = 0; i < 3; i++)
+			{
+				var ai = Math.Abs(v[i]);
+				if(max < ai) max = ai;
+			}
+			return v/max;
+		}
+
 		public static Vector3 Inverse(this Vector3 v, float nan=float.MaxValue) 
 		{ 
 			return new Vector3(
-				v.x.Equals(0)? nan : 1f/v.x, 
-				v.y.Equals(0)? nan : 1f/v.y, 
-				v.z.Equals(0)? nan : 1f/v.z); 
+				v.x.Equals(0)? nan : 1/v.x, 
+				v.y.Equals(0)? nan : 1/v.y, 
+				v.z.Equals(0)? nan : 1/v.z); 
+		}
+
+		public static Vector3d Inverse(this Vector3d v, double nan=double.MaxValue) 
+		{ 
+			return new Vector3d(
+				v.x.Equals(0)? nan : 1/v.x, 
+				v.y.Equals(0)? nan : 1/v.y, 
+				v.z.Equals(0)? nan : 1/v.z); 
 		}
 
 		public static Vector3 ScaleChain(this Vector3 vec, params Vector3[] vectors)
@@ -118,6 +137,37 @@ namespace AT_Utils
 			return result;
 		}
 
+		public static Vector3d ScaleChain(this Vector3d vec, params Vector3d[] vectors)
+		{
+			var result = vec;
+			for(int i = 0, vectorsLength = vectors.Length; i < vectorsLength; i++)
+			{
+				var v = vectors[i];
+				result.x *= v.x;
+				result.y *= v.y;
+				result.z *= v.z;
+			}
+			return result;
+		}
+
+		public static Vector3 SquaredComponents(this Vector3 v) 
+		{ return new Vector3(v.x * v.x, v.y * v.y, v.z * v.z); }
+
+		public static Vector3d SquaredComponents(this Vector3d v) 
+		{ return new Vector3d(v.x * v.x, v.y * v.y, v.z * v.z); }
+
+		public static Vector3 SqrtComponents(this Vector3 v) 
+		{ return new Vector3(Mathf.Sqrt(v.x), Mathf.Sqrt(v.y), Mathf.Sqrt(v.z)); }
+
+		public static Vector3d SqrtComponents(this Vector3d v) 
+		{ return new Vector3d(Math.Sqrt(v.x), Math.Sqrt(v.y), Math.Sqrt(v.z)); }
+
+		public static Vector3 PowComponents(this Vector3 v, float pow) 
+		{ return new Vector3(Mathf.Pow(v.x, pow), Mathf.Pow(v.y, pow), Mathf.Pow(v.z, pow)); }
+
+		public static Vector3d PowComponents(this Vector3d v, double pow) 
+		{ return new Vector3d(Math.Pow(v.x, pow), Math.Pow(v.y, pow), Math.Pow(v.z, pow)); }
+
 		public static Vector3 ClampComponents(this Vector3 v, float min, float max) 
 		{ 
 			return new Vector3(Mathf.Clamp(v.x, min, max), 
@@ -125,11 +175,53 @@ namespace AT_Utils
 			                   Mathf.Clamp(v.z, min, max)); 
 		}
 
-		public static Vector3 ClampMagnitude(this Vector3 v, Vector3 min, Vector3 max) 
+		public static Vector3 ClampComponents(this Vector3 v, Vector3 min, Vector3 max) 
 		{ 
 			return new Vector3(Mathf.Clamp(v.x, min.x, max.x), 
 			                   Mathf.Clamp(v.y, min.y, max.y), 
 			                   Mathf.Clamp(v.z, min.z, max.z)); 
+		}
+
+		public static Vector3 ClampComponentsL(this Vector3 v, Vector3 min) 
+		{ 
+			return new Vector3(Utils.ClampL(v.x, min.x), 
+			                   Utils.ClampL(v.y, min.y), 
+			                   Utils.ClampL(v.z, min.z)); 
+		}
+
+		public static Vector3 ClampComponentsH(this Vector3 v, Vector3 max) 
+		{ 
+			return new Vector3(Utils.ClampH(v.x, max.x), 
+			                   Utils.ClampH(v.y, max.y), 
+			                   Utils.ClampH(v.z, max.z));
+		}
+
+		public static Vector3d ClampComponents(this Vector3d v, double min, double max) 
+		{ 
+			return new Vector3d(Utils.Clamp(v.x, min, max), 
+			                    Utils.Clamp(v.y, min, max), 
+			                    Utils.Clamp(v.z, min, max)); 
+		}
+
+		public static Vector3d ClampComponents(this Vector3d v, Vector3d min, Vector3d max) 
+		{ 
+			return new Vector3d(Utils.Clamp(v.x, min.x, max.x), 
+			                    Utils.Clamp(v.y, min.y, max.y), 
+			                    Utils.Clamp(v.z, min.z, max.z)); 
+		}
+
+		public static Vector3d ClampComponentsH(this Vector3d v, Vector3d max) 
+		{ 
+			return new Vector3d(Utils.ClampH(v.x, max.x), 
+			                    Utils.ClampH(v.y, max.y), 
+			                    Utils.ClampH(v.z, max.z)); 
+		}
+
+		public static Vector3d ClampComponentsL(this Vector3d v, Vector3d min) 
+		{ 
+			return new Vector3d(Utils.ClampL(v.x, min.x), 
+			                    Utils.ClampL(v.y, min.y), 
+			                    Utils.ClampL(v.z, min.z)); 
 		}
 
 		public static Vector3 ClampComponentsH(this Vector3 v, float max) 
@@ -144,6 +236,20 @@ namespace AT_Utils
 			return new Vector3(Utils.ClampL(v.x, min), 
 			                   Utils.ClampL(v.y, min), 
 			                   Utils.ClampL(v.z, min)); 
+		}
+
+		public static Vector3d ClampComponentsH(this Vector3d v, double max) 
+		{ 
+			return new Vector3d(Utils.ClampH(v.x, max), 
+			                    Utils.ClampH(v.y, max), 
+			                    Utils.ClampH(v.z, max)); 
+		}
+
+		public static Vector3d ClampComponentsL(this Vector3d v, double min) 
+		{ 
+			return new Vector3d(Utils.ClampL(v.x, min), 
+			                    Utils.ClampL(v.y, min), 
+			                    Utils.ClampL(v.z, min)); 
 		}
 
 
@@ -681,6 +787,12 @@ namespace AT_Utils
 			T = Body.GetTemperature(Alt);
 			Rho = Body.GetDensity(P, T);
 			Mach1 = Body.GetSpeedOfSound(P, Rho);
+		}
+
+		public override string ToString()
+		{
+			return Utils.Format("{} Atmosphere Params at Alt: {} m\nP {}, T {}, Rho {}, Mach1 {} m/s",
+			                    Body.name, Alt, P, T, Rho, Mach1);
 		}
 	}
 
