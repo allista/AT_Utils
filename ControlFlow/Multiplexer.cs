@@ -114,6 +114,10 @@ namespace AT_Utils
 		public void OffIfOn(T key) { if(state.Equals(key)) Off(); }
 		public void OffIfOn(params T[] keys) 
 		{ 
+			#if DEBUG
+			if(keys.Length == 0) 
+				throw new ArgumentException("Multiplexer.OffIfOn(T[] keys): keys should not be empty array.");
+			#endif
 			if(state.Equals(default(T))) return;
 			for(int i = 0, keysLength = keys.Length; i < keysLength; i++)
 			{ if(state.Equals(keys[i])) { Off(); return; } }
