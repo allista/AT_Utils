@@ -410,7 +410,7 @@ namespace AT_Utils
 		#if DEBUG
 		public void DrawBox(Transform vT) { Utils.GLDrawBounds(bounds, vT, Color.white); }
 
-		public void DrawCenter(Transform vT) { Utils.GLDrawPoint(center, vT); }
+		public void DrawCenter(Transform vT) { Utils.GLDrawPoint(vT.position+vT.TransformDirection(center), Color.white); }
 
 		public override string ToString()
 		{
