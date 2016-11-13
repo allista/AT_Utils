@@ -108,25 +108,25 @@ namespace AT_Utils
 	/// </summary>
 	public abstract class AsymmetricFilter<T> : LowPassFilterBase<T> where T : IComparable
 	{
-		protected float alphaF, alphaR;
-		public float TauF 
+		protected float alphaUp, alphaDown;
+		public float TauUp 
 		{ 
-			get { return LowPassFilter.tau(alphaF); } 
-			set { alphaF = LowPassFilter.alpha(value); } 
+			get { return LowPassFilter.tau(alphaUp); } 
+			set { alphaUp = LowPassFilter.alpha(value); } 
 		}
-		public float TauR
+		public float TauDown
 		{ 
-			get { return LowPassFilter.tau(alphaR); } 
-			set { alphaR = LowPassFilter.alpha(value); } 
+			get { return LowPassFilter.tau(alphaDown); } 
+			set { alphaDown = LowPassFilter.alpha(value); } 
 		}
 
 		protected float _alpha(T cur) 
-		{ return cur.CompareTo(value) > 0? alphaF : alphaR; }
+		{ return cur.CompareTo(value) > 0? alphaUp : alphaDown; }
 
 
 		#if DEBUG
 		public string DebugInfo
-		{ get { return string.Format("AsymmetricFilter: [TauF {0}, TauR {1}, Value {2}]", TauF, TauR, value); } }
+		{ get { return string.Format("AsymmetricFilter: [TauUp {0}, TauDown {1}, Value {2}]", TauUp, TauDown, value); } }
 		#endif
 	}
 
@@ -227,7 +227,7 @@ namespace AT_Utils
 		public override float Update(float cur)
 		{
 			if(float.IsNaN(cur)) return value;
-			value = value + (cur > value? alphaF : alphaR) * (cur-value);
+			value = value + (cur > value? alphaUp : alphaDown) * (cur-value);
 			return value;
 		}
 	}
@@ -237,7 +237,7 @@ namespace AT_Utils
 		public override float Update(float cur)
 		{
 			if(float.IsNaN(cur)) return value;
-			value = Utils.Clamp(value + (cur > value? alphaF : alphaR) * (cur-value), Min, Max);
+			value = Utils.Clamp(value + (cur > value? alphaUp : alphaDown) * (cur-value), Min, Max);
 			return value;
 		}
 	}
@@ -247,7 +247,7 @@ namespace AT_Utils
 		public override double Update(double cur)
 		{
 			if(double.IsNaN(cur)) return value;
-			value = value + (cur > value? alphaF : alphaR) * (cur-value);
+			value = value + (cur > value? alphaUp : alphaDown) * (cur-value);
 			return value;
 		}
 	}
@@ -257,8 +257,48 @@ namespace AT_Utils
 		public override double Update(double cur)
 		{
 			if(double.IsNaN(cur)) return value;
-			value = Utils.Clamp(value + (cur > value? alphaF : alphaR) * (cur-value), Min, Max);
+			value = Utils.Clamp(value + (cur > value? alphaUp : alphaDown) * (cur-value), Min, Max);
 			return value;
+		}
+	}
+
+	public class ClampedAssymetricFilter3D
+	{
+		readonly ClampedAssymetricFilterD Fx = new ClampedAssymetricFilterD();
+		readonly ClampedAssymetricFilterD Fy = new ClampedAssymetricFilterD();
+		readonly ClampedAssymetricFilterD Fz = new ClampedAssymetricFilterD();
+
+		public Vector3d Value { get; private set; }
+
+		public float TauUp 
+		{ 
+			get { return Fx.TauUp; } 
+			set { Fx.TauUp = value; Fy.TauUp = value; Fz.TauUp = value; }
+		}
+		public float TauDown
+		{
+			get { return Fx.TauDown; } 
+			set { Fx.TauDown = value; Fy.TauDown = value; Fz.TauDown = value; }
+		}
+
+		public double Min 
+		{ 
+			get { return Fx.Min; } 
+			set { Fx.Min = value; Fy.Min = value; Fz.Min = value; }
+		}
+		public double Max 
+		{ 
+			get { return Fx.Max; } 
+			set { Fx.Max = value; Fy.Max = value; Fz.Max = value; }
+		}
+
+		public void Set(Vector3d v)
+		{ Value = v; Fx.Set(v.x); Fy.Set(v.y); Fz.Set(v.z); }
+
+		public Vector3d Update(Vector3d cur)
+		{
+			Value = new Vector3d(Fx.Update(cur.x), Fy.Update(cur.y), Fz.Update(cur.z));
+			return Value;
 		}
 	}
 
