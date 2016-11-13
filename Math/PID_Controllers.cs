@@ -122,7 +122,7 @@ namespace AT_Utils
 
 		public void Update(Vector3 error, Vector3 omega)
 		{
-			var derivative   = D * omega/TimeWarp.fixedDeltaTime;
+			var derivative   = D * omega;
 			integral_error.x = (Mathf.Abs(derivative.x) < 0.6f * Max) ? integral_error.x + (error.x * I * TimeWarp.fixedDeltaTime) : 0.9f * integral_error.x;
 			integral_error.y = (Mathf.Abs(derivative.y) < 0.6f * Max) ? integral_error.y + (error.y * I * TimeWarp.fixedDeltaTime) : 0.9f * integral_error.y;
 			integral_error.z = (Mathf.Abs(derivative.z) < 0.6f * Max) ? integral_error.z + (error.z * I * TimeWarp.fixedDeltaTime) : 0.9f * integral_error.z;
@@ -227,11 +227,11 @@ namespace AT_Utils
 
 		public void Update(Vector3 error, Vector3 omega)
 		{
-			var derivative   = Vector3.Scale(omega, D)/TimeWarp.fixedDeltaTime;
+			var derivative   = Vector3.Scale(omega, D);
 			integral_error.x = (Mathf.Abs(derivative.x) < 0.6f * Max.x) ? integral_error.x + (error.x * I.x * TimeWarp.fixedDeltaTime) : 0.9f * integral_error.x;
 			integral_error.y = (Mathf.Abs(derivative.y) < 0.6f * Max.y) ? integral_error.y + (error.y * I.y * TimeWarp.fixedDeltaTime) : 0.9f * integral_error.y;
 			integral_error.z = (Mathf.Abs(derivative.z) < 0.6f * Max.z) ? integral_error.z + (error.z * I.z * TimeWarp.fixedDeltaTime) : 0.9f * integral_error.z;
-			var act = Vector3.Scale(error, P) + integral_error.ClampMagnitude(Min, Max) + derivative;
+			var act = Vector3.Scale(error, P) + integral_error.ClampComponents(Min, Max) + derivative;
 			action = new Vector3
 				(
 					float.IsNaN(act.x)? 0f : Mathf.Clamp(act.x, Min.x, Max.x),
