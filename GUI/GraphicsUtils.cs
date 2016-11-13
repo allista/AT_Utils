@@ -171,7 +171,7 @@ namespace AT_Utils
 			DrawMesh(edges, tris, T, c);
 		}
 
-		public static void DrawPoint(Vector3 point, Transform T, Color c = default(Color))
+		public static void DrawPoint(Vector3 point, Transform T, Color c)
 		{ DrawBounds(new Bounds(point, Vector3.one*0.1f), T, c); }
 
 		public static void DrawHull(ConvexHull3D h, Transform T, Color c = default(Color), Material mat = null)
@@ -342,7 +342,7 @@ namespace AT_Utils
 			camera.farClipPlane = far;
 		}
 
-		public static void GLDrawPoint(Vector3 ori, Color c = default(Color), float r=0.1f)
+		public static void GLDrawPoint(Vector3 ori, Color c, float r=0.1f)
 		{
 			float far;
 			Vector3 i = new Vector3(r, 0, 0);
@@ -359,10 +359,10 @@ namespace AT_Utils
 			camera.farClipPlane = far;
 		}
 
-		public static void GLDrawPoint(Vector3 point, Transform T, Color c = default(Color))
+		public static void GLDrawPoint(Vector3 point, Transform T, Color c)
 		{ GLDrawBounds(new Bounds(point, Vector3.one*0.1f), T, c); }
 
-		public static void GLDrawHull(ConvexHull3D h, Transform T, Vector3 offset = default(Vector3), Color c = default(Color), bool filled = true)
+		public static void GLDrawHull(ConvexHull3D h, Transform T, Color c, Vector3 offset = default(Vector3), bool filled = true)
 		{ 
 			foreach(var f in h.Faces) 
 			{
@@ -373,7 +373,7 @@ namespace AT_Utils
 			}
 		}
 
-		public static void GLDrawMesh(Mesh m, Transform T, Vector3 offset = default(Vector3), Color c = default(Color), bool filled = true)
+		public static void GLDrawMesh(Mesh m, Transform T, Color c, Vector3 offset = default(Vector3), bool filled = true)
 		{
 			var verts = m.vertices;
 			var tris = m.triangles;
