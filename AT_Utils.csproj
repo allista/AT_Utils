@@ -89,6 +89,8 @@
     <Compile Include="GUI\GUIWindowBase.cs" />
     <Compile Include="ToolbarWrapper.cs" />
     <Compile Include="GUI\Vector3Field.cs" />
+    <Compile Include="GUI\Markers.cs" />
+    <Compile Include="Coordinates.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
