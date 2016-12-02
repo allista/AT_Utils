@@ -109,14 +109,13 @@ namespace AT_Utils
 			for(int i = 0; i < x.keys.Length; i++)
 			{
 				var xk = x.keys[i];
-				node.AddValue("key", string.Concat(new object[]
+				node.AddValue("key", string.Join(", ", new string[]
 				{
-					xk.time, 
-					xk.value, y.keys[i].value, z.keys[i].value,
-					xk.inTangent, xk.outTangent
+					xk.time.ToString(), 
+					xk.value.ToString(), y.keys[i].value.ToString(), z.keys[i].value.ToString(),
+					xk.inTangent.ToString(), xk.outTangent.ToString()
 				}));
 			}
 		}
 	}
 }
-
