@@ -5,17 +5,17 @@
 //
 //  Copyright (c) 2016 Allis Tauri
 
+using System;
 using System.Collections.Generic;
 using KSP.IO;
 
 namespace AT_Utils
 {
 	//fuck you Squad! How come the ConfigNode is not serializable anymore? O_o
-	[System.Serializable]
+	[Serializable]
 	public class ConfigNodeWrapper
 	{
 		public string name;
-
 		public ConfigNode.ValueList values;
 		public List<ConfigNodeWrapper> nodes = new List<ConfigNodeWrapper>();
 
@@ -52,6 +52,8 @@ namespace AT_Utils
 			catch(System.Exception ex) { Utils.Log("{}", ex); }
 			return node != null? node.ToConfigNode() : null;
 		}
+
+		public override string ToString() { return ToConfigNode().ToString(); }
 	}
 }
 

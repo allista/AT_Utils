@@ -91,6 +91,9 @@
     <Compile Include="GUI\Vector3Field.cs" />
     <Compile Include="GUI\Markers.cs" />
     <Compile Include="Coordinates.cs" />
+    <Compile Include="SerializableFiledsPartModule.cs" />
+    <Compile Include="ResourceTransfer.cs" />
+    <Compile Include="GUI\ResourceTransferWindow.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
