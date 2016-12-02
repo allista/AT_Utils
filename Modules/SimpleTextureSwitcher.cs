@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace AT_Utils
 {
-	public class SimpleTextureSwitcher : PartModule
+	public class TextureSwitcherServer : PartModule
 	{
 		/// <summary>
 		/// The folder in which textures are located. 
@@ -33,15 +33,43 @@ namespace AT_Utils
 		/// Names of the textures to choose from. 
 		/// </summary>
 		[KSPField] public string Textures = string.Empty;
-		readonly List<string> textures = new List<string>();
+		protected readonly List<string> textures = new List<string>();
 
 		/// <summary>
 		/// The texture currently in use.
 		/// </summary>
-		[KSPField(isPersistant = true, guiActiveEditor = true, guiName = "Texture")]
-		[UI_ChooseOption(scene = UI_Scene.Editor)]
+		[KSPField(isPersistant = true)]
 		public string CurrentTexture = string.Empty;
-		string last_texture = string.Empty;
+
+		public void NextTexture()
+		{
+			if(textures.Count < 2) return;
+			CurrentTexture = textures.Next(CurrentTexture);
+			set_texture();
+		}
+
+		public void PrevTexture()
+		{
+			if(textures.Count < 2) return;
+			CurrentTexture = textures.Prev(CurrentTexture);
+			set_texture();
+		}
+
+		public void SetTexture(string texture)
+		{
+			var prev_texture = CurrentTexture;
+			CurrentTexture = texture;
+			if(!set_texture())
+				CurrentTexture = prev_texture;
+		}
+
+		public void SetTexture(int index)
+		{
+			if(textures.Count == 0) return;
+			index = index % textures.Count;
+			CurrentTexture = textures[index];
+			set_texture();
+		}
 
 		public override void OnStart(StartState state)
 		{
@@ -51,18 +79,9 @@ namespace AT_Utils
 			setup_material();
 			setup_textures();
 			set_texture();
-			//setup UI
-			if(state == StartState.Editor && textures.Count > 1)
-			{
-				var _textures = textures.ToArray();
-				Utils.SetupChooser(_textures, _textures, Fields["CurrentTexture"]);
-				Utils.EnableField(Fields["CurrentTexture"]);
-				StartCoroutine(slow_update());
-			}
-			else Utils.EnableField(Fields["CurrentTexture"], false);
 		}
 
-		void setup_material()
+		protected void setup_material()
 		{
 			renderers.Clear();
 			if(string.IsNullOrEmpty(AffectedObjects)) return;
@@ -77,7 +96,7 @@ namespace AT_Utils
 				this.Log("None of the following objects were found in the model: {}", AffectedObjects);
 		}
 
-		void setup_textures()
+		protected void setup_textures()
 		{
 			textures.Clear();
 			if(renderers.Count == 0 || string.IsNullOrEmpty(Textures)) return;
@@ -98,20 +117,49 @@ namespace AT_Utils
 				CurrentTexture = textures[0];
 		}
 
-		void set_texture()
+		protected bool set_texture()
 		{
-			if(textures.Count == 0) return;
 			var texture = GameDatabase.Instance.GetTexture(RootFolder+CurrentTexture, false);
-			if(texture == null) return;
+			if(texture == null) return false;
 			renderers.ForEach(r => r.material.mainTexture = texture);
-			last_texture = CurrentTexture;
+			return true;
+		}
+	}
+
+	public class SimpleTextureSwitcher : TextureSwitcherServer
+	{
+		/// <summary>
+		/// The texture currently in use. Part menu display.
+		/// </summary>
+		[KSPField(guiActiveEditor = true, guiName = "Texture")]
+		[UI_ChooseOption(scene = UI_Scene.Editor)]
+		public string CurrentTextureDisplay = string.Empty;
+
+		public override void OnStart(StartState state)
+		{
+			base.OnStart(state);
+			//setup UI
+			if(state == StartState.Editor && textures.Count > 1)
+			{
+				var _textures = textures.ToArray();
+				Utils.SetupChooser(_textures, _textures, Fields["CurrentTextureDisplay"]);
+				Utils.EnableField(Fields["CurrentTextureDisplay"]);
+				CurrentTextureDisplay = CurrentTexture;
+				StartCoroutine(slow_update());
+			}
+			else Utils.EnableField(Fields["CurrentTextureDisplay"], false);
 		}
 
 		IEnumerator<YieldInstruction> slow_update()
 		{
 			while(true)
 			{
-				if(CurrentTexture != last_texture) set_texture();
+				if(textures.Count > 1 &&
+				   CurrentTextureDisplay != CurrentTexture)
+				{
+					CurrentTexture = CurrentTextureDisplay;
+					set_texture();
+				}
 				yield return new WaitForSeconds(0.1f);
 			}
 		}
