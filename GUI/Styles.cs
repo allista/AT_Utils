@@ -130,7 +130,7 @@ namespace AT_Utils
 			if (initialized) return;
 
 			var b_texture = new Texture2D(1, 1);
-			b_texture.SetPixel(0, 0, new Color(0.15f, 0.15f, 0.15f, 1f));
+			b_texture.SetPixel(0, 0, new Color(0.8f, 1, 0.6f, 1f));
 			b_texture.Apply();
 
 			//buttons
@@ -163,7 +163,7 @@ namespace AT_Utils
 			magenta = white.OtherColor(Color.magenta);
 
 			//tooltip
-			tooltip  = white.OtherColor(Color.white);
+			tooltip  = white.OtherColor(Color.black);
 			tooltip.alignment = TextAnchor.MiddleCenter;
 			tooltip.normal.background = tooltip.onNormal.background = tooltip.hover.background = tooltip.onHover.background = b_texture;
 
