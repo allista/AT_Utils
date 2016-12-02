@@ -20,6 +20,12 @@ namespace ThrottleControlledAvionics
 		[Persistent] public double Lon;
 		[Persistent] public double Alt;
 
+		/// <summary>
+		/// When the <see cref="ThrottleControlledAvionics.Coordinates.SetAlt2Surface"/> is called, 
+		/// this property is set to <c>true</c> if the point is on the water; otherwise it's <c>false</c>..
+		/// </summary>
+		public bool OnWater { get; private set; } = false;
+
 		public Coordinates(double lat, double lon, double alt) 
 		{ Lat = Utils.ClampAngle(lat); Lon = Utils.ClampAngle(lon); Alt = alt; }
 
@@ -46,7 +52,15 @@ namespace ThrottleControlledAvionics
 
 		public Coordinates Copy() { return new Coordinates(Lat, Lon, Alt); }
 
-		public void SetAlt2Surface(CelestialBody body) { Alt = SurfaceAlt(body); }
+		public void SetAlt2Surface(CelestialBody body) 
+		{ 
+			Alt = SurfaceAlt(body, true);
+			if(body.ocean && Alt < 0)
+			{
+				OnWater = true;
+				Alt = 0;
+			}
+		}
 
 		public static string AngleToDMS(double angle)
 		{
@@ -68,7 +82,7 @@ namespace ThrottleControlledAvionics
 			return lon > 0? AngleToDMS(lon) + " E" : AngleToDMS(-lon) + " W";
 		}
 
-		public double SurfaceAlt(CelestialBody body) { return body.TerrainAltitude(Lat, Lon); }
+		public double SurfaceAlt(CelestialBody body, bool underwater=false) { return body.TerrainAltitude(Lat, Lon, underwater || !body.ocean); }
 		public string Biome(CelestialBody body) { return ScienceUtil.GetExperimentBiome(body, Lat, Lon); }
 
 		static Coordinates Search(CelestialBody body, Ray mouseRay)
