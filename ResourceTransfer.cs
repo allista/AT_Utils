@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AtHangar 
+namespace AT_Utils 
 {
 	public class ResourceProxy : ProtoPartResourceSnapshot
 	{
@@ -185,6 +185,59 @@ namespace AtHangar
 		
 		public double minAmount;
 		public double maxAmount;
-		
+	}
+
+	public class ResourceManifestList : List<ResourceManifest>
+	{
+		public void NewTransfer(VesselResources host, VesselResources target)
+		{
+			Clear();
+			foreach(var r in target.resourcesNames)
+			{
+				if(host.ResourceCapacity(r) <= 0) continue;
+				var rm = new ResourceManifest();
+				rm.name          = r;
+				rm.amount        = target.ResourceAmount(r);
+				rm.capacity      = target.ResourceCapacity(r);
+				rm.offset        = rm.amount;
+				rm.host_amount   = host.ResourceAmount(r);
+				rm.host_capacity = host.ResourceCapacity(r);
+				rm.pool          = rm.host_amount + rm.offset;
+				rm.minAmount     = Math.Max(0, rm.pool-rm.host_capacity);
+				rm.maxAmount     = Math.Min(rm.pool, rm.capacity);
+				Add(rm);
+			}
+		}
+
+		public void UpdateHostInfo(VesselResources host)
+		{
+			foreach(ResourceManifest r in this)
+			{
+				r.host_amount = host.ResourceAmount(r.name);
+				r.pool        = r.host_amount + r.offset;
+				r.minAmount   = Math.Max(0, r.pool-r.host_capacity);
+				r.maxAmount   = Math.Min(r.pool, r.capacity);
+			}
+		}
+
+		public void TransferResources(VesselResources host, VesselResources target, out double deltaMass, out double deltaCost)
+		{
+			deltaMass = deltaCost = 0;
+			if(Count == 0) return;
+			foreach(var r in this)
+			{
+				//transfer resource between hangar and protovessel
+				var a = host.TransferResource(r.name, r.offset-r.amount);
+				a = r.amount-r.offset + a;
+				var b = target.TransferResource(r.name, a);
+				host.TransferResource(r.name, b);
+				//update masses
+				PartResourceDefinition res_def = PartResourceLibrary.Instance.GetDefinition(r.name);
+				if(res_def.density <= 0) continue;
+				deltaMass += a*res_def.density;
+				deltaCost += a*res_def.unitCost;
+			}
+			Clear();
+		}
 	}
 }
