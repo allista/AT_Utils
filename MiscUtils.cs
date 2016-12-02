@@ -6,6 +6,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -76,9 +77,12 @@ namespace AT_Utils
 		public static string formatSmallValue(float value, string unit, string format = "F1")
 		{
 			string mod = "";
-			if(value > 1e-3) { value *= 1e3f; mod = "m"; }
-			else if(value > 1e-6) { value *= 1e6f; mod = "μ"; }
-			else if(value > 1e-9) { value *= 1e9f; mod = "n"; }
+			if(value < 1)
+			{
+				if(value > 1e-3) { value *= 1e3f; mod = "m"; }
+				else if(value > 1e-6) { value *= 1e6f; mod = "μ"; }
+				else if(value > 1e-9) { value *= 1e9f; mod = "n"; }
+			}
 			return value.ToString(format)+mod+unit;
 		}
 
@@ -154,8 +158,9 @@ namespace AT_Utils
 				"T2Ap     {} per\n" +
 				"Vel: {} m/s\n" +
 				"Pos: {} m\n",
-				o.referenceBody.bodyName, o.referenceBody.rotationPeriod, o.referenceBody.rotationAngle,
+				o.referenceBody.bodyName, o.referenceBody.rotationPeriod, 
 				formatBigValue((float)o.referenceBody.Radius, "m"),
+				o.referenceBody.rotationAngle,
 				o.PeA, o.ApA,
 				o.PeR, o.ApR, 
 				o.eccentricity, o.inclination, o.LAN, o.meanAnomaly, o.trueAnomaly, o.argumentOfPeriapsis,
@@ -208,11 +213,11 @@ namespace AT_Utils
 				{
 					var arr = (arg as IEnumerable).Cast<object>().ToArray();
 					convert_args(arr);
-					args[i] = string.Concat("[\n", 
-					                        arr.Aggregate("", (s, el) => 
-					                                      string.IsNullOrEmpty(s)? 
-					                                      el.ToString() : string.Concat(s, ",\n", el)),
-					                        "\n]");
+					args[i] = string.Join("\n", new [] 
+					{ 
+						"Count: "+arr.Length, 
+						"[", string.Join(",\n", arr.Cast<string>().ToArray()), "]"
+					});
 				}
 				else args[i] = arg.ToString();
 			}
