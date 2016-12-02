@@ -484,6 +484,31 @@ namespace AT_Utils
 				return list[ni];
 			} catch { return default(T); }
 		}
+
+		#region Queue extensions
+		public static void FillFrom<T>(this Queue<T> q, IEnumerable<T> content)
+		{ q.Clear(); content.ForEach(q.Enqueue); }
+
+		public static bool Remove<T>(this Queue<T> q, T item)
+		{ 
+			var count = q.Count;
+			var new_content = q.Where(it => !object.Equals(it, item)).ToList();
+			q.Clear(); new_content.ForEach(q.Enqueue);
+			return q.Count != count;
+		}
+
+		public static bool MoveUp<T>(this Queue<T> q, T up)
+		{
+			if(object.Equals(up, q.Peek())) return false;
+			var new_content = q.ToList();
+			var upi = new_content.IndexOf(up);
+			if(upi < 0) return false;
+			new_content[upi] = new_content[upi-1];
+			new_content[upi-1] = up;
+			q.Clear(); new_content.ForEach(q.Enqueue);
+			return true;
+		}
+		#endregion
 	}
 
 
@@ -561,18 +586,20 @@ namespace AT_Utils
 		#endregion
 
 		#region Resources and Phys-Props
-		public static float TotalCost(this Part p) { return p.partInfo != null? p.partInfo.cost : 0; }
+		public static float TotalCost(this Part p) { return p.partInfo != null? p.partInfo.cost+p.GetModuleCosts(p.partInfo.cost) : 0; }
 
 		public static float ResourcesCost(this Part p) 
 		{ 
-			return (float)p.Resources.Cast<PartResource>()
-				.Aggregate(0.0, (a, b) => a + b.amount * b.info.unitCost); 
+			var cost = 0.0;
+			p.Resources.ForEach(r => cost += r.amount * r.info.unitCost);
+			return (float)cost;
 		}
 
 		public static float MaxResourcesCost(this Part p) 
 		{ 
-			return (float)p.Resources.Cast<PartResource>()
-				.Aggregate(0.0, (a, b) => a + b.maxAmount * b.info.unitCost); 
+			var cost = 0.0;
+			p.Resources.ForEach(r => cost += r.maxAmount * r.info.unitCost);
+			return (float)cost;
 		}
 
 		public static float DryCost(this Part p) { return p.TotalCost() - p.MaxResourcesCost(); }
@@ -708,6 +735,22 @@ namespace AT_Utils
 			foreach(Part p in ship.Parts)
 			{ if(p.HasModule<LaunchClamp>()) return true; }
 			return false;
+		}
+
+		public static void Unload(this ShipConstruct construct)
+		{
+			if(construct == null) return;
+			for(int i = 0, count = construct.Parts.Count; i < count; i++)
+			{
+				Part p = construct.Parts[i];
+				if(p != null)
+				{
+					p.OnDelete();
+					if(p.gameObject != null)
+						UnityEngine.Object.Destroy(p.gameObject);
+				}
+			}
+			construct.Clear();
 		}
 
 		public static Bounds Bounds(this Vessel vessel, Transform refT)
