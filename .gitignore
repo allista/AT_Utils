@@ -3,6 +3,7 @@
 *.swp
 *.mdb
 *.dll
+**/config.xml
 
 .idea/**
 Releases/**
