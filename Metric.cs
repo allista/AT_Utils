@@ -12,7 +12,7 @@ using AT_Utils;
 
 namespace AT_Utils
 {
-	public struct Metric
+	public struct Metric : IConfigNode
 	{
 		public static List<string> MeshesToSkip = new List<string>();
 
@@ -230,6 +230,13 @@ namespace AT_Utils
 		public Metric(List<Part> vessel, bool compute_hull=false) : this()
 		{
 			bounds = partsBounds(vessel, vessel[0].partTransform, compute_hull);
+			volume = boundsVolume(bounds);
+			area   = boundsArea(bounds);
+		}
+
+		public Metric(IShipconstruct vessel, bool compute_hull=false) : this()
+		{
+			bounds = partsBounds(vessel.Parts, vessel.Parts[0].partTransform, compute_hull);
 			volume = boundsVolume(bounds);
 			area   = boundsArea(bounds);
 		}
