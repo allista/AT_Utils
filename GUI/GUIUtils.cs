@@ -8,6 +8,7 @@
 // or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 //
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AT_Utils
@@ -52,14 +53,30 @@ namespace AT_Utils
 			return ret;
 		}
 
-		public static int LeftRightChooser(string text, int width = 0)
+		public static int LeftRightChooser(string text, string tooltip = "", int width = 0)
 		{
 			width -= 40;
 			var left  = GUILayout.Button("<", Styles.yellow_button, GUILayout.Width(20));
-			if(width > 0) GUILayout.Label(text, Styles.white, GUILayout.Width(width));
-			else GUILayout.Label(text, Styles.white);
+			if(width > 0) GUILayout.Label(new GUIContent(text, tooltip), Styles.white, GUILayout.Width(width));
+			else GUILayout.Label(new GUIContent(text, tooltip), Styles.white);
 			var right = GUILayout.Button(">", Styles.yellow_button, GUILayout.Width(20));
 			return left? -1 : (right? 1 : 0);
+		}
+
+		public static T LeftRightChooser<T>(T current, IList<T> options, string tooltip = "", int width = 0)
+		{
+			var choice = Utils.LeftRightChooser(current.ToString(), tooltip, width);
+			if(choice < 0) return options.Prev(current);
+			else if(choice > 0) return options.Next(current);
+			return current;
+		}
+
+		public static V LeftRightChooser<K,V>(K current, SortedList<K,V> options, string tooltip = "", int width = 0)
+		{
+			var choice = Utils.LeftRightChooser(current.ToString(), tooltip, width);
+			if(choice < 0) return options.Prev(current);
+			else if(choice > 0) return options.Next(current);
+			return default(V);
 		}
 
 		#region KSP_UI
