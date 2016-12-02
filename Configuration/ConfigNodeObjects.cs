@@ -18,6 +18,7 @@ namespace AT_Utils
 		public const string NODE_NAME = "NODE";
 
 		static readonly string cnode_name = typeof(IConfigNode).Name;
+		static readonly Type[] save_load_args = new [] {typeof(ConfigNode)};
 
 		string node_name = null;
 		public string NodeName 
@@ -44,15 +45,43 @@ namespace AT_Utils
 			foreach(var fi in GetType().GetFields())
 			{
 				if(not_persistant(fi)) continue;
-				if(fi.FieldType.GetInterface(cnode_name) == null) continue;
 				var n = node.GetNode(fi.Name);
 				if(n == null) continue;
-				var method = fi.FieldType.GetMethod("Load", new [] {typeof(ConfigNode)});
-				if(method == null) continue;
-				var f = fi.GetValue(this);
-				if(f == null) continue;
-				method.Invoke(f, new [] {n});
+				if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
+					fi.SetValue(this, n.CreateCopy());
+				else if(fi.FieldType.GetInterface(cnode_name) != null)
+				{
+					var method = fi.FieldType.GetMethod("Load", save_load_args);
+					if(method == null) continue;
+					var f = fi.GetValue(this);
+					if(f == null) 
+					{
+						var constructor = fi.FieldType.GetConstructor(Type.EmptyTypes);
+						if(constructor == null) continue;
+						f = constructor.Invoke(null);
+						if(f == null) continue;
+					}
+					method.Invoke(f, new [] {n});
+					fi.SetValue(this, f);
+				}
 			}
+		}
+
+		public void Load(ConfigNodeWrapper wrapper)
+		{ Load(wrapper.ToConfigNode()); }
+
+		virtual public void LoadFrom(ConfigNode parent)
+		{
+			var node = parent.GetNode(NodeName);
+			if(node != null) Load(node);
+		}
+
+		ConfigNode get_field_node(FieldInfo fi, ConfigNode parent)
+		{
+			var n = parent.GetNode(fi.Name);
+			if(n == null) n = parent.AddNode(fi.Name);
+			else n.ClearData();
+			return n;
 		}
 
 		virtual public void Save(ConfigNode node)
@@ -61,15 +90,20 @@ namespace AT_Utils
 			foreach(var fi in GetType().GetFields())
 			{
 				if(not_persistant(fi)) continue;
-				if(fi.FieldType.GetInterface(cnode_name) == null) continue;
-				var method = fi.FieldType.GetMethod("Save", new [] {typeof(ConfigNode)});
-				if(method == null) continue;
-				var f = fi.GetValue(this);
-				var n = node.GetNode(fi.Name);
-				if(n == null) n = node.AddNode(fi.Name);
-				else n.ClearData();
-				if(f == null) continue;
-				method.Invoke(f, new [] {n});
+				if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
+				{
+					var f = fi.GetValue(this) as ConfigNode;
+					if(f != null) get_field_node(fi, node).AddData(f);
+				}
+				else if(fi.FieldType.GetInterface(cnode_name) != null)
+				{
+					var method = fi.FieldType.GetMethod("Save", save_load_args);
+					if(method == null) continue;
+					var n = get_field_node(fi, node);
+					var f = fi.GetValue(this);
+					if(f == null) continue;
+					method.Invoke(f, new [] {n});
+				}
 			}
 		}
 
@@ -148,6 +182,54 @@ namespace AT_Utils
 			}
 			catch(Exception ex) { Utils.Log("Unable to create {}: {}\n{}", typename, ex.Message, ex.StackTrace); }
 			return obj;
+		}
+	}
+
+	public class PersistentList<T> : List<T>, IConfigNode where T : IConfigNode, new()
+	{
+		public PersistentList() {}
+		public PersistentList(IEnumerable<T> content) : base(content) {}
+
+		public void Save(ConfigNode node)
+		{
+			for(int i = 0, count = Count; i < count; i++) 
+				this[i].Save(node.AddNode("Item"));
+		}
+
+		public void Load(ConfigNode node)
+		{
+			Clear();
+			var nodes = node.GetNodes();
+			for(int i = 0, len = nodes.Length; i < len; i++)
+			{
+				var item = new T();
+				item.Load(nodes[i]);
+				Add(item);
+			}
+		}
+	}
+
+	public class PersistentQueue<T> : Queue<T>, IConfigNode where T : IConfigNode, new()
+	{
+		public PersistentQueue() {}
+		public PersistentQueue(IEnumerable<T> content) : base(content) {}
+
+		public void Save(ConfigNode node)
+		{
+			foreach(var item in this)
+				item.Save(node.AddNode("Item"));
+		}
+
+		public void Load(ConfigNode node)
+		{
+			Clear();
+			var nodes = node.GetNodes();
+			for(int i = 0, len = nodes.Length; i < len; i++)
+			{
+				var item = new T();
+				item.Load(nodes[i]);
+				Enqueue(item);
+			}
 		}
 	}
 
