@@ -18,6 +18,7 @@ namespace AT_Utils
 
 		//convex hull
 		public ConvexHull3D hull { get; private set; }
+		public float hull_volume { get { return hull == null? volume : hull.Volume; } }
 		//bounds
 		public Bounds  bounds  { get; private set; }
 		public Vector3 center  { get { return bounds.center; } }
@@ -409,9 +410,12 @@ namespace AT_Utils
 		public static Metric operator/(Metric m, float scale)
 		{ return m*(1.0f/scale); }
 		
-		//static methods
+		//convenience functions
 		public static float Volume(Part part) { return (new Metric(part)).volume; }
 		public static float Volume(Vessel vessel) { return (new Metric(vessel)).volume; }
+
+		public static float HullVolume(Part part) { return (new Metric(part, true)).hull_volume; }
+		public static float HullVolume(Vessel vessel) { return (new Metric(vessel, true)).hull_volume; }
 		#endregion
 
 		#if DEBUG
