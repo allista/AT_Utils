@@ -129,6 +129,11 @@ namespace AT_Utils
 		}
 
 		public void Orient(Vector3 p) { if(P.GetDistanceToPoint(p) > MinDistance) Flip(); }
+
+		const float half_thirds = 0.5f/3;
+
+		public float Volume()
+		{ return half_thirds * Vector3.Cross(v1-v0, v2-v0).magnitude*P.distance; }
 		#endregion
 
 		#if DEBUG
@@ -197,6 +202,7 @@ namespace AT_Utils
 
 		public List<Vector3> Points { get; private set; }
 		public List<Face>    Faces  { get; private set; }
+		public float         Volume { get; private set; }
 
 		public virtual IEnumerator<Vector3> GetEnumerator()
 		{ return Points.GetEnumerator(); }
@@ -236,8 +242,9 @@ namespace AT_Utils
 			float   min_x,  max_x,  min_y,  max_y,  min_z,  max_z;
 			min_xv = max_xv = min_yv = max_yv = min_zv = max_zv = Vector3.zero;
 			min_x = max_x = min_y = max_y = min_z = max_z = -1;
-			foreach(Vector3 p in points)
+			for(int i = 0, pointsCount = points.Count; i < pointsCount; i++)
 			{
+				Vector3 p = points[i];
 				if(p.x < min_x || min_x < 0) { min_x = p.x; min_xv = p; }
 				else if(p.x > max_x) { max_x = p.x; max_xv = p; }
 
@@ -341,9 +348,14 @@ namespace AT_Utils
 			//filter out faces that are still visible
 			Faces.AddRange(from f in final_set where !f.Dropped select f);
 			//build a list of unique hull points
+			Volume = 0;
 			var _Points = new HashSet<Vector3>();
 			for(int i = 0; i < Faces.Count; i++)
-			{ var f = Faces[i]; _Points.Add(f.v0); _Points.Add(f.v1); _Points.Add(f.v2); }
+			{ 
+				var f = Faces[i]; 
+				Volume += f.Volume();
+				_Points.Add(f.v0); _Points.Add(f.v1); _Points.Add(f.v2); 
+			}
 			Points = new List<Vector3>(_Points.Count);
 			Points.AddRange(_Points);
 		}
