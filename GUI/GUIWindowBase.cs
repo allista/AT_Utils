@@ -68,7 +68,7 @@ namespace AT_Utils
 		protected GUIWindowBase()
 		{
 			CreateConfig();
-			LockName = GetType().FullName;
+			LockName = GetType().FullName+GetInstanceID();
 		}
 
 		public virtual void Awake()
