@@ -133,7 +133,7 @@ namespace AT_Utils
 		const float half_thirds = 0.5f/3;
 
 		public float Volume()
-		{ return half_thirds * Vector3.Cross(v1-v0, v2-v0).magnitude*P.distance; }
+		{ return Mathf.Abs(half_thirds * Vector3.Cross(v1-v0, v2-v0).magnitude*P.distance); }
 		#endregion
 
 		#if DEBUG
