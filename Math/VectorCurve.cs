@@ -47,7 +47,7 @@ namespace AT_Utils
 		{
 			var k = value.Split(separators, StringSplitOptions.RemoveEmptyEntries);
 			if(k.Length < 4)
-				throw new FormatException("VectorChain: Invalid keyframe. " +
+				throw new FormatException("VectorCurve: Invalid keyframe. " +
 					"Requires at least four values: 'time, x, y, z'. Got: "+value);
 			if(k.Length == 6)
 				Add(float.Parse(k[0]), 
@@ -98,9 +98,12 @@ namespace AT_Utils
 			init_curves();
 			base.Load(node);
 			var keys = node.GetValues("key");
-			for(int i = 0; i < keys.Length; i++) add(keys[i]);
-			if(x.keys.Length < 2)
-				throw new FormatException("VectorChain node must have at least 2 'key' values.");
+			if(keys.Length > 0)
+			{
+				for(int i = 0; i < keys.Length; i++) add(keys[i]);
+				if(x.keys.Length < 2)
+					throw new FormatException("VectorCurve node must have at least 2 'key' values.");
+			}
 		}
 
 		public override void Save(ConfigNode node)
