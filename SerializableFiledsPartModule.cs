@@ -10,11 +10,14 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using KSP.IO;
+using System.Text;
 
 namespace AT_Utils
 {
 	public abstract class SerializableFiledsPartModule : PartModule, ISerializationCallbackReceiver
 	{
+		static readonly string cnode_name = typeof(IConfigNode).Name;
+
 		List<FieldInfo> _serializable_fields;
 		List<FieldInfo> serializable_fields
 		{
@@ -27,11 +30,14 @@ namespace AT_Utils
 					for(int i = 0, len = fields.Length; i < len; i++)
 					{
 						var fi = fields[i];
-						if(fi.GetCustomAttributes(typeof(SerializeField), true).Length > 0 &&
+						if(fi.GetCustomAttributes(typeof(SerializeField), true).Length == 0) continue;
+						if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType) ||
+						   fi.FieldType.GetInterface(cnode_name) != null ||
 						   fi.FieldType.GetCustomAttributes(typeof(SerializableAttribute), true).Length > 0)
 							_serializable_fields.Add(fi);
 					}
-//					Utils.Log("{}.fields: {}\n.serializable_fields: {}", GetType().Name, fields, serializable_fields);//debug
+//					if(_serializable_fields.Count > 0) //debug
+//						Utils.Log("{}.serializable_fields: {}", GetType().Name, _serializable_fields);
 				}
 				return _serializable_fields;
 			}
@@ -53,10 +59,19 @@ namespace AT_Utils
 			{
 				var fi = serializable_fields[i];
 				var val = fi.GetValue(this);
-//				Utils.Log("{}.value = {}", fi.Name, val);//debug
+//				Utils.Log("{}.{}.value = {}", this, fi.Name, val);//debug
 				if(val != null)
 				{
-					var data = IOUtils.SerializeToBinary(val);
+					byte[] data = null;
+					if(val is ConfigNode)
+						data = Encoding.UTF8.GetBytes(((ConfigNode)val).ToString());
+					else if(val is IConfigNode)
+					{
+						var node = new ConfigNode(fi.Name);
+						((IConfigNode)val).Save(node);
+						data = Encoding.UTF8.GetBytes(node.ToString());
+					}
+					else data = IOUtils.SerializeToBinary(val);
 					if(data != null && data.Length > 0)
 					{
 						fields_data.Add(data);
@@ -82,8 +97,8 @@ namespace AT_Utils
 
 		public virtual void OnAfterDeserialize() 
 		{ 
+			if(_serialized_fields == null || _serialized_fields.Length == 0) return;
 //			Utils.Log("_fields: {}\n_offsets: {}", _fields, _offsets);//debug
-			if(_serialized_fields == null) return;
 			var start = 0;
 			for(int i = 0, count = _fields.Count; i < count; i++)
 			{
@@ -92,7 +107,27 @@ namespace AT_Utils
 				var data = new byte[len];
 				var fi = serializable_fields[_fields[i]];
 				Array.Copy(_serialized_fields, start, data, 0, len);
-				fi.SetValue(this, IOUtils.DeserializeFromBinary(data));
+				if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
+					fi.SetValue(this, ConfigNode.Parse(Encoding.UTF8.GetString(data)).nodes[0]);
+				else if(fi.FieldType.GetInterface(cnode_name) != null)
+				{
+					var node = ConfigNode.Parse(Encoding.UTF8.GetString(data)).nodes[0];
+//					Utils.Log("{}.{}.node: {}", this, fi.Name, node);//debug
+					var f = fi.GetValue(this) as IConfigNode;
+					if(f == null) 
+					{
+						var constructor = fi.FieldType.GetConstructor(Type.EmptyTypes);
+						if(constructor != null)
+							f = constructor.Invoke(null) as IConfigNode;
+					}
+					if(f != null)
+					{
+						f.Load(node);
+						fi.SetValue(this, f);
+					}
+				}
+				else fi.SetValue(this, IOUtils.DeserializeFromBinary(data));
+//				Utils.Log("{}.{}.value = {}", this, fi.Name, fi.GetValue(this));//debug
 				start = offset;
 			}
 		}
