@@ -12,6 +12,7 @@ using KSP.IO;
 namespace AT_Utils
 {
 	//fuck you Squad! How come the ConfigNode is not serializable anymore? O_o
+	[Obsolete("SerializableFiledsPartModule now handles ConfigNodes and IConfigNodes seamlessly.")]
 	[Serializable]
 	public class ConfigNodeWrapper
 	{
@@ -41,7 +42,7 @@ namespace AT_Utils
 		{ 
 			byte[] data = null;
 			try { data = IOUtils.SerializeToBinary(new ConfigNodeWrapper(node)); }
-			catch(System.Exception ex) { Utils.Log("{}", ex); }
+			catch(Exception ex) { Utils.Log("{}", ex); }
 			return data;
 		}
 
@@ -52,6 +53,9 @@ namespace AT_Utils
 			catch(System.Exception ex) { Utils.Log("{}", ex); }
 			return node != null? node.ToConfigNode() : null;
 		}
+
+		public static implicit operator ConfigNode(ConfigNodeWrapper wrp)
+		{ return wrp.ToConfigNode(); }
 
 		public override string ToString() { return ToConfigNode().ToString(); }
 	}
