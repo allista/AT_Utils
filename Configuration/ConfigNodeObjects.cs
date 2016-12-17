@@ -18,7 +18,6 @@ namespace AT_Utils
 		public const string NODE_NAME = "NODE";
 
 		static readonly string cnode_name = typeof(IConfigNode).Name;
-		static readonly Type[] save_load_args = new [] {typeof(ConfigNode)};
 
 		string node_name = null;
 		public string NodeName 
@@ -51,24 +50,19 @@ namespace AT_Utils
 					fi.SetValue(this, n.CreateCopy());
 				else if(fi.FieldType.GetInterface(cnode_name) != null)
 				{
-					var method = fi.FieldType.GetMethod("Load", save_load_args);
-					if(method == null) continue;
-					var f = fi.GetValue(this);
+					var f = fi.GetValue(this) as IConfigNode;
 					if(f == null) 
 					{
 						var constructor = fi.FieldType.GetConstructor(Type.EmptyTypes);
 						if(constructor == null) continue;
-						f = constructor.Invoke(null);
+						f = constructor.Invoke(null) as IConfigNode;
 						if(f == null) continue;
 					}
-					method.Invoke(f, new [] {n});
+					f.Load(n);
 					fi.SetValue(this, f);
 				}
 			}
 		}
-
-		public void Load(ConfigNodeWrapper wrapper)
-		{ Load(wrapper.ToConfigNode()); }
 
 		virtual public void LoadFrom(ConfigNode parent)
 		{
@@ -97,12 +91,8 @@ namespace AT_Utils
 				}
 				else if(fi.FieldType.GetInterface(cnode_name) != null)
 				{
-					var method = fi.FieldType.GetMethod("Save", save_load_args);
-					if(method == null) continue;
-					var n = get_field_node(fi, node);
-					var f = fi.GetValue(this);
-					if(f == null) continue;
-					method.Invoke(f, new [] {n});
+					var f = fi.GetValue(this) as IConfigNode;
+					if(f != null) f.Save(get_field_node(fi, node));
 				}
 			}
 		}
