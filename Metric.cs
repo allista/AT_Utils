@@ -186,9 +186,14 @@ namespace AT_Utils
 		//mesh metric
 		void init_with_mesh(MeshFilter mesh, Transform refT, bool compute_hull)
 		{
-			if(compute_hull) hull = new ConvexHull3D(uniqueVertices(mesh.sharedMesh));
 			Vector3[] verts = Utils.BoundCorners(mesh.sharedMesh.bounds);
 			if(refT != null) local2local(mesh.transform, refT, verts);
+			if(compute_hull) 
+			{
+				hull = refT != null? 
+					new ConvexHull3D(local2local(mesh.transform, refT, uniqueVertices(mesh.sharedMesh))) : 
+					new ConvexHull3D(uniqueVertices(mesh.sharedMesh));
+			}
 			bounds = initBounds(verts);
 			bounds_volume = boundsVolume(bounds);
 			bounds_area   = boundsArea(bounds);
