@@ -1,6 +1,28 @@
 #AT Utils ChangeLog
-
-* **v1.2.2**
+* **v.1.3.0**
+    * Compiled against **KSP-1.2.2**
+    * Added **SerializableFieldsPartModule** -- a base PartModule that uses reflection to serialize any field with [SerializeField] attribute that is of either [Serializable] type, or an IConfigNode, or the ConfigNode itself.
+    	* So **ConfigNodeWrapper is now obsolete.**
+    * Added **Resource Transfer framework** that facilitates transfer of resources between ships represented by either a Vessel object, a ProtoVessel object or a ConfigNode produced by ProtoVessel.Save.
+    * Factored most of the **SimpleTextureSwitcher** into the new **TextureSwitcherServer**.
+        * The STS now only provides the UI, while all the switching is done by TSS.
+    * Moved from TCA: Coordinates; Draw*Marker methods Markers static class.
+    * Added support for persistent ConfigNode fields. Added PersistentList/Queue. Added CNO.LoadFrom method.
+    * Added calculation of ConvexHull Volume and Area.
+    * Added Queue extensions: FillFrom, Remove, MoveUp.
+    * Added tooltip to LeftRightChooser; Added generic variants of the chooser.
+    * Added Coordinates.OnWater flag and SurfaceAlt(under_water) option.
+    * Fixes and improvements:
+        * Fixed VectorCurve.Load, improved VectorCurve.Save performance using string.Join.
+        * Optimized CNO Load/Save performance.
+        * Fixed ConvexHull calculation in Metric.init_with_mesh.
+	    * Made LockName of GUIWindowBase unique.
+	    * Fixed Utils.formatSmallValue. Improved performance of convert_args.
+    	* Declared Metric as IConfigNode for easy persistence. Added Metric(IShipConstruct).
+    	* Made tooltips light-green with black text for better visibility.
+        * Fixed Part.TotalCost.
+        * Added ShipConstruct.Unload extension.
+* v1.2.2
     * Added ClampedAssymetricFilter3D.
         * Renamed AsymmetricFilter.alpha/Tau[R|F] to [Up|Down].
     * Added Min property to Vector6.
