@@ -129,9 +129,13 @@ namespace AT_Utils
 		{
 			if (initialized) return;
 
-			var b_texture = new Texture2D(1, 1);
-			b_texture.SetPixel(0, 0, new Color(0.8f, 1, 0.6f, 1f));
-			b_texture.Apply();
+			var tooltip_texture = new Texture2D(1, 1);
+			tooltip_texture.SetPixel(0, 0, new Color(0.8f, 1, 0.6f, 1f));
+			tooltip_texture.Apply();
+
+			var black_texture = new Texture2D(1, 1);
+			black_texture.SetPixel(0, 0, new Color(0.15f, 0.15f, 0.15f, 1f));
+			black_texture.Apply();
 
 			//buttons
 			normal_button = GUI.skin.button.OtherColor(Color.white, Color.yellow);
@@ -152,7 +156,7 @@ namespace AT_Utils
 			white.padding = new RectOffset (4, 4, 4, 4);
 
 			white_on_black = new GUIStyle(white);
-			white_on_black.normal.background = white_on_black.onNormal.background = white_on_black.hover.background = white_on_black.onHover.background = b_texture;
+			white_on_black.normal.background = white_on_black.onNormal.background = white_on_black.hover.background = white_on_black.onHover.background = black_texture;
 
 			grey    = white.OtherColor(Color.grey);
 			red     = white.OtherColor(Color.red);
@@ -165,7 +169,7 @@ namespace AT_Utils
 			//tooltip
 			tooltip  = white.OtherColor(Color.black);
 			tooltip.alignment = TextAnchor.MiddleCenter;
-			tooltip.normal.background = tooltip.onNormal.background = tooltip.hover.background = tooltip.onHover.background = b_texture;
+			tooltip.normal.background = tooltip.onNormal.background = tooltip.hover.background = tooltip.onHover.background = tooltip_texture;
 
 			//lable
 			label = GUI.skin.label.OtherColor(Color.white);
@@ -191,7 +195,7 @@ namespace AT_Utils
 
 			//list box
 			list_item = new GUIStyle(GUI.skin.box);
-			list_item.normal.background = list_item.onNormal.background = list_item.hover.background = list_item.onHover.background = b_texture;
+			list_item.normal.background = list_item.onNormal.background = list_item.hover.background = list_item.onHover.background = black_texture;
 			list_item.normal.textColor = list_item.focused.textColor = Color.white;
 			list_item.hover.textColor = list_item.active.textColor = Color.yellow;
 			list_item.onNormal.textColor = list_item.onFocused.textColor = list_item.onHover.textColor = list_item.onActive.textColor = Color.yellow;
