@@ -36,10 +36,11 @@ namespace AT_Utils
 		{ return Utils.PathChain(AssemblyFolder, "PluginData", AssemblyName, filename); }
 
 
-		public static ConfigNode LoadNode(string filepath)
+		public static ConfigNode LoadNode(string filepath, bool with_message = false)
 		{
 			var node = ConfigNode.Load(filepath);
-			if(node == null) Utils.Log("Unable to read {}", filepath);
+			if(node == null && with_message) 
+				Utils.Log("Unable to read {}", filepath);
 			return node;
 		}
 
