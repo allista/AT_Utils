@@ -94,6 +94,9 @@
     <Compile Include="SerializableFiledsPartModule.cs" />
     <Compile Include="ResourceTransfer.cs" />
     <Compile Include="GUI\ResourceTransferWindow.cs" />
+    <Compile Include="CrewTransferBatch.cs" />
+    <Compile Include="GUI\CrewTransferWindow.cs" />
+    <Compile Include="FlightCameraOverride.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
