@@ -315,7 +315,8 @@ namespace AT_Utils
 			var c = Utils.BoundCorners(b);
 			for(int i = 0; i < 8; i++) 
 			{
-				c[i] = T.TransformDirection(c[i])+T.position;
+				if(T != null)
+					c[i] = T.TransformDirection(c[i])+T.position;
 				if(MapView.MapIsEnabled)
 					c[i] = ScaledSpace.LocalToScaledSpace(c[i]);
 			}
@@ -345,9 +346,16 @@ namespace AT_Utils
 		public static void GLDrawPoint(Vector3 ori, Color c, float r=0.1f)
 		{
 			float far;
-			Vector3 i = new Vector3(r, 0, 0);
-			Vector3 j = new Vector3(0, r, 0);
-			Vector3 k = new Vector3(0, 0, r);
+			var i = new Vector3(r, 0, 0);
+			var j = new Vector3(0, r, 0);
+			var k = new Vector3(0, 0, r);
+			if(MapView.MapIsEnabled)
+			{
+				i = ScaledSpace.LocalToScaledSpace(i);
+				j = ScaledSpace.LocalToScaledSpace(j);
+				k = ScaledSpace.LocalToScaledSpace(k);
+				ori = ScaledSpace.LocalToScaledSpace(ori);
+			}
 			var camera = GLBeginWorld(out far);
 			GL.Begin(GL.LINES);
 			GL.Color(c);
