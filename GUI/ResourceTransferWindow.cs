@@ -44,17 +44,14 @@ namespace AT_Utils
 			              Styles.fracStyle((float)(lhs/res.host_capacity)), 
 			              GUILayout.Width(60), GUILayout.Height(res_line_height));
 			// Fill amount
-			// limit slider to 0.5% increments
 			GUILayout.BeginVertical();
-			GUILayout.Box((fraction * 100) + "%", Styles.slider_text, 
+			GUILayout.Box(fraction.ToString("P1"), Styles.slider_text, 
 			              GUILayout.Width(200), GUILayout.Height(20));
 			var frac = GUILayout.HorizontalSlider(fraction, 0.0F, 1.0F,
 												  Styles.slider,
 												  GUI.skin.horizontalSliderThumb,
 			                                      GUILayout.Width(200),
 												  GUILayout.Height(20));
-			frac = (float)Math.Round(frac, 3);
-			frac = (Mathf.Floor(frac * 200)) / 200;
 			if(fraction*res.maxAmount < res.minAmount) 
 				frac = (float)(res.minAmount/res.maxAmount);
 			GUILayout.EndVertical();
@@ -77,7 +74,7 @@ namespace AT_Utils
 			var nres = transfer_list.Count;
 			scroll = GUILayout.BeginScrollView(scroll, 
 			                                   GUILayout.Width(width),
-			                                   GUILayout.Height(res_line_height*Math.Min(nres, 4)));
+			                                   GUILayout.Height(res_line_height*Math.Min(nres, 4)+20));
 			for(int i = 0; i < nres; i++)
 			{
 				var r = transfer_list[i];
@@ -110,6 +107,7 @@ namespace AT_Utils
 			                             title, 
 			                             GUILayout.Width(width),
 			                             GUILayout.Height(height)).clampToScreen();
+			if(Closed) UnlockControls();
 		}
 	}
 }
