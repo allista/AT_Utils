@@ -97,6 +97,8 @@ namespace AT_Utils
 					new HashSet<MeshFilter>(wheel.Wheel.wheelCollider.wheelTransform.GetComponentsInChildren<MeshFilter>()) : null;
 				foreach(MeshFilter m in p.FindModelComponents<MeshFilter>())
 				{
+					//skip disabled objects
+					if(m.gameObject == null || !m.gameObject.activeInHierarchy) continue;
 					//skip meshes from the blacklist
 					bool skip_mesh = false;
 					for(int i = 0, count = MeshesToSkip.Count; i < count; i++)
@@ -122,7 +124,7 @@ namespace AT_Utils
 					updateBounds(ref b, verts);
 				}
 				CrewCapacity += p.CrewCapacity;
-				if(p.IsPhysicallySignificant())	mass += p.TotalMass();
+				mass += p.TotalMass();
 				cost += p.TotalCost();
 			}
 			if(compute_hull && hull_points.Count >= 4) 
