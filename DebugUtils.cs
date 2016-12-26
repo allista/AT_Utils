@@ -177,7 +177,7 @@ namespace AT_Utils
 			indent += "\t";
 			for(int i = 0; i < T.childCount; i++)
 				log.Add(formatTransformTree(T.GetChild(i), indent));
-			return string.Concat(log.ToArray());
+			return string.Join("", log.ToArray());
 		}
 
 		public static void logShipConstruct(ShipConstruct ship)
