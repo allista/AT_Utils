@@ -518,18 +518,6 @@ namespace AT_Utils
 		public static bool HasModule<T>(this Part p) where T : PartModule
 		{ return p.Modules.GetModule<T>() != null; }
 
-		public static bool IsPhysicallySignificant(this Part p)
-		{
-			bool physicallySignificant = (p.physicalSignificance != Part.PhysicalSignificance.NONE);
-			// part.PhysicsSignificance is not initialized in the Editor for all part. but physicallySignificant is useful there.
-			if (HighLogic.LoadedSceneIsEditor)
-				physicallySignificant = physicallySignificant && p.PhysicsSignificance != 1;
-			//Landing gear set physicalSignificance = NONE when they enter the flight scene
-			//Launch clamp mass should be ignored.
-			physicallySignificant &= !p.HasModule<ModuleWheelBase>() && !p.HasModule<LaunchClamp>();
-			return physicallySignificant;
-		}
-
 		public static float TotalMass(this Part p) { return p.mass+p.GetResourceMass(); }
 		#endregion
 
