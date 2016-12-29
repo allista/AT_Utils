@@ -1,5 +1,13 @@
 #AT Utils ChangeLog
-* **v.1.3.0**
+
+* **v1.3.1**
+	* Moved CrewTransferBatch from Hangar here.
+    * Fixed resource transfer UI.
+    * Removed IsPhysicallySignificant as it was obsolete.
+    * Improved GLDrawBounds/Point.
+    * Fixed Metric calculation: disabled objects are not taken into account + all parts have mass. Fixed #176 issue in Hangar's bugtracker.
+    * Moved debug routines into Debugging. Added ResourceHack module to replenish resources in flight.
+* v1.3.0
     * Compiled against **KSP-1.2.2**
     * Added **SerializableFieldsPartModule** -- a base PartModule that uses reflection to serialize any field with [SerializeField] attribute that is of either [Serializable] type, or an IConfigNode, or the ConfigNode itself.
     	* So **ConfigNodeWrapper is now obsolete.**
