@@ -76,7 +76,7 @@ namespace AT_Utils
 			return new_verts;
 		}
 
-		Bounds partsBounds(List<Part> parts, Transform vT, bool compute_hull=false)
+		Bounds partsBounds(List<Part> parts, Transform vT, bool compute_hull, bool exclude_disabled=true)
 		{
 			//reset metric
 			mass = 0;
@@ -98,7 +98,7 @@ namespace AT_Utils
 				foreach(MeshFilter m in p.FindModelComponents<MeshFilter>())
 				{
 					//skip disabled objects
-					if(m.gameObject == null || !m.gameObject.activeInHierarchy) continue;
+					if(m.gameObject == null || exclude_disabled && !m.gameObject.activeInHierarchy) continue;
 					//skip meshes from the blacklist
 					bool skip_mesh = false;
 					for(int i = 0, count = MeshesToSkip.Count; i < count; i++)
@@ -222,7 +222,7 @@ namespace AT_Utils
 		//part metric
 		public Metric(Part part, bool compute_hull=false) : this()
 		{
-			bounds = partsBounds(new List<Part>{part}, part.partTransform, compute_hull);
+			bounds = partsBounds(new List<Part>{part}, part.partTransform, compute_hull, part != part.partInfo.partPrefab);
 			bounds_volume = boundsVolume(bounds);
 			bounds_area   = boundsArea(bounds);
 		}
