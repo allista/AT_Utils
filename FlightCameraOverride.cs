@@ -117,7 +117,8 @@ namespace AT_Utils
 			Utils.Log("Deactivating FCO: duration {}, seconds {}, anchor {}", 
 			          duration, endUT-Planetarium.GetUniversalTime(), anchor.name);
 			#endif
-			FlightCamera.fetch.ActivateUpdate();
+			if(FlightCamera.fetch != null)
+				FlightCamera.fetch.ActivateUpdate();
 			mode = Mode.None;
 			anchor = null;
 			target = null;
