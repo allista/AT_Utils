@@ -1,5 +1,8 @@
 #AT Utils ChangeLog
 
+* **v1.3.1.1**
+    * Numerous small bugfixes.
+
 * **v1.3.1**
 	* Moved CrewTransferBatch from Hangar here.
     * Fixed resource transfer UI.
