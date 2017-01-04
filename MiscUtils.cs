@@ -209,6 +209,11 @@ namespace AT_Utils
 				else if(arg is Orbit) args[i] = formatOrbit((Orbit)arg);
 				else if(arg is Bounds) args[i] = formatBounds((Bounds)arg);
 				else if(arg is Exception) args[i] = formatException((Exception)arg);
+				else if(arg is Transform) 
+				{
+					var T = arg as Transform;
+					args[i] = string.Format("{0}: pos {1}, rot {2}", T.name, T.position, T.rotation.eulerAngles);
+				}
 				else if(arg is IEnumerable) 
 				{
 					var arr = (arg as IEnumerable).Cast<object>().ToArray();
