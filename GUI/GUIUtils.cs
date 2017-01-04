@@ -67,7 +67,7 @@ namespace AT_Utils
 		{
 			var choice = Utils.LeftRightChooser(current.ToString(), tooltip, width);
 			if(choice < 0) return options.Prev(current);
-			else if(choice > 0) return options.Next(current);
+			if(choice > 0) return options.Next(current);
 			return current;
 		}
 
