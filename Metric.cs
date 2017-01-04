@@ -222,7 +222,8 @@ namespace AT_Utils
 		//part metric
 		public Metric(Part part, bool compute_hull=false) : this()
 		{
-			bounds = partsBounds(new List<Part>{part}, part.partTransform, compute_hull, part != part.partInfo.partPrefab);
+			var exclude_disabled = part.partInfo != null && part != part.partInfo.partPrefab;
+			bounds = partsBounds(new List<Part>{part}, part.partTransform, compute_hull, exclude_disabled);
 			bounds_volume = boundsVolume(bounds);
 			bounds_area   = boundsArea(bounds);
 		}
