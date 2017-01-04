@@ -115,7 +115,7 @@ namespace AT_Utils
 		{
 			#if DEBUG
 			Utils.Log("Deactivating FCO: duration {}, seconds {}, anchor {}", 
-			          duration, endUT-Planetarium.GetUniversalTime(), anchor.name);
+			          duration, endUT-Planetarium.GetUniversalTime(), anchor);
 			#endif
 			if(FlightCamera.fetch != null)
 				FlightCamera.fetch.ActivateUpdate();
