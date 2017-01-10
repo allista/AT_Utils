@@ -72,6 +72,8 @@ namespace AT_Utils
 		public static GUIStyle list_item;
 		public static GUIStyle list_box;
 
+		public static GUIStyle no_window;
+
 		public static FieldInfo[] StyleFields = typeof(Styles)
 			.GetFields(BindingFlags.DeclaredOnly|BindingFlags.Public|BindingFlags.Static)
 			.Where(fi => fi.FieldType == typeof(GUIStyle)).ToArray();
@@ -136,6 +138,10 @@ namespace AT_Utils
 			var black_texture = new Texture2D(1, 1);
 			black_texture.SetPixel(0, 0, new Color(0.15f, 0.15f, 0.15f, 1f));
 			black_texture.Apply();
+
+			var alpha_texture = new Texture2D(1, 1);
+			alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0));
+			alpha_texture.Apply();
 
 			//buttons
 			normal_button = GUI.skin.button.OtherColor(Color.white, Color.yellow);
@@ -206,6 +212,14 @@ namespace AT_Utils
 			list_box.hover.textColor = list_box.active.textColor = Color.green;
 			list_box.onNormal.textColor = list_box.onFocused.textColor = list_box.onHover.textColor = list_box.onActive.textColor = Color.green;
 			list_box.padding = new RectOffset (4, 4, 4, 4);
+
+			//borderless window
+			no_window = new GUIStyle(GUI.skin.window);
+			no_window.normal.background = no_window.onNormal.background = no_window.hover.background = no_window.onHover.background = alpha_texture;
+			no_window.border = new RectOffset(0,0,0,0);
+			no_window.clipping = TextClipping.Overflow;
+			no_window.contentOffset = Vector2.zero;
+			no_window.padding = new RectOffset(0,0,0,0);
 
 			initialized = true;
 			ConfigureButtons();
