@@ -280,7 +280,7 @@ namespace AT_Utils
 			if(PartLoader.Instance == null) return false;
 			var info = PartLoader.getPartInfoByName(name);
 			if(info == null || HighLogic.CurrentGame == null) return false;
-			return HighLogic.CurrentGame.Mode != Game.Modes.CAREER || ResearchAndDevelopment.PartModelPurchased(info);
+			return HighLogic.CurrentGame.Mode == Game.Modes.SANDBOX || ResearchAndDevelopment.PartModelPurchased(info);
 		}
 
 		public static Vector3[] BoundCorners(Bounds b)
