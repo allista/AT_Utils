@@ -18,7 +18,7 @@ namespace AT_Utils
 		void DialogWindow(int windowId)
 		{
 			GUILayout.BeginVertical();
-			GUILayout.Label(message, Styles.label, GUILayout.Width(width));
+			GUILayout.Label(message, Styles.rich_label, GUILayout.Width(width));
 			GUILayout.BeginHorizontal();
 			Result = Answer.None;
 			if(GUILayout.Button("No", Styles.red_button, GUILayout.Width(70))) Result = Answer.No;
