@@ -44,7 +44,7 @@ namespace AT_Utils
             GUILayout.EndScrollView();
 			Closed = GUILayout.Button("Close", Styles.close_button, GUILayout.ExpandWidth(true));
 			GUILayout.EndVertical();
-			TooltipsAndDragWindow(WindowPos);
+			TooltipsAndDragWindow();
         }
 		
 		public void Draw(List<ProtoCrewMember> _crew, 

@@ -95,7 +95,7 @@ namespace AT_Utils
 			transferNow = GUILayout.Button("Transfer now", Styles.active_button, GUILayout.ExpandWidth(true));
 			GUILayout.EndHorizontal();
 			GUILayout.EndVertical();
-			TooltipsAndDragWindow(WindowPos);
+			TooltipsAndDragWindow();
 		}
 		
 		public void Draw(string title, List<ResourceManifest> resourceTransferList)

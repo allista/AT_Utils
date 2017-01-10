@@ -98,6 +98,9 @@
     <Compile Include="FlightCameraOverride.cs" />
     <Compile Include="Debugging\DebugUtils.cs" />
     <Compile Include="Debugging\ResourceHack.cs" />
+    <Compile Include="GUI\FloatingWindow.cs" />
+    <Compile Include="GUI\TooltipManager.cs" />
+    <Compile Include="GUI\AddonWindowBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

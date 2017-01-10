@@ -50,7 +50,7 @@ namespace AT_Utils
 			if(GUILayout.Button("Close", Styles.danger_button, GUILayout.ExpandWidth(true)))
 				manage = false;
 			GUILayout.EndVertical();
-			GUIWindowBase.TooltipsAndDragWindow(WindowPos);
+			GUIWindowBase.TooltipsAndDragWindow();
 		}
 
 		void OnGUI()

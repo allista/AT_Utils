@@ -5,86 +5,80 @@
 //
 //  Copyright (c) 2015 Allis Tauri
 
+using System;
+using System.Linq;
 using System.Reflection;
+using System.Collections.Generic;
 using UnityEngine;
 using KSP.IO;
 
 namespace AT_Utils
 {
-	public static class TooltipManager
-	{
-		static string tooltip = "";
-
-		//adapted from blizzy's Toolbar
-		public static void DrawToolTip(Rect window) 
-		{
-			if(Event.current.type == EventType.Repaint)
-				tooltip = GUI.tooltip.Trim();
-			if(string.IsNullOrEmpty(tooltip)) return;
-			var mousePos = Utils.GetMousePosition(window);
-			var size = Styles.tooltip.CalcSize(new GUIContent(tooltip));
-			var rect = new Rect(mousePos.x, mousePos.y + 20, size.x, size.y);
-			Rect orig = rect;
-			rect = rect.clampToWindow(window);
-			//clamping moved the tooltip up -> reposition above mouse cursor
-			if(rect.y < orig.y) 
-			{
-				rect.y = mousePos.y - size.y - 5;
-				rect = rect.clampToScreen();
-			}
-			//clamping moved the tooltip left -> reposition lefto of the mouse cursor
-			if(rect.x < orig.x)
-			{
-				rect.x = mousePos.x - size.x - 5;
-				rect = rect.clampToScreen();
-			}
-			GUI.Label(rect, tooltip, Styles.tooltip);
-		}
-	}
+	[AttributeUsage(AttributeTargets.Field, Inherited = true)]
+	public class ConfigOption : Attribute {}
 
 	abstract public class GUIWindowBase : MonoBehaviour
 	{
 		public static bool HUD_enabled { get; protected set; } = true;
-
-		public Rect WindowPos = new Rect(100, 50, Screen.width/4, Screen.height/4);
+		public static readonly Rect ScreenRect = new Rect(0,0,Screen.width,Screen.height);
 		protected static Rect drag_handle = new Rect(0,0, 10000, 20);
-		protected int  width = 550, height = 100;
-		protected PluginConfiguration GUI_CFG;
-		public string LockName { get; protected set; }
 
-		protected virtual void onShowUI() { HUD_enabled = true; update_content(); }
-		protected virtual void onHideUI() { HUD_enabled = false; update_content(); }
+		[ConfigOption]
+		public Rect WindowPos = new Rect(100, 50, Screen.width/4, Screen.height/4);
+		protected int width = 10, height = 10;
 
-		protected virtual void update_content() {}
-
-		void CreateConfig()
+		#region Subwindows
+		public string Name = "";
+		List<GUIWindowBase> _subwindows;
+		protected List<GUIWindowBase> subwindows 
 		{
-			if(GUI_CFG != null) return;
+			get
+			{
+				if(_subwindows == null)
+					_subwindows = GetType().GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance)
+						.Where(fi => typeof(GUIWindowBase).IsAssignableFrom(fi.FieldType))
+						.Select(fi => fi.GetValue(this) as GUIWindowBase)
+						.ToList();
+				return _subwindows;
+			}
+		}
+
+		void init_subwindows()
+		{
+			foreach(var sw in GetType()
+			        .GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.DeclaredOnly)
+			        .Where(fi => typeof(GUIWindowBase).IsAssignableFrom(fi.FieldType)))
+			{
+				var obj = gameObject.AddComponent(sw.FieldType) as GUIWindowBase;
+				obj.Name = Name+"-"+sw.Name;
+				obj.SetConfig(GUI_CFG);
+				sw.SetValue(this, obj);
+			}
+		}
+		#endregion
+
+		#region Config
+		protected static Dictionary<string, PluginConfiguration> configs = new Dictionary<string, PluginConfiguration>();
+		protected PluginConfiguration GUI_CFG;
+
+		public void SetConfig(PluginConfiguration cfg)
+		{
+			if(cfg == null) return;
+			GUI_CFG = cfg;
+			subwindows.ForEach(sw => sw.SetConfig(cfg));
+		}
+
+		void create_config()
+		{
+			var config_path = AssemblyLoader.GetPathByType(GetType());
+			if(configs.TryGetValue(config_path, out GUI_CFG)) return;
 			var create_for_type = typeof(PluginConfiguration).GetMethod("CreateForType");
 			create_for_type = create_for_type.MakeGenericMethod(new [] { GetType() });
 			GUI_CFG = create_for_type.Invoke(null, new object[] { null }) as PluginConfiguration;
+			configs[config_path] = GUI_CFG;
 		}
 
-		protected GUIWindowBase()
-		{
-			CreateConfig();
-			LockName = GetType().FullName+GetInstanceID();
-		}
-
-		public virtual void Awake()
-		{
-			GameEvents.onHideUI.Add(onHideUI);
-			GameEvents.onShowUI.Add(onShowUI);
-		}
-
-		public virtual void OnDestroy()
-		{
-			GameEvents.onHideUI.Remove(onHideUI);
-			GameEvents.onShowUI.Remove(onShowUI);
-		}
-
-		//settings
-		protected string mangleName(string name) { return GetType().Name+"-"+name; }
+		protected string mangleName(string name) { return Name+"-"+name; }
 
 		protected void SetConfigValue(string key, object value)
 		{ GUI_CFG.SetValue(mangleName(key), value); }
@@ -95,14 +89,76 @@ namespace AT_Utils
 		public virtual void LoadConfig()
 		{
 			GUI_CFG.load();
-			WindowPos = GetConfigValue<Rect>(Utils.PropertyName(new {WindowPos}), new Rect(100, 50, width, height));
+			var T = GetType();
+			var get_val = T.GetMethod("GetConfigValue", BindingFlags.NonPublic|BindingFlags.Instance);
+			var options = T.GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.FlattenHierarchy);
+			foreach(var opt_fi in options)
+			{
+//				Utils.Log("Load: {}[{}].{} = {}", T, GetInstanceID(), opt_fi.Name, opt_fi.GetValue(this));//debug
+				if(typeof(GUIWindowBase).IsAssignableFrom(opt_fi.FieldType))
+				{
+					try 
+					{
+						var opt = opt_fi.GetValue(this) as GUIWindowBase;
+						opt.LoadConfig();
+					} catch(NullReferenceException) {}
+					continue;
+				}
+				if(opt_fi.GetCustomAttributes(typeof(ConfigOption), true).Length == 0) continue;
+				var get_val_gen = get_val.MakeGenericMethod(new []{opt_fi.FieldType});
+				var val = get_val_gen.Invoke(this, new []{opt_fi.Name, Activator.CreateInstance(opt_fi.FieldType)});
+				if(val != null) opt_fi.SetValue(this, val);
+			}
 		}
 
 		public virtual void SaveConfig()
 		{
-			SetConfigValue(Utils.PropertyName(new {WindowPos}), WindowPos);
+			var options = GetType().GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.FlattenHierarchy);
+			foreach(var opt_fi in options)
+			{
+//				Utils.Log("Save: {}[{}].{} = {}", GetType(), GetInstanceID(), opt_fi.Name, opt_fi.GetValue(this));//debug
+				if(typeof(GUIWindowBase).IsAssignableFrom(opt_fi.FieldType))
+				{
+					try
+					{
+						var opt = opt_fi.GetValue(this) as GUIWindowBase;
+						opt.SaveConfig();
+					} catch(NullReferenceException) {}
+					continue;
+				}
+				if(opt_fi.GetCustomAttributes(typeof(ConfigOption), true).Length == 0) continue;
+				var val = opt_fi.GetValue(this);
+				if(val != null) SetConfigValue(opt_fi.Name, val);
+			}
 			GUI_CFG.save();
 		}
+		#endregion
+
+		protected virtual void onShowUI() { HUD_enabled = true; update_content(); }
+		protected virtual void onHideUI() { HUD_enabled = false; update_content(); }
+
+		protected virtual void update_content() {}
+
+		public virtual void Awake()
+		{
+			LockName = GetType().FullName+GetInstanceID();
+			Name = GetType().Name;
+			create_config();
+			init_subwindows();
+			GameEvents.onHideUI.Add(onHideUI);
+			GameEvents.onShowUI.Add(onShowUI);
+		}
+
+		public virtual void OnDestroy()
+		{
+			subwindows.ForEach(Destroy);
+			GameEvents.onHideUI.Remove(onHideUI);
+			GameEvents.onShowUI.Remove(onShowUI);
+			UnlockControls();
+		}
+
+		#region GUI Lock
+		public string LockName { get; protected set; }
 
 		public virtual void UnlockControls()
 		{ Utils.LockIfMouseOver(LockName, WindowPos, false); }
@@ -110,88 +166,58 @@ namespace AT_Utils
 		public virtual void LockControls()
 		{ Utils.LockIfMouseOver(LockName, WindowPos); }
 
-		public static void TooltipsAndDragWindow(Rect rect)
+		public static void TooltipsAndDragWindow()
 		{
-			TooltipManager.DrawToolTip(rect);
+			TooltipManager.GetTooltip();
 			GUI.DragWindow(drag_handle);
 		}
+		#endregion
 	}
 
-	abstract public class AddonWindowBase<T> : GUIWindowBase where T : AddonWindowBase<T>
+
+	//probably not needed after all
+	public class DelayedSwitch : IEnumerator<YieldInstruction>
 	{
-		public string Title;
+		readonly YieldInstruction wait_for = new WaitForSeconds(1);
+		public bool On { get; private set; }
+		bool new_state;
+		int ticks = -1;
 
-		protected static T instance { get; private set; }
-		public static bool window_enabled { get; protected set; } = false;
-		public static bool do_show { get { return window_enabled && HUD_enabled; } }
+		public DelayedSwitch(YieldInstruction wait_for = null)
+		{ this.wait_for = wait_for; }
 
-		readonly ActionDamper save_timer = new ActionDamper(10);
+		public static implicit operator bool(DelayedSwitch sw) { return sw.On; }
 
-		protected virtual void show(bool show)
+		public DelayedSwitch Set(bool state) 
 		{
-			window_enabled = show;
-			update_content();
+			new_state = state;
+			ticks = 1;
+			return this;
 		}
 
-		public static void Show(bool show) 
-		{ if(instance != null) instance.show(show); }
-
-		public static void Toggle() 
-		{ 
-			if(instance != null)
-				instance.show(!window_enabled);
-		}
-
-		public override void Awake()
+		public DelayedSwitch Toggle()
 		{
-			base.Awake();
-			if(instance != null)
-			{ Destroy(gameObject); return; }
-			instance = (T)this;
-			LoadConfig();
-			var assembly = Assembly.GetAssembly(typeof(T)).GetName();
-			Title = string.Concat(assembly.Name, " - ", assembly.Version);
-			GameEvents.onGameStateSave.Add(onGameStateSave);
-			save_timer.action = SaveConfig;
+			new_state = !On;
+			ticks = 1;
+			return this;
 		}
 
-		public override void OnDestroy()
+		public bool MoveNext()
 		{
-			SaveConfig();
-			GameEvents.onGameStateSave.Remove(onGameStateSave);
-			if(this == instance) instance = null;
-			base.OnDestroy();
+			if(ticks-- >= 0) return true;
+			On = new_state;
+			return false;
 		}
 
-		void onGameStateSave(ConfigNode node) { SaveConfig(); }
+		public void Reset() { ticks = 1; }
 
-		//settings
-		public override void LoadConfig()
-		{
-			base.LoadConfig();
-			window_enabled = GetConfigValue<bool>(Utils.PropertyName(new {window_enabled}), window_enabled);
-		}
+		public void Dispose() {}
 
-		public override void SaveConfig()
-		{
-			SetConfigValue(Utils.PropertyName(new {window_enabled}), window_enabled);
-			base.SaveConfig();
-		}
+		public YieldInstruction Current
+		{ get { return wait_for; } }
 
-		protected abstract bool can_draw();
-		protected abstract void draw_gui();
-
-		public virtual void OnGUI()
-		{
-			if(Event.current.type != EventType.Layout && Event.current.type != EventType.Repaint) return;
-			if(do_show && can_draw()) 
-			{
-				Styles.Init();
-				draw_gui();
-				save_timer.Run();
-			}
-			else UnlockControls();
-		}
+		object System.Collections.IEnumerator.Current
+		{ get { return Current; } }
 	}
 }
 
