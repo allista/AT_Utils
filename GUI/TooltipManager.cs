@@ -20,7 +20,11 @@ namespace AT_Utils
 		public static void GetTooltip()
 		{
 			if(Event.current.type == EventType.Repaint)
-				tooltip = GUI.tooltip.Trim();
+			{ 
+				var tip = GUI.tooltip.Trim();
+				if(!string.IsNullOrEmpty(tip))
+					tooltip = tip;
+			}
 		}
 
 		/// <summary>
@@ -77,6 +81,8 @@ namespace AT_Utils
 			}
 			GUI.Label(rect, tooltip, Styles.tooltip);
 		}
+
+		void Update() { tooltip = ""; }
 
 		void OnGUI()
 		{
