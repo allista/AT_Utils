@@ -6,24 +6,52 @@
 //  Copyright (c) 2017 Allis Tauri
 
 using System.Reflection;
+using KSP.UI.Screens;
 using UnityEngine;
 
 namespace AT_Utils
 {
 	abstract public class AddonWindowBase<T> : GUIWindowBase where T : AddonWindowBase<T>
 	{
-		public string Title;
+		public string Title = "";
 
 		public static T Instance { get; private set; }
 
 		public static bool InstanceEnabled 
-		{ get { return Instance && Instance.WindowEnabled; } }
+		{ get { return Instance && Instance.window_enabled; } }
 
 		public static void ShowInstance(bool show)
 		{ if(Instance) Instance.Show(show); }
 
 		public static void ToggleInstance()
-		{ if(Instance) Instance.Show(!Instance.WindowEnabled); }
+		{ if(Instance) Instance.Show(!Instance.window_enabled); }
+
+		public static void ShowWithButton(bool show, ApplicationLauncherButton button)
+		{
+			if(Instance == null) return;
+			if(button == null) ShowInstance(show);
+			else
+			{
+				if(show)
+				{
+					if(Instance.window_enabled) 
+						button.SetTrue(false);
+					else Instance.Show(true);
+				}
+				else
+				{
+					if(Instance.window_enabled) 
+						Instance.Show(false); 
+					else button.SetTrue(false);
+				}
+			}
+		}
+
+		public static void ToggleWithButton(ApplicationLauncherButton button)
+		{
+			if(button == null) ToggleInstance();
+			else if(Instance) ShowWithButton(!Instance.window_enabled, button);
+		}
 
 		readonly ActionDamper save_timer = new ActionDamper(10);
 
