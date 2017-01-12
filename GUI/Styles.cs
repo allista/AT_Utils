@@ -75,7 +75,7 @@ namespace AT_Utils
 		public static GUIStyle no_window;
 
 		public static FieldInfo[] StyleFields = typeof(Styles)
-			.GetFields(BindingFlags.DeclaredOnly|BindingFlags.Public|BindingFlags.Static)
+			.GetFields(BindingFlags.Public|BindingFlags.Static)
 			.Where(fi => fi.FieldType == typeof(GUIStyle)).ToArray();
 
 		static bool initialized;
@@ -84,7 +84,7 @@ namespace AT_Utils
 		{
 			if(skin != null) return;
 			GUI.skin = null;
-			skin = (GUISkin)UnityEngine.Object.Instantiate(GUI.skin);
+			skin = Object.Instantiate(GUI.skin);
 		}
 
 		static GUIStyle find_style(string name)
@@ -140,6 +140,7 @@ namespace AT_Utils
 			black_texture.Apply();
 
 			var alpha_texture = new Texture2D(1, 1);
+//			alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0.3f));
 			alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0));
 			alpha_texture.Apply();
 
@@ -217,9 +218,8 @@ namespace AT_Utils
 			no_window = new GUIStyle(GUI.skin.window);
 			no_window.normal.background = no_window.onNormal.background = no_window.hover.background = no_window.onHover.background = alpha_texture;
 			no_window.border = new RectOffset(0,0,0,0);
-			no_window.clipping = TextClipping.Overflow;
 			no_window.contentOffset = Vector2.zero;
-			no_window.padding = new RectOffset(0,0,0,0);
+			no_window.padding = new RectOffset(4,4,4,4);
 
 			initialized = true;
 			ConfigureButtons();
