@@ -103,7 +103,8 @@ namespace AT_Utils
 				if(opt_fi.GetCustomAttributes(typeof(ConfigOption), true).Length == 0) continue;
 				var get_val_gen = get_val.MakeGenericMethod(new []{opt_fi.FieldType});
 				var val = get_val_gen.Invoke(this, new []{opt_fi.Name, opt_fi.GetValue(this)});
-				if(val != null) opt_fi.SetValue(this, val);
+//				Utils.Log("Load: {}[{}].{} = {}, was {}", T, GetInstanceID(), opt_fi.Name, val, opt_fi.GetValue(this));//debug
+				opt_fi.SetValue(this, val);
 			}
 		}
 
@@ -123,13 +124,14 @@ namespace AT_Utils
 				}
 				if(opt_fi.GetCustomAttributes(typeof(ConfigOption), true).Length == 0) continue;
 				var val = opt_fi.GetValue(this);
+//				Utils.Log("Save: {}[{}].{} = {}, was {}", GetType(), GetInstanceID(), opt_fi.Name, val, opt_fi.GetValue(this));//debug
 				if(val != null) SetConfigValue(opt_fi.Name, val);
 			}
 			GUI_CFG.save();
 		}
 		#endregion
 
-		[ConfigOption] bool window_enabled = true;
+		[ConfigOption] protected bool window_enabled = true;
 		public bool WindowEnabled { get { return window_enabled; } }
 		public bool doShow { get { return window_enabled && HUD_enabled; } }
 
