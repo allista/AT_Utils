@@ -24,35 +24,32 @@ namespace AT_Utils
 		protected static Rect drag_handle = new Rect(0,0, 10000, 20);
 
 		[ConfigOption]
-		public Rect WindowPos = new Rect(100, 50, Screen.width/4, Screen.height/4);
+		public Rect WindowPos = new Rect(200, 100, Screen.width/4, Screen.height/4);
 		protected int width = 10, height = 10;
+
+		public void Move(Vector2 dPos)
+		{
+			WindowPos.x += dPos.x;
+			WindowPos.y += dPos.y;
+		}
 
 		#region Subwindows
 		public string Name = "";
-		List<GUIWindowBase> _subwindows;
-		protected List<GUIWindowBase> subwindows 
-		{
-			get
-			{
-				if(_subwindows == null)
-					_subwindows = GetType().GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance)
-						.Where(fi => typeof(GUIWindowBase).IsAssignableFrom(fi.FieldType))
-						.Select(fi => fi.GetValue(this) as GUIWindowBase)
-						.ToList();
-				return _subwindows;
-			}
-		}
+		protected List<FieldInfo> subwindow_fields = new List<FieldInfo>();
+		protected List<GUIWindowBase> subwindows = new List<GUIWindowBase>();
 
 		void init_subwindows()
 		{
-			foreach(var sw in GetType()
-			        .GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.DeclaredOnly)
-			        .Where(fi => typeof(GUIWindowBase).IsAssignableFrom(fi.FieldType)))
+			subwindow_fields = GetType()
+				.GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.FlattenHierarchy)
+				.Where(fi => typeof(GUIWindowBase).IsAssignableFrom(fi.FieldType)).ToList();
+			foreach(var sw in subwindow_fields)
 			{
 				var obj = gameObject.AddComponent(sw.FieldType) as GUIWindowBase;
 				obj.Name = Name+"-"+sw.Name;
 				obj.SetConfig(GUI_CFG);
 				sw.SetValue(this, obj);
+				subwindows.Add(obj);
 			}
 		}
 		#endregion
@@ -91,8 +88,7 @@ namespace AT_Utils
 			GUI_CFG.load();
 			var T = GetType();
 			var get_val = T.GetMethod("GetConfigValue", BindingFlags.NonPublic|BindingFlags.Instance);
-			var options = T.GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.FlattenHierarchy);
-			foreach(var opt_fi in options)
+			foreach(var opt_fi in T.GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.FlattenHierarchy))
 			{
 //				Utils.Log("Load: {}[{}].{} = {}", T, GetInstanceID(), opt_fi.Name, opt_fi.GetValue(this));//debug
 				if(typeof(GUIWindowBase).IsAssignableFrom(opt_fi.FieldType))
@@ -106,15 +102,14 @@ namespace AT_Utils
 				}
 				if(opt_fi.GetCustomAttributes(typeof(ConfigOption), true).Length == 0) continue;
 				var get_val_gen = get_val.MakeGenericMethod(new []{opt_fi.FieldType});
-				var val = get_val_gen.Invoke(this, new []{opt_fi.Name, Activator.CreateInstance(opt_fi.FieldType)});
+				var val = get_val_gen.Invoke(this, new []{opt_fi.Name, opt_fi.GetValue(this)});
 				if(val != null) opt_fi.SetValue(this, val);
 			}
 		}
 
 		public virtual void SaveConfig()
 		{
-			var options = GetType().GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.FlattenHierarchy);
-			foreach(var opt_fi in options)
+			foreach(var opt_fi in GetType().GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.FlattenHierarchy))
 			{
 //				Utils.Log("Save: {}[{}].{} = {}", GetType(), GetInstanceID(), opt_fi.Name, opt_fi.GetValue(this));//debug
 				if(typeof(GUIWindowBase).IsAssignableFrom(opt_fi.FieldType))
@@ -133,6 +128,20 @@ namespace AT_Utils
 			GUI_CFG.save();
 		}
 		#endregion
+
+		[ConfigOption] bool window_enabled = true;
+		public bool WindowEnabled { get { return window_enabled; } }
+		public bool doShow { get { return window_enabled && HUD_enabled; } }
+
+		protected virtual bool can_draw() { return true; }
+
+		public virtual void Show(bool show)
+		{
+			window_enabled = show;
+			update_content();
+		}
+
+		public void Toggle()  { Show(!window_enabled); }
 
 		protected virtual void onShowUI() { HUD_enabled = true; update_content(); }
 		protected virtual void onHideUI() { HUD_enabled = false; update_content(); }
@@ -161,7 +170,10 @@ namespace AT_Utils
 		public string LockName { get; protected set; }
 
 		public virtual void UnlockControls()
-		{ Utils.LockIfMouseOver(LockName, WindowPos, false); }
+		{ 
+			Utils.LockIfMouseOver(LockName, WindowPos, false); 
+			subwindows.ForEach(sw => sw.UnlockControls());
+		}
 
 		public virtual void LockControls()
 		{ Utils.LockIfMouseOver(LockName, WindowPos); }
@@ -172,52 +184,6 @@ namespace AT_Utils
 			GUI.DragWindow(drag_handle);
 		}
 		#endregion
-	}
-
-
-	//probably not needed after all
-	public class DelayedSwitch : IEnumerator<YieldInstruction>
-	{
-		readonly YieldInstruction wait_for = new WaitForSeconds(1);
-		public bool On { get; private set; }
-		bool new_state;
-		int ticks = -1;
-
-		public DelayedSwitch(YieldInstruction wait_for = null)
-		{ this.wait_for = wait_for; }
-
-		public static implicit operator bool(DelayedSwitch sw) { return sw.On; }
-
-		public DelayedSwitch Set(bool state) 
-		{
-			new_state = state;
-			ticks = 1;
-			return this;
-		}
-
-		public DelayedSwitch Toggle()
-		{
-			new_state = !On;
-			ticks = 1;
-			return this;
-		}
-
-		public bool MoveNext()
-		{
-			if(ticks-- >= 0) return true;
-			On = new_state;
-			return false;
-		}
-
-		public void Reset() { ticks = 1; }
-
-		public void Dispose() {}
-
-		public YieldInstruction Current
-		{ get { return wait_for; } }
-
-		object System.Collections.IEnumerator.Current
-		{ get { return Current; } }
 	}
 }
 

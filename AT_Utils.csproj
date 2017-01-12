@@ -101,6 +101,8 @@
     <Compile Include="GUI\FloatingWindow.cs" />
     <Compile Include="GUI\TooltipManager.cs" />
     <Compile Include="GUI\AddonWindowBase.cs" />
+    <Compile Include="GUI\AnchoredWindow.cs" />
+    <Compile Include="GUI\CompoundWindow.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

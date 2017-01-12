@@ -5,32 +5,28 @@
 //
 //  Copyright (c) 2017 Allis Tauri
 
-using System;
 using UnityEngine;
 
 namespace AT_Utils
 {
-	public enum AnchorPosition { TopLeft, TopRight, BottomRight, BottomLeft }
-
-	public class FloatingWindow : GUIWindowBase
+	/// <summary>
+	/// Base class for floating windows, which are compound windows drawn with no_window style.
+	/// The anchor position of the main window is marked with the anchor control with which the 
+	/// whole compound window can be dragged.
+	/// </summary>
+	public abstract class FloatingWindow : CompoundWindow
 	{
-		[ConfigOption] public AnchorPosition Anchor = AnchorPosition.TopLeft;
 		protected bool moving;
 
 		static GUIContent anchor_content = new GUIContent("●", "Press to move the window");
 		void draw_anchor()
 		{
-			GUILayout.Label(anchor_content, Styles.green, GUILayout.ExpandWidth(false));
+			GUILayout.Label(anchor_content, Styles.green, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
 			if(Event.current.type == EventType.Repaint)
 				moving = GUILayoutUtility.GetLastRect().Contains(Utils.GetMousePosition(WindowPos));
 		}
 
-		public FloatingWindow() 
-		{ 
-			width = height = 10;
-		}
-
-		public Action DrawContent = delegate {};
+		protected abstract void DrawContent();
 
 		void main_window(int windowID)
 		{
@@ -42,12 +38,20 @@ namespace AT_Utils
 				draw_anchor();
 				GUILayout.FlexibleSpace();
 				GUILayout.EndVertical();
+				GUILayout.BeginVertical();
+				GUILayout.FlexibleSpace();
 				DrawContent();
+				GUILayout.FlexibleSpace();
+				GUILayout.EndVertical();
 				GUILayout.EndHorizontal();
 				break;
 			case AnchorPosition.TopRight:
 				GUILayout.BeginHorizontal();
+				GUILayout.BeginVertical();
+				GUILayout.FlexibleSpace();
 				DrawContent();
+				GUILayout.FlexibleSpace();
+				GUILayout.EndVertical();
 				GUILayout.BeginVertical();
 				draw_anchor();
 				GUILayout.FlexibleSpace();
@@ -60,12 +64,20 @@ namespace AT_Utils
 				GUILayout.FlexibleSpace();
 				draw_anchor();
 				GUILayout.EndVertical();
+				GUILayout.BeginVertical();
+				GUILayout.FlexibleSpace();
 				DrawContent();
+				GUILayout.FlexibleSpace();
+				GUILayout.EndVertical();
 				GUILayout.EndHorizontal();
 				break;
 			case AnchorPosition.BottomRight:
 				GUILayout.BeginHorizontal();
+				GUILayout.BeginVertical();
+				GUILayout.FlexibleSpace();
 				DrawContent();
+				GUILayout.FlexibleSpace();
+				GUILayout.EndVertical();
 				GUILayout.BeginVertical();
 				GUILayout.FlexibleSpace();
 				draw_anchor();
@@ -79,40 +91,14 @@ namespace AT_Utils
 			if(moving) GUI.DragWindow(ScreenRect);
 		}
 
-		void update_window_rect(Rect r)
+		protected override Rect DrawWindow()
 		{
-			switch(Anchor)
-			{
-			case AnchorPosition.TopRight:
-				if(!r.width.Equals(WindowPos.width))
-					r.x += WindowPos.width-r.width;
-				break;
-			case AnchorPosition.BottomLeft:
-				if(!r.height.Equals(WindowPos.width))
-					r.y += WindowPos.height-r.height;
-				break;
-			case AnchorPosition.BottomRight:
-				if(!r.width.Equals(WindowPos.width))
-					r.x += WindowPos.width-r.width;
-				if(!r.height.Equals(WindowPos.width))
-					r.y += WindowPos.height-r.height;
-				break;
-			}
-			WindowPos = r.clampToScreen();
-		}
-
-		public void Draw(Action content = null)
-		{
-			if(content != null) 
-				DrawContent = content;
-			LockControls();
-			var r = GUILayout.Window(GetInstanceID(), 
-			                         WindowPos, 
-		                             main_window, 
-		                             "", Styles.no_window,
-		                             GUILayout.Width(width),
-		                             GUILayout.Height(height));
-			update_window_rect(r);
+			return GUILayout.Window(GetInstanceID(), 
+			                        WindowPos, 
+			                        main_window, 
+			                        "", Styles.no_window,
+			                        GUILayout.Width(width),
+			                        GUILayout.Height(height));
 		}
 	}
 }
