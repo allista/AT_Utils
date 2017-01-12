@@ -87,6 +87,7 @@ namespace ThrottleControlledAvionics
 
 		static Coordinates Search(CelestialBody body, Ray mouseRay)
 		{
+			if(body == null || body.pqsController == null) return null;
 			Vector3d relSurfacePosition;
 			Vector3d relOrigin = mouseRay.origin - body.position;
 			double curRadius = body.pqsController.radiusMax;
@@ -125,6 +126,7 @@ namespace ThrottleControlledAvionics
 
 		public static Coordinates GetAtPointer(CelestialBody body)
 		{
+			if(body == null) return null;
 			var mouseRay = PlanetariumCamera.Camera.ScreenPointToRay(Input.mousePosition);
 			mouseRay.origin = ScaledSpace.ScaledToLocalSpace(mouseRay.origin);
 			return Search(body, mouseRay);
