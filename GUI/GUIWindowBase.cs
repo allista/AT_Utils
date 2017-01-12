@@ -160,10 +160,10 @@ namespace AT_Utils
 
 		public virtual void OnDestroy()
 		{
+			UnlockControls();
 			subwindows.ForEach(Destroy);
 			GameEvents.onHideUI.Remove(onHideUI);
 			GameEvents.onShowUI.Remove(onShowUI);
-			UnlockControls();
 		}
 
 		#region GUI Lock
