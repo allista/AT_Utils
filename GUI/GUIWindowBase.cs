@@ -133,7 +133,8 @@ namespace AT_Utils
 
 		[ConfigOption] protected bool window_enabled = true;
 		public bool WindowEnabled { get { return window_enabled; } }
-		public bool doShow { get { return window_enabled && HUD_enabled; } }
+		public bool doShow { get { return level_loaded && window_enabled && HUD_enabled; } }
+		protected static bool level_loaded;
 
 		protected virtual bool can_draw() { return true; }
 
@@ -148,6 +149,9 @@ namespace AT_Utils
 		protected virtual void onShowUI() { HUD_enabled = true; update_content(); }
 		protected virtual void onHideUI() { HUD_enabled = false; update_content(); }
 
+		protected void onLevelLoaded(GameScenes scene) { level_loaded = true; }
+		protected void onGameSceneLoad(GameScenes scene) { level_loaded = false; }
+
 		protected virtual void update_content() {}
 
 		public virtual void Awake()
@@ -158,6 +162,8 @@ namespace AT_Utils
 			init_subwindows();
 			GameEvents.onHideUI.Add(onHideUI);
 			GameEvents.onShowUI.Add(onShowUI);
+			GameEvents.onLevelWasLoadedGUIReady.Add(onLevelLoaded);
+			GameEvents.onGameSceneLoadRequested.Add(onGameSceneLoad);
 		}
 
 		public virtual void OnDestroy()
@@ -166,6 +172,8 @@ namespace AT_Utils
 			subwindows.ForEach(Destroy);
 			GameEvents.onHideUI.Remove(onHideUI);
 			GameEvents.onShowUI.Remove(onShowUI);
+			GameEvents.onLevelWasLoadedGUIReady.Remove(onLevelLoaded);
+			GameEvents.onGameSceneLoadRequested.Remove(onGameSceneLoad);
 		}
 
 		#region GUI Lock
