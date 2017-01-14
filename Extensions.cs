@@ -718,6 +718,21 @@ namespace AT_Utils
 		public static bool PartsStarted(this Vessel v)
 		{ return v.parts.TrueForAll(p => p.started); }
 
+		public static bool InOrbit(this Vessel v)
+		{
+			return !v.LandedOrSplashed &&
+				(v.situation == Vessel.Situations.ORBITING ||
+				 v.situation == Vessel.Situations.SUB_ORBITAL ||
+				 v.situation == Vessel.Situations.ESCAPING);
+		}
+
+		public static bool OnPlanet(this Vessel v)
+		{ 
+			return v.LandedOrSplashed ||
+				v.situation != Vessel.Situations.ORBITING &&
+				v.situation != Vessel.Situations.ESCAPING;
+		}
+
 		public static bool HasLaunchClamp(this IShipconstruct ship)
 		{
 			foreach(Part p in ship.Parts)
