@@ -1,9 +1,35 @@
 #AT Utils ChangeLog
 
-* **v1.3.1.1**
+* **v1.4.0**
+    * Added no_window style for borderless, titleless transparent window.
+    * Fixed PartIsPurchased for ScienceSandbox mode.
+    * **TooltipManager** is now a KSPAddon and is drawing tooltips above everything by itself.
+    * Reimplemented **GUIWindowBase** framework:
+        * To save some field in the GUI_CFG, this field has to be tagged with
+        * ConfigOption attribute. The Load/SaveConfig handle such fields using Reflection.
+        * Added subwindows framework: any field that is a GUIWindowBase itself is automaticaly initialized in Awake and its Save/LoadConfig methods are called when needed.
+        * ALL GUIWindowBase, being MonoBehaviour as they are, have to be instantiated using GameObject.AddComponent, not the new keyword. For subwindows this is done automatically. For any GUIWindowBase fields in other classes this should be done by hand.
+        * GUIWindowBase tracks scene changes to hide itself when no UI should be shown.
+        * Added Move method.
+        * window_enabled is true by default.
+        * UnlockControls unlocks controls for all subwindows.
+        * Moved Show and Toggle methods from AddonWindowBase here.
+        * Moved can_draw() from AddonWindowBase here.
+        * Renamed AddonWindowBase.Show/Toggle static methods to ShowInstance/ToggleInstance. The instance itself is made public and is now called Instance.
+        * Added AddonWindowBase.Show/ToggleWithButton static methods to handle AppLauncher buttons.
+    * SimpleDialog uses rich_label style.
+    * Added **CompoundWindow** framework.
+        * Added AnchoredWindow, SubWindow and CompoundWindow base classes.
+        * Added SubwindowSpec attribute to control SubWindow rendering.
+        * Added FloatingWindow as a CompoundWindow subclass.
+        * GUIWindowBase:
+    * Fixed NRE in Coordinates.GetAtPointer/Search methods.
+    * Added InOrbit/OnPlanet Vessel extension methods.
+
+* v1.3.1.1
     * Numerous small bugfixes.
 
-* **v1.3.1**
+* v1.3.1
 	* Moved CrewTransferBatch from Hangar here.
     * Fixed resource transfer UI.
     * Removed IsPhysicallySignificant as it was obsolete.
