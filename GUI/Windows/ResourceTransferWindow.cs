@@ -20,13 +20,17 @@ namespace AT_Utils
 		const int res_line_height = 40;
 
 		public bool transferNow { get; private set; } = false;
-		public bool Closed { get { return transferNow || closed; } }
-		bool closed;
 
 		public ResourceTransferWindow()
 		{
 			width = 600;
 			height = 100;
+		}
+
+		public override void Awake()
+		{
+			base.Awake();
+			Show(false);
 		}
 		
 		static float ResourceLine(string label, float fraction, ResourceManifest res)
@@ -91,8 +95,12 @@ namespace AT_Utils
 			} 
 			GUILayout.EndScrollView();
 			GUILayout.BeginHorizontal();
-			closed = GUILayout.Button("Close", Styles.close_button, GUILayout.ExpandWidth(true));
-			transferNow = GUILayout.Button("Transfer now", Styles.active_button, GUILayout.ExpandWidth(true));
+			if(GUILayout.Button("Close", Styles.close_button, GUILayout.ExpandWidth(true))) Show(false);
+			if(GUILayout.Button("Transfer now", Styles.active_button, GUILayout.ExpandWidth(true)))
+			{
+				transferNow = true;
+				Show(false);
+			}
 			GUILayout.EndHorizontal();
 			GUILayout.EndVertical();
 			TooltipsAndDragWindow();
@@ -100,14 +108,17 @@ namespace AT_Utils
 		
 		public void Draw(string title, List<ResourceManifest> resourceTransferList)
 		{
-			LockControls();
-			transfer_list = resourceTransferList;
-			WindowPos = GUILayout.Window(GetInstanceID(), 
-			                             WindowPos, TransferWindow,
-			                             title, 
-			                             GUILayout.Width(width),
-			                             GUILayout.Height(height)).clampToScreen();
-			if(Closed) UnlockControls();
+			if(doShow)
+			{
+				LockControls();
+				transfer_list = resourceTransferList;
+				WindowPos = GUILayout.Window(GetInstanceID(), 
+				                             WindowPos, TransferWindow,
+				                             title, 
+				                             GUILayout.Width(width),
+				                             GUILayout.Height(height)).clampToScreen();
+			}
+			else UnlockControls();
 		}
 	}
 }

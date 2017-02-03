@@ -90,7 +90,6 @@ namespace AT_Utils
 		protected void place_components()
 		{
 			var anchor = AnchorPos;
-			var scale = new Vector2(WindowPos.width, WindowPos.height);
 			foreach(var sw in specs)
 			{
 				sw.Key.Anchor = sw.Value.Anchor;
@@ -127,7 +126,7 @@ namespace AT_Utils
 		public override Rect Draw()
 		{
 			var ret = default(Rect);
-			if(doShow && can_draw()) 
+			if(doShow) 
 			{
 				//save current anchor position and window rect
 				var old_anchor = AnchorPos;

@@ -133,7 +133,7 @@ namespace AT_Utils
 
 		[ConfigOption] protected bool window_enabled = true;
 		public bool WindowEnabled { get { return window_enabled; } }
-		public bool doShow { get { return level_loaded && window_enabled && HUD_enabled; } }
+		public bool doShow { get { return level_loaded && window_enabled && HUD_enabled && can_draw(); } }
 		protected static bool level_loaded;
 
 		protected virtual bool can_draw() { return true; }

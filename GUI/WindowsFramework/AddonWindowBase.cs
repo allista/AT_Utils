@@ -34,15 +34,15 @@ namespace AT_Utils
 			{
 				if(show)
 				{
-					if(Instance.window_enabled) 
-						button.SetTrue(false);
-					else Instance.Show(true);
+					if(!Instance.window_enabled) 
+						Instance.Show(true);
+					button.SetTrue(false);
 				}
 				else
 				{
 					if(Instance.window_enabled) 
 						Instance.Show(false); 
-					else button.SetTrue(false);
+					button.SetFalse(false);
 				}
 			}
 		}
@@ -83,7 +83,7 @@ namespace AT_Utils
 		public virtual void OnGUI()
 		{
 			if(Event.current.type != EventType.Layout && Event.current.type != EventType.Repaint) return;
-			if(doShow && can_draw()) 
+			if(doShow) 
 			{
 				Styles.Init();
 				draw_gui();

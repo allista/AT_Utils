@@ -17,11 +17,15 @@ namespace AT_Utils
 		List<ProtoCrewMember> crew;
 		List<ProtoCrewMember> selected;
 
-		public bool Closed { get; private set; }
-
 		public CrewTransferWindow()
 		{
 			width = 250; height = 150;
+		}
+
+		public override void Awake()
+		{
+			base.Awake();
+			Show(false);
 		}
 		
 		Vector2 scroll_view = Vector2.zero;
@@ -42,7 +46,7 @@ namespace AT_Utils
             }
             GUILayout.EndVertical();
             GUILayout.EndScrollView();
-			Closed = GUILayout.Button("Close", Styles.close_button, GUILayout.ExpandWidth(true));
+			if(GUILayout.Button("Close", Styles.close_button, GUILayout.ExpandWidth(true))) Show(false);
 			GUILayout.EndVertical();
 			TooltipsAndDragWindow();
         }
@@ -51,15 +55,18 @@ namespace AT_Utils
 		                 List<ProtoCrewMember> _selected, 
 		                 int _crew_capacity)
 		{
-			crew = _crew;
-			selected = _selected;
-			CrewCapacity = _crew_capacity;
-			LockControls();
-			WindowPos = GUILayout.Window(GetInstanceID(), 
-			                             WindowPos, TransferWindow,
-										 string.Format("Vessel Crew {0}/{1}", selected.Count, CrewCapacity),
-			                             GUILayout.Width(width), GUILayout.Height(height)).clampToScreen();
-			if(Closed) UnlockControls();
+			if(doShow)
+			{
+				crew = _crew;
+				selected = _selected;
+				CrewCapacity = _crew_capacity;
+				LockControls();
+				WindowPos = GUILayout.Window(GetInstanceID(), 
+				                             WindowPos, TransferWindow,
+											 string.Format("Vessel Crew {0}/{1}", selected.Count, CrewCapacity),
+				                             GUILayout.Width(width), GUILayout.Height(height)).clampToScreen();
+			}
+			else UnlockControls();
 		}
 	}
 }

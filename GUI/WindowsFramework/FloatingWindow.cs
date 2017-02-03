@@ -22,8 +22,8 @@ namespace AT_Utils
 		void draw_anchor()
 		{
 			GUILayout.Label(anchor_content, Styles.green, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
-			if(Event.current.type == EventType.Repaint)
-				moving = GUILayoutUtility.GetLastRect().Contains(Utils.GetMousePosition(WindowPos));
+			if(Event.current.type == EventType.Repaint) 
+				moving = Utils.MouseInLastElement();
 		}
 
 		protected abstract void DrawContent();

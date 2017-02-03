@@ -26,14 +26,14 @@ namespace AT_Utils
 
 		public virtual Rect Draw()
 		{
-			if(doShow && can_draw())
+			if(doShow)
 			{
 				LockControls();
 				var r = DrawWindow();
 				update_window_rect(r);
 				return WindowPos;
 			}
-			else UnlockControls();
+			UnlockControls();
 			return default(Rect);
 		}
 

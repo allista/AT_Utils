@@ -15,10 +15,31 @@ namespace AT_Utils
 {
 	public static partial class Utils
 	{
+		/// <summary>
+		/// Gets the mouse position relative to the window Rect.
+		/// </summary>
+		/// <returns>The mouse position.</returns>
+		/// <param name="window">Rect of the window.</param>
 		public static Vector2 GetMousePosition(Rect window) 
 		{
 			var mouse_pos = Input.mousePosition;
 			return new Vector2(mouse_pos.x-window.x, Screen.height-mouse_pos.y-window.y).clampToScreen();
+		}
+
+		/// <summary>
+		/// Checks if the mouse pointer hovers over the last drawn GUILayout element.
+		/// Should be called only if(Event.current.type == EventType.Repaint)
+		/// </summary>
+		/// <returns><c>true</c>, if mouse is over the last element, <c>false</c> otherwise.</returns>
+		public static bool MouseInLastElement()
+		{
+			var rect = GUILayoutUtility.GetLastRect();
+			var mousePos = Input.mousePosition;
+			mousePos.y = Screen.height - mousePos.y;
+			Vector2 clippedMousePos = Event.current.mousePosition;
+			rect.x += mousePos.x - clippedMousePos.x;
+			rect.y += mousePos.y - clippedMousePos.y;
+			return rect.Contains(mousePos);
 		}
 
 		public static float FloatSlider(string name, float value, float min, float max, string format="F1", int label_width = -1, string tooltip = "")
@@ -121,18 +142,18 @@ namespace AT_Utils
 
 		#region ControlLock
 		//modified from Kerbal Alarm Clock mod
-		public static void LockEditor(string LockName, bool Lock=true)
+		public static void LockControls(string LockName, bool Lock=true)
 		{
-			if(Lock && InputLockManager.GetControlLock(LockName) != ControlTypes.EDITOR_LOCK)
-				InputLockManager.SetControlLock(ControlTypes.EDITOR_LOCK, LockName);
-			else if(!Lock && InputLockManager.GetControlLock(LockName) == ControlTypes.EDITOR_LOCK) 
+			if(Lock && InputLockManager.GetControlLock(LockName) != ControlTypes.ALLBUTCAMERAS)
+				InputLockManager.SetControlLock(ControlTypes.ALLBUTCAMERAS, LockName);
+			else if(!Lock && InputLockManager.GetControlLock(LockName) == ControlTypes.ALLBUTCAMERAS) 
 				InputLockManager.RemoveControlLock(LockName);
 		}
 
 		public static void LockIfMouseOver(string LockName, Rect WindowRect, bool Lock=true)
 		{
 			Lock &= WindowRect.Contains(Event.current.mousePosition);
-			LockEditor(LockName, Lock);
+			LockControls(LockName, Lock);
 		}
 
 		public static void UpdatePartMenu(this Part part)
