@@ -677,6 +677,13 @@ namespace AT_Utils
 			}
 			return _state;
 		}
+
+		public static void HighlightAlways(this Part p, Color c)
+		{
+			p.highlightColor = c;
+			p.RecurseHighlight = false;
+			p.SetHighlightType(Part.HighlightType.AlwaysOn);
+		}
 		#endregion
 	}
 
@@ -810,8 +817,9 @@ namespace AT_Utils
 
 		public static float Radius(this Vessel vessel)
 		{ 
-			if(!vessel.loaded) return (float)Math.Pow(vessel.totalMass, 1/3.0);
-			return vessel.Bounds(vessel.ReferenceTransform).size.magnitude;
+			if(!vessel.loaded) return (float)Math.Pow(vessel.GetTotalMass()	, 1/3.0);
+			var bounds = vessel.Bounds(vessel.ReferenceTransform);
+			return bounds.size.magnitude+bounds.center.magnitude;
 		}
 	}
 
