@@ -47,7 +47,7 @@ namespace AT_Utils
 
 		public static string[] ParseLine(string line, char[] delims, bool trim = true)
 		{
-			if(string.IsNullOrEmpty(line)) return null;
+			if(string.IsNullOrEmpty(line)) return new string[]{};
 			var array = line.Split(delims, StringSplitOptions.RemoveEmptyEntries);
 			if(trim) { for(int i = 0, len = array.Length; i < len; i++) array[i] = array[i].Trim(); }
 			return array;
