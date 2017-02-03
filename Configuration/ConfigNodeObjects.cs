@@ -38,6 +38,9 @@ namespace AT_Utils
 		protected bool not_persistant(FieldInfo fi)
 		{ return fi.GetCustomAttributes(typeof(Persistent), true).Length == 0; }
 
+		T get_or_create<T>(FieldInfo fi) where T : class
+		{ return (fi.GetValue(this) ?? Activator.CreateInstance(fi.FieldType)) as T; }
+
 		virtual public void Load(ConfigNode node)
 		{ 
 			ConfigNode.LoadObjectFromConfig(this, node);
@@ -46,21 +49,17 @@ namespace AT_Utils
 				if(not_persistant(fi)) continue;
 				var n = node.GetNode(fi.Name);
 				if(n == null) continue;
-				if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
-					fi.SetValue(this, n.CreateCopy());
-				else if(fi.FieldType.GetInterface(cnode_name) != null)
+				//restore IConfigNodes
+				if(fi.FieldType.GetInterface(cnode_name) != null)
 				{
-					var f = fi.GetValue(this) as IConfigNode;
-					if(f == null) 
-					{
-						var constructor = fi.FieldType.GetConstructor(Type.EmptyTypes);
-						if(constructor == null) continue;
-						f = constructor.Invoke(null) as IConfigNode;
-						if(f == null) continue;
-					}
+					var f = get_or_create<IConfigNode>(fi);
+					if(f == null) continue;
 					f.Load(n);
 					fi.SetValue(this, f);
 				}
+				//restore ConfigNodes
+				else if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
+					fi.SetValue(this, n.CreateCopy());
 			}
 		}
 
@@ -84,15 +83,17 @@ namespace AT_Utils
 			foreach(var fi in GetType().GetFields())
 			{
 				if(not_persistant(fi)) continue;
-				if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
-				{
-					var f = fi.GetValue(this) as ConfigNode;
-					if(f != null) get_field_node(fi, node).AddData(f);
-				}
-				else if(fi.FieldType.GetInterface(cnode_name) != null)
+				//save all IConfigNodes
+				if(fi.FieldType.GetInterface(cnode_name) != null)
 				{
 					var f = fi.GetValue(this) as IConfigNode;
 					if(f != null) f.Save(get_field_node(fi, node));
+				}
+				//save ConfigNodes
+				else if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
+				{
+					var f = fi.GetValue(this) as ConfigNode;
+					if(f != null) get_field_node(fi, node).AddData(f);
 				}
 			}
 		}
