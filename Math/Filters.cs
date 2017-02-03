@@ -461,6 +461,16 @@ namespace AT_Utils
 			_old = EqualityComparer<T>.Default.Equals(old, default(T)) ? cur : old;
 		}
 
+		public bool Empty 
+		{
+			get
+			{
+				return 
+					EqualityComparer<T>.Default.Equals(_current, default(T)) &&
+					EqualityComparer<T>.Default.Equals(_old, default(T));
+			}
+		}
+
 		public static implicit operator T(State<T> s) { return s._current; }
 
 		public override string ToString()
