@@ -5,6 +5,7 @@
 //
 //  Copyright (c) 2017 Allis Tauri
 
+using System;
 using UnityEngine;
 
 namespace AT_Utils
@@ -13,6 +14,36 @@ namespace AT_Utils
 	public class TooltipManager : MonoBehaviour
 	{
 		static string tooltip = "";
+		static int max_width = Math.Max(Screen.width/6, 200);
+
+		static Rect get_tooltip_rect(Vector2 mousePos)
+		{
+			var content = new GUIContent(tooltip);
+			var size = Styles.tooltip.CalcSize(content);
+			if(size.x > max_width)
+			{
+				size.x = max_width;
+				size.y = Styles.tooltip.CalcHeight(content, max_width);
+			}
+			return new Rect(mousePos.x, mousePos.y + 20, size.x, size.y);
+		}
+
+		static Rect clamp_to_screen(Rect rect, Rect orig, Vector2 mousePos)
+		{
+			//clamping moved the tooltip up -> reposition above mouse cursor
+			if(rect.y < orig.y) 
+			{
+				rect.y = mousePos.y - rect.height - 5;
+				rect = rect.clampToScreen();
+			}
+			//clamping moved the tooltip left -> reposition lefto of the mouse cursor
+			if(rect.x < orig.x)
+			{
+				rect.x = mousePos.x - rect.width - 5;
+				rect = rect.clampToScreen();
+			}
+			return rect;
+		}
 
 		/// <summary>
 		/// Gets the tooltip text. Should be called inside WindowFunction.
@@ -36,22 +67,8 @@ namespace AT_Utils
 			GetTooltip();
 			if(string.IsNullOrEmpty(tooltip)) return;
 			var mousePos = Utils.GetMousePosition(window);
-			var size = Styles.tooltip.CalcSize(new GUIContent(tooltip));
-			var rect = new Rect(mousePos.x, mousePos.y + 20, size.x, size.y);
-			Rect orig = rect;
-			rect = rect.clampToWindow(window);
-			//clamping moved the tooltip up -> reposition above mouse cursor
-			if(rect.y < orig.y) 
-			{
-				rect.y = mousePos.y - size.y - 5;
-				rect = rect.clampToScreen();
-			}
-			//clamping moved the tooltip left -> reposition lefto of the mouse cursor
-			if(rect.x < orig.x)
-			{
-				rect.x = mousePos.x - size.x - 5;
-				rect = rect.clampToScreen();
-			}
+			var rect = get_tooltip_rect(mousePos);
+			rect = clamp_to_screen(rect.clampToWindow(window), rect, mousePos);
 			GUI.Label(rect, tooltip, Styles.tooltip);
 		}
 
@@ -63,22 +80,8 @@ namespace AT_Utils
 		{
 			if(string.IsNullOrEmpty(tooltip)) return;
 			var mousePos = new Vector2(Input.mousePosition.x, Screen.height-Input.mousePosition.y);
-			var size = Styles.tooltip.CalcSize(new GUIContent(tooltip));
-			var rect = new Rect(mousePos.x, mousePos.y + 20, size.x, size.y);
-			Rect orig = rect;
-			rect = rect.clampToScreen();
-			//clamping moved the tooltip up -> reposition above mouse cursor
-			if(rect.y < orig.y) 
-			{
-				rect.y = mousePos.y - size.y - 5;
-				rect = rect.clampToScreen();
-			}
-			//clamping moved the tooltip left -> reposition left of the mouse cursor
-			if(rect.x < orig.x)
-			{
-				rect.x = mousePos.x - size.x - 5;
-				rect = rect.clampToScreen();
-			}
+			var rect = get_tooltip_rect(mousePos);
+			rect = clamp_to_screen(rect.clampToScreen(), rect, mousePos);
 			GUI.Label(rect, tooltip, Styles.tooltip);
 		}
 
@@ -86,7 +89,7 @@ namespace AT_Utils
 
 		void OnGUI()
 		{
-			GUI.depth = -1;
+			GUI.depth = -1000;
 			if(GUIWindowBase.HUD_enabled)
 				DrawToolTipOnScreen();
 		}
