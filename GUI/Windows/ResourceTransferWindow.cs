@@ -19,7 +19,7 @@ namespace AT_Utils
 		bool link_lfo_sliders = true;
 		const int res_line_height = 40;
 
-		public bool transferNow { get; private set; } = false;
+        public Action TransferAction = null;
 
 		public ResourceTransferWindow()
 		{
@@ -72,7 +72,6 @@ namespace AT_Utils
 		
 		void TransferWindow(int windowId)
 		{
-			
 			GUILayout.BeginVertical();
 			link_lfo_sliders = GUILayout.Toggle(link_lfo_sliders, "Link LiquidFuel and Oxidizer sliders");
 			var nres = transfer_list.Count;
@@ -98,8 +97,13 @@ namespace AT_Utils
 			if(GUILayout.Button("Close", Styles.close_button, GUILayout.ExpandWidth(true))) Show(false);
 			if(GUILayout.Button("Transfer now", Styles.active_button, GUILayout.ExpandWidth(true)))
 			{
-				transferNow = true;
-				Show(false);
+                if(TransferAction != null) 
+                {
+                    TransferAction();
+                    Show(false);
+                }
+                else 
+                    Utils.Message("No transfer Action provided.\nThis is a bug!");
 			}
 			GUILayout.EndHorizontal();
 			GUILayout.EndVertical();
