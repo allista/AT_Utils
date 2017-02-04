@@ -48,6 +48,17 @@ namespace AT_Utils
 			if(valuesRef != null)
 				Save(valuesRef);
 		}
+
+        public override string ToString()
+        {
+            return Utils.Format(
+                "(res.ref {}, proto.ref {}, have valuesRef: {}, amount {}/{})",
+                resourceRef != null? resourceRef.GetHashCode() : 0, 
+                protoRef != null? protoRef.GetHashCode() : 0, 
+                valuesRef != null, 
+                amount,maxAmount
+            );
+        }
 	}
 
 	public class PartProxy : Dictionary<string, ResourceProxy>
@@ -78,22 +89,13 @@ namespace AT_Utils
 	public class VesselResources
 	{
 		public readonly List<PartProxy> Parts = new List<PartProxy>();
-		public readonly Dictionary<string, List<PartProxy>> Resources = new Dictionary<string, List<PartProxy>>();
+        public readonly ListDict<string, PartProxy> Resources = new ListDict<string, PartProxy>();
 		public List<string> resourcesNames { get { return new List<string>(Resources.Keys); } }
 
 		void add_part_proxy(PartProxy proxy)
 		{
 			Parts.Add(proxy);
-			foreach(var res in proxy)
-			{
-				List<PartProxy> res_parts;
-				if(!Resources.TryGetValue(res.Key, out res_parts))
-				{
-					res_parts = new List<PartProxy>();
-					Resources.Add(res.Key, res_parts);
-				}
-				res_parts.Add(proxy);
-			}
+            proxy.ForEach(res => Resources.Add(res.Key, proxy));
 		}
 
 		public VesselResources(IShipconstruct vessel)
@@ -169,6 +171,15 @@ namespace AT_Utils
 			}
 			return amount;
 		}
+
+        public override string ToString()
+        { 
+            if(Parts.Count == 0) 
+                return "No parts with resources.";
+            var ret = "";
+            Parts.ForEach(p => { if(p.Count > 0) ret += Utils.Format("{}\n", p); });
+            return ret;
+        }
 	}
 	
 	public class ResourceManifest
@@ -185,6 +196,16 @@ namespace AT_Utils
 		
 		public double minAmount;
 		public double maxAmount;
+
+        public override string ToString()
+        {
+            return Utils.Format(
+                "{}: min {}, cur {}, max {}\n" +
+                "transfer: {}",
+                name, minAmount, amount, maxAmount,
+                offset-amount
+            );
+        }
 	}
 
 	public class ResourceManifestList : List<ResourceManifest>
@@ -226,7 +247,7 @@ namespace AT_Utils
 			if(Count == 0) return;
 			foreach(var r in this)
 			{
-				//transfer resource between hangar and protovessel
+				//transfer resource between host and target
 				var a = host.TransferResource(r.name, r.offset-r.amount);
 				a = r.amount-r.offset + a;
 				var b = target.TransferResource(r.name, a);
