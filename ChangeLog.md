@@ -1,5 +1,22 @@
 #AT Utils ChangeLog
 
+* **v1.4.1**
+    * Sorted GUI classes into subfolders. Added SimpleDialog framework.
+    * Included call to GUIWindowBase.can_draw() into doShow property.
+    * Removed Closed fields/property from transfer windows; using WindowEnabled instead.
+    * Fixed AddonWindowBase.ShowWithButton.
+    * Added Utils.MouseInLastElement() method.
+    * Changed default control lock type and renamed LockEditor to LockControls.
+    * Added Part.HighlightAlways extension.
+    * Vessel.Radius extension uses GetTotalMass call instead of totalMass field for unloaded vessels.
+    * Changed scroll-bar styles and tooltip color. Merged InitSkin and InitGUI methods of Styles class.
+    * Fixed tooltips for scroll-views; limited them in width, enabled word-wrap.
+    * Added State.Empty property.
+    * Utils.ParseLine now returns empty array instead of null if argument is empty.
+    * Added SubmoduleResizable module in a separate dll; for @Enceos.
+    * Added ToString overrides to all ResourceProxy classes; using ListDict instead of plane Dictionary in VesselResources.
+    * Removed transferNow flag from ResourceTransferWindow; added TransferAction delegate instead.
+
 * **v1.4.0**
     * Added no_window style for borderless, titleless transparent window.
     * Fixed PartIsPurchased for ScienceSandbox mode.
