@@ -7,4 +7,5 @@ cd $(dirname "$0")
 'GameData/ConfigurableContainers/Parts/*' \
 'GameData/000_AT_Utils/ResourceHack.cfg' \
 '*/AnimatedConverters.dll' \
--i './ConfigurableContainers/GameData'
+-i './ConfigurableContainers/GameData' \
+--dll 000_AT_Utils.dll
