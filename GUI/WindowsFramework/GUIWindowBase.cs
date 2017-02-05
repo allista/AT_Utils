@@ -141,10 +141,11 @@ namespace AT_Utils
 		public virtual void Show(bool show)
 		{
 			window_enabled = show;
+            if(!show) UnlockControls();
 			update_content();
 		}
 
-		public void Toggle()  { Show(!window_enabled); }
+		public void Toggle() { Show(!window_enabled); }
 
 		protected virtual void onShowUI() { HUD_enabled = true; update_content(); }
 		protected virtual void onHideUI() { HUD_enabled = false; update_content(); }
