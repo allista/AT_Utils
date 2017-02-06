@@ -84,7 +84,6 @@ namespace AT_Utils
 
 		public static bool Invalid(this Vector3 v) { return v.IsNaN() || v.IsInf(); }
 
-
 		public static Vector3 CubeNorm(this Vector3 v)
 		{
 			if(v.IsZero()) return v;
@@ -97,13 +96,77 @@ namespace AT_Utils
 			return v/max;
 		}
 
+		public static Vector3d CubeNorm(this Vector3d v)
+		{
+			if(v.IsZero()) return v;
+			var max = -1.0;
+			for(int i = 0; i < 3; i++)
+			{
+				var ai = Math.Abs(v[i]);
+				if(max < ai) max = ai;
+			}
+			return v/max;
+		}
+
 		public static Vector3 Inverse(this Vector3 v, float nan=float.MaxValue) 
 		{ 
 			return new Vector3(
-				v.x.Equals(0)? nan : 1f/v.x, 
-				v.y.Equals(0)? nan : 1f/v.y, 
-				v.z.Equals(0)? nan : 1f/v.z); 
+				v.x.Equals(0)? nan : 1/v.x, 
+				v.y.Equals(0)? nan : 1/v.y, 
+				v.z.Equals(0)? nan : 1/v.z); 
 		}
+
+		public static Vector3d Inverse(this Vector3d v, double nan=double.MaxValue) 
+		{ 
+			return new Vector3d(
+				v.x.Equals(0)? nan : 1/v.x, 
+				v.y.Equals(0)? nan : 1/v.y, 
+				v.z.Equals(0)? nan : 1/v.z); 
+		}
+
+		public static Vector3 ScaleChain(this Vector3 vec, params Vector3[] vectors)
+		{
+			var result = vec;
+			for(int i = 0, vectorsLength = vectors.Length; i < vectorsLength; i++)
+			{
+				var v = vectors[i];
+				result.x *= v.x;
+				result.y *= v.y;
+				result.z *= v.z;
+			}
+			return result;
+		}
+
+		public static Vector3d ScaleChain(this Vector3d vec, params Vector3d[] vectors)
+		{
+			var result = vec;
+			for(int i = 0, vectorsLength = vectors.Length; i < vectorsLength; i++)
+			{
+				var v = vectors[i];
+				result.x *= v.x;
+				result.y *= v.y;
+				result.z *= v.z;
+			}
+			return result;
+		}
+
+		public static Vector3 SquaredComponents(this Vector3 v) 
+		{ return new Vector3(v.x * v.x, v.y * v.y, v.z * v.z); }
+
+		public static Vector3d SquaredComponents(this Vector3d v) 
+		{ return new Vector3d(v.x * v.x, v.y * v.y, v.z * v.z); }
+
+		public static Vector3 SqrtComponents(this Vector3 v) 
+		{ return new Vector3(Mathf.Sqrt(v.x), Mathf.Sqrt(v.y), Mathf.Sqrt(v.z)); }
+
+		public static Vector3d SqrtComponents(this Vector3d v) 
+		{ return new Vector3d(Math.Sqrt(v.x), Math.Sqrt(v.y), Math.Sqrt(v.z)); }
+
+		public static Vector3 PowComponents(this Vector3 v, float pow) 
+		{ return new Vector3(Mathf.Pow(v.x, pow), Mathf.Pow(v.y, pow), Mathf.Pow(v.z, pow)); }
+
+		public static Vector3d PowComponents(this Vector3d v, double pow) 
+		{ return new Vector3d(Math.Pow(v.x, pow), Math.Pow(v.y, pow), Math.Pow(v.z, pow)); }
 
 		public static Vector3 ClampComponents(this Vector3 v, float min, float max) 
 		{ 
@@ -111,6 +174,84 @@ namespace AT_Utils
 			                   Mathf.Clamp(v.y, min, max), 
 			                   Mathf.Clamp(v.z, min, max)); 
 		}
+
+		public static Vector3 ClampComponents(this Vector3 v, Vector3 min, Vector3 max) 
+		{ 
+			return new Vector3(Mathf.Clamp(v.x, min.x, max.x), 
+			                   Mathf.Clamp(v.y, min.y, max.y), 
+			                   Mathf.Clamp(v.z, min.z, max.z)); 
+		}
+
+		public static Vector3 ClampComponentsL(this Vector3 v, Vector3 min) 
+		{ 
+			return new Vector3(Utils.ClampL(v.x, min.x), 
+			                   Utils.ClampL(v.y, min.y), 
+			                   Utils.ClampL(v.z, min.z)); 
+		}
+
+		public static Vector3 ClampComponentsH(this Vector3 v, Vector3 max) 
+		{ 
+			return new Vector3(Utils.ClampH(v.x, max.x), 
+			                   Utils.ClampH(v.y, max.y), 
+			                   Utils.ClampH(v.z, max.z));
+		}
+
+		public static Vector3d ClampComponents(this Vector3d v, double min, double max) 
+		{ 
+			return new Vector3d(Utils.Clamp(v.x, min, max), 
+			                    Utils.Clamp(v.y, min, max), 
+			                    Utils.Clamp(v.z, min, max)); 
+		}
+
+		public static Vector3d ClampComponents(this Vector3d v, Vector3d min, Vector3d max) 
+		{ 
+			return new Vector3d(Utils.Clamp(v.x, min.x, max.x), 
+			                    Utils.Clamp(v.y, min.y, max.y), 
+			                    Utils.Clamp(v.z, min.z, max.z)); 
+		}
+
+		public static Vector3d ClampComponentsH(this Vector3d v, Vector3d max) 
+		{ 
+			return new Vector3d(Utils.ClampH(v.x, max.x), 
+			                    Utils.ClampH(v.y, max.y), 
+			                    Utils.ClampH(v.z, max.z)); 
+		}
+
+		public static Vector3d ClampComponentsL(this Vector3d v, Vector3d min) 
+		{ 
+			return new Vector3d(Utils.ClampL(v.x, min.x), 
+			                    Utils.ClampL(v.y, min.y), 
+			                    Utils.ClampL(v.z, min.z)); 
+		}
+
+		public static Vector3 ClampComponentsH(this Vector3 v, float max) 
+		{ 
+			return new Vector3(Utils.ClampH(v.x, max), 
+			                   Utils.ClampH(v.y, max), 
+			                   Utils.ClampH(v.z, max)); 
+		}
+
+		public static Vector3 ClampComponentsL(this Vector3 v, float min) 
+		{ 
+			return new Vector3(Utils.ClampL(v.x, min), 
+			                   Utils.ClampL(v.y, min), 
+			                   Utils.ClampL(v.z, min)); 
+		}
+
+		public static Vector3d ClampComponentsH(this Vector3d v, double max) 
+		{ 
+			return new Vector3d(Utils.ClampH(v.x, max), 
+			                    Utils.ClampH(v.y, max), 
+			                    Utils.ClampH(v.z, max)); 
+		}
+
+		public static Vector3d ClampComponentsL(this Vector3d v, double min) 
+		{ 
+			return new Vector3d(Utils.ClampL(v.x, min), 
+			                    Utils.ClampL(v.y, min), 
+			                    Utils.ClampL(v.z, min)); 
+		}
+
 
 		public static Vector3 ClampMagnitudeH(this Vector3 v, float max)
 		{ 
@@ -168,6 +309,37 @@ namespace AT_Utils
 				(v.y > v.z? 1 : (v.z < v.x? 2 : 0));
 		}
 
+		public static int MaxI(this Vector3d v)
+		{
+			var maxi = 0;
+			var max  = 0.0;
+			for(int i = 0; i < 3; i++)
+			{
+				if(Math.Abs(v[i]) > Math.Abs(max))
+				{ max = v[i]; maxi = i; }
+			}
+			return maxi;
+		}
+
+		public static int MinI(this Vector3d v)
+		{
+			var mini = 0;
+			var min   = double.MaxValue;
+			for(int i = 0; i < 3; i++)
+			{
+				if(Math.Abs(v[i]) < Math.Abs(min))
+				{ min = v[i]; mini = i; }
+			}
+			return mini;
+		}
+
+		public static int MedI(this Vector3d v)
+		{
+			return v.x < v.y? 
+				(v.x > v.z? 0 : (v.z < v.y? 2 : 1)) : 
+				(v.y > v.z? 1 : (v.z < v.x? 2 : 0));
+		}
+
 		public static Vector3 Component(this Vector3 v, int i)
 		{
 			var ret = Vector3.zero;
@@ -182,16 +354,42 @@ namespace AT_Utils
 			return ret;
 		}
 
+		public static Vector3d Component(this Vector3d v, int i)
+		{
+			var ret = Vector3d.zero;
+			ret[i] = v[i];
+			return ret;
+		}
+
+		public static Vector3d Exclude(this Vector3d v, int i)
+		{
+			var ret = v;
+			ret[i] = 0;
+			return ret;
+		}
+
 		public static Vector3 MaxComponentV(this Vector3 v)
 		{ return v.Component(v.MaxI()); }
 
 		public static Vector3 MinComponentV(this Vector3 v)
 		{ return v.Component(v.MinI()); }
 
+		public static Vector3d MaxComponentV(this Vector3d v)
+		{ return v.Component(v.MaxI()); }
+
+		public static Vector3d MinComponentV(this Vector3d v)
+		{ return v.Component(v.MinI()); }
+
 		public static float MaxComponentF(this Vector3 v)
 		{ return v[v.MaxI()]; }
 
 		public static float MinComponentF(this Vector3 v)
+		{ return v[v.MinI()]; }
+
+		public static double MaxComponentD(this Vector3d v)
+		{ return v[v.MaxI()]; }
+
+		public static double MinComponentD(this Vector3d v)
 		{ return v[v.MinI()]; }
 	}
 
@@ -216,8 +414,11 @@ namespace AT_Utils
 			while(en.MoveNext()) action(en.Current);
 		}
 
+		public static void ForEach<TSource>(this IList<TSource> a, Action<TSource> action)
+		{ for(int i = 0, len = a.Count; i < len; i++) action(a[i]); }
+
 		public static void ForEach<TSource>(this TSource[] a, Action<TSource> action)
-		{ for(int i = 0; i < a.Length; i++) action(a[i]); }
+		{ for(int i = 0, len = a.Length; i < len; i++) action(a[i]); }
 
 		public static TSource Pop<TSource>(this LinkedList<TSource> l)
 		{
@@ -283,6 +484,31 @@ namespace AT_Utils
 				return list[ni];
 			} catch { return default(T); }
 		}
+
+		#region Queue extensions
+		public static void FillFrom<T>(this Queue<T> q, IEnumerable<T> content)
+		{ q.Clear(); content.ForEach(q.Enqueue); }
+
+		public static bool Remove<T>(this Queue<T> q, T item)
+		{ 
+			var count = q.Count;
+			var new_content = q.Where(it => !object.Equals(it, item)).ToList();
+			q.Clear(); new_content.ForEach(q.Enqueue);
+			return q.Count != count;
+		}
+
+		public static bool MoveUp<T>(this Queue<T> q, T up)
+		{
+			if(object.Equals(up, q.Peek())) return false;
+			var new_content = q.ToList();
+			var upi = new_content.IndexOf(up);
+			if(upi < 0) return false;
+			new_content[upi] = new_content[upi-1];
+			new_content[upi-1] = up;
+			q.Clear(); new_content.ForEach(q.Enqueue);
+			return true;
+		}
+		#endregion
 	}
 
 
@@ -291,18 +517,6 @@ namespace AT_Utils
 		#region from MechJeb2 PartExtensions
 		public static bool HasModule<T>(this Part p) where T : PartModule
 		{ return p.Modules.GetModule<T>() != null; }
-
-		public static bool IsPhysicallySignificant(this Part p)
-		{
-			bool physicallySignificant = (p.physicalSignificance != Part.PhysicalSignificance.NONE);
-			// part.PhysicsSignificance is not initialized in the Editor for all part. but physicallySignificant is useful there.
-			if (HighLogic.LoadedSceneIsEditor)
-				physicallySignificant = physicallySignificant && p.PhysicsSignificance != 1;
-			//Landing gear set physicalSignificance = NONE when they enter the flight scene
-			//Launch clamp mass should be ignored.
-			physicallySignificant &= !p.HasModule<ModuleWheelBase>() && !p.HasModule<LaunchClamp>();
-			return physicallySignificant;
-		}
 
 		public static float TotalMass(this Part p) { return p.mass+p.GetResourceMass(); }
 		#endregion
@@ -360,18 +574,20 @@ namespace AT_Utils
 		#endregion
 
 		#region Resources and Phys-Props
-		public static float TotalCost(this Part p) { return p.partInfo != null? p.partInfo.cost : 0; }
+		public static float TotalCost(this Part p) { return p.partInfo != null? p.partInfo.cost+p.GetModuleCosts(p.partInfo.cost) : 0; }
 
 		public static float ResourcesCost(this Part p) 
 		{ 
-			return (float)p.Resources.Cast<PartResource>()
-				.Aggregate(0.0, (a, b) => a + b.amount * b.info.unitCost); 
+			var cost = 0.0;
+			p.Resources.ForEach(r => cost += r.amount * r.info.unitCost);
+			return (float)cost;
 		}
 
 		public static float MaxResourcesCost(this Part p) 
 		{ 
-			return (float)p.Resources.Cast<PartResource>()
-				.Aggregate(0.0, (a, b) => a + b.maxAmount * b.info.unitCost); 
+			var cost = 0.0;
+			p.Resources.ForEach(r => cost += r.maxAmount * r.info.unitCost);
+			return (float)cost;
 		}
 
 		public static float DryCost(this Part p) { return p.TotalCost() - p.MaxResourcesCost(); }
@@ -461,6 +677,13 @@ namespace AT_Utils
 			}
 			return _state;
 		}
+
+		public static void HighlightAlways(this Part p, Color c)
+		{
+			p.highlightColor = c;
+			p.RecurseHighlight = false;
+			p.SetHighlightType(Part.HighlightType.AlwaysOn);
+		}
 		#endregion
 	}
 
@@ -502,11 +725,42 @@ namespace AT_Utils
 		public static bool PartsStarted(this Vessel v)
 		{ return v.parts.TrueForAll(p => p.started); }
 
+		public static bool InOrbit(this Vessel v)
+		{
+			return !v.LandedOrSplashed &&
+				(v.situation == Vessel.Situations.ORBITING ||
+				 v.situation == Vessel.Situations.SUB_ORBITAL ||
+				 v.situation == Vessel.Situations.ESCAPING);
+		}
+
+		public static bool OnPlanet(this Vessel v)
+		{ 
+			return v.LandedOrSplashed ||
+				v.situation != Vessel.Situations.ORBITING &&
+				v.situation != Vessel.Situations.ESCAPING;
+		}
+
 		public static bool HasLaunchClamp(this IShipconstruct ship)
 		{
 			foreach(Part p in ship.Parts)
 			{ if(p.HasModule<LaunchClamp>()) return true; }
 			return false;
+		}
+
+		public static void Unload(this ShipConstruct construct)
+		{
+			if(construct == null) return;
+			for(int i = 0, count = construct.Parts.Count; i < count; i++)
+			{
+				Part p = construct.Parts[i];
+				if(p != null)
+				{
+					p.OnDelete();
+					if(p.gameObject != null)
+						UnityEngine.Object.Destroy(p.gameObject);
+				}
+			}
+			construct.Clear();
 		}
 
 		public static Bounds Bounds(this Vessel vessel, Transform refT)
@@ -563,8 +817,9 @@ namespace AT_Utils
 
 		public static float Radius(this Vessel vessel)
 		{ 
-			if(!vessel.loaded) return (float)Math.Pow(vessel.totalMass, 1/3.0);
-			return vessel.Bounds(vessel.ReferenceTransform).size.magnitude;
+			if(!vessel.loaded) return (float)Math.Pow(vessel.GetTotalMass()	, 1/3.0);
+			var bounds = vessel.Bounds(vessel.ReferenceTransform);
+			return bounds.size.magnitude+bounds.center.magnitude;
 		}
 	}
 
@@ -586,6 +841,12 @@ namespace AT_Utils
 			T = Body.GetTemperature(Alt);
 			Rho = Body.GetDensity(P, T);
 			Mach1 = Body.GetSpeedOfSound(P, Rho);
+		}
+
+		public override string ToString()
+		{
+			return Utils.Format("{} Atmosphere Params at Alt: {} m\nP {}, T {}, Rho {}, Mach1 {} m/s",
+			                    Body.name, Alt, P, T, Rho, Mach1);
 		}
 	}
 

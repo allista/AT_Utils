@@ -27,15 +27,14 @@ namespace AT_Utils
 		protected readonly int bins;  //number of bins in the frequency domain; the resolution
 		protected readonly int window; //a sliding time-window that is scanned for the oscillations
 
-		protected readonly LowPassFilterD detection_filter;
 		protected readonly LinkedList<double> time;
 		protected readonly LinkedList<T> samples;
 		public readonly double[] freqs;
 		public readonly T[] spectrum;
 
-		public double Value { get { return detection_filter.Value; } }
+		public abstract T Value { get; }
 
-		protected OscillationDetector(double low_freq, double high_freq, int freq_bins, int time_window, float smoothing)
+		protected OscillationDetector(double low_freq, double high_freq, int freq_bins, int time_window)
 		{
 			//fill frequencies
 			bins = freq_bins;
@@ -50,8 +49,6 @@ namespace AT_Utils
 			samples = new LinkedList<T>();
 			//output
 			spectrum = new T[bins];
-			detection_filter = new LowPassFilterD();
-			detection_filter.Tau = smoothing;
 		}
 
 		/// <summary>
@@ -78,10 +75,18 @@ namespace AT_Utils
 		protected abstract T next(int k, T s, double t, T s0, double t0);
 
 		/// <summary>
-		/// True if the Furier bin indicates the presence of oscillation.
+		/// Compares absolute value of a Furier bin with the max value and sets the latter.
 		/// </summary>
 		/// <param name="s">The value of a Furier bin.</param>
-		protected abstract bool has_oscillation(T s);
+		/// <param name="max">Current maximum value.</param>
+		protected abstract void max_magnitude(T s, ref T max);
+
+		/// <summary>
+		/// Filters the maximum value of the specter.
+		/// </summary>
+		/// <returns>The filtered value.</returns>
+		/// <param name="max">The value to filter.</param>
+		protected abstract T filter_max_value(T max);
 
 		/// <summary>
 		/// Update detector's state.
@@ -90,20 +95,20 @@ namespace AT_Utils
 		/// <param name="dt">The time interval that has passed from the previous update.</param>
 		/// <returns>A number in [0:1] interval that indicates the presence of oscillations in
 		/// the signal in given time window within frequency limits.</returns>
-		public double Update(T input, double dt)
+		public T Update(T input, double dt)
 		{
 			if(time.Count == 0) time.AddFirst(0);
 			else time.AddFirst(time.First.Value+dt);
 			samples.AddFirst(norm(input));
 			var s = samples.First.Value;
 			var t = time.First.Value;
-			var flag = false;
+			var max = default(T);
 			if(samples.Count <= window)
 			{
 				for(int k = 0; k < bins; k++)
 				{
 					spectrum[k] = next(k, s, t);
-					flag |= has_oscillation(spectrum[k]);
+					max_magnitude(spectrum[k], ref max);
 				}
 			}
 			else
@@ -113,10 +118,10 @@ namespace AT_Utils
 				for(int k = 0; k < bins; k++)
 				{
 					spectrum[k] = next(k, s, t, s0, t0);
-					flag |= has_oscillation(spectrum[k]);
+					max_magnitude(spectrum[k], ref max);
 				}
 			}
-			return detection_filter.Update(flag? 1 : 0);
+			return filter_max_value(max);
 		}
 
 		public override string ToString()
@@ -132,13 +137,15 @@ namespace AT_Utils
 
 	public class OscillationDetectorD : OscillationDetector<double>
 	{
-		public double Threshold;
+		protected LowPassFilterD max_filter = new LowPassFilterD();
 
-		public OscillationDetectorD(double low_freq, double high_freq, int freq_bins, int time_window, float smoothing, double threshold)
-			: base(low_freq, high_freq, freq_bins, time_window, smoothing) 
-		{ Threshold = threshold; }
+		public override double Value { get { return max_filter.Value; } }
 
-		protected override double norm(double val) { return val/bins; }
+		public OscillationDetectorD(double low_freq, double high_freq, int freq_bins, int time_window, float smoothing)
+			: base(low_freq, high_freq, freq_bins, time_window) 
+		{ max_filter.Tau = smoothing; }
+
+		protected override double norm(double val) { return val/window; }
 
 		protected override double next(int k, double s, double t)
 		{ 
@@ -151,21 +158,64 @@ namespace AT_Utils
 			return spectrum[k] + s * Math.Cos(f * t) - s0 * Math.Cos(f * t0);
 		}
 
-		protected override bool has_oscillation(double s)
+		protected override void max_magnitude(double s, ref double max)
 		{
-			return Math.Abs(s) > Threshold;
+			var abs = Math.Abs(s);
+			if(abs > max) max = abs;
+		}
+
+		protected override double filter_max_value(double max)
+		{
+			return max_filter.Update(max);
+		}
+	}
+
+	public class OscillationDetectorF : OscillationDetector<float>
+	{
+		protected LowPassFilterF max_filter = new LowPassFilterF();
+
+		public override float Value { get { return max_filter.Value; } }
+
+		public OscillationDetectorF(double low_freq, double high_freq, int freq_bins, int time_window, float smoothing)
+			: base(low_freq, high_freq, freq_bins, time_window) 
+		{ max_filter.Tau = smoothing; }
+
+		protected override float norm(float val) { return val/window; }
+
+		protected override float next(int k, float s, double t)
+		{ 
+			return spectrum[k] + s * (float)Math.Cos(freqs[k] * t); 
+		}
+
+		protected override float next(int k, float s, double t, float s0, double t0)
+		{
+			var f = freqs[k];
+			return spectrum[k] + s * (float)Math.Cos(f * t) - s0 * (float)Math.Cos(f * t0);
+		}
+
+		protected override void max_magnitude(float s, ref float max)
+		{
+			var abs = Math.Abs(s);
+			if(abs > max) max = abs;
+		}
+
+		protected override float filter_max_value(float max)
+		{
+			return max_filter.Update(max);
 		}
 	}
 
 	public class OscillationDetectorV : OscillationDetector<Vector3>
 	{
-		public double Threshold;
+		protected LowPassFilterV max_filter = new LowPassFilterV();
 
-		public OscillationDetectorV(double low_freq, double high_freq, int freq_bins, int time_window, float smoothing, double threshold)
-			: base(low_freq, high_freq, freq_bins, time_window, smoothing) 
-		{ Threshold = threshold; }
+		public override Vector3 Value { get { return max_filter.Value; } }
 
-		protected override Vector3 norm(Vector3 val) { return val/bins; }
+		public OscillationDetectorV(double low_freq, double high_freq, int freq_bins, int time_window, float smoothing)
+			: base(low_freq, high_freq, freq_bins, time_window) 
+		{ max_filter.Tau = smoothing; }
+
+		protected override Vector3 norm(Vector3 val) { return val/window; }
 
 		protected override Vector3 next(int k, Vector3 s, double t)
 		{ 
@@ -178,11 +228,49 @@ namespace AT_Utils
 			return spectrum[k] + s * (float)Math.Cos(f * t) - s0 * (float)Math.Cos(f * t0);
 		}
 
-		protected override bool has_oscillation(Vector3 s)
+		protected override void max_magnitude(Vector3 s, ref Vector3 max)
 		{
-			return Math.Abs(s.x) > Threshold ||
-				Math.Abs(s.y) > Threshold ||
-				Math.Abs(s.z) > Threshold;
+			if(s.sqrMagnitude > max.sqrMagnitude) max = s;
+		}
+
+		protected override Vector3 filter_max_value(Vector3 max)
+		{
+			return max_filter.Update(max);
+		}
+	}
+
+	public class OscillationDetector3D
+	{
+		readonly OscillationDetectorD x_OD, y_OD, z_OD;
+
+		public Vector3d Value { get; private set; }
+
+		public OscillationDetector3D(double low_freq, double high_freq, int freq_bins, int time_window, float smoothing)
+		{ 
+			x_OD = new OscillationDetectorD(low_freq, high_freq, freq_bins, time_window, smoothing);
+			y_OD = new OscillationDetectorD(low_freq, high_freq, freq_bins, time_window, smoothing);
+			z_OD = new OscillationDetectorD(low_freq, high_freq, freq_bins, time_window, smoothing);
+		}
+
+		public Vector3d Update(Vector3d input, double dt)
+		{
+			Value = new Vector3d(x_OD.Update(input.x, dt),
+			             	     y_OD.Update(input.y, dt),
+			                     z_OD.Update(input.z, dt));
+			return Value;
+		}
+
+		public Vector3 Update(Vector3 input, double dt)
+		{ return Update((Vector3d)input, dt); }
+
+		public override string ToString()
+		{
+//			return Utils.Format("OscillationDetector3D: Threshold={}, Value={}", Threshold, Value);
+			return Utils.Format("OscillationDetector3D: Value={}\n" +
+			                    "\nx_OD:\n{}" +
+			                    "\ny_OD:\n{}" +
+			                    "\nz_OD:\n{}", 
+			                    Value, x_OD, y_OD, z_OD);
 		}
 	}
 }

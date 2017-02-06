@@ -19,10 +19,27 @@ namespace AT_Utils
 
 		static readonly string cnode_name = typeof(IConfigNode).Name;
 
-		public string NodeName { get { return GetType().GetField("NODE_NAME").GetValue(null) as string; } }
+		string node_name = null;
+		public string NodeName 
+		{ 
+			get 
+			{ 
+				if(node_name == null)
+				{
+					var T = GetType();
+					var name_field = T.GetField("NODE_NAME", BindingFlags.Public|BindingFlags.Static|BindingFlags.FlattenHierarchy);
+					node_name = name_field != null? name_field.GetValue(null) as string : T.Name;
+//					Utils.Log("{}, field {}, name {}", T.Name, name_field, node_name);//debug
+				}
+				return node_name;
+			}
+		}
 
 		protected bool not_persistant(FieldInfo fi)
 		{ return fi.GetCustomAttributes(typeof(Persistent), true).Length == 0; }
+
+		T get_or_create<T>(FieldInfo fi) where T : class
+		{ return (fi.GetValue(this) ?? Activator.CreateInstance(fi.FieldType)) as T; }
 
 		virtual public void Load(ConfigNode node)
 		{ 
@@ -30,15 +47,34 @@ namespace AT_Utils
 			foreach(var fi in GetType().GetFields())
 			{
 				if(not_persistant(fi)) continue;
-				if(fi.FieldType.GetInterface(cnode_name) == null) continue;
 				var n = node.GetNode(fi.Name);
 				if(n == null) continue;
-				var method = fi.FieldType.GetMethod("Load", new [] {typeof(ConfigNode)});
-				if(method == null) continue;
-				var f = fi.GetValue(this);
-				if(f == null) continue;
-				method.Invoke(f, new [] {n});
+				//restore IConfigNodes
+				if(fi.FieldType.GetInterface(cnode_name) != null)
+				{
+					var f = get_or_create<IConfigNode>(fi);
+					if(f == null) continue;
+					f.Load(n);
+					fi.SetValue(this, f);
+				}
+				//restore ConfigNodes
+				else if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
+					fi.SetValue(this, n.CreateCopy());
 			}
+		}
+
+		virtual public void LoadFrom(ConfigNode parent)
+		{
+			var node = parent.GetNode(NodeName);
+			if(node != null) Load(node);
+		}
+
+		ConfigNode get_field_node(FieldInfo fi, ConfigNode parent)
+		{
+			var n = parent.GetNode(fi.Name);
+			if(n == null) n = parent.AddNode(fi.Name);
+			else n.ClearData();
+			return n;
 		}
 
 		virtual public void Save(ConfigNode node)
@@ -47,17 +83,23 @@ namespace AT_Utils
 			foreach(var fi in GetType().GetFields())
 			{
 				if(not_persistant(fi)) continue;
-				if(fi.FieldType.GetInterface(cnode_name) == null) continue;
-				var method = fi.FieldType.GetMethod("Save", new [] {typeof(ConfigNode)});
-				if(method == null) continue;
-				var f = fi.GetValue(this);
-				var n = node.GetNode(fi.Name);
-				if(n == null) n = node.AddNode(fi.Name);
-				else n.ClearData();
-				if(f == null) continue;
-				method.Invoke(f, new [] {n});
+				//save all IConfigNodes
+				if(fi.FieldType.GetInterface(cnode_name) != null)
+				{
+					var f = fi.GetValue(this) as IConfigNode;
+					if(f != null) f.Save(get_field_node(fi, node));
+				}
+				//save ConfigNodes
+				else if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
+				{
+					var f = fi.GetValue(this) as ConfigNode;
+					if(f != null) get_field_node(fi, node).AddData(f);
+				}
 			}
 		}
+
+		virtual public void SaveInto(ConfigNode parent)
+		{ Save(parent.AddNode(NodeName)); }
 
 		virtual public void Copy(ConfigNodeObject other)
 		{
@@ -94,7 +136,8 @@ namespace AT_Utils
 	{
 		public override void Save(ConfigNode node)
 		{
-			node.AddValue("type", GetType().FullName);
+			var type = GetType();
+			node.AddValue("type", string.Format("{0}, {1}", type.FullName, type.Assembly.GetName().Name));
 			base.Save(node);
 		}
 
@@ -115,15 +158,69 @@ namespace AT_Utils
 		public static TypedConfigNodeObject FromConfig(ConfigNode node)
 		{
 			TypedConfigNodeObject obj = null;
-			var type = node.GetValue("type");
-			if(type == null) return obj;
+			var typename = node.GetValue("type");
+			if(typename == null) return obj;
+			var type = Type.GetType(typename);
+			if(type == null)
+			{
+				Utils.Log("Unable to create {}: Type not found.", typename);
+				return obj;
+			}
 			try 
 			{ 
-				obj = Assembly.GetAssembly(Type.GetType(type)).CreateInstance(type) as TypedConfigNodeObject;
+				obj = Activator.CreateInstance(type) as TypedConfigNodeObject;
 				obj.Load(node);
 			}
-			catch(Exception ex) { Utils.Log("Unable to create {}: {}", type, ex.Message); }
+			catch(Exception ex) { Utils.Log("Unable to create {}: {}\n{}", typename, ex.Message, ex.StackTrace); }
 			return obj;
+		}
+	}
+
+	public class PersistentList<T> : List<T>, IConfigNode where T : IConfigNode, new()
+	{
+		public PersistentList() {}
+		public PersistentList(IEnumerable<T> content) : base(content) {}
+
+		public void Save(ConfigNode node)
+		{
+			for(int i = 0, count = Count; i < count; i++) 
+				this[i].Save(node.AddNode("Item"));
+		}
+
+		public void Load(ConfigNode node)
+		{
+			Clear();
+			var nodes = node.GetNodes();
+			for(int i = 0, len = nodes.Length; i < len; i++)
+			{
+				var item = new T();
+				item.Load(nodes[i]);
+				Add(item);
+			}
+		}
+	}
+
+	public class PersistentQueue<T> : Queue<T>, IConfigNode where T : IConfigNode, new()
+	{
+		public PersistentQueue() {}
+		public PersistentQueue(IEnumerable<T> content) : base(content) {}
+
+		public void Save(ConfigNode node)
+		{
+			foreach(var item in this)
+				item.Save(node.AddNode("Item"));
+		}
+
+		public void Load(ConfigNode node)
+		{
+			Clear();
+			var nodes = node.GetNodes();
+			for(int i = 0, len = nodes.Length; i < len; i++)
+			{
+				var item = new T();
+				item.Load(nodes[i]);
+				Enqueue(item);
+			}
 		}
 	}
 

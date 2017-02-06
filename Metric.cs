@@ -12,26 +12,28 @@ using AT_Utils;
 
 namespace AT_Utils
 {
-	public struct Metric
+	public struct Metric : IConfigNode
 	{
 		public static List<string> MeshesToSkip = new List<string>();
 
 		//convex hull
 		public ConvexHull3D hull { get; private set; }
+		public float volume { get { return hull == null? bounds_volume : hull.Volume; } }
+		public float area { get { return hull == null? bounds_area : hull.Area; } }
 		//bounds
 		public Bounds  bounds  { get; private set; }
 		public Vector3 center  { get { return bounds.center; } }
 		public Vector3 extents { get { return bounds.extents; } }
 		public Vector3 size    { get { return bounds.size; } }
 		//physical properties
-		public float volume { get; private set; }
-		public float area   { get; private set; }
+		public float bounds_volume { get; private set; }
+		public float bounds_area   { get; private set; }
 		public float mass   { get; set; }
 		//part-vessel properties
 		public int CrewCapacity { get; private set; }
 		public float cost { get; set; }
 
-		public bool Empty { get { return volume.Equals(0) && area.Equals(0); } }
+		public bool Empty { get { return bounds_volume.Equals(0) && bounds_area.Equals(0); } }
 		
 		static Vector3[] local2local(Transform _from, Transform _to, Vector3[] points)
 		{
@@ -74,7 +76,7 @@ namespace AT_Utils
 			return new_verts;
 		}
 
-		Bounds partsBounds(List<Part> parts, Transform vT, bool compute_hull=false)
+		Bounds partsBounds(List<Part> parts, Transform vT, bool compute_hull, bool exclude_disabled=true)
 		{
 			//reset metric
 			mass = 0;
@@ -95,6 +97,8 @@ namespace AT_Utils
 					new HashSet<MeshFilter>(wheel.Wheel.wheelCollider.wheelTransform.GetComponentsInChildren<MeshFilter>()) : null;
 				foreach(MeshFilter m in p.FindModelComponents<MeshFilter>())
 				{
+					//skip disabled objects
+					if(m.gameObject == null || exclude_disabled && !m.gameObject.activeInHierarchy) continue;
 					//skip meshes from the blacklist
 					bool skip_mesh = false;
 					for(int i = 0, count = MeshesToSkip.Count; i < count; i++)
@@ -120,7 +124,7 @@ namespace AT_Utils
 					updateBounds(ref b, verts);
 				}
 				CrewCapacity += p.CrewCapacity;
-				if(p.IsPhysicallySignificant())	mass += p.TotalMass();
+				mass += p.TotalMass();
 				cost += p.TotalCost();
 			}
 			if(compute_hull && hull_points.Count >= 4) 
@@ -134,8 +138,8 @@ namespace AT_Utils
 		{
 			hull   = m.hull;
 			bounds = new Bounds(m.bounds.center, m.bounds.size);
-			volume = m.volume;
-			area   = m.area;
+			bounds_volume = m.bounds_volume;
+			bounds_area   = m.bounds_area;
 			mass   = m.mass;
 			CrewCapacity = m.CrewCapacity;
 		}
@@ -144,8 +148,8 @@ namespace AT_Utils
 		void init_with_bounds(Bounds b, float m, int crew_capacity)
 		{
 			bounds = b;
-			volume = boundsVolume(b);
-			area   = boundsArea(b);
+			bounds_volume = boundsVolume(b);
+			bounds_area   = boundsArea(b);
 			mass   = m;
 			CrewCapacity = crew_capacity;
 		}
@@ -172,8 +176,8 @@ namespace AT_Utils
 		{
 			if(compute_hull) hull = new ConvexHull3D(verts);
 			bounds = initBounds(verts);
-			volume = boundsVolume(bounds);
-			area   = boundsArea(bounds);
+			bounds_volume = boundsVolume(bounds);
+			bounds_area   = boundsArea(bounds);
 			mass   = m;
 			CrewCapacity = crew_capacity;
 		}
@@ -184,12 +188,17 @@ namespace AT_Utils
 		//mesh metric
 		void init_with_mesh(MeshFilter mesh, Transform refT, bool compute_hull)
 		{
-			if(compute_hull) hull = new ConvexHull3D(uniqueVertices(mesh.sharedMesh));
 			Vector3[] verts = Utils.BoundCorners(mesh.sharedMesh.bounds);
 			if(refT != null) local2local(mesh.transform, refT, verts);
+			if(compute_hull) 
+			{
+				hull = refT != null? 
+					new ConvexHull3D(local2local(mesh.transform, refT, uniqueVertices(mesh.sharedMesh))) : 
+					new ConvexHull3D(uniqueVertices(mesh.sharedMesh));
+			}
 			bounds = initBounds(verts);
-			volume = boundsVolume(bounds);
-			area   = boundsArea(bounds);
+			bounds_volume = boundsVolume(bounds);
+			bounds_area   = boundsArea(bounds);
 			mass   = 0f;
 		}
 
@@ -213,25 +222,33 @@ namespace AT_Utils
 		//part metric
 		public Metric(Part part, bool compute_hull=false) : this()
 		{
-			bounds = partsBounds(new List<Part>{part}, part.partTransform, compute_hull);
-			volume = boundsVolume(bounds);
-			area   = boundsArea(bounds);
+			var exclude_disabled = part.partInfo != null && part != part.partInfo.partPrefab;
+			bounds = partsBounds(new List<Part>{part}, part.partTransform, compute_hull, exclude_disabled);
+			bounds_volume = boundsVolume(bounds);
+			bounds_area   = boundsArea(bounds);
 		}
 		
 		//vessel metric
 		public Metric(Vessel vessel, bool compute_hull=false) : this()
 		{
 			bounds = partsBounds(vessel.parts, vessel.vesselTransform, compute_hull);
-			volume = boundsVolume(bounds);
-			area   = boundsArea(bounds);
+			bounds_volume = boundsVolume(bounds);
+			bounds_area   = boundsArea(bounds);
 		}
 		
 		//in-editor vessel metric
 		public Metric(List<Part> vessel, bool compute_hull=false) : this()
 		{
 			bounds = partsBounds(vessel, vessel[0].partTransform, compute_hull);
-			volume = boundsVolume(bounds);
-			area   = boundsArea(bounds);
+			bounds_volume = boundsVolume(bounds);
+			bounds_area   = boundsArea(bounds);
+		}
+
+		public Metric(IShipconstruct vessel, bool compute_hull=false) : this()
+		{
+			bounds = partsBounds(vessel.Parts, vessel.Parts[0].partTransform, compute_hull);
+			bounds_volume = boundsVolume(bounds);
+			bounds_area   = boundsArea(bounds);
 		}
 		#endregion
 		
@@ -239,7 +256,7 @@ namespace AT_Utils
 		public void Clear() 
 		{ 
 			bounds = default(Bounds);
-			volume = area = mass = cost = 0;
+			bounds_volume = bounds_area = mass = cost = 0;
 			CrewCapacity = 0;
 			hull   = null;
 		}
@@ -249,8 +266,8 @@ namespace AT_Utils
 		public void Scale(float s)
 		{
 			bounds = new Bounds(center, size*s);
-			volume = boundsVolume(bounds);
-			area   = boundsArea(bounds);
+			bounds_volume = boundsVolume(bounds);
+			bounds_area   = boundsArea(bounds);
 			if(hull != null) hull = hull.Scale(s);
 		}
 		
@@ -275,8 +292,8 @@ namespace AT_Utils
 			Vector3 _center = ConfigNode.ParseVector3(node.GetValue("bounds_center"));
 			Vector3 _size   = ConfigNode.ParseVector3(node.GetValue("bounds_size"));
 			bounds = new Bounds(_center, _size);
-			volume = boundsVolume(bounds);
-			area   = boundsArea(bounds);
+			bounds_volume = boundsVolume(bounds);
+			bounds_area   = boundsArea(bounds);
 			CrewCapacity = int.Parse(node.GetValue("crew_capacity"));
 			mass = float.Parse(node.GetValue("mass"));
 			cost = float.Parse(node.GetValue("cost"));
@@ -402,15 +419,18 @@ namespace AT_Utils
 		public static Metric operator/(Metric m, float scale)
 		{ return m*(1.0f/scale); }
 		
-		//static methods
-		public static float Volume(Part part) { return (new Metric(part)).volume; }
-		public static float Volume(Vessel vessel) { return (new Metric(vessel)).volume; }
+		//convenience functions
+		public static float BoundsVolume(Part part) { return (new Metric(part)).bounds_volume; }
+		public static float BoundsVolume(Vessel vessel) { return (new Metric(vessel)).bounds_volume; }
+
+		public static float Volume(Part part) { return (new Metric(part, true)).volume; }
+		public static float Volume(Vessel vessel) { return (new Metric(vessel, true)).volume; }
 		#endregion
 
 		#if DEBUG
 		public void DrawBox(Transform vT) { Utils.GLDrawBounds(bounds, vT, Color.white); }
 
-		public void DrawCenter(Transform vT) { Utils.GLDrawPoint(center, vT); }
+		public void DrawCenter(Transform vT) { Utils.GLDrawPoint(vT.position+vT.TransformDirection(center), Color.white); }
 
 		public override string ToString()
 		{

@@ -171,7 +171,7 @@ namespace AT_Utils
 			DrawMesh(edges, tris, T, c);
 		}
 
-		public static void DrawPoint(Vector3 point, Transform T, Color c = default(Color))
+		public static void DrawPoint(Vector3 point, Transform T, Color c)
 		{ DrawBounds(new Bounds(point, Vector3.one*0.1f), T, c); }
 
 		public static void DrawHull(ConvexHull3D h, Transform T, Color c = default(Color), Material mat = null)
@@ -315,7 +315,8 @@ namespace AT_Utils
 			var c = Utils.BoundCorners(b);
 			for(int i = 0; i < 8; i++) 
 			{
-				c[i] = T.TransformDirection(c[i])+T.position;
+				if(T != null)
+					c[i] = T.TransformDirection(c[i])+T.position;
 				if(MapView.MapIsEnabled)
 					c[i] = ScaledSpace.LocalToScaledSpace(c[i]);
 			}
@@ -342,10 +343,34 @@ namespace AT_Utils
 			camera.farClipPlane = far;
 		}
 
-		public static void GLDrawPoint(Vector3 point, Transform T, Color c = default(Color))
+		public static void GLDrawPoint(Vector3 ori, Color c, float r=0.1f)
+		{
+			float far;
+			var i = new Vector3(r, 0, 0);
+			var j = new Vector3(0, r, 0);
+			var k = new Vector3(0, 0, r);
+			if(MapView.MapIsEnabled)
+			{
+				i = ScaledSpace.LocalToScaledSpace(i);
+				j = ScaledSpace.LocalToScaledSpace(j);
+				k = ScaledSpace.LocalToScaledSpace(k);
+				ori = ScaledSpace.LocalToScaledSpace(ori);
+			}
+			var camera = GLBeginWorld(out far);
+			GL.Begin(GL.LINES);
+			GL.Color(c);
+			gl_line(ori-i, ori+i);
+			gl_line(ori-j, ori+j);
+			gl_line(ori-k, ori+k);
+			GL.End();
+			GL.PopMatrix();
+			camera.farClipPlane = far;
+		}
+
+		public static void GLDrawPoint(Vector3 point, Transform T, Color c)
 		{ GLDrawBounds(new Bounds(point, Vector3.one*0.1f), T, c); }
 
-		public static void GLDrawHull(ConvexHull3D h, Transform T, Vector3 offset = default(Vector3), Color c = default(Color), bool filled = true)
+		public static void GLDrawHull(ConvexHull3D h, Transform T, Color c, Vector3 offset = default(Vector3), bool filled = true)
 		{ 
 			foreach(var f in h.Faces) 
 			{
@@ -356,7 +381,7 @@ namespace AT_Utils
 			}
 		}
 
-		public static void GLDrawMesh(Mesh m, Transform T, Vector3 offset = default(Vector3), Color c = default(Color), bool filled = true)
+		public static void GLDrawMesh(Mesh m, Transform T, Color c, Vector3 offset = default(Vector3), bool filled = true)
 		{
 			var verts = m.vertices;
 			var tris = m.triangles;

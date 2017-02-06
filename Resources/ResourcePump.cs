@@ -20,7 +20,7 @@ namespace AT_Utils
 		public readonly PartResourceDefinition Resource;
 		public float Requested { get; private set; }
 		public float Result    { get; private set; }
-		public float Ratio     { get { return Result/Requested; } }
+		public float Ratio     { get { return Mathf.Abs(Result/Requested); } }
 		public bool  PartialTransfer { get { return Mathf.Abs(Requested)-Mathf.Abs(Result) > eps; } }
 		public bool  Valid     { get { return part != null; } }
 

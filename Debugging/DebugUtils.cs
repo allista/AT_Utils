@@ -9,7 +9,9 @@
 
 #if DEBUG
 using System;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -18,12 +20,59 @@ namespace AT_Utils
 {
 	public static class DebugUtils
 	{
-		public static void CSV(params object[] args)
+		public static void CSV(string filename, params object[] args)
 		{ 
-			var row = "tag: ";
-			for(int i = 0; i < args.Length-1; i++) row += "{}, ";
-			row += "{}\n";
-			Utils.Log(row, args);
+			var row = new StringBuilder();
+			var len = args.Length;
+			var last_i = len-1;
+			for(int i = 0; i < len; i++) 
+			{
+				var arg = args[i];
+				if(arg is Vector3)
+				{
+					var v = (Vector3)arg;
+					row.Append(v.x);
+					row.Append(",");
+					row.Append(v.y);
+					row.Append(",");
+					row.Append(v.z);
+				}
+				else if(arg is Vector3d)
+				{
+					var v = (Vector3d)arg;
+					row.Append(v.x);
+					row.Append(",");
+					row.Append(v.y);
+					row.Append(",");
+					row.Append(v.z);
+				}
+				else if(arg is Vector4)
+				{
+					var v = (Vector4)arg;
+					row.Append(v.x);
+					row.Append(",");
+					row.Append(v.y);
+					row.Append(",");
+					row.Append(v.z);
+					row.Append(",");
+					row.Append(v.w);
+				}
+				else if(arg is Vector4d)
+				{
+					var v = (Vector4d)arg;
+					row.Append(v.x);
+					row.Append(",");
+					row.Append(v.y);
+					row.Append(",");
+					row.Append(v.z);
+					row.Append(",");
+					row.Append(v.w);
+				}
+				else row.Append(arg);
+				if(i < last_i) row.Append(", ");
+			}
+			using(var f = new StreamWriter(filename, true))
+				f.WriteLine(row);
 		}
 
 		public static void logVectors(string tag, bool normalize = true, params Vector3[] vecs)
@@ -128,7 +177,7 @@ namespace AT_Utils
 			indent += "\t";
 			for(int i = 0; i < T.childCount; i++)
 				log.Add(formatTransformTree(T.GetChild(i), indent));
-			return string.Concat(log.ToArray());
+			return string.Join("", log.ToArray());
 		}
 
 		public static void logShipConstruct(ShipConstruct ship)

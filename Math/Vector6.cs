@@ -118,6 +118,17 @@ namespace AT_Utils
 			}
 		}
 
+		public Vector3 Min
+		{
+			get
+			{
+				var mvec = Vector3.zero;
+				for(int i = 0; i < 3; i++)
+					mvec[i] = Mathf.Min(-negative[i], positive[i]);
+				return mvec;
+			}
+		}
+
 		public Vector3 MaxInPlane(Vector3 normal)
 		{
 			var maxm = 0f;

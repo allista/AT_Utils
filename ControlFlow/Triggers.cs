@@ -15,7 +15,7 @@ namespace AT_Utils
 	{
 		protected T next_time;
 		public double Period;
-		public Action action;
+		public Action action = delegate {};
 
 		protected TimerBase(double period) { Period = period; }
 		public abstract void Reset();
@@ -27,24 +27,71 @@ namespace AT_Utils
 		protected abstract T default_time { get; }
 
 		protected Timer(double period) : base(period) { next_time = default_time; }
+
+		protected abstract void start();
+
+		/// <summary>
+		/// True if this <see cref="AT_Utils.Timer"/> is started.
+		/// </summary>
+		/// <value><c>true</c> if started; otherwise, <c>false</c>.</value>
+		public bool Started { get { return !next_time.Equals(default_time); } }
+
+		/// <summary>
+		/// Start this timer if it is not running.
+		/// <returns><c>true</c> if the timer was not running; <c><false/c> otherwise.</returns>
+		/// </summary>
+		public bool Start() 
+		{ 
+			if(Started) return false;
+			start(); return true;
+		}
+
+		/// <summary>
+		/// Reset the timer.
+		/// </summary>
 		public override void Reset() { next_time = default_time; }
-		public abstract void Start();
+
+		/// <summary>
+		/// Reset, then Start.
+		/// </summary>
+		public void Restart() { Reset(); Start(); }
+
+		/// <summary>
+		/// Gets the remaining time.
+		/// </summary>
+		/// <value>The remaining time.</value>
 		public abstract double Remaining { get; }
 
+		/// <summary>
+		/// True if the <see cref="AT_Utils.Timer.Period"/> has passed since Start.
+		/// </summary>
+		/// <value><c>true</c> if time passed; otherwise, <c>false</c>.</value>
 		public bool TimePassed
 		{
 			get 
 			{
-				var time = now;
-				if(next_time.Equals(default_time))
-				{
-					Start();
-					return false;
-				}
-				return next_time.CompareTo(time) < 0;
+				if(Start()) return false;
+				return next_time.CompareTo(now) < 0;
 			}
 		}
 
+		/// <summary>
+		/// Starts the timer if the predicate is <c>true</c>; Resets the timer otherwise.
+		/// </summary>
+		/// <returns><c>true</c>, if the timer was started, <c>false</c> otherwise.</returns>
+		/// <param name="predicate">A preevaluated boolean condition.</param>
+		public bool StartIf(bool predicate)
+		{
+			if(predicate) return Start();
+			Reset(); return false;
+		}
+
+		/// <summary>
+		/// Runs the action if the predicate is true and the TimePassed; Resets the timer otherwise.
+		/// </summary>
+		/// <returns><c>true</c>, if the time has passed and the action was run, <c>false</c> otherwise.</returns>
+		/// <param name="action">An <c>>Action</c> to be run.</param>
+		/// <param name="predicate">A preevaluated boolean condition.</param>
 		public bool RunIf(Action action, bool predicate)
 		{
 			if(predicate) { if(TimePassed) { action(); Reset(); return true; } }
@@ -56,8 +103,8 @@ namespace AT_Utils
 		public override string ToString()
 		{
 			var time = now;
-			return string.Format("time: {0} < next time {1}: {2}", 
-			                     time, next_time, time.CompareTo(next_time) < 0);
+			return string.Format("Started: {0}. TimePassed: [{1} > next {2}]: {3}", 
+			                     Started, time, next_time, Started && next_time.CompareTo(time) < 0);
 		}
 	}
 
@@ -83,7 +130,7 @@ namespace AT_Utils
 		protected override DateTime now { get { return DateTime.Now; } }
 		protected override DateTime default_time { get { return DateTime.MinValue; } }
 		public RealTimer(double period = 1) : base(period) { next_time = default_time; }
-		public override void Start() { next_time = now.AddSeconds(Period); }
+		protected override void start() { next_time = now.AddSeconds(Period); }
 		public override double Remaining { get { return next_time.Subtract(now).TotalSeconds; } }
 	}
 
@@ -92,7 +139,7 @@ namespace AT_Utils
 		protected override double now { get { return Planetarium.GetUniversalTime(); } }
 		protected override double default_time { get { return -1; } }
 		public Timer(double period = 1) : base(period) { next_time = default_time; }
-		public override void Start() { next_time = now+Period; }
+		protected override void start() { next_time = now+Period; }
 		public override double Remaining { get { return next_time-now; } }
 	}
 

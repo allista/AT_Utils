@@ -8,16 +8,38 @@
 // or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 //
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AT_Utils
 {
 	public static partial class Utils
 	{
+		/// <summary>
+		/// Gets the mouse position relative to the window Rect.
+		/// </summary>
+		/// <returns>The mouse position.</returns>
+		/// <param name="window">Rect of the window.</param>
 		public static Vector2 GetMousePosition(Rect window) 
 		{
 			var mouse_pos = Input.mousePosition;
 			return new Vector2(mouse_pos.x-window.x, Screen.height-mouse_pos.y-window.y).clampToScreen();
+		}
+
+		/// <summary>
+		/// Checks if the mouse pointer hovers over the last drawn GUILayout element.
+		/// Should be called only if(Event.current.type == EventType.Repaint)
+		/// </summary>
+		/// <returns><c>true</c>, if mouse is over the last element, <c>false</c> otherwise.</returns>
+		public static bool MouseInLastElement()
+		{
+			var rect = GUILayoutUtility.GetLastRect();
+			var mousePos = Input.mousePosition;
+			mousePos.y = Screen.height - mousePos.y;
+			Vector2 clippedMousePos = Event.current.mousePosition;
+			rect.x += mousePos.x - clippedMousePos.x;
+			rect.y += mousePos.y - clippedMousePos.y;
+			return rect.Contains(mousePos);
 		}
 
 		public static float FloatSlider(string name, float value, float min, float max, string format="F1", int label_width = -1, string tooltip = "")
@@ -52,13 +74,30 @@ namespace AT_Utils
 			return ret;
 		}
 
-		public static int LeftRightChooser(string text, int width = 0)
+		public static int LeftRightChooser(string text, string tooltip = "", int width = 0)
 		{
+			width -= 40;
 			var left  = GUILayout.Button("<", Styles.yellow_button, GUILayout.Width(20));
-			if(width > 0) GUILayout.Label(text, Styles.white, GUILayout.Width(width));
-			else GUILayout.Label(text, Styles.white);
+			if(width > 0) GUILayout.Label(new GUIContent(text, tooltip), Styles.white, GUILayout.Width(width));
+			else GUILayout.Label(new GUIContent(text, tooltip), Styles.white);
 			var right = GUILayout.Button(">", Styles.yellow_button, GUILayout.Width(20));
 			return left? -1 : (right? 1 : 0);
+		}
+
+		public static T LeftRightChooser<T>(T current, IList<T> options, string tooltip = "", int width = 0)
+		{
+			var choice = Utils.LeftRightChooser(current.ToString(), tooltip, width);
+			if(choice < 0) return options.Prev(current);
+			if(choice > 0) return options.Next(current);
+			return current;
+		}
+
+		public static V LeftRightChooser<K,V>(K current, SortedList<K,V> options, string tooltip = "", int width = 0)
+		{
+			var choice = Utils.LeftRightChooser(current.ToString(), tooltip, width);
+			if(choice < 0) return options.Prev(current);
+			else if(choice > 0) return options.Next(current);
+			return default(V);
 		}
 
 		#region KSP_UI
@@ -103,18 +142,24 @@ namespace AT_Utils
 
 		#region ControlLock
 		//modified from Kerbal Alarm Clock mod
-		public static void LockEditor(string LockName, bool Lock=true)
+		public static void LockControls(string LockName, bool Lock=true)
 		{
-			if(Lock && InputLockManager.GetControlLock(LockName) != ControlTypes.EDITOR_LOCK)
-				InputLockManager.SetControlLock(ControlTypes.EDITOR_LOCK, LockName);
-			else if(!Lock && InputLockManager.GetControlLock(LockName) == ControlTypes.EDITOR_LOCK) 
+			if(Lock && InputLockManager.GetControlLock(LockName) != ControlTypes.ALLBUTCAMERAS)
+				InputLockManager.SetControlLock(ControlTypes.ALLBUTCAMERAS, LockName);
+			else if(!Lock && InputLockManager.GetControlLock(LockName) == ControlTypes.ALLBUTCAMERAS) 
 				InputLockManager.RemoveControlLock(LockName);
 		}
 
 		public static void LockIfMouseOver(string LockName, Rect WindowRect, bool Lock=true)
 		{
 			Lock &= WindowRect.Contains(Event.current.mousePosition);
-			LockEditor(LockName, Lock);
+			LockControls(LockName, Lock);
+		}
+
+		public static void UpdatePartMenu(this Part part)
+		{
+			MonoUtilities.RefreshContextWindows(part);
+			Utils.UpdateEditorGUI();
 		}
 
 		public static void UpdateEditorGUI()
@@ -126,7 +171,7 @@ namespace AT_Utils
 			msg = string.Format(msg, args);
 			#if DEBUG
 			Log(msg);
-			msg = string.Format("[{0:HH:mm:ss.fff}] {1}", DateTime.Now, msg);
+			msg = string.Format("[{0:HH:mm:ss.fff}]\n{1}", DateTime.Now, msg);
 			#endif
 			ScreenMessages.PostScreenMessage(msg, duration, ScreenMessageStyle.UPPER_CENTER);
 		}

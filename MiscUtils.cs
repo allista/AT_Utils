@@ -6,6 +6,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -46,7 +47,7 @@ namespace AT_Utils
 
 		public static string[] ParseLine(string line, char[] delims, bool trim = true)
 		{
-			if(string.IsNullOrEmpty(line)) return null;
+			if(string.IsNullOrEmpty(line)) return new string[]{};
 			var array = line.Split(delims, StringSplitOptions.RemoveEmptyEntries);
 			if(trim) { for(int i = 0, len = array.Length; i < len; i++) array[i] = array[i].Trim(); }
 			return array;
@@ -76,9 +77,12 @@ namespace AT_Utils
 		public static string formatSmallValue(float value, string unit, string format = "F1")
 		{
 			string mod = "";
-			if(value > 1e-3) { value *= 1e3f; mod = "m"; }
-			else if(value > 1e-6) { value *= 1e6f; mod = "μ"; }
-			else if(value > 1e-9) { value *= 1e9f; mod = "n"; }
+			if(value < 1)
+			{
+				if(value > 1e-3) { value *= 1e3f; mod = "m"; }
+				else if(value > 1e-6) { value *= 1e6f; mod = "μ"; }
+				else if(value > 1e-9) { value *= 1e9f; mod = "n"; }
+			}
 			return value.ToString(format)+mod+unit;
 		}
 
@@ -133,12 +137,15 @@ namespace AT_Utils
 		{
 			return Utils.Format(
 				"Body:   {}\n" +
-				"\trotation: {}s\n" +
+				"\trotation: {} s\n" +
 				"\tradius:   {}\n" +
+				"\trot angle {} deg\n" +
 				"PeA:    {} m\n" +
 				"ApA:    {} m\n" +
 				"PeR:    {} m\n" +
 				"ApR:    {} m\n" +
+				"SMA:    {} m\n" +
+				"SmA:    {} m\n" +
 				"Ecc:    {}\n" +
 				"Inc:    {} deg\n" +
 				"LAN:    {} deg\n" +
@@ -151,15 +158,19 @@ namespace AT_Utils
 				"T:       {} s\n" +
 				"T2Pe     {} per\n" +
 				"T2Ap     {} per\n" +
+				"EndTrans {}, EndUT {}\n" +
 				"Vel: {} m/s\n" +
 				"Pos: {} m\n",
-				o.referenceBody.bodyName, o.referenceBody.rotationPeriod,
+				o.referenceBody.bodyName, o.referenceBody.rotationPeriod, 
 				formatBigValue((float)o.referenceBody.Radius, "m"),
+				o.referenceBody.rotationAngle,
 				o.PeA, o.ApA,
 				o.PeR, o.ApR, 
+				o.semiMajorAxis, o.semiMinorAxis,
 				o.eccentricity, o.inclination, o.LAN, o.meanAnomaly, o.trueAnomaly, o.argumentOfPeriapsis,
 				o.period, o.epoch, o.ObTAtEpoch, o.ObT,
 				o.timeToPe/o.period, o.timeToAp/o.period,
+				o.patchEndTransition, o.EndUT,
 				formatVector(o.vel), formatVector(o.pos));
 		}
 
@@ -203,15 +214,20 @@ namespace AT_Utils
 				else if(arg is Orbit) args[i] = formatOrbit((Orbit)arg);
 				else if(arg is Bounds) args[i] = formatBounds((Bounds)arg);
 				else if(arg is Exception) args[i] = formatException((Exception)arg);
+				else if(arg is Transform) 
+				{
+					var T = arg as Transform;
+					args[i] = string.Format("{0}: pos {1}, rot {2}", T.name, T.position, T.rotation.eulerAngles);
+				}
 				else if(arg is IEnumerable) 
 				{
 					var arr = (arg as IEnumerable).Cast<object>().ToArray();
 					convert_args(arr);
-					args[i] = string.Concat("[\n", 
-					                        arr.Aggregate("", (s, el) => 
-					                                      string.IsNullOrEmpty(s)? 
-					                                      el.ToString() : string.Concat(s, ",\n", el)),
-					                        "\n]");
+					args[i] = string.Join("\n", new [] 
+					{ 
+						"Count: "+arr.Length, 
+						"[", string.Join(",\n", arr.Cast<string>().ToArray()), "]"
+					});
 				}
 				else args[i] = arg.ToString();
 			}
@@ -264,14 +280,12 @@ namespace AT_Utils
 		//second answer
 		public static string PropertyName<T>(T obj) { return typeof(T).GetProperties()[0].Name; }
 
-		//ResearchAndDevelopment.PartModelPurchased is broken and always returns 'true'
 		public static bool PartIsPurchased(string name)
 		{
+			if(PartLoader.Instance == null) return false;
 			var info = PartLoader.getPartInfoByName(name);
 			if(info == null || HighLogic.CurrentGame == null) return false;
-			if(HighLogic.CurrentGame.Mode != Game.Modes.CAREER) return true;
-			var tech = ResearchAndDevelopment.Instance.GetTechState(info.TechRequired);
-			return tech != null && tech.state == RDTech.State.Available && tech.partsPurchased.Contains(info);
+			return HighLogic.CurrentGame.Mode == Game.Modes.SANDBOX || ResearchAndDevelopment.PartModelPurchased(info);
 		}
 
 		public static Vector3[] BoundCorners(Bounds b)
@@ -324,10 +338,12 @@ namespace AT_Utils
 			return false;
 		}
 
-		public static void SaveGame(string name)
+		public static void SaveGame(string name, bool with_message = true)
 		{ 
-			GamePersistence.SaveGame(name, HighLogic.SaveFolder, SaveMode.OVERWRITE);
-			Message("Game saved as: {0}", name);
+			Game game = HighLogic.CurrentGame.Updated();
+			game.startScene = GameScenes.FLIGHT;
+			GamePersistence.SaveGame(game, name, HighLogic.SaveFolder, SaveMode.OVERWRITE);
+			if(with_message) Message("Game saved as: {0}", name);
 		}
 	}
 

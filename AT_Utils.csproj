@@ -17,6 +17,7 @@
     <DefineConstants>DEBUG;</DefineConstants>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -24,53 +25,56 @@
     <OutputPath>GameData\000_AT_Utils\Plugins</OutputPath>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Nightbuild|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>GameData\000_AT_Utils\Plugins</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <DefineConstants>NIGHTBUILD</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System">
-      <HintPath>..\KSP-test\KSP_test_1.2\KSP_Data\Managed\System.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.2.2\KSP_Data\Managed\System.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\KSP-test\KSP_test_1.2\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.2.2\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\KSP-test\KSP_test_1.2\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.2.2\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Core">
-      <HintPath>..\KSP-test\KSP_test_1.2\KSP_Data\Managed\System.Core.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.2.2\KSP_Data\Managed\System.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\KSP-test\KSP_test_1.2\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.2.2\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil">
-      <HintPath>..\KSP-test\KSP_test_1.2\KSP_Data\Managed\Mono.Cecil.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.2.2\KSP_Data\Managed\Mono.Cecil.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\KSP-test\KSP_test_1.2\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.2.2\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DebugUtils.cs" />
     <Compile Include="KSP_AVC_Updater.cs" />
     <Compile Include="Math\Vector6.cs" />
     <Compile Include="Math\PID_Controllers.cs" />
     <Compile Include="GUI\GUIUtils.cs" />
     <Compile Include="GUI\MD2Unity.cs" />
     <Compile Include="GUI\Styles.cs" />
-    <Compile Include="GUI\DropDownList.cs" />
     <Compile Include="Math\Matrix3.cs" />
     <Compile Include="Math\MathUtils.cs" />
     <Compile Include="MiscUtils.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="GUI\FloatField.cs" />
-    <Compile Include="GUI\SimpleDialog.cs" />
     <Compile Include="Math\ConvexHull3D.cs" />
     <Compile Include="GUI\GraphicsUtils.cs" />
     <Compile Include="Metric.cs" />
@@ -86,7 +90,29 @@
     <Compile Include="Math\OscillationDetector.cs" />
     <Compile Include="Math\VectorCurve.cs" />
     <Compile Include="Modules\SimpleTextureSwitcher.cs" />
-    <Compile Include="GUI\GUIWindowBase.cs" />
+    <Compile Include="ToolbarWrapper.cs" />
+    <Compile Include="GUI\Markers.cs" />
+    <Compile Include="Coordinates.cs" />
+    <Compile Include="SerializableFiledsPartModule.cs" />
+    <Compile Include="ResourceTransfer.cs" />
+    <Compile Include="CrewTransferBatch.cs" />
+    <Compile Include="FlightCameraOverride.cs" />
+    <Compile Include="Debugging\DebugUtils.cs" />
+    <Compile Include="Debugging\ResourceHack.cs" />
+    <Compile Include="GUI\TooltipManager.cs" />
+    <Compile Include="GUI\Dialogs\SimpleDialog.cs" />
+    <Compile Include="GUI\Dialogs\SimpleTextEntry.cs" />
+    <Compile Include="GUI\Dialogs\SimpleWarning.cs" />
+    <Compile Include="GUI\Windows\CrewTransferWindow.cs" />
+    <Compile Include="GUI\Windows\ResourceTransferWindow.cs" />
+    <Compile Include="GUI\Elements\FloatField.cs" />
+    <Compile Include="GUI\Elements\Vector3Field.cs" />
+    <Compile Include="GUI\Elements\DropDownList.cs" />
+    <Compile Include="GUI\WindowsFramework\AddonWindowBase.cs" />
+    <Compile Include="GUI\WindowsFramework\AnchoredWindow.cs" />
+    <Compile Include="GUI\WindowsFramework\CompoundWindow.cs" />
+    <Compile Include="GUI\WindowsFramework\FloatingWindow.cs" />
+    <Compile Include="GUI\WindowsFramework\GUIWindowBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -96,6 +122,11 @@
     <Folder Include="Configuration\" />
     <Folder Include="ControlFlow\" />
     <Folder Include="Modules\" />
+    <Folder Include="Debugging\" />
+    <Folder Include="GUI\Dialogs\" />
+    <Folder Include="GUI\Windows\" />
+    <Folder Include="GUI\Elements\" />
+    <Folder Include="GUI\WindowsFramework\" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

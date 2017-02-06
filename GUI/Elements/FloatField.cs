@@ -6,7 +6,6 @@
 //
 // Copyright (c) 2016 Allis Tauri
 
-using System;
 using UnityEngine;
 
 namespace AT_Utils
@@ -19,6 +18,8 @@ namespace AT_Utils
 		[Persistent] public float  Min;
 		[Persistent] public float  Max;
 		[Persistent] public bool   Circle;
+
+		public bool IsSet { get; private set; }
 
 		public float Range { get { return Max-Min; } }
 
@@ -50,7 +51,7 @@ namespace AT_Utils
 		public static implicit operator float(FloatField ff) { return ff.fvalue; }
 		public override string ToString () { return fvalue.ToString(format); }
 
-		public FloatField(string format = "F1", float min = float.MinValue, float max = float.MaxValue, bool circle = false)
+		public FloatField(string format = "R", float min = float.MinValue, float max = float.MaxValue, bool circle = false)
 		{
 			this.format = format;
 			Circle = circle;
@@ -66,23 +67,23 @@ namespace AT_Utils
 			return false;
 		}
 
-		public bool Draw(string suffix = "", bool show_set_button = true, float increment = 0)
+		public bool Draw(string suffix = "", bool show_set_button = true, float increment = 0, string iformat = "F1")
 		{
 			bool updated = false;
 			if(!increment.Equals(0)) 
 			{
-				if(GUILayout.Button(string.Format("-{0}", increment), Styles.normal_button, GUILayout.ExpandWidth(false)))
+				if(GUILayout.Button(string.Format("-{0}", increment.ToString(iformat)), 	
+				                    Styles.normal_button, GUILayout.ExpandWidth(false)))
 				{ Value = fvalue-increment; updated = true; }
-				if(GUILayout.Button(string.Format("+{0}", increment), Styles.normal_button, GUILayout.ExpandWidth(false)))
+				if(GUILayout.Button(string.Format("+{0}", increment.ToString(iformat)), 
+				                    Styles.normal_button, GUILayout.ExpandWidth(false)))
 				{ Value = fvalue+increment; updated = true; }
 			}
 			svalue = GUILayout.TextField(svalue, svalue.Equals(fvalue.ToString(format))? Styles.green : Styles.white,
 			                             GUILayout.ExpandWidth(true), GUILayout.MinWidth(70));
 			if(!string.IsNullOrEmpty(suffix)) GUILayout.Label(suffix, Styles.label, GUILayout.ExpandWidth(false));
-			updated |= 
-				show_set_button && 
-				GUILayout.Button("Set", Styles.normal_button, GUILayout.ExpandWidth(false)) && 
-				UpdateValue();
+			IsSet = show_set_button && GUILayout.Button("Set", Styles.normal_button, GUILayout.ExpandWidth(false));
+			updated |= IsSet && UpdateValue();
 			return updated;
 		}
 	}
