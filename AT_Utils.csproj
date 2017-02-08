@@ -17,7 +17,6 @@
     <DefineConstants>DEBUG;</DefineConstants>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -25,7 +24,6 @@
     <OutputPath>GameData\000_AT_Utils\Plugins</OutputPath>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Nightbuild|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -113,6 +111,7 @@
     <Compile Include="GUI\WindowsFramework\CompoundWindow.cs" />
     <Compile Include="GUI\WindowsFramework\FloatingWindow.cs" />
     <Compile Include="GUI\WindowsFramework\GUIWindowBase.cs" />
+    <Compile Include="SimplePartFilter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
