@@ -95,8 +95,8 @@ namespace AT_Utils
 			black_texture.Apply();
 
 			var alpha_texture = new Texture2D(1, 1);
-//			alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0.3f));
-			alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0));
+            alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0));
+//            alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0.3f));//debug
 			alpha_texture.Apply();
 
 			//buttons

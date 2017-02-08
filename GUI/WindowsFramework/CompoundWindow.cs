@@ -137,12 +137,16 @@ namespace AT_Utils
 				var dPos = AnchorPos-old_anchor;
 				if(!dPos.IsZero())
 					components.ForEach(c => c.Move(dPos));
-				//if the window was resized, reposition subwindows
-				if(old_rect.size != WindowPos.size)
-					place_components();
 				//draw subwindows and combine their rects to get the total rect
 				var total = WindowPos;
 				components.ForEach(c => total = combine(total, c.Draw()));
+                //if the window was resized, reposition subwindows
+                if(old_rect.size != WindowPos.size)
+                {
+                    place_components();
+                    total = WindowPos;
+                    components.ForEach(c => total = combine(total, c.WindowPos));
+                }
 				//check if total rect is out of the screen, and move everything if needed
 				var to_screen = total.clampToScreen();
 				dPos = to_screen.position-total.position;

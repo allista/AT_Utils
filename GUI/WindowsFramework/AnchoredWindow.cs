@@ -73,13 +73,13 @@ namespace AT_Utils
 					r.x += WindowPos.width-r.width;
 				break;
 			case AnchorPosition.BottomLeft:
-				if(!r.height.Equals(WindowPos.width))
+                if(!r.height.Equals(WindowPos.height))
 					r.y += WindowPos.height-r.height;
 				break;
 			case AnchorPosition.BottomRight:
 				if(!r.width.Equals(WindowPos.width))
 					r.x += WindowPos.width-r.width;
-				if(!r.height.Equals(WindowPos.width))
+                if(!r.height.Equals(WindowPos.height))
 					r.y += WindowPos.height-r.height;
 				break;
 			}
