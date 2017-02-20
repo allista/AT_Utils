@@ -18,6 +18,7 @@ namespace AT_Utils
 	public abstract class AnchoredWindow : GUIWindowBase
 	{
 		public AnchorPosition Anchor = AnchorPosition.TopLeft;
+        public bool SizeChanged { get; protected set; }
 
 		/// <summary>
 		/// Should draw the window using either GUI.Window or GUILayout.Window function.
@@ -30,6 +31,7 @@ namespace AT_Utils
 			{
 				LockControls();
 				var r = DrawWindow();
+                SizeChanged = r.size != WindowPos.size;
 				update_window_rect(r);
 				return WindowPos;
 			}
@@ -66,6 +68,7 @@ namespace AT_Utils
 		/// <param name="r">New window rect.</param>
 		protected void update_window_rect(Rect r)
 		{
+//            this.Log("{}: WindowPos {}, Drawn Rect {}", this, WindowPos, r);
 			switch(Anchor)
 			{
 			case AnchorPosition.TopRight:
@@ -84,6 +87,7 @@ namespace AT_Utils
 				break;
 			}
 			WindowPos = r;
+//            this.Log("{}: WindowPos {}", this, WindowPos);
 		}
 	}
 }

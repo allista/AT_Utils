@@ -130,7 +130,6 @@ namespace AT_Utils
 			{
 				//save current anchor position and window rect
 				var old_anchor = AnchorPos;
-				var old_rect = WindowPos;
 				//draw the main window
 				base.Draw();
 				//if it was moved, move subwindows
@@ -141,7 +140,7 @@ namespace AT_Utils
 				var total = WindowPos;
 				components.ForEach(c => total = combine(total, c.Draw()));
                 //if the window was resized, reposition subwindows
-                if(old_rect.size != WindowPos.size)
+                if(SizeChanged || components.Any(c => c.SizeChanged))
                 {
                     place_components();
                     total = WindowPos;
