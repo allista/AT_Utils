@@ -77,10 +77,12 @@ namespace AT_Utils
 		public static int LeftRightChooser(string text, string tooltip = "", int width = 0)
 		{
 			width -= 40;
+            GUILayout.BeginHorizontal();
 			var left  = GUILayout.Button("<", Styles.yellow_button, GUILayout.Width(20));
 			if(width > 0) GUILayout.Label(new GUIContent(text, tooltip), Styles.white, GUILayout.Width(width));
 			else GUILayout.Label(new GUIContent(text, tooltip), Styles.white);
 			var right = GUILayout.Button(">", Styles.yellow_button, GUILayout.Width(20));
+            GUILayout.EndHorizontal();
 			return left? -1 : (right? 1 : 0);
 		}
 
@@ -92,12 +94,12 @@ namespace AT_Utils
 			return current;
 		}
 
-		public static V LeftRightChooser<K,V>(K current, SortedList<K,V> options, string tooltip = "", int width = 0)
+        public static K LeftRightChooser<K,V>(K current, SortedList<K,V> options, string tooltip = "", int width = 0)
 		{
 			var choice = Utils.LeftRightChooser(current.ToString(), tooltip, width);
-			if(choice < 0) return options.Prev(current);
-			else if(choice > 0) return options.Next(current);
-			return default(V);
+            if(choice < 0) return options.Prev(current);
+            if(choice > 0) return options.Next(current);
+            return current;
 		}
 
 		#region KSP_UI

@@ -445,25 +445,25 @@ namespace AT_Utils
 			return max;
 		}
 
-		public static V Next<K, V>(this SortedList<K,V> list, K key)
-		{
-			try
-			{
-				var i = list.IndexOfKey(key);
-				var ni = (i+1) % list.Count;
-				return list.Values[ni];
-			} catch { return default(V); }
-		}
+        public static K Next<K, V>(this SortedList<K,V> list, K key)
+        {
+            try
+            {
+                var i = list.IndexOfKey(key);
+                var ni = (i+1) % list.Count;
+                return list.Keys[ni];
+            } catch { return default(K); }
+        }
 
-		public static V Prev<K, V>(this SortedList<K,V> list, K key)
-		{
-			try
-			{
-				var i = list.IndexOfKey(key);
-				var ni = i > 0? i-1 : list.Count-1;
-				return list.Values[ni];
-			} catch { return default(V); }
-		}
+        public static K Prev<K, V>(this SortedList<K,V> list, K key)
+        {
+            try
+            {
+                var i = list.IndexOfKey(key);
+                var ni = i > 0? i-1 : list.Count-1;
+                return list.Keys[ni];
+            } catch { return default(K); }
+        }
 
 		public static T Next<T>(this IList<T> list, T key)
 		{
