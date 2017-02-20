@@ -11,7 +11,7 @@ using System;
 using UnityEngine;
 using AT_Utils;
 
-namespace ThrottleControlledAvionics
+namespace AT_Utils
 {
 	//adapted from MechJeb
 	public class Coordinates : ConfigNodeObject, IEquatable<Coordinates>
@@ -21,13 +21,41 @@ namespace ThrottleControlledAvionics
 		[Persistent] public double Alt;
 
 		/// <summary>
-		/// When the <see cref="ThrottleControlledAvionics.Coordinates.SetAlt2Surface"/> is called, 
+		/// When the <see cref="AT_Utils.Coordinates.SetAlt2Surface"/> is called, 
 		/// this property is set to <c>true</c> if the point is on the water; otherwise it's <c>false</c>..
 		/// </summary>
 		public bool OnWater { get; private set; } = false;
 
+        /// <summary>
+        /// Convert lat [0:360], lon [0:360] coordinates to [-90:90] lat.
+        /// I.e. lat 15, lon 108 = lat 195, lon 72
+        /// </summary>
+        void normalize_coordinates()
+        {
+            Lat = Utils.CenterAngle(Utils.ClampAngle(Lat));
+            if(Math.Abs(Lat) <= 90) 
+                Lon = Utils.ClampAngle(Lon);
+            else
+            {
+                Lon = Utils.ClampAngle(Lon+180);
+                if(Lat > 0) Lat = 180-Lat;
+                else Lat = -180-Lat;
+            }
+        }
+
+        public override void Load(ConfigNode node)
+        {
+            base.Load(node);
+            normalize_coordinates();
+        }
+
 		public Coordinates(double lat, double lon, double alt) 
-		{ Lat = Utils.ClampAngle(lat); Lon = Utils.ClampAngle(lon); Alt = alt; }
+		{ 
+            Lat = lat; 
+            Lon = lon; 
+            Alt = alt; 
+            normalize_coordinates();
+        }
 
 		public Coordinates(Vector3 worldPos, CelestialBody body)
 			: this(body.GetLatitude(worldPos), 
@@ -70,12 +98,29 @@ namespace ThrottleControlledAvionics
 			return String.Format("{0:0}°{1:00}'{2:00}\"", Math.Sign(angle)*d, m, s);
 		}
 
+        public static double NormalizeLatitude(double lat)
+        {
+            lat = Utils.CenterAngle(Utils.ClampAngle(lat));
+            if(lat > 90) lat = 180-lat;
+            else if(lat < -90) lat = -180-lat;
+            return lat;
+        }
+
+        /// <summary>
+        /// Format a Degrees,Minutes,Seconds N|S string from latitude value within [-90:90] deg
+        /// </summary>
+        /// <returns>The string representation of a latutude.</returns>
+        /// <param name="lat">Latitude value within [-90:90] deg.</param>
 		public static string LatToDMS(double lat)
 		{
-			lat = Utils.CenterAngle(lat);
 			return lat > 0? AngleToDMS(lat) + " N" : AngleToDMS(-lat) + " S";
 		}
 
+        /// <summary>
+        /// Format a Degrees,Minutes,Seconds N|S string from longitude value in degrees.
+        /// </summary>
+        /// <returns>The string representation of a longitude.</returns>
+        /// <param name="lon">Longitude value in degrees.</param>
 		public static string LonToDMS(double lon)
 		{
 			lon = Utils.CenterAngle(lon);
