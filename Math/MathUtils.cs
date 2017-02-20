@@ -50,13 +50,13 @@ namespace AT_Utils
 		public static float AngleDelta(float a, float b)
 		{
 			var d = Utils.CenterAngle(b)-Utils.CenterAngle(a);
-			return Mathf.Abs(d) > 180? -Mathf.Sign(d)*(360-Mathf.Abs(d)) : d;
+            return Mathf.Abs(d) > 180? Mathf.Sign(d)*(Mathf.Abs(d)-360) : d;
 		}
 
 		public static double AngleDelta(double a, double b)
 		{
 			var d = Utils.CenterAngle(b)-Utils.CenterAngle(a);
-			return Math.Abs(d) > 180? -Math.Sign(d)*(360-Math.Abs(d)) : d;
+            return Math.Abs(d) > 180? Math.Sign(d)*(Math.Abs(d)-360) : d;
 		}
 
 		public static double ClampRad(double a) { a = a%TwoPI; return a < 0? TwoPI+a : a; }
@@ -93,6 +93,9 @@ namespace AT_Utils
 
 		public static float EWA(float old, float cur, float ratio = 0.7f)
 		{ return (1-ratio)*old + ratio*cur; }
+
+        public static double EWA(double old, double cur, double ratio = 0.7f)
+        { return (1-ratio)*old + ratio*cur; }
 
 		public static Vector3 EWA(Vector3 old, Vector3 cur, float ratio = 0.7f)
 		{ return (1-ratio)*old + ratio*cur; }
