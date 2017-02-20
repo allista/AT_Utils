@@ -7,7 +7,7 @@
 
 using UnityEngine;
 
-namespace ThrottleControlledAvionics
+namespace AT_Utils
 {
 	public static class Markers
 	{
