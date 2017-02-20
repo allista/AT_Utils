@@ -198,5 +198,10 @@ namespace AT_Utils
 			State = Enum.GetName(typeof(T), state);
 			base.Save(node);
 		}
+
+        public override string ToString()
+        {
+            return string.Format("{0}: {1}", GetType().Name, state);
+        }
 	}
 }
