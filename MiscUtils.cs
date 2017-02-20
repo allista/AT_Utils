@@ -150,15 +150,16 @@ namespace AT_Utils
 				"Inc:    {} deg\n" +
 				"LAN:    {} deg\n" +
 				"MA:     {} rad\n" +
-				"TA:     {} deg\n" +
+				"TA:     {} rad\n" +
 				"AoP:    {} deg\n" +
 				"Period: {} s\n" +
 				"epoch:   {}\n" +
 				"T@epoch: {} s\n" +
 				"T:       {} s\n" +
-				"T2Pe     {} per\n" +
-				"T2Ap     {} per\n" +
-				"EndTrans {}, EndUT {}\n" +
+				"T2Pe     {} s\n" +
+				"T2Ap     {} s\n" +
+                "StartUT  {} \n" +
+                "EndUT    {}, EndTrans: {}\n" +
 				"Vel: {} m/s\n" +
 				"Pos: {} m\n",
 				o.referenceBody.bodyName, o.referenceBody.rotationPeriod, 
@@ -169,8 +170,8 @@ namespace AT_Utils
 				o.semiMajorAxis, o.semiMinorAxis,
 				o.eccentricity, o.inclination, o.LAN, o.meanAnomaly, o.trueAnomaly, o.argumentOfPeriapsis,
 				o.period, o.epoch, o.ObTAtEpoch, o.ObT,
-				o.timeToPe/o.period, o.timeToAp/o.period,
-				o.patchEndTransition, o.EndUT,
+                o.timeToPe, o.timeToAp,
+                o.StartUT, o.EndUT, o.patchEndTransition, 
 				formatVector(o.vel), formatVector(o.pos));
 		}
 
