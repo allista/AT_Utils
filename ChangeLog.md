@@ -1,6 +1,19 @@
 #AT Utils ChangeLog
 
-* **v1.4.1**
+* **v1.4.2**
+    * Added patch for FilterExtensions to properly classify APR parts as "proc" bulkheadProfiles.
+    * Added SimplePartFilter class to add custom part subcategories.
+    * Fixed calculations of subwindow placement in compound windows.
+    * Corrected formatOrbit method.
+    * Added double version of EWA.
+    * Added Multiplexer.ToString
+    * Added Coordinates.normailize_coordinates method to deal with any lat/lon.
+        * Coordinates are automatically normalized on creation and Load.
+        * Added NormalizedLatitude static method.
+    * Prev/Next extensions of SortedList return Key instead of Value.
+    * Corrected namespace for Markers class.
+
+* v1.4.1
     * Sorted GUI classes into subfolders. Added SimpleDialog framework.
     * Included call to GUIWindowBase.can_draw() into doShow property.
     * Removed Closed fields/property from transfer windows; using WindowEnabled instead.
@@ -17,7 +30,7 @@
     * Added ToString overrides to all ResourceProxy classes; using ListDict instead of plane Dictionary in VesselResources.
     * Removed transferNow flag from ResourceTransferWindow; added TransferAction delegate instead.
 
-* **v1.4.0**
+* v1.4.0
     * Added no_window style for borderless, titleless transparent window.
     * Fixed PartIsPurchased for ScienceSandbox mode.
     * **TooltipManager** is now a KSPAddon and is drawing tooltips above everything by itself.
