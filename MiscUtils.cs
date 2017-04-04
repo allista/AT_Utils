@@ -118,11 +118,27 @@ namespace AT_Utils
 			return "0.0u"; //effectivly zero
 		}
 
-//		public static string FormatTimeDelta(double value)
-//		{
-//			var h = 0;
-//			if(value > 3600) h
-//		}
+        struct _DateTime 
+        { 
+            public int seconds, minutes, hours, days, years; 
+            public _DateTime(double time, int year_len, int day_len)
+            {
+                years = (int)(time/year_len);
+                time -= years*year_len;
+                int secs = (int)time;
+                seconds = secs % 60;
+                minutes = secs / 60 % 60;
+                hours = secs / 3600 % (day_len / 3600);
+                days = secs / day_len;
+            }
+        }
+
+        public static string formatTimeDelta(double delta)
+        {
+            var dt = new _DateTime(delta, KSPUtil.dateTimeFormatter.Year, KSPUtil.dateTimeFormatter.Day);
+            return string.Format("{0}y {1,3}d {2,2:}:{3:00}:{4:00}", 
+                                 dt.years, dt.days, dt.hours, dt.minutes, dt.seconds);
+        }
 
 		public static string formatDimensions(Vector3 size)
 		{ return string.Format("{0:F2}m x {1:F2}m x {2:F2}m", size.x, size.y, size.z); }
@@ -133,13 +149,23 @@ namespace AT_Utils
 		public static string formatVector(Vector3d v)
 		{ return string.Format("({0}, {1}, {2}); |v| = {3}", v.x, v.y, v.z, v.magnitude); }
 
+        public static string formatCB(CelestialBody cb)
+        {
+            if(cb == null) return "Body:   null";
+            return Utils.Format(
+                "Body:   {}\n" +
+                "\trotation: {} s\n" +
+                "\tradius:   {}\n" +
+                "\trot angle {} deg",
+                cb.bodyName, cb.rotationPeriod, 
+                formatBigValue((float)cb.Radius, "m"),
+                cb.rotationAngle);
+        }
+
 		public static string formatOrbit(Orbit o)
 		{
 			return Utils.Format(
-				"Body:   {}\n" +
-				"\trotation: {} s\n" +
-				"\tradius:   {}\n" +
-				"\trot angle {} deg\n" +
+                "{}\n" +
 				"PeA:    {} m\n" +
 				"ApA:    {} m\n" +
 				"PeR:    {} m\n" +
@@ -158,22 +184,38 @@ namespace AT_Utils
 				"T:       {} s\n" +
 				"T2Pe     {} s\n" +
 				"T2Ap     {} s\n" +
-                "StartUT  {} \n" +
-                "EndUT    {}, EndTrans: {}\n" +
+                "StartUT  {}  StartTrans: {}\n" +
+                "EndUT    {}, EndTrans:   {}\n" +
 				"Vel: {} m/s\n" +
 				"Pos: {} m\n",
-				o.referenceBody.bodyName, o.referenceBody.rotationPeriod, 
-				formatBigValue((float)o.referenceBody.Radius, "m"),
-				o.referenceBody.rotationAngle,
+                formatCB(o.referenceBody),
 				o.PeA, o.ApA,
 				o.PeR, o.ApR, 
 				o.semiMajorAxis, o.semiMinorAxis,
 				o.eccentricity, o.inclination, o.LAN, o.meanAnomaly, o.trueAnomaly, o.argumentOfPeriapsis,
 				o.period, o.epoch, o.ObTAtEpoch, o.ObT,
                 o.timeToPe, o.timeToAp,
-                o.StartUT, o.EndUT, o.patchEndTransition, 
+                o.StartUT, o.patchStartTransition,
+                o.EndUT, o.patchEndTransition, 
 				formatVector(o.vel), formatVector(o.pos));
 		}
+
+        public static string formatPatches(Orbit o, string tag)//debug
+        {
+            var with_tag = !string.IsNullOrEmpty(tag);
+            var ret = with_tag? 
+                Format("===================== {} : {} =======================\n{}", 
+                       tag, Planetarium.GetUniversalTime(), o) :
+                formatOrbit(o);
+            ret += "\n";
+            if(o.nextPatch != null &&
+               o.nextPatch.referenceBody != null &&
+               o.patchEndTransition != Orbit.PatchTransitionType.FINAL)
+                ret += formatPatches(o.nextPatch, "");
+            if(with_tag)
+                ret += "===================================================================\n";
+            return ret;
+        }
 
 		public static string formatBounds(Bounds b, string name="")
 		{
@@ -212,6 +254,7 @@ namespace AT_Utils
 				else if(arg == null) args[i] = "null";
 				else if(arg is Vector3) args[i] = formatVector((Vector3)arg);
 				else if(arg is Vector3d) args[i] = formatVector((Vector3d)arg);
+                else if(arg is CelestialBody) args[i] = formatCB((CelestialBody)arg);
 				else if(arg is Orbit) args[i] = formatOrbit((Orbit)arg);
 				else if(arg is Bounds) args[i] = formatBounds((Bounds)arg);
 				else if(arg is Exception) args[i] = formatException((Exception)arg);
