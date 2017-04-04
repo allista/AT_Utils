@@ -112,6 +112,8 @@
     <Compile Include="GUI\WindowsFramework\FloatingWindow.cs" />
     <Compile Include="GUI\WindowsFramework\GUIWindowBase.cs" />
     <Compile Include="SimplePartFilter.cs" />
+    <Compile Include="Debugging\Emailer.cs" />
+    <Compile Include="Debugging\ScenarioTester.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
