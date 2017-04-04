@@ -34,9 +34,9 @@ namespace AT_Utils
 
 	public class FlightCameraOverride : MonoBehaviour
 	{
-		public enum Mode { None, Hold, LookAt }
+		public enum Mode { None, Hold, LookAt, LookBetween, LookFromTo }
 
-		const int EASING_FRAMES = 60;
+		const int EASING_FRAMES = 120;
 
 		static Mode mode;
 		static int duration = -1;
@@ -89,33 +89,37 @@ namespace AT_Utils
 
 		public static void HoldCameraStillForSeconds(Transform new_anchor, double seconds, bool override_reference = false)
 		{
-			Activate(Mode.Hold, new_anchor, null, override_reference);
+            if(override_reference || !Active)
+                Activate(Mode.Hold, new_anchor, null, override_reference);
 			UpdateDurationSeconds(seconds);
 		}
 
 		public static void HoldCameraStill(Transform new_anchor, int num_frames, bool override_reference = false)
 		{
-			Activate(Mode.Hold, new_anchor, null, override_reference);
+            if(override_reference || !Active)
+                Activate(Mode.Hold, new_anchor, null, override_reference);
 			UpdateDuration(num_frames);
 		}
 
-		public static void LookAtForSeconds(Transform new_anchor, Transform new_target, double seconds, bool override_reference = false)
-		{
-			Activate(Mode.LookAt, new_anchor, new_target, override_reference);
-			UpdateDurationSeconds(seconds);
-		}
+        public static void LookForSeconds(Mode mode, Transform new_anchor, Transform new_target, double seconds, bool override_reference = false)
+        {
+            if(override_reference || !Active)
+                Activate(mode, new_anchor, new_target, override_reference);
+            UpdateDurationSeconds(seconds);
+        }
 
-		public static void LookAt(Transform new_anchor, Transform new_target, int num_frames, bool override_reference = false)
-		{
-			Activate(Mode.LookAt, new_anchor, new_target, override_reference);
-			UpdateDuration(num_frames);
-		}
+        public static void Look(Mode mode, Transform new_anchor, Transform new_target, int num_frames, bool override_reference = false)
+        {
+            if(override_reference || !Active)
+                Activate(mode, new_anchor, new_target, override_reference);
+            UpdateDuration(num_frames);
+        }
 
 		public static void Deactivate()
 		{
 			#if DEBUG
-			Utils.Log("Deactivating FCO: duration {}, seconds {}, anchor {}", 
-			          duration, endUT-Planetarium.GetUniversalTime(), anchor);
+            Utils.Log("Deactivating FCO: duration {}, seconds {}, anchor {}, target {}", 
+			          duration, endUT-Planetarium.GetUniversalTime(), anchor, target);
 			#endif
 			if(FlightCamera.fetch != null)
 				FlightCamera.fetch.ActivateUpdate();
@@ -146,6 +150,26 @@ namespace AT_Utils
 				}
 				else pivot = target.position;
 				break;
+            case Mode.LookBetween:
+                pos = rel_pos+anchor.position;
+                if(easing > 0)
+                {
+                    pivot = Vector3.Lerp((target.position+anchor.position)/2, rel_pivot+anchor.position, easing/EASING_FRAMES);
+                    easing -= 1;
+                }
+                else pivot = (target.position+anchor.position)/2;
+                break;
+            case Mode.LookFromTo:
+                pos = anchor.position + Quaternion.AngleAxis(15, Vector3.forward)*(anchor.position-target.position).normalized*30;
+                if(easing > 0)
+                {
+                    var t = easing/EASING_FRAMES;
+                    pos = Vector3.Lerp(pos, rel_pos+anchor.position, t);
+                    pivot = Vector3.Lerp(target.position, rel_pivot+anchor.position, t);
+                    easing -= 1;
+                }
+                else pivot = target.position;
+                break;
 			}
 		}
 
