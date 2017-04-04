@@ -349,6 +349,9 @@ namespace AT_Utils
 
 		public static implicit operator bool(Extremum<T> e) { return e.True; }
 		public static implicit operator T(Extremum<T> e) { return e.Value; }
+
+        public override string ToString()
+        { return Utils.Format("[{}: {}, {} -> {} -> {}]", GetType().Name, True, v2, v1, v0); }
 	}
 
 	public class MinimumF: Extremum<float>
