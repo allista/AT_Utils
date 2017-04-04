@@ -11,6 +11,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using FinePrint.Utilities;
 
 namespace AT_Utils
 {
@@ -789,10 +790,9 @@ namespace AT_Utils
 			return b;
 		}
 
-		public static Bounds EnginesExhaust(this Vessel vessel)
+        public static Bounds EnginesExhaust(this Vessel vessel, Transform refT)
 		{
 			var CoM = vessel.CurrentCoM;
-			var refT = vessel.ReferenceTransform;
 			var b = new Bounds();
 			var inited = false;
 			for(int i = 0, vesselPartsCount = vessel.Parts.Count; i < vesselPartsCount; i++)
@@ -815,11 +815,38 @@ namespace AT_Utils
 			return b;
 		}
 
-		public static float Radius(this Vessel vessel)
+        public static Bounds BoundsWithExhaust(this Vessel vessel, Transform refT)
+        {
+            var b = vessel.Bounds(refT);
+            b.Encapsulate(vessel.EnginesExhaust(refT));
+            return b;
+        }
+
+        public static float Radius(this Vessel vessel, bool fromCoM = false)
 		{ 
-			if(!vessel.loaded) return (float)Math.Pow(vessel.GetTotalMass()	, 1/3.0);
-			var bounds = vessel.Bounds(vessel.ReferenceTransform);
-			return bounds.size.magnitude+bounds.center.magnitude;
+			if(!vessel.loaded) 
+            {
+                if(vessel.vesselType == VesselType.SpaceObject)
+                {
+                    var ast = vessel.protoVessel.protoPartSnapshots
+                        .Select(p => p.FindModule("ModuleAsteroid"))
+                        .FirstOrDefault();
+                    if(ast != null) 
+                    {
+                        float rho;
+                        if(float.TryParse(ast.moduleValues.GetValue("density"), out rho))
+                            return (float)Math.Pow(vessel.GetTotalMass()/rho, 1/3.0);
+                    }
+                }
+                return (float)Math.Pow(vessel.GetTotalMass()/2, 1/3.0);
+            }
+			var bounds = vessel.BoundsWithExhaust(vessel.ReferenceTransform);
+            if(fromCoM)
+            {
+                var shift = vessel.ReferenceTransform.TransformPoint(bounds.center)-vessel.CoM;
+                return bounds.extents.magnitude+shift.magnitude;
+            }
+            return bounds.extents.magnitude;
 		}
 	}
 
@@ -853,6 +880,26 @@ namespace AT_Utils
 	public static class OrbitalExtensions
 	{
 		public static bool ApAhead(this Orbit obt) { return obt.timeToAp < obt.timeToPe; }
+
+        public static double MinPeR(this Orbit obt)
+        { 
+            return obt.referenceBody.atmosphere? 
+                obt.referenceBody.Radius+obt.referenceBody.atmosphereDepth+1000 : 
+                obt.referenceBody.Radius+CelestialUtilities.GetHighestPeak(obt.referenceBody)+1000; 
+        }
+
+        public static double GetEndUT(this Orbit obt)
+        {
+            var end = obt.EndUT;
+            while(obt.nextPatch != null && 
+                  obt.nextPatch.referenceBody != null &&
+                  obt.patchEndTransition != Orbit.PatchTransitionType.FINAL)
+            {
+                obt = obt.nextPatch;
+                end = obt.EndUT; 
+            }
+            return end;
+        }
 
 		public static Vector3d hV(this Orbit obt, double UT) 
 		{ 
