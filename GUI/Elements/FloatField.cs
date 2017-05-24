@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace AT_Utils
 {
-	public class FloatField : ConfigNodeObject
+    public class FloatField : ConfigNodeObject, ITypeUI<float>
 	{
 		string svalue;
 		[Persistent] public string format;
@@ -29,7 +29,7 @@ namespace AT_Utils
 			set 
 			{
 				fvalue = Circle? Utils.Circle(value, Min, Max) : Utils.Clamp(value, Min, Max);
-				svalue = fvalue.ToString(format);	
+                svalue = fvalue.ToString(format);   
 			}
 		}
 
@@ -48,7 +48,7 @@ namespace AT_Utils
 			Value = fvalue;
 		}
 
-		public static implicit operator float(FloatField ff) { return ff.fvalue; }
+		public static implicit operator float(FloatField fi) { return fi.fvalue; }
 		public override string ToString () { return fvalue.ToString(format); }
 
 		public FloatField(string format = "R", float min = float.MinValue, float max = float.MaxValue, bool circle = false)
@@ -67,7 +67,7 @@ namespace AT_Utils
 			return false;
 		}
 
-		public bool Draw(string suffix = "", bool show_set_button = true, float increment = 0, string iformat = "F1")
+		public bool Draw(string suffix, bool show_set_button = true, float increment = 0, string iformat = "F1")
 		{
 			bool updated = false;
 			if(!increment.Equals(0)) 
@@ -86,6 +86,8 @@ namespace AT_Utils
 			updated |= IsSet && UpdateValue();
 			return updated;
 		}
+
+        public bool Draw() { return Draw(""); }
 	}
 }
 

@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace AT_Utils
 {
-	public class Vector3Field
+    public class Vector3Field : ITypeUI<Vector3>
 	{
 		public FloatField Fx = new FloatField();
 		public FloatField Fy = new FloatField();
@@ -36,11 +36,10 @@ namespace AT_Utils
 			return updated;
 		}
 
-		public bool Draw(string name, string suffix = "", bool show_set_button = true, float increment = 0, string iformat = "F1")
+		public bool Draw(string suffix, bool show_set_button = true, float increment = 0, string iformat = "F1")
 		{
 			var ret = false;
 			GUILayout.BeginHorizontal();
-			GUILayout.Label(name, GUILayout.ExpandWidth(false));
 			ret = Fx.Draw("", false, increment, iformat) || ret;
 			ret = Fy.Draw("", false, increment, iformat) || ret;
 			ret = Fz.Draw(suffix, show_set_button, increment, iformat) || ret;
@@ -48,6 +47,8 @@ namespace AT_Utils
 			GUILayout.EndHorizontal();
 			return ret;
 		}
+
+        public bool Draw() { return Draw(""); }
 	}
 }
 
