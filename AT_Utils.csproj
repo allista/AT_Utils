@@ -114,6 +114,10 @@
     <Compile Include="SimplePartFilter.cs" />
     <Compile Include="Debugging\Emailer.cs" />
     <Compile Include="Debugging\ScenarioTester.cs" />
+    <Compile Include="GUI\ConfigNodeObjectGUI.cs" />
+    <Compile Include="GUI\Elements\IntField.cs" />
+    <Compile Include="GUI\Elements\SimpleFields.cs" />
+    <Compile Include="GUI\Elements\ITypeUI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
