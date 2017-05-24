@@ -36,8 +36,24 @@ namespace AT_Utils
 		public static int ClampL(int x, int low)  { return x < low  ? low  : x; }
 		public static int ClampH(int x, int high) { return x > high ? high : x; }
 
+        public static float ClampSignedH(float x, float high) 
+        { return x > 0 ? (x > high? high : x) : (x < -high? -high : x); }
+
+        public static double ClampSignedH(double x, double high)
+        { return x > 0 ? (x > high? high : x) : (x < -high? -high : x); }
+
+        public static float ClampSignedL(float x, float low) 
+        { return x > 0 ? (x < low? low : x) : (x > -low? -low : x); }
+
+        public static double ClampSignedL(double x, double low)
+        { return x > 0 ? (x < low? low : x) : (x > -low? -low : x); }
+
+        public static int Circle(int a, int min, int max)
+        { if(a > max) a = a%max+min; return a < min? max-min+a : a; }
+
 		public static float Circle(float a, float min, float max)
 		{ if(a > max) a = a%max+min; return a < min? max-min+a : a; }
+
 		public static double Circle(double a, double min, double max)
 		{ if(a > max) a = a%max+min; return a < min? max-min+a : a; }
 
