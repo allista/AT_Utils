@@ -34,16 +34,19 @@ namespace AT_Utils
 
 	public class FlightCameraOverride : MonoBehaviour
 	{
-		public enum Mode { None, Hold, LookAt, LookBetween, LookFromTo }
+		public enum Mode { None, Hold, LookAt, LookBetween, LookFromTo, OrbitAround }
 
 		const int EASING_FRAMES = 120;
+        const float MAX_DIST = 1000;
+        static float ln12 = Mathf.Log(0.5f);
 
 		static Mode mode;
 		static int duration = -1;
 		static float easing = -1;
 		static double endUT = -1;
 
-		static Transform anchor, target;
+        public static Transform anchor { get; private set; }
+        public static Transform target { get; private set; }
 
 		static Vector3 pos, rel_pos;
 		static Vector3 pivot, rel_pivot;
@@ -87,28 +90,28 @@ namespace AT_Utils
 			easing = EASING_FRAMES;
 		}
 
-		public static void HoldCameraStillForSeconds(Transform new_anchor, double seconds, bool override_reference = false)
+        public static void AnchorForSeconds(Mode mode, Transform new_anchor, double seconds, bool override_reference = false)
 		{
             if(override_reference || !Active)
-                Activate(Mode.Hold, new_anchor, null, override_reference);
+                Activate(mode, new_anchor, null, override_reference);
 			UpdateDurationSeconds(seconds);
 		}
 
-		public static void HoldCameraStill(Transform new_anchor, int num_frames, bool override_reference = false)
+		public static void Anchor(Mode mode, Transform new_anchor, int num_frames, bool override_reference = false)
 		{
             if(override_reference || !Active)
-                Activate(Mode.Hold, new_anchor, null, override_reference);
+                Activate(mode, new_anchor, null, override_reference);
 			UpdateDuration(num_frames);
 		}
 
-        public static void LookForSeconds(Mode mode, Transform new_anchor, Transform new_target, double seconds, bool override_reference = false)
+        public static void TargetForSeconds(Mode mode, Transform new_anchor, Transform new_target, double seconds, bool override_reference = false)
         {
             if(override_reference || !Active)
                 Activate(mode, new_anchor, new_target, override_reference);
             UpdateDurationSeconds(seconds);
         }
 
-        public static void Look(Mode mode, Transform new_anchor, Transform new_target, int num_frames, bool override_reference = false)
+        public static void Target(Mode mode, Transform new_anchor, Transform new_target, int num_frames, bool override_reference = false)
         {
             if(override_reference || !Active)
                 Activate(mode, new_anchor, new_target, override_reference);
@@ -117,12 +120,15 @@ namespace AT_Utils
 
 		public static void Deactivate()
 		{
-			#if DEBUG
-            Utils.Log("Deactivating FCO: duration {}, seconds {}, anchor {}, target {}", 
-			          duration, endUT-Planetarium.GetUniversalTime(), anchor, target);
-			#endif
 			if(FlightCamera.fetch != null)
 				FlightCamera.fetch.ActivateUpdate();
+            if(FlightGlobals.ActiveVessel != null)
+            {
+                anchor = FlightGlobals.ActiveVessel.transform;
+                pos = rel_pos+anchor.position;
+                pivot = rel_pivot+anchor.position;
+            }
+            update_camera();
 			mode = Mode.None;
 			anchor = null;
 			target = null;
@@ -133,8 +139,20 @@ namespace AT_Utils
 
 		void OnDestroy() { Deactivate(); }
 
+        static float smooth_easing(Vector3 t, out float lin_easing)
+        {
+            var L = (t-anchor.position).magnitude;
+            var a = Mathf.Min(L*0.1f, 100);
+            var p = Mathf.Log(a/L)/ln12;
+            lin_easing = 1-easing/EASING_FRAMES;
+            return Mathf.Pow(lin_easing, p);
+        }
+
 		static void update_pos_and_pivot()
 		{
+            Vessel vsl;
+            Vector3d axis;
+            float tl, ts;
 			switch(mode)
 			{
 			case Mode.Hold:
@@ -142,33 +160,47 @@ namespace AT_Utils
 				pivot = rel_pivot+anchor.position;
 				break;
 			case Mode.LookAt:
+                if(target == null) { Deactivate(); return; }
 				pos = rel_pos+anchor.position;
+                pivot = pos+(target.position-pos).normalized*MAX_DIST;
 				if(easing > 0)
-				{
-					pivot = Vector3.Lerp(target.position, rel_pivot+anchor.position, easing/EASING_FRAMES);
+                {
+                    ts = smooth_easing(pivot, out tl);
+                    pivot = Vector3.Lerp(rel_pivot+anchor.position, pivot, ts);
 					easing -= 1;
 				}
-				else pivot = target.position;
 				break;
             case Mode.LookBetween:
+                if(target == null) { Deactivate(); return; }
                 pos = rel_pos+anchor.position;
+                pivot = pos+((target.position+anchor.position)/2-pos).normalized*MAX_DIST;
                 if(easing > 0)
                 {
-                    pivot = Vector3.Lerp((target.position+anchor.position)/2, rel_pivot+anchor.position, easing/EASING_FRAMES);
+                    ts = smooth_easing(pivot, out tl);
+                    pivot = Vector3.Lerp(rel_pivot+anchor.position, pivot, ts);
                     easing -= 1;
                 }
-                else pivot = (target.position+anchor.position)/2;
                 break;
             case Mode.LookFromTo:
-                pos = anchor.position + Quaternion.AngleAxis(15, Vector3.forward)*(anchor.position-target.position).normalized*30;
+                if(target == null) { Deactivate(); return; }
+                vsl = anchor.gameObject.GetComponent<Vessel>();
+                axis = vsl == null? anchor.up : (Vector3)vsl.orbit.pos.xzy;
+                pos = anchor.position + Quaternion.AngleAxis(20, axis)*(anchor.position-target.position).normalized*30;
+                pivot = pos+(target.position-pos).normalized*MAX_DIST;
                 if(easing > 0)
                 {
-                    var t = easing/EASING_FRAMES;
-                    pos = Vector3.Lerp(pos, rel_pos+anchor.position, t);
-                    pivot = Vector3.Lerp(target.position, rel_pivot+anchor.position, t);
+                    ts = smooth_easing(pivot, out tl);
+                    pos = Vector3.Lerp(rel_pos+anchor.position, pos, tl);
+                    pivot = Vector3.Lerp(rel_pivot+anchor.position, pivot, ts);
                     easing -= 1;
                 }
-                else pivot = target.position;
+                break;
+            case Mode.OrbitAround:
+                pos = rel_pos+anchor.position;
+                pivot = rel_pivot+anchor.position;
+                vsl = anchor.gameObject.GetComponent<Vessel>();
+                axis = vsl == null? anchor.up : (Vector3)vsl.orbit.pos.xzy;
+                rel_pos = Quaternion.AngleAxis(0.15f, axis)*rel_pos;
                 break;
 			}
 		}
@@ -201,13 +233,13 @@ namespace AT_Utils
 			update_camera();
 		}
 
-		#if DEBUG
-		void OnRenderObject()
-		{
-			if(!Active) return;
-			Utils.GLDrawPoint(pivot, Color.magenta, 0.5f);
-		}
-		#endif
+//		#if DEBUG
+//		void OnRenderObject()
+//		{
+//			if(!Active) return;
+//			Utils.GLDrawPoint(pivot, Color.magenta, 0.5f);
+//		}
+//		#endif
 	}
 }
 
