@@ -61,9 +61,9 @@ namespace AT_Utils
                                     lst = new SortedList<string, ScenarioConstructor>();
                                     scenarios.Add(aname, lst);
                                 }
-                                Utils.Log("Trying to add {}.{} to scenarios: {}", aname, type.Name, lst);//debug
                                 lst.Add(Utils.ParseCamelCase(type.Name).Replace("_", " "), 
                                         () => cinfo.Invoke(null) as ITestScenario);
+                                Utils.Log("Added {}.{} to testing scenarios.", aname, type.Name);
                             }
                         }
                     }
@@ -76,7 +76,6 @@ namespace AT_Utils
                 }
             }
             else Destroy(gameObject);
-            Utils.Log("Scenarios: {}", scenarios);//debug
         }
 
         protected virtual void setup_test(ITestScenario test)
