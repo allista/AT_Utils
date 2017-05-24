@@ -88,6 +88,7 @@ namespace AT_Utils
 		}
 		public void LoadDefaultFile() { Load(DefaultFile); }
 		public void CreateDefaultFile() { Create(DefaultFile); }
+        public void CreateDefaultOverride() { Create(DefaultOverride); }
 	}
 
 
