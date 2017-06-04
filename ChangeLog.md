@@ -1,6 +1,21 @@
 #AT Utils ChangeLog
 
-* **v1.4.2**
+* **v1.4.3**
+    * Compatible with KSP-1.3
+    * Added simple emailer class (works only with local spooler). Added ScenarioTester framework for automated continious testing.
+    * Changed log message upon scenario registration.
+    * Added formatTimeDelta, formatCB, formatPatches methods to Utils.
+    * Added Extremum.ToString method.
+    * Added Vessel.BoundsWithExhaust, Orbit.MinPeR; improved Vessel.Radius calculation.
+    * Added ConfigNodeObjectGUI framework. Mainly for debugging.
+    * Made Float/Vector3Field implement ITypeUI.
+    * Added CreateDefaultOverride method to PluginConfig.
+    * Added ClampSignedH/L family of methods, added Circle method to Utils.
+    * Made PID.IntegralError public; changed notation of PID class names; added PIDvf and PIDv controllers.
+    * Added LookBetween and LookFromTo modes for FCO.
+    * Added OrbitAround mode for FCO; changed naming scheme for methods its.
+
+* v1.4.2
     * Added patch for FilterExtensions to properly classify APR parts as "proc" bulkheadProfiles.
     * Added SimplePartFilter class to add custom part subcategories.
     * Fixed calculations of subwindow placement in compound windows.
