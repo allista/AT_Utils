@@ -79,7 +79,7 @@ namespace AT_Utils
             var category = PartCategorizer.Instance.filters
                 .Find(f => f.button.categoryName == CATEGORY);
             //add custom function filter
-            PartCategorizer.AddCustomSubcategoryFilter(category, SUBCATEGORY, icon, filter);
+            PartCategorizer.AddCustomSubcategoryFilter(category, SUBCATEGORY, SUBCATEGORY, icon, filter);
             //Apparently needed to make sure the icon actually shows at first
             var button = category.button.activeButton;
             button.Value = false;
