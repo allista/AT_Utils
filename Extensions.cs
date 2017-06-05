@@ -764,12 +764,12 @@ namespace AT_Utils
 			construct.Clear();
 		}
 
-		public static Bounds Bounds(this Vessel vessel, Transform refT)
+        public static Bounds Bounds(this IShipconstruct vessel, Transform refT)
 		{
 			//update physical bounds
 			var b = new Bounds();
 			bool inited = false;
-			var parts = vessel.parts;
+			var parts = vessel.Parts;
 			for(int i = 0, partsCount = parts.Count; i < partsCount; i++)
 			{
 				Part p = parts[i];
