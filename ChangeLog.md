@@ -14,6 +14,7 @@
     * Made PID.IntegralError public; changed notation of PID class names; added PIDvf and PIDv controllers.
     * Added LookBetween and LookFromTo modes for FCO.
     * Added OrbitAround mode for FCO; changed naming scheme for methods its.
+    * Made Bounds an extension of IShipconstruct.
 
 * v1.4.2
     * Added patch for FilterExtensions to properly classify APR parts as "proc" bulkheadProfiles.
