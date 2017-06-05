@@ -200,7 +200,7 @@ namespace AT_Utils
 				formatVector(o.vel), formatVector(o.pos));
 		}
 
-        public static string formatPatches(Orbit o, string tag)//debug
+        public static string formatPatches(Orbit o, string tag)
         {
             var with_tag = !string.IsNullOrEmpty(tag);
             var ret = with_tag? 

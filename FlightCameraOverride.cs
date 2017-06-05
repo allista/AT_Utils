@@ -122,13 +122,6 @@ namespace AT_Utils
 		{
 			if(FlightCamera.fetch != null)
 				FlightCamera.fetch.ActivateUpdate();
-            if(FlightGlobals.ActiveVessel != null)
-            {
-                anchor = FlightGlobals.ActiveVessel.transform;
-                pos = rel_pos+anchor.position;
-                pivot = rel_pivot+anchor.position;
-            }
-            update_camera();
 			mode = Mode.None;
 			anchor = null;
 			target = null;
