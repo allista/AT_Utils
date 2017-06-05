@@ -27,7 +27,7 @@ namespace AT_Utils
     public abstract class SimplePartFilter : MonoBehaviour
     {
         protected List<Type> MODULES;
-        protected string CATEGORY = "Filter by Function";
+        protected string CATEGORY = "Filter by function";
         protected string SUBCATEGORY = "";
         protected string FOLDER = "";
         protected string ICON = "";
@@ -44,7 +44,7 @@ namespace AT_Utils
             if(modules != null && modules.Count > 0)
             {
                 PartCategorizer.Instance.filters
-                    .Find(f => f.button.categoryName == "Filter by Module")
+                    .Find(f => f.button.categoryName == "Filter by module")
                     .subcategories.FindAll(s => 
                 {
                     var cat_name = string.Join("", s.button.categoryName.Split());
@@ -78,8 +78,10 @@ namespace AT_Utils
             //get category
             var category = PartCategorizer.Instance.filters
                 .Find(f => f.button.categoryName == CATEGORY);
+//            Utils.Log("add_filter.category: {}\nall: {}", category, 
+//                      PartCategorizer.Instance.filters.ConvertAll(f => f.button.categoryName));//debug
             //add custom function filter
-            PartCategorizer.AddCustomSubcategoryFilter(category, SUBCATEGORY, SUBCATEGORY, icon, filter);
+            PartCategorizer.AddCustomSubcategoryFilter(category, SUBCATEGORY, SUBCATEGORY, icon, filter);//FIXME: NRE here!!!
             //Apparently needed to make sure the icon actually shows at first
             var button = category.button.activeButton;
             button.Value = false;
