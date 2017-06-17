@@ -381,6 +381,30 @@ namespace AT_Utils
 			}
 		}
 
+        public static void GLDrawHull2(ConvexHull3D h, Transform T, Color c, Vector3 offset = default(Vector3), bool filled = true)
+        { 
+            float far;
+            var camera = GLBeginWorld(out far);
+            GL.Begin(filled? GL.TRIANGLES : GL.LINES);
+            GL.Color(c);
+            for(int i = 0, hFacesCount = h.Faces.Count; i < hFacesCount; i++)
+            {
+                var f = h.Faces[i];
+                var verts = f.ToArray();
+                for(int j = 0; j < verts.Length; j++)
+                    verts[i] = T.TransformDirection(verts[j] - offset) + T.position;
+                GL.Vertex(verts[0]);
+                GL.Vertex(verts[1]);
+                GL.Vertex(verts[1]);
+                GL.Vertex(verts[2]);
+                GL.Vertex(verts[2]);
+                GL.Vertex(verts[0]);
+            }
+            GL.End();
+            GL.PopMatrix();
+            camera.farClipPlane = far;
+        }
+
 		public static void GLDrawMesh(Mesh m, Transform T, Color c, Vector3 offset = default(Vector3), bool filled = true)
 		{
 			var verts = m.vertices;
