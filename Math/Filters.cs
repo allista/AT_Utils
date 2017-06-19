@@ -96,10 +96,8 @@ namespace AT_Utils
 			set { alpha = LowPassFilter.alpha(value); } 
 		}
 
-		#if DEBUG
-		public string DebugInfo
-		{ get { return string.Format("LowPassFilter: [Tau {0}, Value {1}]", Tau, Value); } }
-		#endif
+        public override string ToString()
+        { return string.Format("[Value {1}, Tau {0}]", Tau, Value); }
 	}
 
 	/// <summary>
@@ -124,10 +122,8 @@ namespace AT_Utils
 		{ return cur.CompareTo(value) > 0? alphaUp : alphaDown; }
 
 
-		#if DEBUG
-		public string DebugInfo
-		{ get { return string.Format("AsymmetricFilter: [TauUp {0}, TauDown {1}, Value {2}]", TauUp, TauDown, value); } }
-		#endif
+        public override string ToString()
+        { return string.Format("[Value {2}, TauUp {0}, TauDown {1}]", TauUp, TauDown, value); }
 	}
 
 	public abstract class ClampedAsymmetricFilter<T> : AsymmetricFilter<T>
