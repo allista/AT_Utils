@@ -116,6 +116,36 @@ namespace AT_Utils
 		public static Vector3 EWA(Vector3 old, Vector3 cur, float ratio = 0.7f)
 		{ return (1-ratio)*old + ratio*cur; }
 
+        /// <summary>
+        /// Calculate time needed for an iterative expression
+        /// a = Lerp(a, b, speed*dT)
+        /// to reach the value at lerp coordinate t.
+        /// </summary>
+        /// <param name="speed">Lerp speed.</param>
+        /// <param name="t">t parameter of the Lerp.</param>
+        public static float LerpTime(float speed, float t)
+        {
+            if(t <= 0) return 0;
+            if(t >= 1) return float.PositiveInfinity;
+            return 1/speed*Mathf.Log(1/(1-t));
+        }
+
+        /// <summary>
+        /// Calculate time needed for an iterative expression
+        /// a = Lerp(a, b, speed*dT)
+        /// to reach the value of c.
+        /// </summary>
+        /// <param name="a">Lerp start.</param>
+        /// <param name="b">Lerp end</param>
+        /// <param name="c">Desired lerp value.</param>
+        /// <param name="speed">Rate of change from a to b.</param>
+        public static float LerpTime(float a, float b, float c, float speed)
+        {
+            if(c <= a) return 0;
+            if(c >= b) return float.PositiveInfinity;
+            return 1/speed*Mathf.Log((b-a)/(b-c));
+        }
+
 		public static float CubeSurface(float volume)
 		{ return 6*Mathf.Pow(volume, 2/3f); }
 
