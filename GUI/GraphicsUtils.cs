@@ -390,9 +390,9 @@ namespace AT_Utils
             for(int i = 0, hFacesCount = h.Faces.Count; i < hFacesCount; i++)
             {
                 var f = h.Faces[i];
-                var verts = f.ToArray();
-                for(int j = 0; j < verts.Length; j++)
-                    verts[i] = T.TransformDirection(verts[j] - offset) + T.position;
+                var verts = new Vector3[3];
+                for(int j = 0; j < 3; j++)
+                    verts[j] = T.TransformDirection(f[j] - offset) + T.position;
                 GL.Vertex(verts[0]);
                 GL.Vertex(verts[1]);
                 GL.Vertex(verts[1]);
