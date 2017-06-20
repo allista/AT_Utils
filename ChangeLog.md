@@ -1,6 +1,15 @@
 #AT Utils ChangeLog
 
-* **v1.4.3**
+* **v1.4.4**
+    * Added kerbal traits and level to CrewTransferWindow; Closed #4
+    * Added a slghtly optimized version of GLDrawHull.
+    * Converted DebugInfo props of filters into ToString overrides.
+    * Added two Utils.LerpTime methods.
+    * In SimplePartFilter:
+    	* Fixed module matching with moduleInfo.moduleName: Converted MODULES to List of strings that is filled with SetMODULES methods that accepts IEnumerable of Types and converts Type.Name to moduleName/categoryName format.
+    	* Added default implementation of the filter method.
+
+* v1.4.3
     * Compatible with KSP-1.3
     * Added simple emailer class (works only with local spooler). Added ScenarioTester framework for automated continious testing.
     * Changed log message upon scenario registration.
