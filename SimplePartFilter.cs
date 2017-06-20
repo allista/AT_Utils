@@ -26,7 +26,8 @@ namespace AT_Utils
     /// </summary>
     public abstract class SimplePartFilter : MonoBehaviour
     {
-        protected List<Type> MODULES;
+        List<string> modules;
+        protected List<string> MODULES { get { return modules; } }
         protected string CATEGORY = "Filter by function";
         protected string SUBCATEGORY = "";
         protected string FOLDER = "";
@@ -37,19 +38,20 @@ namespace AT_Utils
             GameEvents.onGUIEditorToolbarReady.Add(add_filter);
         }
 
+        protected void SetMODULES(IEnumerable<Type> types)
+        {
+            modules = types.Select(t => KSPUtil.PrintModuleName(t.Name)).ToList();
+        }
+
         protected abstract bool filter(AvailablePart part);
 
-        static void set_modules_icon(List<Type> modules, Icon icon)
+        void set_modules_icon(Icon icon)
         {
             if(modules != null && modules.Count > 0)
             {
                 PartCategorizer.Instance.filters
                     .Find(f => f.button.categoryName == "Filter by module")
-                    .subcategories.FindAll(s => 
-                {
-                    var cat_name = string.Join("", s.button.categoryName.Split());
-                    return modules.Any(m => m.Name == cat_name);
-                })
+                    .subcategories.FindAll(s => modules.Any(m => m == s.button.categoryName))
                     .ForEach(c => c.button.SetIcon(icon));
             }
         }
@@ -87,7 +89,7 @@ namespace AT_Utils
             button.Value = false;
             button.Value = true;
             //set icon(s) for all the modules
-            set_modules_icon(MODULES, icon);
+            set_modules_icon(icon);
         }
     }
 }
