@@ -43,7 +43,10 @@ namespace AT_Utils
             modules = types.Select(t => KSPUtil.PrintModuleName(t.Name)).ToList();
         }
 
-        protected abstract bool filter(AvailablePart part);
+        protected virtual bool filter(AvailablePart part)
+        {
+            return part.moduleInfos.Any(info => MODULES.Any(m => m == info.moduleName));
+        }
 
         void set_modules_icon(Icon icon)
         {
