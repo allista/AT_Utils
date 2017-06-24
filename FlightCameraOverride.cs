@@ -50,6 +50,7 @@ namespace AT_Utils
 
 		static Vector3 pos, rel_pos;
 		static Vector3 pivot, rel_pivot;
+        static float rel_pivot_dist;
 
 		static void set_rel_coordinates(Transform new_anchor)
 		{
@@ -59,6 +60,7 @@ namespace AT_Utils
 			rel_pos = pos-anchor.position;
 			pivot = camera.GetPivot().position;
 			rel_pivot = pivot-anchor.position;
+            rel_pivot_dist = Mathf.Min(rel_pivot.magnitude, MAX_DIST);
 		}
 
 		public static bool Active { get { return mode != Mode.None; } }
@@ -155,7 +157,7 @@ namespace AT_Utils
 			case Mode.LookAt:
                 if(target == null) { Deactivate(); return; }
 				pos = rel_pos+anchor.position;
-                pivot = pos+(target.position-pos).normalized*MAX_DIST;
+                pivot = pos+(target.position-pos).normalized*rel_pivot_dist;
 				if(easing > 0)
                 {
                     ts = smooth_easing(pivot, out tl);
@@ -166,7 +168,7 @@ namespace AT_Utils
             case Mode.LookBetween:
                 if(target == null) { Deactivate(); return; }
                 pos = rel_pos+anchor.position;
-                pivot = pos+((target.position+anchor.position)/2-pos).normalized*MAX_DIST;
+                pivot = pos+((target.position+anchor.position)/2-pos).normalized*rel_pivot_dist;
                 if(easing > 0)
                 {
                     ts = smooth_easing(pivot, out tl);
@@ -179,7 +181,7 @@ namespace AT_Utils
                 vsl = anchor.gameObject.GetComponent<Vessel>();
                 axis = vsl == null? anchor.up : (Vector3)vsl.orbit.pos.xzy;
                 pos = anchor.position + Quaternion.AngleAxis(20, axis)*(anchor.position-target.position).normalized*30;
-                pivot = pos+(target.position-pos).normalized*MAX_DIST;
+                pivot = pos+(target.position-pos).normalized*rel_pivot_dist;
                 if(easing > 0)
                 {
                     ts = smooth_easing(pivot, out tl);
@@ -190,7 +192,7 @@ namespace AT_Utils
                 break;
             case Mode.OrbitAround:
                 pos = rel_pos+anchor.position;
-                pivot = rel_pivot+anchor.position;
+                pivot = anchor.position;
                 vsl = anchor.gameObject.GetComponent<Vessel>();
                 axis = vsl == null? anchor.up : (Vector3)vsl.orbit.pos.xzy;
                 rel_pos = Quaternion.AngleAxis(0.15f, axis)*rel_pos;
@@ -201,6 +203,8 @@ namespace AT_Utils
 		static void update_camera()
 		{
 			var camera = FlightCamera.fetch;
+//            Utils.Log("FlightCamera: pos {}, pivot {}, anchor {}, target {}", 
+//                      pos, pivot, anchor, target);//debug
 			camera.GetPivot().position = pivot;
 			camera.SetCamCoordsFromPosition(pos);
 			camera.GetCameraTransform().position = pos;
