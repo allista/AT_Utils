@@ -78,17 +78,40 @@ namespace AT_Utils
 			return c;
 		}
 
+        public void SetAlt2Surface(CelestialBody body) 
+        { 
+            Alt = SurfaceAlt(body, true);
+            if(body.ocean && Alt < 0)
+            {
+                OnWater = true;
+                Alt = 0;
+            }
+        }
+
 		public Coordinates Copy() { return new Coordinates(Lat, Lon, Alt); }
 
-		public void SetAlt2Surface(CelestialBody body) 
-		{ 
-			Alt = SurfaceAlt(body, true);
-			if(body.ocean && Alt < 0)
-			{
-				OnWater = true;
-				Alt = 0;
-			}
-		}
+        #region Distance
+        //using Haversine formula (see http://www.movable-type.co.uk/scripts/latlong.html)
+        public double AngleTo(double lat, double lon)
+        {
+            var lat1 = Lat*Mathf.Deg2Rad;
+            var lat2 = lat*Mathf.Deg2Rad;
+            var dlat = lat2-lat1;
+            var dlon = (lon-Lon)*Mathf.Deg2Rad;
+            var a = (1-Math.Cos(dlat))/2 + Math.Cos(lat1)*Math.Cos(lat2)*(1-Math.Cos(dlon))/2;
+            return 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1-a));
+        }
+
+        public double AngleTo(Coordinates c) { return AngleTo(c.Lat, c.Lon); }
+        public double AngleTo(Vessel vsl) { return AngleTo(vsl.latitude, vsl.longitude); }
+
+        public double DistanceTo(Coordinates c, CelestialBody body) { return AngleTo(c)*body.Radius; }
+        public double DistanceTo(Vessel vsl) { return AngleTo(vsl)*vsl.mainBody.Radius; }
+
+        public Vector3d RelSurfPos(CelestialBody body) { return body.GetRelSurfacePosition(Lat, Lon, Alt); }
+        public Vector3d RelOrbPos(CelestialBody body) { return RelSurfPos(body).xzy; }
+        public Vector3d WorldPos(CelestialBody body) { return body.GetWorldSurfacePosition(Lat, Lon, Alt); }
+        #endregion
 
 		public static string AngleToDMS(double angle)
 		{
