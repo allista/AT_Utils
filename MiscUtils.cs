@@ -301,9 +301,12 @@ namespace AT_Utils
 			if(args.Length > 0)
 			{
 				convert_args(args);
-				UnityEngine.Debug.Log(Format(msg, args)); 
+                msg = Format(msg, args);
 			}
-			else UnityEngine.Debug.Log(msg);
+			UnityEngine.Debug.Log(msg);
+            #if DEBUG
+            BackupLogger.LogRaw(msg);
+            #endif
 		}
 
 		public static void Log2File(string filename, string msg, params object[] args)
@@ -314,9 +317,9 @@ namespace AT_Utils
 				if(args.Length > 0)
 				{
 					convert_args(args);
-					f.WriteLine(Format(msg, args));
+                    msg = Format(msg, args);
 				}
-				else f.WriteLine(msg);
+				f.WriteLine(msg);
 			}
 		}
 
