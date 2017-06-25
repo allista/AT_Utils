@@ -261,13 +261,13 @@ namespace AT_Utils
 
 		}
 
-		public static Vector3d ClampMagnitudeH(this Vector3d v, float max)
+        public static Vector3d ClampMagnitudeH(this Vector3d v, double max)
 		{ 
 			var vm = v.magnitude;
 			return vm > max? v/vm*max : v;
 		}
 
-		public static Vector3d ClampMagnitudeL(this Vector3d v, float min)
+        public static Vector3d ClampMagnitudeL(this Vector3d v, double min)
 		{ 
 			var vm = v.magnitude;
 			return vm < min? v/vm*min : v;
