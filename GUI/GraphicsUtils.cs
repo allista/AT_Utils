@@ -219,6 +219,28 @@ namespace AT_Utils
 			camera.farClipPlane = far;
 		}
 
+        public static void GLLines(Vector3[] points, Color c)
+        {
+            if(points.Length < 2) return;
+            float far;
+            var camera = GLBeginWorld(out far);
+            if(MapView.MapIsEnabled)
+            {
+                for(int i = 0, len = points.Length; i < len; i++)
+                    points[i] = ScaledSpace.LocalToScaledSpace(points[i]);
+            }
+            GL.Begin(GL.LINES);
+            GL.Color(c);
+            for(int i = 0, len = points.Length; i < len-1; i++)
+            {
+                GL.Vertex(points[i]);
+                GL.Vertex(points[i+1]);
+            }
+            GL.End();
+            GL.PopMatrix();
+            camera.farClipPlane = far;
+        }
+
 		public static void GLVec(Vector3 ori, Vector3 vec, Color c)
 		{ GLLine(ori, ori+vec, c); }
 
