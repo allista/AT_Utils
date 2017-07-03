@@ -10,56 +10,41 @@ using UnityEngine;
 
 namespace AT_Utils
 {
-    public class FloatField : ConfigNodeObject, ITypeUI<float>
+    public class FloatField : BoundValueField<float>
 	{
-		string svalue;
-		[Persistent] public string format;
-		[Persistent] public float  fvalue;
-		[Persistent] public float  Min;
-		[Persistent] public float  Max;
-		[Persistent] public bool   Circle;
+		public override float Range { get { return Max-Min; } }
 
-		public bool IsSet { get; private set; }
+        protected override string formated_value
+        { 
+            get 
+            { 
+                return _value.ToString(format); 
+            }
+        }
 
-		public float Range { get { return Max-Min; } }
-
-		public float Value 
+		public override float Value 
 		{ 
-			get { return fvalue; } 
+			get { return _value; } 
 			set 
 			{
-				fvalue = Circle? Utils.Circle(value, Min, Max) : Utils.Clamp(value, Min, Max);
-                svalue = fvalue.ToString(format);   
+				_value = Circle? Utils.Circle(value, Min, Max) : Utils.Clamp(value, Min, Max);
+                svalue = formated_value;
 			}
 		}
 
-		public void Invert()
+        public override void Invert()
 		{
 			Min = -Max; Max = -Min;
 			Value = -Value;
 		}
 
-		public void ClampValue()
+        public override void ClampValue()
 		{ Value = Utils.Clamp(Value, Min, Max); }
 
-		public override void Load(ConfigNode node)
-		{
-			base.Load(node);
-			Value = fvalue;
-		}
-
-		public static implicit operator float(FloatField fi) { return fi.fvalue; }
-		public override string ToString () { return fvalue.ToString(format); }
-
 		public FloatField(string format = "R", float min = float.MinValue, float max = float.MaxValue, bool circle = false)
-		{
-			this.format = format;
-			Circle = circle;
-			Min = min; Max = max;
-			Value = fvalue;
-		}
+            : base(format, min, max, circle) {}
 
-		public bool UpdateValue()
+        public override bool UpdateValue()
 		{
 			float val;
 			if(float.TryParse(svalue, out val)) 
@@ -67,27 +52,31 @@ namespace AT_Utils
 			return false;
 		}
 
-		public bool Draw(string suffix, bool show_set_button = true, float increment = 0, string iformat = "F1")
+        public bool Draw(string suffix, float increment = 0, string iformat = "F1", int suffix_width = -1)
 		{
 			bool updated = false;
+            GUILayout.BeginHorizontal();
 			if(!increment.Equals(0)) 
 			{
 				if(GUILayout.Button(string.Format("-{0}", increment.ToString(iformat)), 	
 				                    Styles.normal_button, GUILayout.ExpandWidth(false)))
-				{ Value = fvalue-increment; updated = true; }
+				{ Value = _value-increment; updated = true; }
 				if(GUILayout.Button(string.Format("+{0}", increment.ToString(iformat)), 
 				                    Styles.normal_button, GUILayout.ExpandWidth(false)))
-				{ Value = fvalue+increment; updated = true; }
+				{ Value = _value+increment; updated = true; }
 			}
-			svalue = GUILayout.TextField(svalue, svalue.Equals(fvalue.ToString(format))? Styles.green : Styles.white,
+            GUI.SetNextControlName(field_name);
+            svalue = GUILayout.TextField(svalue, svalue.Equals(formated_value)? Styles.green : Styles.white,
 			                             GUILayout.ExpandWidth(true), GUILayout.MinWidth(70));
-			if(!string.IsNullOrEmpty(suffix)) GUILayout.Label(suffix, Styles.label, GUILayout.ExpandWidth(false));
-			IsSet = show_set_button && GUILayout.Button("Set", Styles.normal_button, GUILayout.ExpandWidth(false));
-			updated |= IsSet && UpdateValue();
-			return updated;
+			if(!string.IsNullOrEmpty(suffix)) 
+                GUILayout.Label(suffix, Styles.label, suffix_width < 0? 
+                                GUILayout.ExpandWidth(false) : GUILayout.Width(suffix_width));
+            GUILayout.EndHorizontal();
+            updated |= TrySetValue();
+            return updated;
 		}
 
-        public bool Draw() { return Draw(""); }
+        public override bool Draw() { return Draw(""); }
 	}
 }
 

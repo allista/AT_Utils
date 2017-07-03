@@ -9,54 +9,47 @@ using UnityEngine;
 
 namespace AT_Utils
 {
-    public class IntField : ConfigNodeObject, ITypeUI<int>
+    public class IntField : BoundValueField<int>
     {
-        string svalue;
-        [Persistent] public int  ivalue;
-        [Persistent] public int  Min;
-        [Persistent] public int  Max;
-        [Persistent] public bool Circle;
+        public override int Range { get { return Max-Min; } }
 
-        public bool IsSet { get; private set; }
-
-        public int Range { get { return Max-Min; } }
-
-        public int Value 
-        { 
-            get { return ivalue; } 
-            set 
+        protected override string formated_value
+        {
+            get
             {
-                ivalue = Circle? Utils.Circle(value, Min, Max) : Utils.Clamp(value, Min, Max);
-                svalue = ivalue.ToString("D");   
+                return _value.ToString("D");
             }
         }
 
-        public void Invert()
+        public override int Value 
+        { 
+            get { return _value; } 
+            set 
+            {
+                _value = Circle? Utils.Circle(value, Min, Max) : Utils.Clamp(value, Min, Max);
+                svalue = formated_value;
+            }
+        }
+
+        public override void Invert()
         {
             Min = -Max; Max = -Min;
             Value = -Value;
         }
 
-        public void ClampValue()
+        public override void ClampValue()
         { Value = Utils.Clamp(Value, Min, Max); }
+
+        public IntField(int min = int.MinValue, int max = int.MaxValue, bool circle = false)
+            : base("D", min, max, circle) {}
 
         public override void Load(ConfigNode node)
         {
             base.Load(node);
-            Value = ivalue;
+            Value = _value;
         }
 
-        public static implicit operator int(IntField fi) { return fi.ivalue; }
-        public override string ToString () { return ivalue.ToString("D"); }
-
-        public IntField(int min = int.MinValue, int max = int.MaxValue, bool circle = false)
-        {
-            Circle = circle;
-            Min = min; Max = max;
-            Value = ivalue;
-        }
-
-        public bool UpdateValue()
+        public override bool UpdateValue()
         {
             int val;
             if(int.TryParse(svalue, out val)) 
@@ -64,27 +57,31 @@ namespace AT_Utils
             return false;
         }
 
-        public bool Draw(string suffix, bool show_set_button = true, int increment = 0)
+        public bool Draw(string suffix, int increment = 0, int suffix_width = -1)
         {
             bool updated = false;
+            GUILayout.BeginHorizontal();
             if(!increment.Equals(0)) 
             {
                 if(GUILayout.Button(string.Format("-{0}", increment.ToString("D")),     
                                     Styles.normal_button, GUILayout.ExpandWidth(false)))
-                { Value = ivalue-increment; updated = true; }
+                { Value = _value-increment; updated = true; }
                 if(GUILayout.Button(string.Format("+{0}", increment.ToString("D")), 
                                     Styles.normal_button, GUILayout.ExpandWidth(false)))
-                { Value = ivalue+increment; updated = true; }
+                { Value = _value+increment; updated = true; }
             }
-            svalue = GUILayout.TextField(svalue, svalue.Equals(ivalue.ToString("D"))? Styles.green : Styles.white,
+            GUI.SetNextControlName(field_name);
+            svalue = GUILayout.TextField(svalue, svalue.Equals(formated_value)? Styles.green : Styles.white,
                                          GUILayout.ExpandWidth(true), GUILayout.MinWidth(70));
-            if(!string.IsNullOrEmpty(suffix)) GUILayout.Label(suffix, Styles.label, GUILayout.ExpandWidth(false));
-            IsSet = show_set_button && GUILayout.Button("Set", Styles.normal_button, GUILayout.ExpandWidth(false));
-            updated |= IsSet && UpdateValue();
+            if(!string.IsNullOrEmpty(suffix)) 
+                GUILayout.Label(suffix, Styles.label, suffix_width < 0? 
+                                GUILayout.ExpandWidth(false) : GUILayout.Width(suffix_width));
+            GUILayout.EndHorizontal();
+            updated |= TrySetValue();
             return updated;
         }
 
-        public bool Draw() { return Draw(""); }
+        public override bool Draw() { return Draw(""); }
     }
 }
 

@@ -40,9 +40,9 @@ namespace AT_Utils
 		{
 			var ret = false;
 			GUILayout.BeginHorizontal();
-			ret = Fx.Draw("", false, increment, iformat) || ret;
-			ret = Fy.Draw("", false, increment, iformat) || ret;
-			ret = Fz.Draw(suffix, show_set_button, increment, iformat) || ret;
+			ret = Fx.Draw("", increment, iformat) || ret;
+			ret = Fy.Draw("", increment, iformat) || ret;
+			ret = Fz.Draw(suffix, increment, iformat) || ret;
 			if(Fz.IsSet) ret = UpdateValue() || ret;
 			GUILayout.EndHorizontal();
 			return ret;
