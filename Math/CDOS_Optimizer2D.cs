@@ -217,7 +217,8 @@ namespace AT_Utils
         {
             Point P1;
             var shift_dir = new Vector2d(-dir.y, dir.x);
-            while(Math.Abs(d) > xtol)
+            var _xtol = d/100;
+            while(Math.Abs(d) > _xtol)
             {
                 P1 = P+shift_dir*d;
                 P1.Update();
@@ -267,12 +268,15 @@ namespace AT_Utils
 
         public IEnumerator GetEnumerator()
         {
+            Utils.Log("CDOS Start");//debug
             foreach(var t in find_first_point())
                 yield return t;
             BestP = P;
+            Utils.Log("CDOS First: Best {}", P.v);//debug
             if(!P.IsFeasible) yield break;
             foreach(var t in build_conjugate_set())
                 yield return t;
+            Utils.Log("CDOS Set: Best {}", P.v);//debug
             BestP = P;
             var d = delta;
             while(d > xtol && dv > tol)
@@ -281,7 +285,7 @@ namespace AT_Utils
                 d = 0.3 * Point.Delta(P0, P).magnitude + 0.1 * d;
                 if(d.Equals(0)) d = delta*0.1;
                 BestP = P;
-//                Utils.Log("Best {}, d {}, dv {}", P.v, d, dv);//debug
+                Utils.Log("CDOS Iter: Best {}, d {}, dv {}", P.v, d, dv);//debug
             }
         }
     }
