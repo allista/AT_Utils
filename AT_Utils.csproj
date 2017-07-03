@@ -120,6 +120,8 @@
     <Compile Include="GUI\Elements\ITypeUI.cs" />
     <Compile Include="Math\CDOS_Optimizer2D.cs" />
     <Compile Include="Debugging\BackupLogger.cs" />
+    <Compile Include="GUI\Elements\ValueFieldBase.cs" />
+    <Compile Include="ControlFlow\HierarchicalComparer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
