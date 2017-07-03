@@ -5,10 +5,6 @@
 //
 //  Copyright (c) 2017 Allis Tauri
 
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-
 namespace AT_Utils
 {
     public interface I_UI
@@ -21,12 +17,5 @@ namespace AT_Utils
         bool Draw();
         T Value { get; set; }
     }
-
-//    public static class FieldUIs
-//    {
-//        public delegate IFieldUI ui_constructor()
-//        Dictionary<type,
-//        
-//    }
 }
 
