@@ -288,9 +288,9 @@ namespace AT_Utils
 				mod_name = method.DeclaringType.Assembly.GetName().Name;
 				break;
 			}
-			#if DEBUG
-			UnityEngine.Debug.Log(stack);
-			#endif
+//			#if DEBUG
+//			UnityEngine.Debug.Log(stack);
+//			#endif
 			return string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", mod_name, DateTime.Now, msg);
 		}
 
