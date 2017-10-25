@@ -28,7 +28,7 @@ namespace AT_Utils
     {
         List<string> modules;
         protected List<string> MODULES { get { return modules; } }
-        protected string CATEGORY = "Filter by function";
+        protected string CATEGORY = "Filter by Function";
         protected string SUBCATEGORY = "";
         protected string FOLDER = "";
         protected string ICON = "";
@@ -53,7 +53,7 @@ namespace AT_Utils
             if(modules != null && modules.Count > 0)
             {
                 PartCategorizer.Instance.filters
-                    .Find(f => f.button.categoryName == "Filter by module")
+                    .Find(f => f.button.categoryName == "Filter by Module")
                     .subcategories.FindAll(s => modules.Any(m => m == s.button.categoryName))
                     .ForEach(c => c.button.SetIcon(icon));
             }
