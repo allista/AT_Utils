@@ -63,9 +63,9 @@ namespace AT_Utils
 			}
 		}
 
-		virtual public void LoadFrom(ConfigNode parent)
+		virtual public void LoadFrom(ConfigNode parent, string node_name = null)
 		{
-			var node = parent.GetNode(NodeName);
+			var node = parent.GetNode(node_name ?? NodeName);
 			if(node != null) Load(node);
 		}
 
@@ -98,8 +98,8 @@ namespace AT_Utils
 			}
 		}
 
-		virtual public void SaveInto(ConfigNode parent)
-		{ Save(parent.AddNode(NodeName)); }
+		virtual public void SaveInto(ConfigNode parent, string node_name = null)
+		{ Save(parent.AddNode(node_name ?? NodeName)); }
 
 		virtual public void Copy(ConfigNodeObject other)
 		{
