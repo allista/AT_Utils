@@ -108,8 +108,8 @@ namespace AT_Utils
         public double DistanceTo(Coordinates c, CelestialBody body) { return AngleTo(c)*body.Radius; }
         public double DistanceTo(Vessel vsl) { return AngleTo(vsl)*vsl.mainBody.Radius; }
 
-        public Vector3d RelSurfPos(CelestialBody body) { return body.GetRelSurfacePosition(Lat, Lon, Alt); }
-        public Vector3d RelOrbPos(CelestialBody body) { return RelSurfPos(body).xzy; }
+        public Vector3d SurfPos(CelestialBody body) { return body.GetWorldSurfacePosition(Lat, Lon, Alt)-body.position; }
+        public Vector3d OrbPos(CelestialBody body) { return SurfPos(body).xzy; }
         public Vector3d WorldPos(CelestialBody body) { return body.GetWorldSurfacePosition(Lat, Lon, Alt); }
         #endregion
 
