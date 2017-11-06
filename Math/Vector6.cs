@@ -81,6 +81,11 @@ namespace AT_Utils
 			return cvec;
 		}
 
+        public Vector6 Inverse(float inf = 0)
+        {
+            return new Vector6(positive.Inverse(inf), negative.Inverse(inf));
+        }
+
 		public Vector3 Scale(Vector3 vec)
 		{
 			var svec = Vector3.zero;
@@ -180,6 +185,23 @@ namespace AT_Utils
 			}
 			return proj*normal;
 		}
+
+        public Vector3 Slice(Vector3 normal)
+        {
+            var sum = Vector3.zero;
+            var cvec = Vector3.zero;
+            for(int i = 0; i < 3; i++)
+            {
+                cvec[i] = positive[i];
+                var projm = Vector3.Dot(cvec, normal);
+                if(projm > 0) sum += cvec;
+                cvec[i] = negative[i];
+                projm = Vector3.Dot(cvec, normal);
+                if(projm > 0) sum += cvec;
+                cvec[i] = 0;
+            }
+            return sum;
+        }
 
 		public Vector6 Transform(Transform T)
 		{
