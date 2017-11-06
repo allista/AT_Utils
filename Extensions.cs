@@ -109,20 +109,20 @@ namespace AT_Utils
 			return v/max;
 		}
 
-		public static Vector3 Inverse(this Vector3 v, float nan=float.MaxValue) 
+		public static Vector3 Inverse(this Vector3 v, float inf=float.MaxValue) 
 		{ 
 			return new Vector3(
-				v.x.Equals(0)? nan : 1/v.x, 
-				v.y.Equals(0)? nan : 1/v.y, 
-				v.z.Equals(0)? nan : 1/v.z); 
+				v.x.Equals(0)? inf : 1/v.x, 
+				v.y.Equals(0)? inf : 1/v.y, 
+				v.z.Equals(0)? inf : 1/v.z); 
 		}
 
-		public static Vector3d Inverse(this Vector3d v, double nan=double.MaxValue) 
+		public static Vector3d Inverse(this Vector3d v, double inf=double.MaxValue) 
 		{ 
 			return new Vector3d(
-				v.x.Equals(0)? nan : 1/v.x, 
-				v.y.Equals(0)? nan : 1/v.y, 
-				v.z.Equals(0)? nan : 1/v.z); 
+				v.x.Equals(0)? inf : 1/v.x, 
+				v.y.Equals(0)? inf : 1/v.y, 
+				v.z.Equals(0)? inf : 1/v.z); 
 		}
 
 		public static Vector3 ScaleChain(this Vector3 vec, params Vector3[] vectors)
@@ -303,13 +303,6 @@ namespace AT_Utils
 			return mini;
 		}
 
-		public static int MedI(this Vector3 v)
-		{
-			return v.x < v.y? 
-				(v.x > v.z? 0 : (v.z < v.y? 2 : 1)) : 
-				(v.y > v.z? 1 : (v.z < v.x? 2 : 0));
-		}
-
 		public static int MaxI(this Vector3d v)
 		{
 			var maxi = 0;
@@ -332,13 +325,6 @@ namespace AT_Utils
 				{ min = v[i]; mini = i; }
 			}
 			return mini;
-		}
-
-		public static int MedI(this Vector3d v)
-		{
-			return v.x < v.y? 
-				(v.x > v.z? 0 : (v.z < v.y? 2 : 1)) : 
-				(v.y > v.z? 1 : (v.z < v.x? 2 : 0));
 		}
 
 		public static Vector3 Component(this Vector3 v, int i)
@@ -765,28 +751,40 @@ namespace AT_Utils
 			construct.Clear();
 		}
 
+        public static Vector3[] uniqueVertices(this Mesh m)
+        {
+            var v_set = new HashSet<Vector3>(m.vertices);
+            var new_verts = new Vector3[v_set.Count];
+            v_set.CopyTo(new_verts);
+            return new_verts;
+        }
+
         public static Bounds Bounds(this IShipconstruct vessel, Transform refT)
 		{
 			//update physical bounds
 			var b = new Bounds();
-			bool inited = false;
 			var parts = vessel.Parts;
 			for(int i = 0, partsCount = parts.Count; i < partsCount; i++)
 			{
 				Part p = parts[i];
 				if(p == null) continue;
-				var meshes = p.FindModelComponents<MeshFilter>();
-				for(int mi = 0, meshesLength = meshes.Count; mi < meshesLength; mi++)
-				{
-					var m = meshes[mi];
-					var bounds = Utils.BoundCorners(m.sharedMesh.bounds);
-					for(int j = 0; j < 8; j++)
-					{
-						var c = refT.InverseTransformPoint(m.transform.TransformPoint(bounds[j]));
-						if(inited) b.Encapsulate(c);
-						else { b = new Bounds(c, Vector3.zero); inited = true; }
-					}
-				}
+                var full_mesh = p.Modules.GetModule<ModuleAsteroid>() != null;
+                foreach(var mesh in p.transform.GetComponentsInChildren<MeshFilter>()
+                        .Select(c => new MeshTransform{m=c.sharedMesh, t=c.transform})
+                        .Union(p.transform.GetComponentsInChildren<SkinnedMeshRenderer>()
+                               .Select(c => new MeshTransform{m=c.sharedMesh, t=c.transform})))
+                {
+                    var verts = full_mesh? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds);
+                    for(int j = 0, len = verts.Length; j < len; j++)
+                    {
+                        var c = refT == mesh.t? verts[j] : 
+                            refT.InverseTransformPoint(mesh.t.TransformPoint(verts[j]));
+                        if(b == default(Bounds)) 
+                            b = new Bounds(c, Vector3.zero);
+                        else
+                            b.Encapsulate(c);
+                    }
+                }
 			}
 			return b;
 		}
@@ -841,10 +839,11 @@ namespace AT_Utils
                 }
                 return (float)Math.Pow(vessel.GetTotalMass()/2, 1/3.0);
             }
-			var bounds = vessel.BoundsWithExhaust(vessel.ReferenceTransform);
+            var refT = vessel.packed? vessel.transform : vessel.ReferenceTransform;
+            var bounds = vessel.BoundsWithExhaust(refT);
             if(fromCoM)
             {
-                var shift = vessel.ReferenceTransform.TransformPoint(bounds.center)-vessel.CoM;
+                var shift = refT.TransformPoint(bounds.center)-vessel.CoM;
                 return bounds.extents.magnitude+shift.magnitude;
             }
             return bounds.extents.magnitude;
@@ -904,8 +903,8 @@ namespace AT_Utils
 
 		public static Vector3d hV(this Orbit obt, double UT) 
 		{ 
-			return Vector3d.Exclude(obt.getRelativePositionAtUT(UT), 
-		                            obt.getOrbitalVelocityAtUT(UT));
+            return Vector3d.Exclude(obt.getRelativePositionAtUT(UT), 
+                                    obt.getOrbitalVelocityAtUT(UT));
 		}
 
 		public static double TerrainAltitude(this CelestialBody body, double Lat, double Lon)
