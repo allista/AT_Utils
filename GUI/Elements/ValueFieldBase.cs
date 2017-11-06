@@ -56,8 +56,10 @@ namespace AT_Utils
 
         protected bool TrySetValue()
         {
+            IsSet = false;
             if(Event.current.isKey && 
-               Event.current.keyCode == KeyCode.Return && 
+               (Event.current.keyCode == KeyCode.Return ||
+                Event.current.keyCode == KeyCode.KeypadEnter) && 
                GUI.GetNameOfFocusedControl() == field_name)
                 IsSet = UpdateValue();
             return IsSet;
