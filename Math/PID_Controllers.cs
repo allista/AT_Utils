@@ -44,25 +44,23 @@ namespace AT_Utils
 
 	public abstract class PI_Controller<T> : PI_Controller
 	{
-		protected T action = default(T);
-		protected T integral_error = default(T);
+        public T Action = default(T);
+        public T IntegralError = default(T);
 
 		public abstract void Update(T error);
 
 		public void Reset() 
-		{ action = default(T); integral_error = default(T); }
+		{ Action = default(T); IntegralError = default(T); }
 
-		//access
-		public T Action { get { return action; } }
-		public static implicit operator T(PI_Controller<T> c) { return c.action; }
+		public static implicit operator T(PI_Controller<T> c) { return c.Action; }
 	}
 
 	public class PIf_Controller : PI_Controller<float>
 	{
 		public override void Update(float error)
 		{
-			integral_error += error * TimeWarp.fixedDeltaTime;
-			action = error * P + integral_error * I;
+			IntegralError += error * TimeWarp.fixedDeltaTime;
+			Action = error * P + IntegralError * I;
 		}
 	}
 	#endregion
@@ -79,8 +77,14 @@ namespace AT_Utils
 		public PID_Controller(T p, T i, T d, T min, T max)
 		{ P = p; I = i; D = d; Min = min; Max = max; }
 
-		public void setPID(PID_Controller<T> c)
+		public virtual void setPID(PID_Controller<T> c)
 		{ P = c.P; I = c.I; D = c.D; Min = c.Min; Max = c.Max; }
+
+        public void setClamp(T min, T max)
+        {
+            Min = min;
+            Max = max;
+        }
 
 		public virtual void Reset() {}
 
@@ -95,18 +99,20 @@ namespace AT_Utils
         }
 	}
 
-	public class PID_Controller<T, C> : PID_Controller<C>
+	public abstract class PID_Controller<T, C> : PID_Controller<C>
 	{
-		protected T action;
-		protected T last_error;
+        public T Action;
+		public T LastError;
 		public T IntegralError;
 
 		public override void Reset() 
-		{ action = default(T); IntegralError = default(T); }
+		{ Action = default(T); IntegralError = default(T); }
 
-		//access
-		public T Action { get { return action; } }
-		public static implicit operator T(PID_Controller<T, C> c) { return c.action; }
+		public static implicit operator T(PID_Controller<T, C> c) { return c.Action; }
+
+        public abstract void setClamp(C clamp);
+        public abstract void Update(T error);
+        public abstract void Update(T error, T speed);
 
 		public override string ToString()
 		{
@@ -114,36 +120,9 @@ namespace AT_Utils
 				Utils.Format("\nLast Error: {}" +
 				              "\nIntegral Error: {}" +
 				              "\nAction: {}\n",
-				              last_error, 
+				              LastError, 
 				              IntegralError, 
-				              action);
-		}
-	}
-
-	//separate implementation of the strange PID controller from MechJeb2
-	public class PIDvf_Controller2 : PID_Controller<Vector3, float>
-	{
-		public PIDvf_Controller2() {}
-		public PIDvf_Controller2(float p, float i, float d, float min, float max)
-		{ P = p; I = i; D = d; Min = min; Max = max; }
-
-		public void Update(Vector3 error, Vector3 omega)
-		{
-			var derivative   = D * omega;
-            if(IntegralError.x*error.x < 0) IntegralError.x = 0;
-            if(IntegralError.y*error.y < 0) IntegralError.y = 0;
-            if(IntegralError.z*error.z < 0) IntegralError.z = 0;
-			IntegralError.x = (Mathf.Abs(derivative.x) < 0.6f * Max) ? IntegralError.x + (error.x * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.x;
-			IntegralError.y = (Mathf.Abs(derivative.y) < 0.6f * Max) ? IntegralError.y + (error.y * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.y;
-			IntegralError.z = (Mathf.Abs(derivative.z) < 0.6f * Max) ? IntegralError.z + (error.z * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.z;
-			Vector3.ClampMagnitude(IntegralError, Max);
-			var act = error * P + IntegralError + derivative;
-			action = new Vector3
-				(
-					float.IsNaN(act.x)? 0f : Mathf.Clamp(act.x, Min, Max),
-					float.IsNaN(act.y)? 0f : Mathf.Clamp(act.y, Min, Max),
-					float.IsNaN(act.z)? 0f : Mathf.Clamp(act.z, Min, Max)
-				);
+				              Action);
 		}
 	}
 
@@ -153,34 +132,75 @@ namespace AT_Utils
         public PIDvf_Controller(float p, float i, float d, float min, float max)
         { P = p; I = i; D = d; Min = min; Max = max; }
 
-        public void Update(Vector3 error)
+        public override void setClamp(float clamp) { setClamp(-clamp, clamp); }
+
+        public override void Update(Vector3 error)
         {
             if(error.IsNaN()) return;
-            if(last_error.IsZero()) last_error = error;
+            if(LastError.IsZero()) LastError = error;
+            Update(error, (error-LastError)/TimeWarp.fixedDeltaTime);
+        }
+
+        public override void Update(Vector3 error, Vector3 speed)
+        {
+            if(error.IsNaN()) return;
             if(IntegralError.x*error.x < 0) IntegralError.x = 0;
             if(IntegralError.y*error.y < 0) IntegralError.y = 0;
             if(IntegralError.z*error.z < 0) IntegralError.z = 0;
             var old_ierror = IntegralError;
             IntegralError += error*TimeWarp.fixedDeltaTime;
-            var act = P*error + I*IntegralError + D*(error-last_error)/TimeWarp.fixedDeltaTime;
-            if(act.IsZero()) action = act;
+            var act = P*error + I*IntegralError + D*speed;
+            if(act.IsZero()) Action = act;
             else
             {
-                action = new Vector3
+                Action = new Vector3
                     (
                         float.IsNaN(act.x)? 0f : Utils.Clamp(act.x, Min, Max),
                         float.IsNaN(act.y)? 0f : Utils.Clamp(act.y, Min, Max),
                         float.IsNaN(act.z)? 0f : Utils.Clamp(act.z, Min, Max)
                     );
-                if(act != action) IntegralError = old_ierror;
+                if(act != Action) IntegralError = old_ierror;
             }
-            //          Utils.Log("{}\nPe {}\nIe {}\nDe {}\nerror {}\nact {}\naction {}\nact==action {}", 
-            //                     this, P*error, I*integral_error, 
-            //                     D*(error-last_error)/TimeWarp.fixedDeltaTime, 
-            //                     error, act, action, act == action);//debug
-            last_error = error;
+            LastError = error;
         }
     }
+
+	public class PIDvf_Controller2 : PID_Controller<Vector3, float>
+	{
+		public PIDvf_Controller2() {}
+		public PIDvf_Controller2(float p, float i, float d, float min, float max)
+		{ P = p; I = i; D = d; Min = min; Max = max; }
+
+        public override void setClamp(float clamp) { setClamp(-clamp, clamp); }
+
+        public override void Update(Vector3 error)
+        {
+            if(error.IsNaN()) return;
+            if(LastError.IsZero()) LastError = error;
+            Update(error, (error-LastError)/TimeWarp.fixedDeltaTime);
+        }
+
+        public override void Update(Vector3 error, Vector3 speed)
+		{
+            if(error.IsNaN()) return;
+            var derivative = D * speed;
+            if(IntegralError.x*error.x < 0) IntegralError.x = 0;
+            if(IntegralError.y*error.y < 0) IntegralError.y = 0;
+            if(IntegralError.z*error.z < 0) IntegralError.z = 0;
+			IntegralError.x = (Mathf.Abs(derivative.x) < 0.6f * Max) ? IntegralError.x + (error.x * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.x;
+			IntegralError.y = (Mathf.Abs(derivative.y) < 0.6f * Max) ? IntegralError.y + (error.y * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.y;
+			IntegralError.z = (Mathf.Abs(derivative.z) < 0.6f * Max) ? IntegralError.z + (error.z * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.z;
+			Vector3.ClampMagnitude(IntegralError, Max);
+			var act = error * P + IntegralError + derivative;
+			Action = new Vector3
+				(
+					float.IsNaN(act.x)? 0f : Mathf.Clamp(act.x, Min, Max),
+					float.IsNaN(act.y)? 0f : Mathf.Clamp(act.y, Min, Max),
+					float.IsNaN(act.z)? 0f : Mathf.Clamp(act.z, Min, Max)
+				);
+            LastError = error;
+		}
+	}
 
 	public class PIDvd_Controller : PID_Controller<Vector3d, double>
 	{
@@ -188,32 +208,36 @@ namespace AT_Utils
 		public PIDvd_Controller(double p, double i, double d, double min, double max)
 		{ P = p; I = i; D = d; Min = min; Max = max; }
 
-		public void Update(Vector3d error)
-		{
+        public override void setClamp(double clamp) { setClamp(-clamp, clamp); }
+
+        public override void Update(Vector3d error)
+        {
+            if(error.IsNaN()) return;
+            if(LastError.IsZero()) LastError = error;
+            Update(error, (error-LastError)/TimeWarp.fixedDeltaTime);
+        }
+
+        public override void Update(Vector3d error, Vector3d speed)
+        {
 			if(error.IsNaN()) return;
-			if(last_error.IsZero()) last_error = error;
             if(IntegralError.x*error.x < 0) IntegralError.x = 0;
             if(IntegralError.y*error.y < 0) IntegralError.y = 0;
             if(IntegralError.z*error.z < 0) IntegralError.z = 0;
 			var old_ierror = IntegralError;
 			IntegralError += error*TimeWarp.fixedDeltaTime;
-			var act = P*error + I*IntegralError + D*(error-last_error)/TimeWarp.fixedDeltaTime;
-			if(act.IsZero()) action = act;
+            var act = P*error + I*IntegralError + D*speed;
+			if(act.IsZero()) Action = act;
 			else
 			{
-				action = new Vector3d
+				Action = new Vector3d
 					(
 						double.IsNaN(act.x)? 0f : Utils.Clamp(act.x, Min, Max),
 						double.IsNaN(act.y)? 0f : Utils.Clamp(act.y, Min, Max),
 						double.IsNaN(act.z)? 0f : Utils.Clamp(act.z, Min, Max)
 					);
-				if(act != action) IntegralError = old_ierror;
+				if(act != Action) IntegralError = old_ierror;
 			}
-//			Utils.Log("{}\nPe {}\nIe {}\nDe {}\nerror {}\nact {}\naction {}\nact==action {}", 
-//			           this, P*error, I*integral_error, 
-//			           D*(error-last_error)/TimeWarp.fixedDeltaTime, 
-//			           error, act, action, act == action);//debug
-			last_error = error;
+			LastError = error;
 		}
 	}
 
@@ -223,32 +247,36 @@ namespace AT_Utils
         public PIDv_Controller(Vector3 p, Vector3 i, Vector3 d, Vector3 min, Vector3 max)
         { P = p; I = i; D = d; Min = min; Max = max; }
 
-        public void Update(Vector3 error)
+        public override void setClamp(Vector3 clamp) { setClamp(-clamp, clamp); }
+
+        public override void Update(Vector3 error)
         {
             if(error.IsNaN()) return;
-            if(last_error.IsZero()) last_error = error;
+            if(LastError.IsZero()) LastError = error;
+            Update(error, (error-LastError)/TimeWarp.fixedDeltaTime);
+        }
+
+        public override void Update(Vector3 error, Vector3 speed)
+        {
+            if(error.IsNaN()) return;
             if(IntegralError.x*error.x < 0) IntegralError.x = 0;
             if(IntegralError.y*error.y < 0) IntegralError.y = 0;
             if(IntegralError.z*error.z < 0) IntegralError.z = 0;
             var old_ierror = IntegralError;
             IntegralError += error*TimeWarp.fixedDeltaTime;
-            var act = Vector3.Scale(P, error) + Vector3.Scale(I, IntegralError) + Vector3.Scale(D, (error-last_error)/TimeWarp.fixedDeltaTime);
-            if(act.IsZero()) action = act;
+            var act = Vector3.Scale(P, error) + Vector3.Scale(I, IntegralError) + Vector3.Scale(D, speed);
+            if(act.IsZero()) Action = act;
             else
             {
-                action = new Vector3
+                Action = new Vector3
                     (
                         float.IsNaN(act.x)? 0f : Utils.Clamp(act.x, Min.x, Max.x),
                         float.IsNaN(act.y)? 0f : Utils.Clamp(act.y, Min.y, Max.y),
                         float.IsNaN(act.z)? 0f : Utils.Clamp(act.z, Min.z, Max.z)
                     );
-                if(act != action) IntegralError = old_ierror;
+                if(act != Action) IntegralError = old_ierror;
             }
-//          Utils.Log("{}\nPe {}\nIe {}\nDe {}\nerror {}\nact {}\naction {}\nact==action {}", 
-//                     this, P*error, I*integral_error, 
-//                     D*(error-last_error)/TimeWarp.fixedDeltaTime, 
-//                     error, act, action, act == action);//debug
-            last_error = error;
+            LastError = error;
         }
     }
 
@@ -258,26 +286,25 @@ namespace AT_Utils
 		public PIDf_Controller(float p, float i, float d, float min, float max)
 		{ P = p; I = i; D = d; Min = min; Max = max; }
 
-		public void Update(float error
-		                   #if DEBUG
-		                   , bool debug = false
-		                   #endif
-		                  )
-		{
+        public override void setClamp(float clamp) { setClamp(-clamp, clamp); }
+
+        public override void Update(float error)
+        {
+            if(float.IsNaN(error)) return;
+            if(LastError.Equals(0)) LastError = error;
+            Update(error, (error-LastError)/TimeWarp.fixedDeltaTime);
+        }
+
+        public override void Update(float error, float speed)
+        {
 			if(float.IsNaN(error)) return;
-			if(last_error.Equals(0)) last_error = error;
 			if(IntegralError*error < 0) IntegralError = 0;
 			var old_ierror = IntegralError;
 			IntegralError += error*TimeWarp.fixedDeltaTime;
-			var act = P*error + I*IntegralError + D*(error-last_error)/TimeWarp.fixedDeltaTime;
-			action = Mathf.Clamp(act, Min, Max);
-			if(Mathf.Abs(act-action) > 1e-5) IntegralError = old_ierror;
-			#if DEBUG
-			if(debug)
-				Utils.Log("{}\nPe {}; Ie {}; De {}; error {}, action {}", 
-				          this, P*error, I*IntegralError, D*(error-last_error)/TimeWarp.fixedDeltaTime, error, action);
-			#endif
-			last_error = error;
+			var act = P*error + I*IntegralError + D*speed;
+			Action = Mathf.Clamp(act, Min, Max);
+			if(Mathf.Abs(act-Action) > 1e-5) IntegralError = old_ierror;
+			LastError = error;
 		}
 	}
 
@@ -287,17 +314,24 @@ namespace AT_Utils
 		public PIDf_Controller2(float p, float i, float d, float min, float max)
 		{ P = p; I = i; D = d; Min = min; Max = max; }
 
-		public void Update(float error, float speed = float.NaN)
-		{
+        public override void setClamp(float clamp) { setClamp(-clamp, clamp); }
+
+        public override void Update(float error)
+        {
+            if(float.IsNaN(error)) return;
+            if(LastError.Equals(0)) LastError = error;
+            Update(error, (error-LastError)/TimeWarp.fixedDeltaTime);
+        }
+
+        public override void Update(float error, float speed)
+        {
 			if(float.IsNaN(error)) return;
-			if(last_error.Equals(0)) last_error = error;
             if(IntegralError*error < 0) IntegralError = 0;
-			var derivative = D * (float.IsNaN(speed)? (error-last_error)/TimeWarp.fixedDeltaTime : speed);
+			var derivative = D * speed;
 			IntegralError = Mathf.Clamp((Math.Abs(derivative) < 0.6f * Max) ? IntegralError + (error * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError, Min, Max);
 			var act = error * P + IntegralError + derivative;
-			if(!float.IsNaN(act)) action = Mathf.Clamp(act, Min, Max);
-//			Utils.Log("error {}; Pe {}; Ie {}; De {}; action {}", error, P*error, integral_error, derivative, action);//debug
-			last_error = error;
+			if(!float.IsNaN(act)) Action = Mathf.Clamp(act, Min, Max);
+			LastError = error;
 		}
 	}
 
@@ -307,9 +341,19 @@ namespace AT_Utils
 		public PIDv_Controller2(Vector3 p, Vector3 i, Vector3 d, Vector3 min, Vector3 max)
 		{ P = p; I = i; D = d; Min = min; Max = max; }
 
-		public void Update(Vector3 error, Vector3 omega)
-		{
-			var derivative   = Vector3.Scale(omega, D);
+        public override void setClamp(Vector3 clamp) { setClamp(-clamp, clamp); }
+
+        public override void Update(Vector3 error)
+        {
+            if(error.IsNaN()) return;
+            if(LastError.IsZero()) LastError = error;
+            Update(error, (error-LastError)/TimeWarp.fixedDeltaTime);
+        }
+
+        public override void Update(Vector3 error, Vector3 speed)
+        {
+            if(error.IsNaN()) return;
+			var derivative = Vector3.Scale(speed, D);
             if(IntegralError.x*error.x < 0) IntegralError.x = 0;
             if(IntegralError.y*error.y < 0) IntegralError.y = 0;
             if(IntegralError.z*error.z < 0) IntegralError.z = 0;
@@ -317,14 +361,81 @@ namespace AT_Utils
 			IntegralError.y = (Mathf.Abs(derivative.y) < 0.6f * Max.y) ? IntegralError.y + (error.y * I.y * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.y;
 			IntegralError.z = (Mathf.Abs(derivative.z) < 0.6f * Max.z) ? IntegralError.z + (error.z * I.z * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.z;
 			var act = Vector3.Scale(error, P) + IntegralError.ClampComponents(Min, Max) + derivative;
-			action = new Vector3
+			Action = new Vector3
 				(
 					float.IsNaN(act.x)? 0f : Mathf.Clamp(act.x, Min.x, Max.x),
 					float.IsNaN(act.y)? 0f : Mathf.Clamp(act.y, Min.y, Max.y),
 					float.IsNaN(act.z)? 0f : Mathf.Clamp(act.z, Min.z, Max.z)
 				);
+            LastError = error;
 		}
 	}
+
+    public class PIDf_Controller3 : PID_Controller<float, float>
+    {
+        [Persistent] public float Tau = 0;
+        readonly LowPassFilterF dFilter = new LowPassFilterF();
+
+        public PIDf_Controller3() {}
+        public PIDf_Controller3(float p, float i, float d, float min, float max, float filter)
+        { P = p; I = i; D = d; Min = min; Max = max; setTau(filter); }
+
+        public override void Load(ConfigNode node)
+        {
+            base.Load(node);
+            dFilter.Tau = Tau;
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            dFilter.Reset();
+        }
+
+        public void setPID(PIDf_Controller3 c)
+        {
+            base.setPID(c);
+            setTau(c.Tau);
+        }
+
+        public void setTau(float tau) { Tau = tau; dFilter.Tau = tau; }
+
+        public override void setClamp(float clamp) { setClamp(-clamp, clamp); }
+
+        public override void Update(float error)
+        {
+            if(float.IsNaN(error)) return;
+            if(LastError.Equals(0)) LastError = error;
+            Update(error, (error-LastError)/TimeWarp.fixedDeltaTime);
+        }
+
+        public override void Update(float error, float speed)
+        {
+            if(float.IsNaN(error)) return;
+            if(IntegralError*error < 0) IntegralError = 0;
+            var old_ierror = IntegralError;
+            IntegralError += error*TimeWarp.fixedDeltaTime;
+            //compute filterred d component of the output
+            var d = dFilter.Update(D*speed);
+            //compute new Action
+            var act = P*error + I*IntegralError + d;
+            Action = Mathf.Clamp(act, Min, Max);
+            //if the Action was clamped
+            //do not save IntegralError
+            //and clamp dFilter value
+            if(Mathf.Abs(act-Action) > 1e-5) 
+            {
+                IntegralError = old_ierror;
+                dFilter.Set(Utils.Clamp(d, Min, Max));
+            }
+            LastError = error;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString()+"D.filter: "+dFilter+"\n";
+        }
+    }
 	#endregion
 }
 
