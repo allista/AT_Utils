@@ -46,7 +46,8 @@ namespace AT_Utils
 
         protected virtual bool filter(AvailablePart part)
         {
-            return part.moduleInfos.Any(info => MODULES.Any(m => m == info.moduleName));
+            return part.category != PartCategories.none &&
+                part.moduleInfos.Any(info => MODULES.Any(m => m == info.moduleName));
         }
 
         void set_modules_icon(Icon icon)
@@ -84,10 +85,8 @@ namespace AT_Utils
             //get category
             var category = PartCategorizer.Instance.filters
                 .Find(f => f.button.categoryName == CATEGORY);
-//            Utils.Log("add_filter.category: {}\nall: {}", category, 
-//                      PartCategorizer.Instance.filters.ConvertAll(f => f.button.categoryName));//debug
             //add custom function filter
-            PartCategorizer.AddCustomSubcategoryFilter(category, SUBCATEGORY, SUBCATEGORY, icon, filter);//FIXME: NRE here!!!
+            PartCategorizer.AddCustomSubcategoryFilter(category, SUBCATEGORY, SUBCATEGORY, icon, filter);
             //Apparently needed to make sure the icon actually shows at first
             var button = category.button.activeButton;
             button.Value = false;
