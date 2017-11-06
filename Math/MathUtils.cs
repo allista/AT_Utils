@@ -83,9 +83,68 @@ namespace AT_Utils
 			return Math.Abs(d) > Math.PI? -Math.Sign(d)*(TwoPI-Math.Abs(d)) : d;
 		}
 
+        /// <summary>
+        /// Acr-cosine.
+        /// </summary>
+        /// <param name="x">The cosine.</param>
 		public static double Acot(double x) { return HalfPI - Math.Atan(x); }
 
+        /// <summary>
+        /// Haversine of an angle.
+        /// See: https://en.wikipedia.org/wiki/Haversine_formula
+        /// </summary>
+        /// <param name="a">Angle in radians.</param>
 		public static double Haversine(double a) { return (1-Math.Cos(a))/2; }
+
+        /// <summary>
+        /// Angle2 is a more numerically stable for small angles version of Vector3.Angle method.
+        /// </summary>
+        /// <param name="a">Vector a.</param>
+        /// <param name="b">Vector b.</param>
+        public static float Angle2(Vector3 a, Vector3 b)
+        {
+            var abm = a*b.magnitude;
+            var bam = b*a.magnitude;
+            return 2 * Mathf.Atan2((abm-bam).magnitude, (abm+bam).magnitude) * Mathf.Rad2Deg;
+        }
+
+        /// <summary>
+        /// Angle2 is a more numerically stable for small angles version of Vector3d.Angle method.
+        /// </summary>
+        /// <param name="a">Vector a.</param>
+        /// <param name="b">Vector b.</param>
+        public static double Angle2(Vector3d a, Vector3d b)
+        {
+            var abm = a*b.magnitude;
+            var bam = b*a.magnitude;
+            return 2 * Math.Atan2((abm-bam).magnitude, (abm+bam).magnitude) * Mathf.Rad2Deg;
+        }
+
+        /// <summary>
+        /// Angle2Rad is a more numerically stable for small angles version of Vector3.Angle method.
+        /// Its return value is in radians rather than degrees.
+        /// </summary>
+        /// <param name="a">Vector a.</param>
+        /// <param name="b">Vector b.</param>
+        public static float Angle2Rad(Vector3 a, Vector3 b)
+        {
+            var abm = a*b.magnitude;
+            var bam = b*a.magnitude;
+            return 2 * Mathf.Atan2((abm-bam).magnitude, (abm+bam).magnitude);
+        }
+
+        /// <summary>
+        /// Angle2Rad is a more numerically stable for small angles version of Vector3d.Angle method.
+        /// Its return value is in radians rather than degrees.
+        /// </summary>
+        /// <param name="a">Vector a.</param>
+        /// <param name="b">Vector b.</param>
+        public static double Angle2Rad(Vector3d a, Vector3d b)
+        {
+            var abm = a*b.magnitude;
+            var bam = b*a.magnitude;
+            return 2 * Math.Atan2((abm-bam).magnitude, (abm+bam).magnitude);
+        }
 
 		/// <summary>
 		/// Returns the angle (in degrees) between a radial vector A and the projection 
@@ -108,13 +167,13 @@ namespace AT_Utils
 		{ return ClampAngle(ProjectionAngle(A, B, tangentA)); }
 
 		public static float EWA(float old, float cur, float ratio = 0.7f)
-		{ return (1-ratio)*old + ratio*cur; }
+        { return old + (cur-old)*ratio; }
 
         public static double EWA(double old, double cur, double ratio = 0.7f)
-        { return (1-ratio)*old + ratio*cur; }
+        { return old + (cur-old)*ratio; }
 
 		public static Vector3 EWA(Vector3 old, Vector3 cur, float ratio = 0.7f)
-		{ return (1-ratio)*old + ratio*cur; }
+        { return old + (cur-old)*ratio; }
 
         /// <summary>
         /// Calculate time needed for an iterative expression
