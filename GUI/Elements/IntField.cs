@@ -57,7 +57,7 @@ namespace AT_Utils
             return false;
         }
 
-        public bool Draw(string suffix, int increment = 0, int suffix_width = -1)
+        public bool Draw(string suffix, int increment = 0, int suffix_width = -1, GUIStyle style = null)
         {
             bool updated = false;
             GUILayout.BeginHorizontal();
@@ -71,7 +71,7 @@ namespace AT_Utils
                 { Value = _value+increment; updated = true; }
             }
             GUI.SetNextControlName(field_name);
-            svalue = GUILayout.TextField(svalue, svalue.Equals(formated_value)? Styles.green : Styles.white,
+            svalue = GUILayout.TextField(svalue, svalue.Equals(formated_value)? (style ?? Styles.green) : Styles.white,
                                          GUILayout.ExpandWidth(true), GUILayout.MinWidth(70));
             if(!string.IsNullOrEmpty(suffix)) 
                 GUILayout.Label(suffix, Styles.label, suffix_width < 0? 
