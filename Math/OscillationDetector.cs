@@ -23,9 +23,20 @@ namespace AT_Utils
 	/// </summary>
 	public abstract class OscillationDetector<T> where T: new()
 	{
-		protected readonly double low, high; //boundaries of frequency window of interest
-		protected readonly int bins;  //number of bins in the frequency domain; the resolution
-		protected readonly int window; //a sliding time-window that is scanned for the oscillations
+        /// <summary>
+        /// The bounds of frequency window of interest.
+        /// </summary>
+		protected readonly double low, high;
+
+        /// <summary>
+        /// Number of bins in the frequency domain; the resolution.
+        /// </summary>
+		protected readonly int bins;
+
+        /// <summary>
+        /// Sliding time-window that is scanned for the oscillations.
+        /// </summary>
+		protected readonly int window;
 
 		protected readonly LinkedList<double> time;
 		protected readonly LinkedList<T> samples;
@@ -34,6 +45,13 @@ namespace AT_Utils
 
 		public abstract T Value { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AT_Utils.OscillationDetector"/> class.
+        /// </summary>
+        /// <param name="low_freq">Low bound of frequency window in Hz.</param>
+        /// <param name="high_freq">High bound of frequency window in Hz.</param>
+        /// <param name="freq_bins">Number of frequency bins.</param>
+        /// <param name="time_window">Number of time frames.</param>
 		protected OscillationDetector(double low_freq, double high_freq, int freq_bins, int time_window)
 		{
 			//fill frequencies
@@ -41,8 +59,9 @@ namespace AT_Utils
 			low  = low_freq*Utils.TwoPI;
 			high = high_freq*Utils.TwoPI;
 			freqs = new double[bins];
+            var df = (high-low)/bins;
 			for(int k = 0; k < bins; k++)
-				freqs[k] = low + (high-low)*k/bins;
+				freqs[k] = low + df*k;
 			//prepare time windo
 			window = time_window;
 			time = new LinkedList<double>();
@@ -124,6 +143,14 @@ namespace AT_Utils
 			return filter_max_value(max);
 		}
 
+        public virtual void Reset()
+        {
+            for(int k = 0; k < bins; k++)
+                spectrum[k] = default(T);
+            samples.Clear();
+            time.Clear();
+        }
+
 		public override string ToString()
 		{
 			var spec = new string[bins];
@@ -133,7 +160,6 @@ namespace AT_Utils
 			                    Value, string.Concat(spec));
 		}
 	}
-
 
 	public class OscillationDetectorD : OscillationDetector<double>
 	{
@@ -145,7 +171,7 @@ namespace AT_Utils
 			: base(low_freq, high_freq, freq_bins, time_window) 
 		{ max_filter.Tau = smoothing; }
 
-		protected override double norm(double val) { return val/window; }
+        protected override double norm(double val) { return val/bins; }
 
 		protected override double next(int k, double s, double t)
 		{ 
@@ -168,6 +194,12 @@ namespace AT_Utils
 		{
 			return max_filter.Update(max);
 		}
+
+        public override void Reset()
+        {
+            base.Reset();
+            max_filter.Reset();
+        }
 	}
 
 	public class OscillationDetectorF : OscillationDetector<float>
@@ -180,7 +212,7 @@ namespace AT_Utils
 			: base(low_freq, high_freq, freq_bins, time_window) 
 		{ max_filter.Tau = smoothing; }
 
-		protected override float norm(float val) { return val/window; }
+        protected override float norm(float val) { return val/bins; }
 
 		protected override float next(int k, float s, double t)
 		{ 
@@ -203,6 +235,12 @@ namespace AT_Utils
 		{
 			return max_filter.Update(max);
 		}
+
+        public override void Reset()
+        {
+            base.Reset();
+            max_filter.Reset();
+        }
 	}
 
 	public class OscillationDetectorV : OscillationDetector<Vector3>
@@ -215,7 +253,7 @@ namespace AT_Utils
 			: base(low_freq, high_freq, freq_bins, time_window) 
 		{ max_filter.Tau = smoothing; }
 
-		protected override Vector3 norm(Vector3 val) { return val/window; }
+        protected override Vector3 norm(Vector3 val) { return val/bins; }
 
 		protected override Vector3 next(int k, Vector3 s, double t)
 		{ 
@@ -237,6 +275,12 @@ namespace AT_Utils
 		{
 			return max_filter.Update(max);
 		}
+
+        public override void Reset()
+        {
+            base.Reset();
+            max_filter.Reset();
+        }
 	}
 
 	public class OscillationDetector3D
@@ -263,9 +307,15 @@ namespace AT_Utils
 		public Vector3 Update(Vector3 input, double dt)
 		{ return Update((Vector3d)input, dt); }
 
+        public void Reset()
+        {
+            x_OD.Reset();
+            y_OD.Reset();
+            z_OD.Reset();
+        }
+
 		public override string ToString()
 		{
-//			return Utils.Format("OscillationDetector3D: Threshold={}, Value={}", Threshold, Value);
 			return Utils.Format("OscillationDetector3D: Value={}\n" +
 			                    "\nx_OD:\n{}" +
 			                    "\ny_OD:\n{}" +
