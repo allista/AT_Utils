@@ -85,7 +85,11 @@ namespace AT_Utils
             { return new Vector2d(b.x-a.x, b.y-a.y); }
 
             public static double DistK(Point a, Point b)
-            { return 1-Math.Abs(a.v-b.v)/Math.Max(a.v, b.v); }
+            { 
+                if(a.IsFeasible && b.IsFeasible)
+                    return 1-Math.Abs(a.v-b.v)/Math.Max(a.v, b.v); 
+                return 1;
+            }
 
             public static implicit operator Vector3d(Point p)
             { return new Vector3d(p.x, p.y, p.v); }
@@ -94,6 +98,12 @@ namespace AT_Utils
             public bool Equals(Point other)
             { return x.Equals(other.x) && y.Equals(other.y); }
             #endregion
+
+            public override string ToString()
+            {
+                return Utils.Format("Point ({}, {}) = {}, IsFeasible: {}", 
+                                    x, y, v, IsFeasible);
+            }
         }
 
         Vector2d dir;
@@ -195,6 +205,8 @@ namespace AT_Utils
                 path += step_k;
                 cur += dir*d*step_k;
                 cur.Update();
+//                Utils.Log("d {} > xtol {}, dir {}, step_k {}, prev {}, cur {} < best {}", 
+//                          d, xtol, dir, step_k, prev, cur, bestP);//debug
                 if(cur.IsFeasible && cur < bestP)
                 {
                     bestP = cur;
@@ -272,11 +284,11 @@ namespace AT_Utils
             foreach(var t in find_first_point())
                 yield return t;
             BestP = P;
-            Utils.Log("CDOS First: Best {}", P.v);//debug
+            Utils.Log("CDOS First: Best {}", P);//debug
             if(!P.IsFeasible) yield break;
             foreach(var t in build_conjugate_set())
                 yield return t;
-            Utils.Log("CDOS Set: Best {}", P.v);//debug
+            Utils.Log("CDOS Set: Best {}", P);//debug
             BestP = P;
             var d = delta;
             while(d > xtol && dv > tol)
@@ -285,7 +297,7 @@ namespace AT_Utils
                 d = 0.3 * Point.Delta(P0, P).magnitude + 0.1 * d;
                 if(d.Equals(0)) d = delta*0.1;
                 BestP = P;
-                Utils.Log("CDOS Iter: Best {}, d {}, dv {}", P.v, d, dv);//debug
+                Utils.Log("CDOS Iter: Best {}, d {}, dv {}", P, d, dv);//debug
             }
         }
     }
