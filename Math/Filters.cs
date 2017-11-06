@@ -97,7 +97,7 @@ namespace AT_Utils
 		}
 
         public override string ToString()
-        { return string.Format("[Value {1}, Tau {0}]", Tau, Value); }
+        { return string.Format("[Value {0}, Tau {1}]", value, Tau); }
 	}
 
 	/// <summary>
@@ -123,7 +123,7 @@ namespace AT_Utils
 
 
         public override string ToString()
-        { return string.Format("[Value {2}, TauUp {0}, TauDown {1}]", TauUp, TauDown, value); }
+        { return string.Format("[Value {0}, TauUp {1}, TauDown {2}]", value, TauUp, TauDown); }
 	}
 
 	public abstract class ClampedAsymmetricFilter<T> : AsymmetricFilter<T>
