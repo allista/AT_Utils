@@ -90,7 +90,7 @@ namespace AT_Utils
 			var c_pos = MapView.MapIsEnabled? 
 				ScaledSpace.ScaledToLocalSpace(PlanetariumCamera.Camera.transform.position) :
 				(Vector3d)FlightCamera.fetch.mainCamera.transform.position;
-			return Vector3d.Angle(c_pos-wPos, byBody.position-wPos) <= 90.0;
+			return Utils.Angle2(c_pos-wPos, byBody.position-wPos) <= 90.0;
 		}
 	}
 }
