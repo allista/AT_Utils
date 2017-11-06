@@ -27,9 +27,9 @@ using System.Reflection;
 #if NIGHTBUILD
 [assembly: AssemblyVersion("1.4.*")]
 #else
-[assembly: AssemblyVersion("1.4.4")]
+[assembly: AssemblyVersion("1.5.0")]
 #endif
-[assembly: KSPAssembly("AT_Utils", 1, 4)]
+[assembly: KSPAssembly("AT_Utils", 1, 5)]
 
 // The following attributes are used to specify the signing key for the assembly,
 // if desired. See the Mono documentation for more information about signing.
@@ -43,8 +43,8 @@ namespace AT_Utils
 	{
 		public ModInfo()
 		{
-			MinKSPVersion = new Version(1,3,0);
-			MaxKSPVersion = new Version(1,3,0);
+			MinKSPVersion = new Version(1,3,1);
+			MaxKSPVersion = new Version(1,3,1);
 
 			VersionURL   = "https://raw.githubusercontent.com/allista/AT_Utils/master/GameData/000_AT_Utils/000_AT_Utils.version";
 			UpgradeURL   = "https://github.com/allista/AT_Utils/releases";
