@@ -149,6 +149,12 @@ namespace AT_Utils
 		public static string formatVector(Vector3d v)
 		{ return string.Format("({0}, {1}, {2}); |v| = {3}", v.x, v.y, v.z, v.magnitude); }
 
+        public static string formatComponents(Vector3 v)
+        {
+            return string.Format("[{0: 0.000;-0.000; 0.000;}, {1: 0.000;-0.000; 0.000;}, {2: 0.000;-0.000; 0.000;}]",
+                                 v.x, v.y, v.z);
+        }
+
         public static string formatCB(CelestialBody cb)
         {
             if(cb == null) return "Body:   null";
