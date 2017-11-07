@@ -62,16 +62,21 @@ namespace AT_Utils
 //				Utils.Log("{}.{}.value = {}", this, fi.Name, val);//debug
 				if(val != null)
 				{
-					byte[] data = null;
-					if(val is ConfigNode)
-						data = Encoding.UTF8.GetBytes(((ConfigNode)val).ToString());
-					else if(val is IConfigNode)
-					{
-						var node = new ConfigNode(fi.Name);
-						((IConfigNode)val).Save(node);
-						data = Encoding.UTF8.GetBytes(node.ToString());
-					}
-					else data = IOUtils.SerializeToBinary(val);
+					byte[] data;
+                    var cn = val as ConfigNode;
+					if(cn != null)
+						data = Encoding.UTF8.GetBytes(cn.ToString());
+                    else
+                    {
+                        var icn = val as IConfigNode;
+    					if(icn != null)
+    					{
+    						var node = new ConfigNode(fi.Name);
+    						icn.Save(node);
+    						data = Encoding.UTF8.GetBytes(node.ToString());
+    					}
+    					else data = IOUtils.SerializeToBinary(val);
+                    }
 					if(data != null && data.Length > 0)
 					{
 						fields_data.Add(data);
