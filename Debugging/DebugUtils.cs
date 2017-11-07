@@ -233,7 +233,7 @@ namespace AT_Utils
 		public void Reset() { sw.Stop(); sw.Reset(); }
 	}
 
-	class Profiler
+	class AT_Profiler
 	{
 		class Counter
 		{
