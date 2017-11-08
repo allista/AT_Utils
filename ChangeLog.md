@@ -1,6 +1,50 @@
 #AT Utils ChangeLog
 
-* **v1.4.4**
+* **v1.5.0**
+    * Using rel pivot distance instead of constant MAX_DIST for LookAt modes.
+    * OnPlanet uses additional PeR check using Orbit.MinPeR extension.
+    * Moved AngleTo/DistanceTo/*Pos methods to Coordinates.
+    * Added CDOS_Optimizer2D generic 2d-function optimizer. Added BackupLogger addon.
+        * CDOS_Optimizer2d_Generic is an implementation of the CDOS algorithm for 2d case.
+        * BackupLogger does two things: 1. it copies the full Unity player log each second to a time-tagged file (one per game start) to retain its content in case of accidental game restart. 2. it can log anything to a separate time-tagged (per game start) file.
+    * Fixed argument types for ClampMagnitude(Vector3d, double).
+    * Using BackupLogger to backup Utils.Log messages in DEBUG mode.
+    * Added HierarchicalComparer and ValueFieldBase classes.
+        * HC is a container for optimization constrains of different importance. VFB is the base of all field widgets; it adds an important ability to set value with Return key.
+    * Removed redundant using-s; removed commented out class embryo.
+    * Reimplemented Fileds using ValueFieldBase class.
+    * Added Utils.GLLines method to draw polyline more efficiently.
+    * Fixed orto_shift; added some more debug logging. WIP still.
+    * Commented out logging of stack trace, since KSP Development Build does it anyway.
+    * 1.3.1 compatibility of SimplePartFilter (NRE fix)
+        * Squad changed capitalization of "Filter by Function" and "Filter by Module". Also can be used #autoLOC_453547 for "Filter by Function" and #autoLOC_453705 for "Filter by Module".
+    * Merge pull request #5 from jarosm/patch-1
+        * 1.3.1 compatibility of SimplePartFilter (NRE fix)
+    * Added optional node_name argument to CNO LoadFrom and SaveInto methods.
+    * Added ModuleAsteroidFix to preven asteroids from changing form on load.
+    * Using Localizer as suggested by maja.
+    * Fixed CrewTransferBatch.
+    * Using Angle2 in Markers.
+    * Small refactoring of Filters.
+    * Added docstrings; added Angle2* methods to Utils.
+    * Added Vector6.Inverse and .Slice methods.
+    * Added formatComponents(Vector3) method to Utils.
+    * SimplePartFilter excludes parts in "none" category.
+    * Reimplemented and renamed RelSurf/OrbPos methods of Coordinates.
+        * After the implementatino of the corresponding CB methods was changed.
+    * Made PID.Action and IntegralAction public. Added setClamp method.
+        * Overloaded Update method with (error,speed) signature.
+        * Added PIDf_Controller3.
+    * Added Reset to OD. Fixed normalization.
+    * Fixed CDOS optimizer that stuck at feasible borders.
+    * GL methods accept material as mat argument.
+    * ValueFields accept value both on Enter and KeypadEnter.
+    * Added style argument to *Field.Draw methods.
+    * Fixed metric and bounds calculation.
+    * Renamed Profiler to AT_Profiler to avoid name clash with Unity.
+    * Performance optimizations.
+
+* v1.4.4
     * Added kerbal traits and level to CrewTransferWindow; Closed #4
     * Added a slghtly optimized version of GLDrawHull.
     * Converted DebugInfo props of filters into ToString overrides.
