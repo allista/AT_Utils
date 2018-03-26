@@ -418,5 +418,28 @@ namespace AT_Utils
 			}
 			return new ConvexHull3D(points);
 		}
+
+        public Mesh MakeMesh()
+        {
+            var lookup = new Dictionary<Vector3,int>(Points.Count);
+            for(int i = 0, PointsCount = Points.Count; i < PointsCount; i++)
+                lookup[Points[i]] = i;
+            var triangles = new int[Faces.Count*3];
+            for(int i = 0, FacesCount = Faces.Count; i < FacesCount; i++)
+            {
+                var f = Faces[i];
+                var vi = i*3;
+                triangles[vi] = lookup[f.v0];
+                triangles[vi+1] = lookup[f.v1];
+                triangles[vi+2] = lookup[f.v2];
+            }
+            var mesh = new Mesh();
+            mesh.vertices  = Points.ToArray();
+            mesh.triangles = triangles;
+            mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
+            mesh.RecalculateBounds();
+            return mesh;
+        }
 	}
 }
