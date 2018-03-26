@@ -6,7 +6,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -18,19 +17,7 @@ namespace AT_Utils
 {
 	public static partial class Utils
 	{
-		const string ElectricChargeName = "ElectricCharge";
-		static PartResourceDefinition _electric_charge;
-		public static PartResourceDefinition ElectricCharge
-		{ 
-			get 
-			{ 
-				if(_electric_charge == null)
-					_electric_charge = PartResourceLibrary.Instance.GetDefinition(ElectricChargeName);	
-				return _electric_charge; 
-			} 
-		}
-		public static int ElectricChargeID { get { return ElectricCharge.id; } }
-
+        public static ResourceInfo ElectricCharge = new ResourceInfo("ElectricCharge");
 
 		/// <summary>
 		/// The camel case components matching regexp.

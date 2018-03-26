@@ -557,7 +557,7 @@ namespace AT_Utils
 		}
 
 		public static ResourcePump CreateSocket(this Part p)
-		{ return new ResourcePump(p, Utils.ElectricChargeID); }
+		{ return new ResourcePump(p, Utils.ElectricCharge.id); }
 		#endregion
 
 		#region Resources and Phys-Props
@@ -770,9 +770,9 @@ namespace AT_Utils
 				if(p == null) continue;
                 var full_mesh = p.Modules.GetModule<ModuleAsteroid>() != null;
                 foreach(var mesh in p.transform.GetComponentsInChildren<MeshFilter>()
-                        .Select(c => new MeshTransform{m=c.sharedMesh, t=c.transform})
+                        .Select(c => new MeshTransform(c))
                         .Union(p.transform.GetComponentsInChildren<SkinnedMeshRenderer>()
-                               .Select(c => new MeshTransform{m=c.sharedMesh, t=c.transform})))
+                               .Select(c => new MeshTransform(c))))
                 {
                     var verts = full_mesh? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds);
                     for(int j = 0, len = verts.Length; j < len; j++)

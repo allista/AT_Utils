@@ -9,7 +9,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
-using AT_Utils;
 
 namespace AT_Utils
 {
@@ -17,6 +16,19 @@ namespace AT_Utils
     {
         public Mesh m;
         public Transform t;
+
+        public MeshTransform(MeshFilter mesh_filter)
+        {
+            t = mesh_filter.transform;
+            m = mesh_filter.sharedMesh; 
+        }
+
+        public MeshTransform(SkinnedMeshRenderer skin)
+        {
+            t = skin.transform;
+            m = new Mesh();
+            skin.BakeMesh(m);
+        }
     }
 
     public struct Metric : IConfigNode
@@ -26,17 +38,28 @@ namespace AT_Utils
         //convex hull
         public ConvexHull3D hull { get; private set; }
 
-        public float volume { get { return hull == null ? bounds_volume : hull.Volume; } }
+        Mesh _hull_mesh;
+        public Mesh hull_mesh 
+        { 
+            get 
+            { 
+                if(_hull_mesh == null && hull != null) 
+                    _hull_mesh = hull.MakeMesh();
+                return _hull_mesh;
+            }
+        }
 
-        public float area { get { return hull == null ? bounds_area : hull.Area; } }
+        public float volume => hull == null ? bounds_volume : hull.Volume;
+
+        public float area => hull == null ? bounds_area : hull.Area;
         //bounds
         public Bounds  bounds { get; private set; }
 
-        public Vector3 center  { get { return bounds.center; } }
+        public Vector3 center => bounds.center;
 
-        public Vector3 extents { get { return bounds.extents; } }
+        public Vector3 extents => bounds.extents;
 
-        public Vector3 size    { get { return bounds.size; } }
+        public Vector3 size => bounds.size;
         //physical properties
         public float bounds_volume { get; private set; }
 
@@ -48,7 +71,7 @@ namespace AT_Utils
 
         public float cost { get; set; }
 
-        public bool Empty { get { return bounds_volume.Equals(0) && bounds_area.Equals(0); } }
+        public bool Empty => bounds_volume.Equals(0) && bounds_area.Equals(0);
 
         static Vector3[] local2local(Transform _from, Transform _to, Vector3[] points)
         {
@@ -58,15 +81,9 @@ namespace AT_Utils
             return points;
         }
 
-        static float boundsVolume(Bounds b)
-        {
-            return b.size.x * b.size.y * b.size.z;
-        }
+        static float boundsVolume(Bounds b) => b.size.x * b.size.y * b.size.z;
 
-        static float boundsArea(Bounds b)
-        {
-            return 2 * (b.size.x * b.size.y + b.size.x * b.size.z + b.size.y * b.size.z);
-        }
+        static float boundsArea(Bounds b) => 2 * (b.size.x * b.size.y + b.size.x * b.size.z + b.size.y * b.size.z);
 
         static Bounds initBounds(Vector3[] edges)
         {
@@ -118,13 +135,10 @@ namespace AT_Utils
                 var wheel = p.Modules.GetModule<ModuleWheelBase>();
                 var wheel_transform = wheel != null && wheel.Wheel != null && wheel.Wheel.wheelCollider != null ? wheel.Wheel.wheelCollider.wheelTransform : null;
                 var is_asteroid = p.Modules.GetModule<ModuleAsteroid>() != null;
-                foreach(var mesh in p.GetComponentsInChildren<MeshFilter>().Select(c => new MeshTransform {
-                    m = c.sharedMesh,
-                    t = c.transform
-                }).Union(p.GetComponentsInChildren<SkinnedMeshRenderer>().Select(c => new MeshTransform {
-                    m = c.sharedMesh,
-                    t = c.transform
-                })))
+                foreach(var mesh in p.GetComponentsInChildren<MeshFilter>()
+                        .Select(c => new MeshTransform(c))
+                        .Union(p.GetComponentsInChildren<SkinnedMeshRenderer>()
+                               .Select(c =>  new MeshTransform(c))))
                 {
                     //skip disabled objects
                     if(mesh.t.gameObject == null || exclude_disabled && !mesh.t.gameObject.activeInHierarchy)
@@ -160,7 +174,10 @@ namespace AT_Utils
                 cost += p.TotalCost();
             }
             if(compute_hull && hull_points.Count >= 4)
-                hull = new ConvexHull3D(hull_points); 
+            {
+                hull = new ConvexHull3D(hull_points);
+                _hull_mesh = null;
+            }
             return b;
         }
 
@@ -503,57 +520,36 @@ namespace AT_Utils
             return _new;
         }
 
-        public static Metric operator/(Metric m, float scale)
-        {
-            return m * (1.0f / scale);
-        }
-		
+        public static Metric operator /(Metric m, float scale) => m * (1.0f / scale);
+
         //convenience functions
-        public static float BoundsVolume(Part part)
-        {
-            return (new Metric(part)).bounds_volume;
-        }
+        public static float BoundsVolume(Part part) => (new Metric(part)).bounds_volume;
 
-        public static float BoundsVolume(Vessel vessel)
-        {
-            return (new Metric(vessel)).bounds_volume;
-        }
+        public static float BoundsVolume(Vessel vessel) => (new Metric(vessel)).bounds_volume;
 
-        public static float Volume(Part part)
-        {
-            return (new Metric(part, true)).volume;
-        }
+        public static float Volume(Part part) => (new Metric(part, true)).volume;
 
-        public static float Volume(Vessel vessel)
-        {
-            return (new Metric(vessel, true)).volume;
-        }
+        public static float Volume(Vessel vessel) => (new Metric(vessel, true)).volume;
         #endregion
 
         #if DEBUG
-        public void DrawBox(Transform vT)
-        {
-            Utils.GLDrawBounds(bounds, vT, Color.white);
-        }
+        public void DrawBox(Transform vT) => Utils.GLDrawBounds(bounds, vT, Color.white);
 
-        public void DrawCenter(Transform vT)
-        {
-            Utils.GLDrawPoint(vT.position + vT.TransformDirection(center), Color.white);
-        }
+        public void DrawCenter(Transform vT) => Utils.GLDrawPoint(vT.position + vT.TransformDirection(center), Color.white);
 
         public override string ToString()
         {
             return Utils.Format("hull:    {}\n" +
-            "bounds:  {}\n" +
-            "center:  {}\n" +
-            "extents: {}\n" +
-            "size:    {}\n" +
-            "volume:  {}\n" +
-            "area:    {}\n" +
-            "mass:    {}\n" +
-            "cost:    {}\n" +
-            "CrewCapacity: {}\n" +
-            "Empty:   {}\n", 
+                                "bounds:  {}\n" +
+                                "center:  {}\n" +
+                                "extents: {}\n" +
+                                "size:    {}\n" +
+                                "volume:  {}\n" +
+                                "area:    {}\n" +
+                                "mass:    {}\n" +
+                                "cost:    {}\n" +
+                                "CrewCapacity: {}\n" +
+                                "Empty:   {}\n", 
                                 hull, bounds, center, extents, size, volume, area, mass, cost, CrewCapacity, Empty);
         }
         #endif
