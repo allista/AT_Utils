@@ -33,31 +33,31 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System">
-      <HintPath>..\KSP-test\KSP_test_1.3.1\KSP_Data\Managed\System.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.4.1\KSP_Data\Managed\System.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\KSP-test\KSP_test_1.3.1\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.4.1\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\KSP-test\KSP_test_1.3.1\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.4.1\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Core">
-      <HintPath>..\KSP-test\KSP_test_1.3.1\KSP_Data\Managed\System.Core.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.4.1\KSP_Data\Managed\System.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\KSP-test\KSP_test_1.3.1\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.4.1\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil">
-      <HintPath>..\KSP-test\KSP_test_1.3.1\KSP_Data\Managed\Mono.Cecil.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.4.1\KSP_Data\Managed\Mono.Cecil.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\KSP-test\KSP_test_1.3.1\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\KSP-test\KSP_test_1.4.1\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -91,10 +91,6 @@
     <Compile Include="ToolbarWrapper.cs" />
     <Compile Include="GUI\Markers.cs" />
     <Compile Include="Coordinates.cs" />
-    <Compile Include="SerializableFiledsPartModule.cs" />
-    <Compile Include="ResourceTransfer.cs" />
-    <Compile Include="CrewTransferBatch.cs" />
-    <Compile Include="FlightCameraOverride.cs" />
     <Compile Include="Debugging\DebugUtils.cs" />
     <Compile Include="Debugging\ResourceHack.cs" />
     <Compile Include="GUI\TooltipManager.cs" />
@@ -111,7 +107,6 @@
     <Compile Include="GUI\WindowsFramework\CompoundWindow.cs" />
     <Compile Include="GUI\WindowsFramework\FloatingWindow.cs" />
     <Compile Include="GUI\WindowsFramework\GUIWindowBase.cs" />
-    <Compile Include="SimplePartFilter.cs" />
     <Compile Include="Debugging\Emailer.cs" />
     <Compile Include="Debugging\ScenarioTester.cs" />
     <Compile Include="GUI\ConfigNodeObjectGUI.cs" />
@@ -122,7 +117,16 @@
     <Compile Include="Debugging\BackupLogger.cs" />
     <Compile Include="GUI\Elements\ValueFieldBase.cs" />
     <Compile Include="ControlFlow\HierarchicalComparer.cs" />
-    <Compile Include="ModuleAsteroidFix.cs" />
+    <Compile Include="GUI\Windows\SubassemblySelector.cs" />
+    <Compile Include="Modules\ModuleAsteroidFix.cs" />
+    <Compile Include="Modules\SerializableFiledsPartModule.cs" />
+    <Compile Include="Addons\CrewTransferBatch.cs" />
+    <Compile Include="Addons\FlightCameraOverride.cs" />
+    <Compile Include="Addons\ResourceTransfer.cs" />
+    <Compile Include="Addons\SimplePartFilter.cs" />
+    <Compile Include="Addons\HangarSpaceManager.cs" />
+    <Compile Include="ResourceInfo.cs" />
+    <Compile Include="GUI\TextureCache.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -137,6 +141,7 @@
     <Folder Include="GUI\Windows\" />
     <Folder Include="GUI\Elements\" />
     <Folder Include="GUI\WindowsFramework\" />
+    <Folder Include="Addons\" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

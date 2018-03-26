@@ -119,7 +119,7 @@ namespace AT_Utils
 
 		protected bool set_texture()
 		{
-			var texture = GameDatabase.Instance.GetTexture(RootFolder+CurrentTexture, false);
+			var texture = TextureCache.GetTexture(RootFolder+CurrentTexture);
 			if(texture == null) return false;
 			renderers.ForEach(r => r.material.mainTexture = texture);
 			return true;
