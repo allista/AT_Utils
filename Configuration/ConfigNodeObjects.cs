@@ -48,18 +48,31 @@ namespace AT_Utils
 			{
 				if(not_persistant(fi)) continue;
 				var n = node.GetNode(fi.Name);
-				if(n == null) continue;
-				//restore IConfigNodes
-				if(fi.FieldType.GetInterface(cnode_name) != null)
-				{
-					var f = get_or_create<IConfigNode>(fi);
-					if(f == null) continue;
-					f.Load(n);
-					fi.SetValue(this, f);
-				}
-				//restore ConfigNodes
-				else if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
-					fi.SetValue(this, n.CreateCopy());
+                //restore types saved as nodes
+				if(n != null)
+                {
+    				//restore IConfigNodes
+    				if(fi.FieldType.GetInterface(cnode_name) != null)
+    				{
+    					var f = get_or_create<IConfigNode>(fi);
+    					if(f != null)
+                        {
+        					f.Load(n);
+        					fi.SetValue(this, f);
+                        }
+    				}
+    				//restore ConfigNodes
+    				else if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
+    					fi.SetValue(this, n.CreateCopy());
+                    continue;
+                }
+                //restore types saved as values
+                var v = node.GetValue(fi.Name);
+                if(v != null) 
+                {
+                    if(fi.FieldType == typeof(Guid))
+                        fi.SetValue(this, new Guid(v));
+                }
 			}
 		}
 
@@ -95,6 +108,12 @@ namespace AT_Utils
 					var f = fi.GetValue(this) as ConfigNode;
 					if(f != null) get_field_node(fi, node).AddData(f);
 				}
+                //save some often used ValueTypes
+                else if(fi.FieldType == typeof(Guid))
+                {
+                    var f = (Guid)fi.GetValue(this);
+                    node.AddValue(fi.Name, f.ToString("N"));
+                }
 			}
 		}
 
@@ -176,10 +195,10 @@ namespace AT_Utils
 		}
 	}
 
-	public class PersistentList<T> : List<T>, IConfigNode where T : IConfigNode, new()
+    public class PersistentList<T> : List<T>, IConfigNode where T : IConfigNode, new()
 	{
 		public PersistentList() {}
-		public PersistentList(IEnumerable<T> content) : base(content) {}
+        public PersistentList(IEnumerable<T> content) : base(content) {}
 
 		public void Save(ConfigNode node)
 		{
@@ -199,6 +218,31 @@ namespace AT_Utils
 			}
 		}
 	}
+
+    public class PersistentDictS<T> : Dictionary<string,T>, IConfigNode where T : IConfigNode, new()
+    {
+        public PersistentDictS() {}
+        public PersistentDictS(IDictionary<string,T> data) : base(data) {}
+
+        public void Save(ConfigNode node)
+        {
+            foreach(var item in this)
+                item.Value.Save(node.AddNode(item.Key));
+        }
+
+        public void Load(ConfigNode node)
+        {
+            Clear();
+            var nodes = node.GetNodes();
+            for(int i = 0, len = nodes.Length; i < len; i++)
+            {
+                var n = nodes[i];
+                var item = new T();
+                item.Load(n);
+                Add(n.name, item);
+            }
+        }
+    }
 
 	public class PersistentQueue<T> : Queue<T>, IConfigNode where T : IConfigNode, new()
 	{
