@@ -13,6 +13,7 @@ using KSP.UI;
 using KSP.UI.Screens;
 using KSP.Localization;
 using System.Collections.Generic;
+using System.IO;
 
 namespace AT_Utils
 {
@@ -65,9 +66,9 @@ namespace AT_Utils
         {
             if(PartCategorizer.Instance.iconLoader.iconDictionary.ContainsKey(icon_name))
                 return PartCategorizer.Instance.iconLoader.GetIcon(icon_name);
-            var icon_path = folder+"/"+icon_name;
-            var icon   = GameDatabase.Instance.GetTexture(icon_path, false);
-            var icon_s = GameDatabase.Instance.GetTexture(icon_path+"_selected", false) ?? icon;
+            var icon_path = Path.Combine(folder, icon_name);
+            var icon   = TextureCache.GetTexture(icon_path);
+            var icon_s = TextureCache.GetTexture(icon_path+"_selected") ?? icon;
             var selectable_icon = new Icon(icon_name, icon, icon_s, icon == icon_s);
             PartCategorizer.Instance.iconLoader.icons.Add(selectable_icon);
             PartCategorizer.Instance.iconLoader.iconDictionary.Add(icon_name, selectable_icon);
