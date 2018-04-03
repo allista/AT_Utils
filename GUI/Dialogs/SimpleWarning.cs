@@ -2,20 +2,20 @@
 
 namespace AT_Utils
 {
-	public class SimpleWarning : SimpleDialog
-	{
+    public class SimpleWarning : SimpleDialog
+    {
 
-		string message;
+        string message;
 
-		protected override void DrawContent()
-		{
-			GUILayout.Label(message, Styles.rich_label, GUILayout.Width(width));
-		}
+        protected override void DrawContent()
+        {
+            GUILayout.Label(message, Styles.rich_label, GUILayout.Width(width));
+        }
 
-		public Answer Draw(string message)
-		{
-			this.message = message;
-			return draw("Warning");
-		}
-	}
+        public Answer Draw(string message)
+        {
+            this.message = message;
+            return draw("Warning");
+        }
+    }
 }

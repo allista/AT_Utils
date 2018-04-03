@@ -39,15 +39,15 @@ using System.Reflection;
 
 namespace AT_Utils
 {
-	public class ModInfo : KSP_AVC_Info
-	{
-		public ModInfo()
-		{
-			MinKSPVersion = new Version(1,4,1);
-			MaxKSPVersion = new Version(1,4,1);
+    public class ModInfo : KSP_AVC_Info
+    {
+        public ModInfo()
+        {
+            MinKSPVersion = new Version(1,4,1);
+            MaxKSPVersion = new Version(1,4,1);
 
-			VersionURL   = "https://raw.githubusercontent.com/allista/AT_Utils/master/GameData/000_AT_Utils/000_AT_Utils.version";
-			UpgradeURL   = "https://github.com/allista/AT_Utils/releases";
-		}
-	}
+            VersionURL   = "https://raw.githubusercontent.com/allista/AT_Utils/master/GameData/000_AT_Utils/000_AT_Utils.version";
+            UpgradeURL   = "https://github.com/allista/AT_Utils/releases";
+        }
+    }
 }

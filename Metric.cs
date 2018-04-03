@@ -209,7 +209,7 @@ namespace AT_Utils
         {
             init_with_bounds(b, m, crew_capacity);
         }
-		
+        
         //metric from size
         public Metric(Vector3 center, Vector3 size, float m = 0f, int crew_capacity = 0)
             : this(new Bounds(center, size), m, crew_capacity)
@@ -228,7 +228,7 @@ namespace AT_Utils
             var a = Mathf.Pow(V, 1 / 3f);
             init_with_bounds(new Bounds(Vector3.zero, new Vector3(a, a, a)), m, crew_capacity);
         }
-		
+        
         //metric form vertices
         public Metric(Vector3[] verts, float m = 0f, int crew_capacity = 0, bool compute_hull = false)
             : this()
@@ -241,14 +241,14 @@ namespace AT_Utils
             mass = m;
             CrewCapacity = crew_capacity;
         }
-		
+        
         //metric from config node
         public Metric(ConfigNode node)
             : this()
         {
             Load(node);
         }
-		
+        
         //mesh metric
         void init_with_mesh(MeshFilter mesh, Transform refT, bool compute_hull)
         {
@@ -296,7 +296,7 @@ namespace AT_Utils
             }
             init_with_mesh(m, part.transform, compute_hull);
         }
-		
+        
         //part metric
         public Metric(Part part, bool compute_hull = false)
             : this()
@@ -306,7 +306,7 @@ namespace AT_Utils
             bounds_volume = boundsVolume(bounds);
             bounds_area = boundsArea(bounds);
         }
-		
+        
         //vessel metric
         public Metric(Vessel vessel, bool compute_hull = false)
             : this()
@@ -315,7 +315,7 @@ namespace AT_Utils
             bounds_volume = boundsVolume(bounds);
             bounds_area = boundsArea(bounds);
         }
-		
+        
         //in-editor vessel metric
         public Metric(List<Part> vessel, bool compute_hull = false)
             : this()

@@ -43,7 +43,7 @@ namespace AT_Utils
         readonly protected int i4;
 
         public Quad(int i1, int i2, int i3, int i4) //indecies need to be clockwise
-			: base(i1, i2, i3)
+            : base(i1, i2, i3)
         {
             this.i4 = i4;
         }
@@ -161,7 +161,7 @@ namespace AT_Utils
             float w = l * 0.02f;
             w = w > 0.05f ? 0.05f : (w < 0.01f ? 0.01f : w);
             Vector3 x = Mathf.Abs(Vector3.Dot(dir.normalized, Vector3.up)) < 0.9f ? 
-				Vector3.Cross(dir, Vector3.up).normalized : Vector3.Cross(Vector3.forward, dir).normalized;
+                Vector3.Cross(dir, Vector3.up).normalized : Vector3.Cross(Vector3.forward, dir).normalized;
             Vector3 y = Vector3.Cross(x, dir).normalized * w;
             x *= w;
             var edges = new Vector3[5];
@@ -269,7 +269,7 @@ namespace AT_Utils
             GLLine(ori, ori + vec, c, mat);
         }
 
-        public static void GLTriangle(Vector3 j, Vector3 k, Vector3 l, Color c, MaterialWrapper mat = null, bool filled = true)
+        public static void GLTriangle(Vector3 j, Vector3 k, Vector3 l, Color c, MaterialWrapper mat = null)
         {
             float far;
             var camera = GLBeginWorld(out far, mat);
@@ -279,20 +279,17 @@ namespace AT_Utils
                 k = ScaledSpace.LocalToScaledSpace(k);
                 l = ScaledSpace.LocalToScaledSpace(l);
             }
-            GL.Begin(filled ? GL.TRIANGLES : GL.LINES);
+            GL.Begin(GL.TRIANGLES);
             GL.Color(c);
             GL.Vertex(j);
             GL.Vertex(k);
-            GL.Vertex(k);
             GL.Vertex(l);
-            GL.Vertex(l);
-            GL.Vertex(j);
             GL.End();
             GL.PopMatrix();
             camera.farClipPlane = far;
         }
 
-        public static void GLTriangles(Vector3[] worldVertices, Color c, MaterialWrapper mat = null, bool filled = true)
+        public static void GLTriangles(Vector3[] worldVertices, Color c, MaterialWrapper mat = null)
         {
             float far;
             var camera = GLBeginWorld(out far, mat);
@@ -301,25 +298,21 @@ namespace AT_Utils
                 for(int i = 0, len = worldVertices.Length; i < len; i++)
                     worldVertices[i] = ScaledSpace.LocalToScaledSpace(worldVertices[i]);
             }
-            GL.Begin(filled ? GL.TRIANGLES : GL.LINES);
+            GL.Begin(GL.TRIANGLES);
             GL.Color(c);
             for(int i = 0, len = worldVertices.Length / 3; i < len; i++)
             {
                 int j = i * 3;
-                int k = j + 1, l = j + 2;
                 GL.Vertex(worldVertices[j]);
-                GL.Vertex(worldVertices[k]);
-                GL.Vertex(worldVertices[k]);
-                GL.Vertex(worldVertices[l]);
-                GL.Vertex(worldVertices[l]);
-                GL.Vertex(worldVertices[j]);
+                GL.Vertex(worldVertices[j + 1]);
+                GL.Vertex(worldVertices[j + 2]);
             }
             GL.End();
             GL.PopMatrix();
             camera.farClipPlane = far;
         }
 
-        public static void GLTriangles(Vector3[] worldVertices, int[] tris, Color c, MaterialWrapper mat = null, bool filled = true)
+        public static void GLTriangles(Vector3[] worldVertices, int[] tris, Color c, MaterialWrapper mat = null)
         {
             float far;
             var camera = GLBeginWorld(out far, mat);
@@ -328,19 +321,14 @@ namespace AT_Utils
                 for(int i = 0, len = worldVertices.Length; i < len; i++)
                     worldVertices[i] = ScaledSpace.LocalToScaledSpace(worldVertices[i]);
             }
-            GL.Begin(filled ? GL.TRIANGLES : GL.LINES);
+            GL.Begin(GL.TRIANGLES);
             GL.Color(c);
             for(int i = 0, len = tris.Length / 3; i < len; i++)
             {
                 int j = i * 3; 
-                int k = tris[j + 1], l = tris[j + 2];
-                j = tris[j];
-                GL.Vertex(worldVertices[j]);
-                GL.Vertex(worldVertices[k]);
-                GL.Vertex(worldVertices[k]);
-                GL.Vertex(worldVertices[l]);
-                GL.Vertex(worldVertices[l]);
-                GL.Vertex(worldVertices[j]);
+                GL.Vertex(worldVertices[tris[j]]);
+                GL.Vertex(worldVertices[tris[j + 1]]);
+                GL.Vertex(worldVertices[tris[j + 2]]);
             }
             GL.End();
             GL.PopMatrix();
@@ -423,22 +411,22 @@ namespace AT_Utils
             GLDrawBounds(new Bounds(point, Vector3.one * 0.1f), T, c, mat);
         }
 
-        public static void GLDrawHull(ConvexHull3D h, Transform T, Color c, MaterialWrapper mat = null, Vector3 offset = default(Vector3), bool filled = true)
+        public static void GLDrawHull(ConvexHull3D h, Transform T, Color c, MaterialWrapper mat = null, Vector3 offset = default(Vector3))
         { 
             foreach(var f in h.Faces)
             {
                 var verts = f.ToArray();
                 for(int i = 0; i < verts.Length; i++)
                     verts[i] = T.TransformDirection(verts[i] - offset) + T.position;
-                GLTriangles(verts, c, mat, filled);
+                GLTriangles(verts, c, mat);
             }
         }
 
-        public static void GLDrawHull2(ConvexHull3D h, Transform T, Color c, MaterialWrapper mat = null, Vector3 offset = default(Vector3), bool filled = true)
+        public static void GLDrawHull2(ConvexHull3D h, Transform T, Color c, MaterialWrapper mat = null, Vector3 offset = default(Vector3))
         { 
             float far;
             var camera = GLBeginWorld(out far, mat);
-            GL.Begin(filled ? GL.TRIANGLES : GL.LINES);
+            GL.Begin(GL.TRIANGLES);
             GL.Color(c);
             for(int i = 0, hFacesCount = h.Faces.Count; i < hFacesCount; i++)
             {
@@ -448,23 +436,20 @@ namespace AT_Utils
                     verts[j] = T.TransformDirection(f[j] - offset) + T.position;
                 GL.Vertex(verts[0]);
                 GL.Vertex(verts[1]);
-                GL.Vertex(verts[1]);
                 GL.Vertex(verts[2]);
-                GL.Vertex(verts[2]);
-                GL.Vertex(verts[0]);
             }
             GL.End();
             GL.PopMatrix();
             camera.farClipPlane = far;
         }
 
-        public static void GLDrawMesh(Mesh m, Transform T, Color c, MaterialWrapper mat = null, Vector3 offset = default(Vector3), bool filled = true)
+        public static void GLDrawMesh(Mesh m, Transform T, Color c, MaterialWrapper mat = null, Vector3 offset = default(Vector3))
         {
             var verts = m.vertices;
             var tris = m.triangles;
             for(int i = 0, len = verts.Length; i < len; i++)
                 verts[i] = T.TransformDirection(verts[i] - offset) + T.position;
-            GLTriangles(verts, tris, c, mat, filled);
+            GLTriangles(verts, tris, c, mat);
         }
     }
 }
