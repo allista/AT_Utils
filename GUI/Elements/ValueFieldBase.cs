@@ -11,9 +11,9 @@ namespace AT_Utils
 {
     public abstract class ValueFieldBase<T> : ConfigNodeObject, ITypeUI<T>
     {
+		[Persistent] public T _value;
         protected string svalue;
-        [Persistent] public T _value;
-        [Persistent] public string format;
+        public string format;
 
         string _field_name;
         protected string field_name 
@@ -74,9 +74,9 @@ namespace AT_Utils
 
     public abstract class BoundValueField<T> : ValueFieldBase<T>
     {
-        [Persistent] public T Min;
-        [Persistent] public T Max;
-        [Persistent] public bool Circle;
+        public T Min;
+        public T Max;
+        public bool Circle;
 
         protected BoundValueField(string format, T min, T max, bool circle) : base(format)
         {

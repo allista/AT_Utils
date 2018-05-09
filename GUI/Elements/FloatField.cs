@@ -52,16 +52,16 @@ namespace AT_Utils
             return false;
         }
 
-        public bool Draw(string suffix, float increment = 0, string iformat = "F1", int suffix_width = -1, GUIStyle style = null)
+        public bool Draw(string suffix, float increment = 0, string iformat = null, int suffix_width = -1, GUIStyle style = null)
         {
             bool updated = false;
             GUILayout.BeginHorizontal();
             if(!increment.Equals(0)) 
             {
-                if(GUILayout.Button(string.Format("-{0}", increment.ToString(iformat)),     
+                if(GUILayout.Button(string.Format("-{0}", increment.ToString(iformat ?? format)),
                                     Styles.normal_button, GUILayout.ExpandWidth(false)))
                 { Value = _value-increment; updated = true; }
-                if(GUILayout.Button(string.Format("+{0}", increment.ToString(iformat)), 
+                if(GUILayout.Button(string.Format("+{0}", increment.ToString(iformat ?? format)), 
                                     Styles.normal_button, GUILayout.ExpandWidth(false)))
                 { Value = _value+increment; updated = true; }
             }
@@ -79,4 +79,3 @@ namespace AT_Utils
         public override bool Draw() { return Draw(""); }
     }
 }
-
