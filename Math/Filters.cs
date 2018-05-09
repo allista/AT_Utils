@@ -326,6 +326,8 @@ namespace AT_Utils
         public FuzzyThreshold() { value = default(T); }
         public FuzzyThreshold(T upper, T lower) { Upper = upper; Lower = lower; }
 
+        public void Reset() { value = default(T); On = false; }
+
         public static implicit operator bool(FuzzyThreshold<T> t) { return t.On; }
         public static implicit operator T(FuzzyThreshold<T> t) { return t.value; }
 
