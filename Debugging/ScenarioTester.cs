@@ -21,13 +21,13 @@ namespace AT_Utils
         string Setup();
         bool Update(System.Random RND);
         void Cleanup();
+        void Draw();
     }
 
     [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
     public class ScenarioTester : AddonWindowBase<ScenarioTester>
     {
-        delegate ITestScenario ScenarioConstructor();
-        static SortedList<string, SortedList<string, ScenarioConstructor>> scenarios;
+        static SortedList<string, SortedList<string, ITestScenario>> scenarios;
 
         System.Random RND;
         protected ITestScenario current_test;
@@ -40,7 +40,7 @@ namespace AT_Utils
             if(Instance != this) return;
             if(scenarios == null)
             {
-                scenarios = new SortedList<string, SortedList<string, ScenarioConstructor>>();
+                scenarios = new SortedList<string, SortedList<string, ITestScenario>>();
                 foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
                     Type[] types;
@@ -55,14 +55,14 @@ namespace AT_Utils
                             var cinfo = type.GetConstructor(Type.EmptyTypes);
                             if(cinfo != null)
                             {
-                                SortedList<string,ScenarioConstructor> lst;
+                                SortedList<string,ITestScenario> lst;
                                 if(!scenarios.TryGetValue(aname, out lst))
                                 {
-                                    lst = new SortedList<string, ScenarioConstructor>();
+                                    lst = new SortedList<string, ITestScenario>();
                                     scenarios.Add(aname, lst);
                                 }
                                 lst.Add(Utils.ParseCamelCase(type.Name).Replace("_", " "), 
-                                        () => cinfo.Invoke(null) as ITestScenario);
+                                        cinfo.Invoke(null) as ITestScenario);
                                 Utils.Log("Added {}.{} to testing scenarios.", aname, type.Name);
                             }
                         }
@@ -104,15 +104,17 @@ namespace AT_Utils
             test = null;
         }
 
+        bool unpaused => !FlightDriver.Pause;
+
         protected virtual void Update()
         {
-            if(current_test != null && current_test.NeedsUpdate)
+            if(unpaused && current_test != null && current_test.NeedsUpdate)
                 test_loop(ref current_test);
         }
 
         protected virtual void FixedUpdate()
         {
-            if(current_test != null && current_test.NeedsFixedUpdate)
+            if(unpaused && current_test != null && current_test.NeedsFixedUpdate)
                 test_loop(ref current_test);
         }
 
@@ -132,7 +134,7 @@ namespace AT_Utils
             var old_assembly = current_assembly;
             current_assembly = Utils.LeftRightChooser(current_assembly, scenarios, "Select assembly");
             if(old_assembly != current_assembly) current_test_name = "";
-            SortedList<string, ScenarioConstructor> tests = null;
+            SortedList<string, ITestScenario> tests = null;
             if(scenarios.TryGetValue(current_assembly, out tests))
                 current_test_name = Utils.LeftRightChooser(current_test_name, tests, "Select test to run");
             if(current_test != null)
@@ -151,23 +153,26 @@ namespace AT_Utils
             }
             else if(tests != null)
             {
-                ScenarioConstructor scn;
-                if(tests.TryGetValue(current_test_name, out scn) &&
-                   GUILayout.Button("Run the test", Styles.active_button, GUILayout.ExpandWidth(true)))
-                    setup_test(scn());
+                ITestScenario scn;
+                if(tests.TryGetValue(current_test_name, out scn))
+                {
+                    scn.Draw();
+                    if(GUILayout.Button("Run the test", Styles.active_button, GUILayout.ExpandWidth(true)))
+                        setup_test(scn);
+                }
             }
             GUILayout.EndVertical();
             TooltipsAndDragWindow();
         }
 
         #region Helpers
-        public static void LoadGame(string filename)
+        public static bool LoadGame(string filename)
         {
             ConfigNode configNode = GamePersistence.LoadSFSFile(filename, HighLogic.SaveFolder);
             if (configNode == null)
             {
                 ScreenMessages.PostScreenMessage("<color=orange>Unable to load the save: " + filename, 5f, ScreenMessageStyle.UPPER_LEFT);
-                return;
+                return false;
             }
             var v = NodeUtil.GetCfgVersion(configNode, LoadContext.SFS);
             KSPUpgradePipeline.Process(configNode,  HighLogic.SaveFolder, LoadContext.SFS, 
@@ -176,6 +181,7 @@ namespace AT_Utils
                                        ScreenMessages.PostScreenMessage(string.Format("<color=orange>Unable to load the save: {0}\n" +
                                                                                       "KSPUpgradePipeline finished with error.", filename), 
                                                                         5f, ScreenMessageStyle.UPPER_LEFT));
+            return true;
         }
 
         static void onPipelineFinished(ConfigNode node, string saveName, Version originalVersion)
