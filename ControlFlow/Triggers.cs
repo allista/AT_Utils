@@ -129,7 +129,7 @@ namespace AT_Utils
     {
         protected override DateTime now { get { return DateTime.Now; } }
         protected override DateTime default_time { get { return DateTime.MinValue; } }
-        public RealTimer(double period = 1) : base(period) { next_time = default_time; }
+        public RealTimer(double period = 1) : base(period) { next_time = DateTime.MinValue; }
         protected override void start() { next_time = now.AddSeconds(Period); }
         public override double Remaining { get { return next_time.Subtract(now).TotalSeconds; } }
     }
@@ -138,7 +138,7 @@ namespace AT_Utils
     {
         protected override double now { get { return Planetarium.GetUniversalTime(); } }
         protected override double default_time { get { return -1; } }
-        public Timer(double period = 1) : base(period) { next_time = default_time; }
+        public Timer(double period = 1) : base(period) { next_time = -1; }
         protected override void start() { next_time = now+Period; }
         public override double Remaining { get { return next_time-now; } }
     }
@@ -205,6 +205,34 @@ namespace AT_Utils
         public void Checked() { prev_state = state; }
 
         public static implicit operator bool(Switch s) { return s.state; }
+    }
+
+    public class Ratchet : ConfigNodeObject
+    {
+        public enum State {OFF, ARMED, ON};
+        [Persistent] public State state { get; private set; }
+
+        public void Update(bool condition)
+        {
+            switch(state)
+            {
+            case State.OFF:
+                if(!condition)
+                    state = State.ARMED;
+                break;
+            case State.ARMED:
+                if(condition)
+                    state = State.ON;
+                break;
+            case State.ON:
+                break;
+            }
+        }
+
+        public void Reset() => state = State.OFF;
+
+        public bool On => state == State.ON;
+        public static implicit operator bool(Ratchet r) => r.On;
     }
 
     public class SingleAction
