@@ -127,6 +127,9 @@
     <Compile Include="Addons\HangarSpaceManager.cs" />
     <Compile Include="ResourceInfo.cs" />
     <Compile Include="GUI\TextureCache.cs" />
+    <Compile Include="GUI\ProgressIndicator.cs" />
+    <Compile Include="Math\StallDetector.cs" />
+    <Compile Include="ComputationBalancer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
