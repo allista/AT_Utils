@@ -204,13 +204,16 @@ namespace AT_Utils
 
     public class OscillationDetectorF : OscillationDetector<float>
     {
-        protected LowPassFilterF max_filter = new LowPassFilterF();
+        protected AsymmetricFiterF max_filter = new AsymmetricFiterF();
 
         public override float Value { get { return max_filter.Value; } }
 
         public OscillationDetectorF(double low_freq, double high_freq, int freq_bins, int time_window, float smoothing)
             : base(low_freq, high_freq, freq_bins, time_window) 
-        { max_filter.Tau = smoothing; }
+        { 
+            max_filter.TauUp = smoothing;
+            max_filter.TauDown = smoothing/10;
+        }
 
         protected override float norm(float val) { return val/bins; }
 
