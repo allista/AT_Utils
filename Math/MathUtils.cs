@@ -121,6 +121,18 @@ namespace AT_Utils
         }
 
         /// <summary>
+        /// Angle2 is a more numerically stable for small angles version of Vector2d.Angle method.
+        /// </summary>
+        /// <param name="a">Vector a.</param>
+        /// <param name="b">Vector b.</param>
+        public static double Angle2(Vector2d a, Vector2d b)
+        {
+            var abm = a*b.magnitude;
+            var bam = b*a.magnitude;
+            return 2 * Math.Atan2((abm-bam).magnitude, (abm+bam).magnitude) * Mathf.Rad2Deg;
+        }
+
+        /// <summary>
         /// Angle2Rad is a more numerically stable for small angles version of Vector3.Angle method.
         /// Its return value is in radians rather than degrees.
         /// </summary>
@@ -140,6 +152,19 @@ namespace AT_Utils
         /// <param name="a">Vector a.</param>
         /// <param name="b">Vector b.</param>
         public static double Angle2Rad(Vector3d a, Vector3d b)
+        {
+            var abm = a*b.magnitude;
+            var bam = b*a.magnitude;
+            return 2 * Math.Atan2((abm-bam).magnitude, (abm+bam).magnitude);
+        }
+
+        /// <summary>
+        /// Angle2Rad is a more numerically stable for small angles version of Vector2d.Angle method.
+        /// Its return value is in radians rather than degrees.
+        /// </summary>
+        /// <param name="a">Vector a.</param>
+        /// <param name="b">Vector b.</param>
+        public static double Angle2Rad(Vector2d a, Vector2d b)
         {
             var abm = a*b.magnitude;
             var bam = b*a.magnitude;
@@ -210,6 +235,40 @@ namespace AT_Utils
 
         public static double CubeSurface(double volume)
         { return 6*Math.Pow(volume, 2/3.0); }
+
+        /// <summary>
+        /// Clamps vector's direction to the cone around axis.
+        /// </summary>
+        /// <returns>A new vector that is inside the cone, has the same magnitude as vec 
+        /// and lies in the plane of vec*axis. If vec itself lies within the cone, it is returned 
+        /// unchanged; otherwise, returnd vector lies just at the edge of the cone.</returns>
+        /// <param name="vec">Vector to clamp</param>
+        /// <param name="max_angle">Cone angle</param>
+        /// <param name="axis">Axis.of the cone</param>
+        public static Vector3d ClampDirection(Vector3d vec, Vector3d axis, double max_angle)
+        {
+            if(Angle2(vec, axis) > max_angle)
+                return QuaternionD.AngleAxis(max_angle, Vector3d.Cross(axis, vec)) 
+                                  * axis.normalized * vec.magnitude;
+            return vec;
+        }
+
+        /// <summary>
+        /// Clamps vector's direction to the cone around axis.
+        /// </summary>
+        /// <returns>A new vector that is inside the cone, has the same magnitude as vec 
+        /// and lies in the plane of vec*axis. If vec itself lies within the cone, it is returned 
+        /// unchanged; otherwise, returnd vector lies just at the edge of the cone.</returns>
+        /// <param name="vec">Vector to clamp</param>
+        /// <param name="max_angle">Cone angle</param>
+        /// <param name="axis">Axis.of the cone</param>
+        public static Vector3 ClampDirection(Vector3 vec, Vector3 axis, float max_angle)
+        {
+            if(Angle2(vec, axis) > max_angle)
+                return Quaternion.AngleAxis(max_angle, Vector3.Cross(axis, vec)) 
+                                  * axis.normalized * vec.magnitude;
+            return vec;
+        }
     }
 }
 
