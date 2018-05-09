@@ -94,6 +94,7 @@ namespace AT_Utils
 
         public static void AnchorForSeconds(Mode mode, Transform new_anchor, double seconds, bool override_reference = false)
         {
+            override_reference |= FlightCameraOverride.mode != mode;
             if(override_reference || !Active)
                 Activate(mode, new_anchor, null, override_reference);
             UpdateDurationSeconds(seconds);
@@ -101,6 +102,7 @@ namespace AT_Utils
 
         public static void Anchor(Mode mode, Transform new_anchor, int num_frames, bool override_reference = false)
         {
+            override_reference |= FlightCameraOverride.mode != mode;
             if(override_reference || !Active)
                 Activate(mode, new_anchor, null, override_reference);
             UpdateDuration(num_frames);
@@ -108,6 +110,7 @@ namespace AT_Utils
 
         public static void TargetForSeconds(Mode mode, Transform new_anchor, Transform new_target, double seconds, bool override_reference = false)
         {
+            override_reference |= FlightCameraOverride.mode != mode;
             if(override_reference || !Active)
                 Activate(mode, new_anchor, new_target, override_reference);
             UpdateDurationSeconds(seconds);
@@ -115,6 +118,7 @@ namespace AT_Utils
 
         public static void Target(Mode mode, Transform new_anchor, Transform new_target, int num_frames, bool override_reference = false)
         {
+            override_reference |= FlightCameraOverride.mode != mode;
             if(override_reference || !Active)
                 Activate(mode, new_anchor, new_target, override_reference);
             UpdateDuration(num_frames);
@@ -191,10 +195,19 @@ namespace AT_Utils
                 }
                 break;
             case Mode.OrbitAround:
-                pos = rel_pos+anchor.position;
-                pivot = anchor.position;
-                vsl = anchor.gameObject.GetComponent<Vessel>();
-                axis = vsl == null? anchor.up : (Vector3)vsl.orbit.pos.xzy;
+				vsl = anchor.gameObject.GetComponent<Vessel>();
+                if(vsl != null)
+                {
+                    pos = rel_pos+anchor.position;
+                    pivot = vsl.CoM;
+                    axis = vsl.up;
+                }
+                else
+                {
+                    pos = rel_pos+anchor.position;
+                    pivot = anchor.position;
+                    axis = anchor.up;
+                }
                 rel_pos = Quaternion.AngleAxis(0.15f, axis)*rel_pos;
                 break;
             }
