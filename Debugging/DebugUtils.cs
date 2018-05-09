@@ -28,7 +28,21 @@ namespace AT_Utils
             for(int i = 0; i < len; i++) 
             {
                 var arg = args[i];
-                if(arg is Vector3)
+                if(arg is Vector2)
+                {
+                    var v = (Vector2)arg;
+                    row.Append(v.x);
+                    row.Append(",");
+                    row.Append(v.y);
+                }
+                else if(arg is Vector2d)
+                {
+                    var v = (Vector2d)arg;
+                    row.Append(v.x);
+                    row.Append(",");
+                    row.Append(v.y);
+                }
+                else if(arg is Vector3)
                 {
                     var v = (Vector3)arg;
                     row.Append(v.x);
