@@ -72,13 +72,14 @@ namespace AT_Utils
 
         [Persistent] public T Min, Max;
         [Persistent] public T P, I, D;
+        [Persistent] public T FF;
 
         public PID_Controller() {}
         public PID_Controller(T p, T i, T d, T min, T max)
         { P = p; I = i; D = d; Min = min; Max = max; }
 
         public virtual void setPID(PID_Controller<T> c)
-        { P = c.P; I = c.I; D = c.D; Min = c.Min; Max = c.Max; }
+        { P = c.P; I = c.I; D = c.D; FF = c.FF; Min = c.Min; Max = c.Max; }
 
         public void setClamp(T min, T max)
         {
@@ -93,9 +94,10 @@ namespace AT_Utils
             return Utils.Format("P={}\n" +
                                 "I={}\n" +
                                 "D={}\n" +
+                                "FF={}\n" +
                                 "Min={}\n" +
                                 "Max={}", 
-                                P, I, D, Min, Max); 
+                                P, I, D, FF, Min, Max); 
         }
     }
 
@@ -104,6 +106,7 @@ namespace AT_Utils
         public T Action;
         public T LastError;
         public T IntegralError;
+        public T FeedForward;
 
         public override void Reset() 
         { Action = default(T); IntegralError = default(T); }
@@ -118,11 +121,13 @@ namespace AT_Utils
         {
             return base.ToString()+
                 Utils.Format("\nLast Error: {}" +
-                              "\nIntegral Error: {}" +
-                              "\nAction: {}\n",
-                              LastError, 
-                              IntegralError, 
-                              Action);
+                             "\nIntegral Error: {}" +
+                             "\nFeedForward: {}" +
+                             "\nAction: {}\n",
+                             LastError, 
+                             IntegralError, 
+                             FeedForward,
+                             Action);
         }
     }
 
@@ -149,7 +154,7 @@ namespace AT_Utils
             if(IntegralError.z*error.z < 0) IntegralError.z = 0;
             var old_ierror = IntegralError;
             IntegralError += error*TimeWarp.fixedDeltaTime;
-            var act = P*error + I*IntegralError + D*speed;
+            var act = P*error + I*IntegralError + D*speed + FeedForward*FF;
             if(act.IsZero()) Action = act;
             else
             {
@@ -187,11 +192,14 @@ namespace AT_Utils
             if(IntegralError.x*error.x < 0) IntegralError.x = 0;
             if(IntegralError.y*error.y < 0) IntegralError.y = 0;
             if(IntegralError.z*error.z < 0) IntegralError.z = 0;
-            IntegralError.x = (Mathf.Abs(derivative.x) < 0.6f * Max) ? IntegralError.x + (error.x * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.x;
-            IntegralError.y = (Mathf.Abs(derivative.y) < 0.6f * Max) ? IntegralError.y + (error.y * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.y;
-            IntegralError.z = (Mathf.Abs(derivative.z) < 0.6f * Max) ? IntegralError.z + (error.z * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.z;
+            IntegralError.x = (Mathf.Abs(derivative.x) < 0.6f * Max) ? 
+                IntegralError.x + (error.x * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.x;
+            IntegralError.y = (Mathf.Abs(derivative.y) < 0.6f * Max) ? 
+                IntegralError.y + (error.y * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.y;
+            IntegralError.z = (Mathf.Abs(derivative.z) < 0.6f * Max) ? 
+                IntegralError.z + (error.z * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.z;
             Vector3.ClampMagnitude(IntegralError, Max);
-            var act = error * P + IntegralError + derivative;
+            var act = error * P + IntegralError + derivative + FeedForward*FF;
             Action = new Vector3
                 (
                     float.IsNaN(act.x)? 0f : Mathf.Clamp(act.x, Min, Max),
@@ -225,7 +233,7 @@ namespace AT_Utils
             if(IntegralError.z*error.z < 0) IntegralError.z = 0;
             var old_ierror = IntegralError;
             IntegralError += error*TimeWarp.fixedDeltaTime;
-            var act = P*error + I*IntegralError + D*speed;
+            var act = P*error + I*IntegralError + D*speed + FeedForward*FF;
             if(act.IsZero()) Action = act;
             else
             {
@@ -264,7 +272,10 @@ namespace AT_Utils
             if(IntegralError.z*error.z < 0) IntegralError.z = 0;
             var old_ierror = IntegralError;
             IntegralError += error*TimeWarp.fixedDeltaTime;
-            var act = Vector3.Scale(P, error) + Vector3.Scale(I, IntegralError) + Vector3.Scale(D, speed);
+            var act = Vector3.Scale(P, error) + 
+                             Vector3.Scale(I, IntegralError) + 
+                             Vector3.Scale(D, speed) + 
+                             Vector3.Scale(FeedForward, FF);
             if(act.IsZero()) Action = act;
             else
             {
@@ -301,7 +312,7 @@ namespace AT_Utils
             if(IntegralError*error < 0) IntegralError = 0;
             var old_ierror = IntegralError;
             IntegralError += error*TimeWarp.fixedDeltaTime;
-            var act = P*error + I*IntegralError + D*speed;
+            var act = P*error + I*IntegralError + D*speed + FeedForward*FF;
             Action = Mathf.Clamp(act, Min, Max);
             if(Mathf.Abs(act-Action) > 1e-5) IntegralError = old_ierror;
             LastError = error;
@@ -328,8 +339,10 @@ namespace AT_Utils
             if(float.IsNaN(error)) return;
             if(IntegralError*error < 0) IntegralError = 0;
             var derivative = D * speed;
-            IntegralError = Mathf.Clamp((Math.Abs(derivative) < 0.6f * Max) ? IntegralError + (error * I * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError, Min, Max);
-            var act = error * P + IntegralError + derivative;
+            IntegralError = Mathf.Clamp((Math.Abs(derivative) < 0.6f * Max) ? 
+                                        IntegralError + (error * I * TimeWarp.fixedDeltaTime) : 
+                                        0.9f * IntegralError, Min, Max);
+            var act = error * P + IntegralError + derivative + FeedForward*FF;
             if(!float.IsNaN(act)) Action = Mathf.Clamp(act, Min, Max);
             LastError = error;
         }
@@ -357,10 +370,15 @@ namespace AT_Utils
             if(IntegralError.x*error.x < 0) IntegralError.x = 0;
             if(IntegralError.y*error.y < 0) IntegralError.y = 0;
             if(IntegralError.z*error.z < 0) IntegralError.z = 0;
-            IntegralError.x = (Mathf.Abs(derivative.x) < 0.6f * Max.x) ? IntegralError.x + (error.x * I.x * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.x;
-            IntegralError.y = (Mathf.Abs(derivative.y) < 0.6f * Max.y) ? IntegralError.y + (error.y * I.y * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.y;
-            IntegralError.z = (Mathf.Abs(derivative.z) < 0.6f * Max.z) ? IntegralError.z + (error.z * I.z * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.z;
-            var act = Vector3.Scale(error, P) + IntegralError.ClampComponents(Min, Max) + derivative;
+            IntegralError.x = (Mathf.Abs(derivative.x) < 0.6f * Max.x) ? 
+                IntegralError.x + (error.x * I.x * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.x;
+            IntegralError.y = (Mathf.Abs(derivative.y) < 0.6f * Max.y) ? 
+                IntegralError.y + (error.y * I.y * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.y;
+            IntegralError.z = (Mathf.Abs(derivative.z) < 0.6f * Max.z) ? 
+                IntegralError.z + (error.z * I.z * TimeWarp.fixedDeltaTime) : 0.9f * IntegralError.z;
+            var act = Vector3.Scale(error, P) + 
+                             IntegralError.ClampComponents(Min, Max) + derivative + 
+                             Vector3.Scale(FeedForward, FF);
             Action = new Vector3
                 (
                     float.IsNaN(act.x)? 0f : Mathf.Clamp(act.x, Min.x, Max.x),
@@ -418,7 +436,7 @@ namespace AT_Utils
             //compute filterred d component of the output
             var d = dFilter.Update(D*speed);
             //compute new Action
-            var act = P*error + I*IntegralError + d;
+            var act = P*error + I*IntegralError + d + FeedForward*FF;
             Action = Mathf.Clamp(act, Min, Max);
             //if the Action was clamped
             //do not save IntegralError
