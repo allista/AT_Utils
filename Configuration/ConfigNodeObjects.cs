@@ -35,16 +35,19 @@ namespace AT_Utils
             }
         }
 
-        protected bool not_persistant(FieldInfo fi)
-        { return fi.GetCustomAttributes(typeof(Persistent), true).Length == 0; }
+        protected bool not_persistant(FieldInfo fi) => 
+        fi.GetCustomAttributes(typeof(Persistent), true).Length == 0;
 
-        T get_or_create<T>(FieldInfo fi) where T : class
-        { return (fi.GetValue(this) ?? Activator.CreateInstance(fi.FieldType)) as T; }
+        T get_or_create<T>(FieldInfo fi) where T : class => 
+        (fi.GetValue(this) ?? Activator.CreateInstance(fi.FieldType)) as T;
+
+        FieldInfo[] get_fields() =>
+        GetType().GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance);
 
         virtual public void Load(ConfigNode node)
         { 
             ConfigNode.LoadObjectFromConfig(this, node);
-            foreach(var fi in GetType().GetFields())
+            foreach(var fi in get_fields())
             {
                 if(not_persistant(fi)) continue;
                 var n = node.GetNode(fi.Name);
@@ -93,7 +96,7 @@ namespace AT_Utils
         virtual public void Save(ConfigNode node)
         { 
             ConfigNode.CreateConfigFromObject(this, node); 
-            foreach(var fi in GetType().GetFields())
+            foreach(var fi in get_fields())
             {
                 if(not_persistant(fi)) continue;
                 //save all IConfigNodes
@@ -132,7 +135,7 @@ namespace AT_Utils
         {
             var node = new ConfigNode(NODE_NAME);
             Save(node);
-            return ConfigNodeObject.FromConfig<CNO>(node);
+            return FromConfig<CNO>(node);
         }
 
         public static CNO FromConfig<CNO>(ConfigNode node)
