@@ -380,6 +380,23 @@ namespace AT_Utils
         { return v[v.MinI()]; }
 
         public static Vector3 xzy(this Vector3 v) => new Vector3(v.x, v.z, v.y);
+
+        public static Vector2d Rotate(this Vector2d v, double angle)
+        {
+            angle *= Mathf.Deg2Rad;
+            var sin = Math.Sin(angle);
+            var cos = Math.Cos(angle);
+            return new Vector2d(cos*v.x-sin*v.y, sin*v.x+cos*v.y);
+        }
+
+        public static Vector2d RotateRad(this Vector2d v, double angle)
+        {
+            var sin = Math.Sin(angle);
+            var cos = Math.Cos(angle);
+            return new Vector2d(cos*v.x-sin*v.y, sin*v.x+cos*v.y);
+        }
+
+        public static Vector2d Rotate90(this Vector2d v) => new Vector2d(-v.y, v.x);
     }
 
 
@@ -852,24 +869,33 @@ namespace AT_Utils
         }
     }
 
-    public class AtmosphereParams
+    public struct AtmosphereParams
     {
         public readonly CelestialBody Body;
         public readonly double Alt;
-        public readonly double P = 0;
-        public readonly double T = -273;
-        public readonly double Rho = 0;
-        public readonly double Mach1 = 0;
+        public readonly double P;
+        public readonly double T;
+        public readonly double Rho;
+        public readonly double Mach1;
 
         public AtmosphereParams(CelestialBody body, double altitude)
         {
             Alt = altitude;
             Body = body;
-            if(!Body.atmosphere) return;
-            P = Body.GetPressure(Alt);
-            T = Body.GetTemperature(Alt);
-            Rho = Body.GetDensity(P, T);
-            Mach1 = Body.GetSpeedOfSound(P, Rho);
+            if(Body.atmosphere)
+            {
+                P = Body.GetPressure(Alt);
+                T = Body.GetTemperature(Alt);
+                Rho = Body.GetDensity(P, T);
+                Mach1 = Body.GetSpeedOfSound(P, Rho);
+            }
+            else
+            {
+                P = 0;
+                T = -273;
+                Rho = 0;
+                Mach1 = 0;
+            }
         }
 
         public override string ToString()
@@ -881,12 +907,16 @@ namespace AT_Utils
 
     public static class OrbitalExtensions
     {
-        public static bool ApAhead(this Orbit obt) { return obt.timeToAp < obt.timeToPe; }
+        public static bool ApAhead(this Orbit obt) => 
+        obt.timeToAp < obt.timeToPe;
+
+        public static bool Contains(this Orbit obt, double UT) => 
+        obt.StartUT <= UT && UT <= obt.EndUT;
 
         public static double MinPeR(this Orbit obt)
         { 
             return obt.referenceBody.atmosphere? 
-                obt.referenceBody.Radius+obt.referenceBody.atmosphereDepth+1000 : 
+                obt.referenceBody.Radius+obt.referenceBody.atmosphereDepth : 
                 obt.referenceBody.Radius+CelestialUtilities.GetHighestPeak(obt.referenceBody)+1000; 
         }
 
@@ -903,11 +933,8 @@ namespace AT_Utils
             return end;
         }
 
-        public static Vector3d hV(this Orbit obt, double UT) 
-        { 
-            return Vector3d.Exclude(obt.getRelativePositionAtUT(UT), 
-                                    obt.getOrbitalVelocityAtUT(UT));
-        }
+        public static Vector3d hV(this Orbit obt, double UT) => 
+        Vector3d.Exclude(obt.getRelativePositionAtUT(UT), obt.getOrbitalVelocityAtUT(UT));
 
         public static double TerrainAltitude(this CelestialBody body, double Lat, double Lon)
         {
@@ -916,11 +943,23 @@ namespace AT_Utils
             return body.ocean && alt < 0? 0 : alt;
         }
 
-        public static double TerrainAltitude(this CelestialBody body, Vector3d wpos)
-        { return TerrainAltitude(body, body.GetLatitude(wpos), body.GetLongitude(wpos)); }
+        public static double TerrainAltitude(this CelestialBody body, Vector3d wpos) => 
+        TerrainAltitude(body, body.GetLatitude(wpos), body.GetLongitude(wpos));
 
-        public static AtmosphereParams AtmoParamsAtAltitude(this CelestialBody body, double alt) 
-        { return new AtmosphereParams(body, alt); }
+        public static AtmosphereParams AtmoParamsAtAltitude(this CelestialBody body, double alt) =>
+        new AtmosphereParams(body, alt);
+
+        public static double ApAUT(this Orbit orb) =>
+        Planetarium.GetUniversalTime()+orb.timeToAp;
+
+        public static double PeAUT(this Orbit orb) =>
+        Planetarium.GetUniversalTime()+orb.timeToPe;
+
+        public static Vector3d ApV(this Orbit orb) =>
+        orb.getRelativePositionAtUT(Planetarium.GetUniversalTime()+orb.timeToAp);
+
+        public static Vector3d PeV(this Orbit orb) =>
+        orb.getRelativePositionAtUT(Planetarium.GetUniversalTime()+orb.timeToPe);
     }
 }
 
