@@ -1,6 +1,41 @@
 #AT Utils ChangeLog
 
-* **v1.5.0**
+* **v1.5.2**
+    * Added FeedForward input to PID controllers.
+    * Fixed FCO mode switching without changing the anchor.
+        * Plus, OrbitAround anchors at CoMs of vessels.
+    * CNO saves non-public fileds.
+    * Added Ratched trigger; probably not a good name, but still.
+        * Anyway, works like this: input is a boolean condition that normally should be True; when it first becomes False, the Ratchet becomes "armed"; then if it becomes True again, the Ratched becomes True itself and stays this way.
+    * Added formatting of Vector2(d) to convert_args
+    * Added .Draw() method to ITestScenario.
+        * Scenarios are created at game start and then only initialized, updated and cleaned.
+    * Added Vector2d.Rotate extensions; AtmosphereParams are a struct now.
+        * Added Orbit.Contains(UT), ApA/PeAUT, Ap/PeV extensions.
+    * Added Vector2d.Angle2 and Vector3(d).ClampDirection extensions.
+    * In ValueFileds iformat defaults to format instead of "F1"
+        * Made runtime fields non-persistent.
+    * Added FuzzyThreshold.Reset() method
+    * OscillationDetector.max_filter is assymmetric.
+    * Added StallDetector class hierarchy; added ComputationBalancer KSPAddon.
+        * ComputationBalancer computes tasks made as IEnumerables (like coroutines) inside its Update event, trying to keep FPS from dropping too low.
+        * It works in Flight, Editor and KSC, and also when the game is paused.
+        * Also moved ProgressIndicator here from TCA.
+
+* v1.5.1
+    * Moved HangarSpaceManagers and SubassemblySelector from Hangar here.
+        * Moved all addons to Addons subfolder.
+        * Moved all modules to Modules subfoldre.
+        * Added ResourceInfo CNO to proxy calls to PartResourceDefinition.
+    * Added TextureCache static class to load and store fullres icons.
+    * SimplePartFilter uses TextureCache.
+    * Added direct support for GUID fields to CNO. Added PersistentDictS<T> class.
+    * Added ConvexHull3D.MakeMesh method.
+    * Fixed SkinnedMeshRenderer handling by the Metric.
+        * Using ResourceInfo("ElectricCharge") for static EC information.
+        * Added Metric.hull_mesh lazy property.
+    
+* v1.5.0
     * Using rel pivot distance instead of constant MAX_DIST for LookAt modes.
     * OnPlanet uses additional PeR check using Orbit.MinPeR extension.
     * Moved AngleTo/DistanceTo/*Pos methods to Coordinates.
