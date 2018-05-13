@@ -19,7 +19,6 @@ namespace AT_Utils
 
     abstract public class GUIWindowBase : MonoBehaviour
     {
-        public static bool HUD_enabled { get; protected set; } = true;
         public static readonly Rect ScreenRect = new Rect(0,0,Screen.width,Screen.height);
         protected static Rect drag_handle = new Rect(0,0, 10000, 20);
 
@@ -131,10 +130,12 @@ namespace AT_Utils
         }
         #endregion
 
+		protected static bool level_loaded;
+        protected static bool hud_enabled = true;
         [ConfigOption] protected bool window_enabled = true;
-        public bool WindowEnabled { get { return window_enabled; } }
-        public bool doShow { get { return level_loaded && window_enabled && HUD_enabled && can_draw(); } }
-        protected static bool level_loaded;
+        public bool WindowEnabled => window_enabled;
+        public static bool HUD_enabled => hud_enabled && level_loaded;
+        public bool doShow => level_loaded && window_enabled && hud_enabled && can_draw();
 
         protected virtual bool can_draw() { return true; }
 
@@ -147,8 +148,8 @@ namespace AT_Utils
 
         public void Toggle() { Show(!window_enabled); }
 
-        protected virtual void onShowUI() { HUD_enabled = true; update_content(); }
-        protected virtual void onHideUI() { HUD_enabled = false; update_content(); }
+        protected virtual void onShowUI() { hud_enabled = true; update_content(); }
+        protected virtual void onHideUI() { hud_enabled = false; update_content(); }
 
         protected void onLevelLoaded(GameScenes scene) { level_loaded = true; }
         protected void onGameSceneLoad(GameScenes scene) { level_loaded = false; }
