@@ -281,9 +281,9 @@ namespace AT_Utils
                 mod_name = method.DeclaringType.Assembly.GetName().Name;
                 break;
             }
-//            #if DEBUG
-//            UnityEngine.Debug.Log(stack);
-//            #endif
+            #if DEBUG
+            UnityEngine.Debug.Log(stack);
+            #endif
             return string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", mod_name, DateTime.Now, msg);
         }
 
@@ -384,6 +384,15 @@ namespace AT_Utils
             game.startScene = GameScenes.FLIGHT;
             GamePersistence.SaveGame(game, name, HighLogic.SaveFolder, SaveMode.OVERWRITE);
             if(with_message) Message("Game saved as: {0}", name);
+        }
+
+        public static IEnumerator<YieldInstruction> SlowUpdate(Action action, float period = 1)
+        {
+            while(true)
+            {
+                action();
+                yield return new WaitForSeconds(period);
+            }
         }
     }
 
