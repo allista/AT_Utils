@@ -74,6 +74,24 @@ namespace AT_Utils
             return ret;
         }
 
+        public static bool ButtonSwitch(string name_on, string name_off, bool current_value, 
+                                        string tooltip = "", params GUILayoutOption[] options)
+        {
+            return string.IsNullOrEmpty(tooltip)? 
+                         GUILayout.Button(current_value? name_on : name_off, 
+                                          current_value ? Styles.enabled_button : Styles.active_button, options) : 
+                         GUILayout.Button(new GUIContent(current_value? name_on : name_off, tooltip), 
+                                          current_value ? Styles.enabled_button : Styles.active_button, options);
+        }
+
+        public static bool ButtonSwitch(string name_on, string name_off, ref bool current_value, 
+                                        string tooltip = "", params GUILayoutOption[] options)
+        {
+            var ret = ButtonSwitch(name_on, name_off, current_value, tooltip, options);
+            if(ret) current_value = !current_value;
+            return ret;
+        }
+
         public static int LeftRightChooser(string text, string tooltip = "", int width = 0)
         {
             width -= 40;
@@ -161,7 +179,7 @@ namespace AT_Utils
         public static void UpdatePartMenu(this Part part)
         {
             MonoUtilities.RefreshContextWindows(part);
-            Utils.UpdateEditorGUI();
+            UpdateEditorGUI();
         }
 
         public static void UpdateEditorGUI()
