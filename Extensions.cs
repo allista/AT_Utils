@@ -778,7 +778,7 @@ namespace AT_Utils
             return new_verts;
         }
 
-        public static Bounds Bounds(this IShipconstruct vessel, Transform refT)
+        public static Bounds Bounds(this IShipconstruct vessel, Transform refT = null)
         {
             //update physical bounds
             var b = new Bounds();
@@ -796,8 +796,13 @@ namespace AT_Utils
                     var verts = full_mesh? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds);
                     for(int j = 0, len = verts.Length; j < len; j++)
                     {
-                        var c = refT == mesh.t? verts[j] : 
-                            refT.InverseTransformPoint(mesh.t.TransformPoint(verts[j]));
+                        Vector3 c;
+                        if(refT != null)
+                            c = refT == mesh.t? 
+                                            verts[j] : 
+                                            refT.InverseTransformPoint(mesh.t.TransformPoint(verts[j]));
+                        else
+                            c = mesh.t.TransformPoint(verts[j]);
                         if(b == default(Bounds)) 
                             b = new Bounds(c, Vector3.zero);
                         else

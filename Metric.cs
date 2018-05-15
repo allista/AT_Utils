@@ -81,6 +81,13 @@ namespace AT_Utils
             return points;
         }
 
+        static Vector3[] local2world(Transform _from, Vector3[] points)
+        {
+            for(int p = 0; p < points.Length; p++)
+                points[p] = _from.TransformPoint(points[p]);
+            return points;
+        }
+
         static float boundsVolume(Bounds b) => b.size.x * b.size.y * b.size.z;
 
         static float boundsArea(Bounds b) => 2 * (b.size.x * b.size.y + b.size.x * b.size.z + b.size.y * b.size.z);
@@ -110,7 +117,7 @@ namespace AT_Utils
                 b.Encapsulate(nb);
         }
 
-        Bounds partsBounds(IList<Part> parts, Transform vT, bool compute_hull, bool exclude_disabled = true)
+        Bounds partsBounds(IList<Part> parts, Transform refT, bool compute_hull, bool exclude_disabled = true)
         {
             //reset metric
             mass = 0;
@@ -161,12 +168,16 @@ namespace AT_Utils
                     if(compute_hull)
                     {
                         float m_size = Vector3.Scale(mesh.m.bounds.size, mesh.t.lossyScale).sqrMagnitude;
-                        verts = local2local(mesh.t, vT, (full_mesh || m_size > b_size / 10 ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds)));
+                        verts = refT != null?
+                            local2local(mesh.t, refT, (full_mesh || m_size > b_size / 10 ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds))) : 
+                            local2world(mesh.t, (full_mesh || m_size > b_size / 10 ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds)));
                         hull_points.AddRange(verts);
                         b_size = b.size.sqrMagnitude;
                     }
                     else
-                        verts = local2local(mesh.t, vT, (full_mesh ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds)));
+                        verts = refT != null?
+                            local2local(mesh.t, refT, (full_mesh ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds))) :
+                            local2world(mesh.t, (full_mesh ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds)));
                     updateBounds(ref b, verts);
                 }
                 CrewCapacity += p.CrewCapacity;
@@ -255,11 +266,13 @@ namespace AT_Utils
             Vector3[] verts = Utils.BoundCorners(mesh.sharedMesh.bounds);
             if(refT != null)
                 local2local(mesh.transform, refT, verts);
+            else
+                local2world(mesh.transform, verts);
             if(compute_hull)
             {
                 hull = refT != null ? 
                     new ConvexHull3D(local2local(mesh.transform, refT, mesh.sharedMesh.uniqueVertices())) : 
-                    new ConvexHull3D(mesh.sharedMesh.uniqueVertices());
+                    new ConvexHull3D(local2world(mesh.transform, mesh.sharedMesh.uniqueVertices()));
             }
             bounds = initBounds(verts);
             bounds_volume = boundsVolume(bounds);
@@ -273,7 +286,7 @@ namespace AT_Utils
             init_with_mesh(mesh, refT, compute_hull);
         }
 
-        public Metric(Transform transform, bool compute_hull = false)
+        public Metric(Transform transform, bool compute_hull = false, bool world_space = false)
             : this()
         {
             MeshFilter m = transform.gameObject.GetComponent<MeshFilter>();
@@ -282,10 +295,10 @@ namespace AT_Utils
                 Utils.Log("[Metric] {} does not have MeshFilter component", transform.gameObject);
                 return;
             }
-            init_with_mesh(m, transform, compute_hull);
+            init_with_mesh(m, world_space? null : transform, compute_hull);
         }
 
-        public Metric(Part part, string mesh_name, bool compute_hull = false)
+        public Metric(Part part, string mesh_name, bool compute_hull = false, bool world_space = false)
             : this()
         {
             MeshFilter m = part.FindModelComponent<MeshFilter>(mesh_name);
@@ -294,41 +307,41 @@ namespace AT_Utils
                 Utils.Log("[Metric] {} does not have '{}' mesh", part.name, mesh_name);
                 return;
             }
-            init_with_mesh(m, part.transform, compute_hull);
+            init_with_mesh(m, world_space? null : part.transform, compute_hull);
         }
         
         //part metric
-        public Metric(Part part, bool compute_hull = false)
+        public Metric(Part part, bool compute_hull = false, bool world_space = false)
             : this()
         {
             var exclude_disabled = part.partInfo != null && part != part.partInfo.partPrefab;
-            bounds = partsBounds(new List<Part>{ part }, part.partTransform, compute_hull, exclude_disabled);
+            bounds = partsBounds(new List<Part>{ part }, world_space? null : part.partTransform, compute_hull, exclude_disabled);
             bounds_volume = boundsVolume(bounds);
             bounds_area = boundsArea(bounds);
         }
         
         //vessel metric
-        public Metric(Vessel vessel, bool compute_hull = false)
+        public Metric(Vessel vessel, bool compute_hull = false, bool world_space = false)
             : this()
         {
-            bounds = partsBounds(vessel.parts, vessel.vesselTransform, compute_hull);
+            bounds = partsBounds(vessel.parts, world_space? null : vessel.vesselTransform, compute_hull);
             bounds_volume = boundsVolume(bounds);
             bounds_area = boundsArea(bounds);
         }
         
         //in-editor vessel metric
-        public Metric(List<Part> vessel, bool compute_hull = false)
+        public Metric(List<Part> vessel, bool compute_hull = false, bool world_space = false)
             : this()
         {
-            bounds = partsBounds(vessel, vessel[0].partTransform, compute_hull);
+            bounds = partsBounds(vessel, world_space? null : vessel[0].partTransform, compute_hull);
             bounds_volume = boundsVolume(bounds);
             bounds_area = boundsArea(bounds);
         }
 
-        public Metric(IShipconstruct vessel, bool compute_hull = false)
+        public Metric(IShipconstruct vessel, bool compute_hull = false, bool world_space = false)
             : this()
         {
-            bounds = partsBounds(vessel.Parts, vessel.Parts[0].partTransform, compute_hull);
+            bounds = partsBounds(vessel.Parts, world_space? null : vessel.Parts[0].partTransform, compute_hull);
             bounds_volume = boundsVolume(bounds);
             bounds_area = boundsArea(bounds);
         }
