@@ -10,7 +10,7 @@ using AT_Utils;
 using KSP.UI.Screens;
 using UnityEngine;
 
-namespace GroundConstruction
+namespace AT_Utils
 {
     public class ShipConstructLoader : MonoBehaviour
     {
@@ -38,8 +38,6 @@ namespace GroundConstruction
         void vessel_selected(string filename, CraftBrowserDialog.LoadType t)
         {
             vessel_selector = null;
-            EditorLogic EL = EditorLogic.fetch;
-            if(EL == null) return;
             //load vessel config
             var node = ConfigNode.Load(filename);
             if(node == null) return;
@@ -63,21 +61,27 @@ namespace GroundConstruction
         }
         void selection_canceled() { vessel_selector = null; }
 
+        public static void SetConstructRendering(ShipConstruct construct, bool render)
+        {
+            foreach(var p in construct.parts)
+            {
+                var renderers = p.GetComponentsInChildren<MeshRenderer>();
+                for(int i = 0, len = renderers.Length; i < len; i++)
+                    renderers[i].enabled = render;
+                var skinned_renderers = p.GetComponentsInChildren<SkinnedMeshRenderer>();
+                for(int i = 0, len = skinned_renderers.Length; i < len; i++)
+                    skinned_renderers[i].enabled = render;
+            }
+        }
+
         IEnumerator<YieldInstruction> delayed_process_construct(ShipConstruct construct)
         {
             if(construct == null) yield break;
             var lock_name = "construct_loading"+GetHashCode();
             Utils.LockControls(lock_name);
-            foreach(var p in construct.parts)
-            {
-                var renderers = p.GetComponentsInChildren<MeshRenderer>();
-                for(int i = 0, len = renderers.Length; i < len; i++)
-                    renderers[i].enabled = false;
-                var skinned_renderers = p.GetComponentsInChildren<SkinnedMeshRenderer>();
-                for(int i = 0, len = skinned_renderers.Length; i < len; i++)
-                    skinned_renderers[i].enabled = false;
-            }
-            for(int i = 0; i < 3; i++) yield return null;
+            SetConstructRendering(construct, false);
+            if(HighLogic.LoadedSceneIsEditor)
+                for(int i = 0; i < 3; i++) yield return null;
             process_loaded_construct(construct);
             Utils.LockControls(lock_name, false);
         }
@@ -94,9 +98,12 @@ namespace GroundConstruction
         public void SelectVessel()
         {
             if(vessel_selector != null) return;
+            var facility = EditorLogic.fetch != null?
+                                      EditorLogic.fetch.ship.shipFacility : 
+                                      EditorFacility.VAB;
             vessel_selector =
                 CraftBrowserDialog.Spawn(
-                    EditorLogic.fetch.ship.shipFacility,
+                    facility,
                     HighLogic.SaveFolder,
                     vessel_selected,
                     selection_canceled, false);
