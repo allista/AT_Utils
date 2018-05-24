@@ -331,5 +331,99 @@ namespace AT_Utils
                 yield return i;
             end_launch();
         }
+
+        public static Vessel AssembleForLaunch(ShipConstruct ship, string landedAt, string displaylandedAt, 
+                                               string flagURL, Game sceneState, VesselCrewManifest crewManifest, 
+                                               bool fromShipAssembly, bool setActiveVessel, bool isLanded, 
+                                               bool preCreate, Orbit orbit, bool isSplashed)
+        {
+            var localRoot = ship.parts[0].localRoot;
+            var vessel = localRoot.gameObject.GetComponent<Vessel>();
+            if(vessel == null)
+                vessel = localRoot.gameObject.AddComponent<Vessel>();
+            vessel.id = Guid.NewGuid();
+            vessel.vesselName = ship.shipName;
+            vessel.persistentId = ship.persistentId;
+            if(orbit != null)
+            {
+                var orbitDriver = vessel.gameObject.GetComponent<OrbitDriver>();
+                if(orbitDriver == null)
+                    orbitDriver = vessel.gameObject.AddComponent<OrbitDriver>();
+                orbitDriver.orbit = orbit;
+            }
+            vessel.Initialize(fromShipAssembly);
+            vessel.IgnoreGForces(10);
+            if(fromShipAssembly)
+            {
+                if(!string.IsNullOrEmpty(landedAt))
+                {
+                    vessel.vesselSpawning = true;
+                    vessel.launchedFrom = landedAt;
+                }
+            }
+            if(isLanded)
+            {
+                if(!isSplashed)
+                {
+                    vessel.Landed = true;
+                    vessel.SetLandedAt(landedAt, null, displaylandedAt);
+                    vessel.skipGroundPositioning = false;
+                }
+                else
+                {
+                    vessel.Landed = false;
+                    vessel.Splashed = true;
+                    vessel.skipGroundPositioning = true;
+                }
+            }
+            else
+                vessel.Landed = false;
+            uint hashCode = (uint) Guid.NewGuid().GetHashCode();
+            uint launchID = HighLogic.CurrentGame.launchID++;
+            for(int i = 0, count = vessel.parts.Count; i < count; ++i)
+            {
+                var p = vessel.parts[i];
+                p.flightID = ShipConstruction.GetUniqueFlightID(sceneState.flightState);
+                p.missionID = hashCode;
+                p.launchID = launchID;
+                p.flagURL = flagURL;
+            }
+            crewManifest.AssignCrewToVessel(ship);
+            vessel.RebuildCrewList();
+            if(preCreate)
+            {
+                for (int i = 0; i < vessel.protoVessel.protoPartSnapshots.Count; ++i)
+                {
+                    var protoPartSnapshot = vessel.protoVessel.protoPartSnapshots[i];
+                    for (int index3 = 0; index3 < protoPartSnapshot.partRef.protoModuleCrew.Count; ++index3)
+                    {
+                        var pcm = protoPartSnapshot.partRef.protoModuleCrew[index3];
+                        protoPartSnapshot.protoModuleCrew.Add(pcm);
+                        protoPartSnapshot.protoCrewNames.Add(pcm.name);
+                        vessel.protoVessel.AddCrew(pcm);
+                    }
+                }
+                vessel.protoVessel.RebuildCrewCounts();
+            }
+            if(setActiveVessel)
+                FlightGlobals.SetActiveVessel(vessel);
+            if(localRoot.isControlSource == Vessel.ControlLevel.NONE)
+            {
+                var firstCrewablePart = ShipConstruction.findFirstCrewablePart(ship.parts[0]);
+                var p = firstCrewablePart;
+                if(p == null)
+                {
+                    Part firstControlSource = ShipConstruction.findFirstControlSource(vessel);
+                    if(firstControlSource == null)
+                        p = localRoot;
+                    else
+                        p = firstControlSource;
+                }
+                vessel.SetReferenceTransform(p, true);
+            }
+            else
+                vessel.SetReferenceTransform(localRoot, true);
+            return vessel;
+        }
     }
 }
