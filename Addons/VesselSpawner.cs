@@ -118,6 +118,7 @@ namespace AT_Utils
             proto_vessel.Load(HighLogic.CurrentGame.flightState);
             launched_vessel = proto_vessel.vesselRef;
             launched_vessel.orbitDriver.updateMode = OrbitDriver.UpdateMode.TRACK_Phys;
+            launched_vessel.skipGroundPositioning = true;
             foreach(var i in launch_moving_vessel(spawn_transform, 
                                                   spawn_offset, 
                                                   dV,
@@ -243,15 +244,18 @@ namespace AT_Utils
             var startP = part.Rigidbody.worldCenterOfMass;
             var startAV = part.Rigidbody.angularVelocity;
             var startAVm = startAV.sqrMagnitude;
-            var vel = dV;
-            vel += (Vector3d)part.Rigidbody.velocity;
+            var vel = (Vector3d)part.Rigidbody.velocity;
             vel += Vector3d.Cross(startAV, launched_vessel.CoM - startP);
-            //conserve momentum
-            var hM = vessel.GetTotalMass();
-            var tM = hM + launched_vessel.GetTotalMass();
-            var lvel = vel * hM/tM;
-            launched_vessel.SetWorldVelocity(lvel);
-            vessel.SetWorldVelocity(lvel-vel);
+            if(!dV.IsZero())
+            {
+                //conserve momentum
+                var hM = vessel.GetTotalMass();
+                var lM = launched_vessel.GetTotalMass();
+                var lvel = dV * hM/(hM + lM);
+                vel += lvel;
+                part.Rigidbody.AddForce(-lvel*lM, ForceMode.Impulse);
+            }
+            launched_vessel.SetWorldVelocity(vel);
             for(int i = 0; i < 10; i++)
             {
                 //this is a hack for incorrect VelocityChange mode (or whatever causing this);
