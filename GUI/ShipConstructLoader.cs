@@ -61,9 +61,9 @@ namespace AT_Utils
         }
         void selection_canceled() { vessel_selector = null; }
 
-        public static void SetConstructRendering(ShipConstruct construct, bool render)
+        public static void SetShipRendering(IShipconstruct construct, bool render)
         {
-            foreach(var p in construct.parts)
+            foreach(var p in construct.Parts)
             {
                 var renderers = p.GetComponentsInChildren<MeshRenderer>();
                 for(int i = 0, len = renderers.Length; i < len; i++)
@@ -79,7 +79,7 @@ namespace AT_Utils
             if(construct == null) yield break;
             var lock_name = "construct_loading"+GetHashCode();
             Utils.LockControls(lock_name);
-            SetConstructRendering(construct, false);
+            SetShipRendering(construct, false);
             if(HighLogic.LoadedSceneIsEditor)
                 for(int i = 0; i < 3; i++) yield return null;
             process_loaded_construct(construct);
