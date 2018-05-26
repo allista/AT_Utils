@@ -71,7 +71,7 @@ namespace AT_Utils
 
         public float cost { get; set; }
 
-        public bool Empty => bounds_volume.Equals(0) && bounds_area.Equals(0);
+        public bool Empty => bounds.size.IsZero();
 
         static Vector3[] local2local(Transform _from, Transform _to, Vector3[] points)
         {
