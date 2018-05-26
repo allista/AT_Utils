@@ -11,7 +11,7 @@ namespace AT_Utils
 {
     public abstract class ValueFieldBase<T> : ConfigNodeObject, ITypeUI<T>
     {
-		[Persistent] public T _value;
+        [Persistent] public T _value;
         protected string svalue;
         public string format;
 

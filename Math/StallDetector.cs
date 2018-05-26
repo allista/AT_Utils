@@ -56,12 +56,12 @@ namespace AT_Utils
             old_value = default(T);
         }
 
-		public override string ToString()
-		{
+        public override string ToString()
+        {
             return Utils.Format("threshold: {}, old value {}, value {}, timer {}",
                                 Threshold, old_value, filter, timer.Remaining);
-		}
-	}
+        }
+    }
 
     public class StallDetectorF : StallDetector<float>
     {
@@ -72,9 +72,9 @@ namespace AT_Utils
             init_filter();
         }
 
-		protected override bool same_value(float a, float b) =>
+        protected override bool same_value(float a, float b) =>
         Mathf.Abs(b-a) < Threshold;
-	}
+    }
 
     public class StallDetectorD : StallDetector<double>
     {

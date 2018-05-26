@@ -195,7 +195,7 @@ namespace AT_Utils
                 }
                 break;
             case Mode.OrbitAround:
-				vsl = anchor.gameObject.GetComponent<Vessel>();
+                vsl = anchor.gameObject.GetComponent<Vessel>();
                 if(vsl != null)
                 {
                     pos = rel_pos+anchor.position;

@@ -400,7 +400,7 @@ namespace AT_Utils
             proto_vessel.landed    = vessel.Landed;
             proto_vessel.landedAt  = vessel.landedAt;
             //rotation
-			spawn_offset = spawn_transform.TransformDirection(spawn_offset);
+            spawn_offset = spawn_transform.TransformDirection(spawn_offset);
             //rotate spawn_transform.rotation to protovessel's reference frame
             proto_vessel.rotation = vessel.mainBody.bodyTransform.rotation.Inverse() * spawn_transform.rotation;
             //set vessel's orbit

@@ -130,7 +130,7 @@ namespace AT_Utils
         }
         #endregion
 
-		protected static bool level_loaded;
+        protected static bool level_loaded;
         protected static bool hud_enabled = true;
         [ConfigOption] protected bool window_enabled = true;
         public bool WindowEnabled => window_enabled;
