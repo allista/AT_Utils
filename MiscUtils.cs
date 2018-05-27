@@ -374,7 +374,7 @@ namespace AT_Utils
                 group.audio.clip = GameDatabase.Instance.GetAudioClip(sndPath);
                 return true;
             }
-            Utils.Message(10, "Sound file : {0} has not been found, please check your Hangar installation", sndPath);
+            Message(10, "Sound file : {0} has not been found, please check your Hangar installation", sndPath);
             return false;
         }
 
