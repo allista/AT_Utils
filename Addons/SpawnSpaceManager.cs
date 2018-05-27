@@ -74,6 +74,7 @@ namespace AT_Utils
                 if(Space != null) 
                 {
                     flip_mesh_if_needed(Space);
+                    Space.gameObject.layer = 2; // IgnoreRaycast
                     UpdateMetric();
                 }
             }
