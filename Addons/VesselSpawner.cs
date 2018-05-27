@@ -301,8 +301,8 @@ namespace AT_Utils
             vessel_loaded = false;
             FlightCameraOverride.AnchorForSeconds(FlightCameraOverride.Mode.Hold,
                                                   FlightGlobals.ActiveVessel.transform, 1);
-            if(FlightGlobals.ready)
-                FloatingOrigin.SetOffset(spawn_transform.position);
+            //if(FlightGlobals.ready)
+                //FloatingOrigin.SetOffset(spawn_transform.position);
         }
 
         void end_launch()
