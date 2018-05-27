@@ -118,7 +118,6 @@
     <Compile Include="GUI\Elements\ValueFieldBase.cs" />
     <Compile Include="ControlFlow\HierarchicalComparer.cs" />
     <Compile Include="GUI\Windows\SubassemblySelector.cs" />
-    <Compile Include="Modules\ModuleAsteroidFix.cs" />
     <Compile Include="Modules\SerializableFiledsPartModule.cs" />
     <Compile Include="Addons\CrewTransferBatch.cs" />
     <Compile Include="Addons\FlightCameraOverride.cs" />
@@ -132,6 +131,7 @@
     <Compile Include="ComputationBalancer.cs" />
     <Compile Include="GUI\ShipConstructLoader.cs" />
     <Compile Include="Addons\VesselSpawner.cs" />
+    <Compile Include="Modules\ATGroundAnchor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
