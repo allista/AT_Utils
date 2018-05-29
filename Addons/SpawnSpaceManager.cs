@@ -21,6 +21,9 @@ namespace AT_Utils
         [Persistent] public string SpawnTransform = string.Empty;
         protected Transform spawn_transform;
 
+        SpawnSpaceSensor Sensor;
+        public bool SpawnSpaceEmpty => Sensor == null || Sensor.SpawnSpaceEmpty;
+
         #region AutoRotation
         static readonly Quaternion xyrot = Quaternion.Euler(0, 0, 90);
         static readonly Quaternion xzrot = Quaternion.Euler(0, 90, 0);
@@ -87,6 +90,24 @@ namespace AT_Utils
                 launch_empty.transform.SetParent(parent, false);
                 spawn_transform = launch_empty.transform;
             }
+        }
+
+        public void SetupSensor()
+        {
+            if(Space == null) return;
+            var space_collider = Space.GetComponent<Collider>();
+            if(space_collider == null || !space_collider.isTrigger)
+            {
+                Utils.Log("Adding a Sensor collider to the SpawnSpaceMesh: {}", Space);
+                var collider = Space.gameObject.AddComponent<MeshCollider>();
+                collider.sharedMesh = Space.sharedMesh;
+                collider.convex = true;
+                collider.isTrigger = true;
+                space_collider = collider;
+            }
+            space_collider.enabled = true;
+            Sensor = space_collider.gameObject.AddComponent<SpawnSpaceSensor>();
+            Sensor.Init(vessel);
         }
 
         protected void flip_mesh_if_needed(MeshFilter mesh_filter)
@@ -157,6 +178,32 @@ namespace AT_Utils
 
         public bool MetricFits(Metric metric) =>
         MetricFits(metric, GetSpawnTransform(metric), GetSpawnOffset(metric));
+
+        class SpawnSpaceSensor : MonoBehaviour
+        {
+            Vessel vessel;
+            RealTimer spawn_space_check = new RealTimer();
+
+            public bool SpawnSpaceEmpty => 
+            !spawn_space_check.Started || spawn_space_check.TimePassed;
+
+            public void Init(Vessel vsl) => vessel = vsl;
+
+            void OnTriggerStay(Collider col)
+            {
+                if(col != null && col.attachedRigidbody != null &&
+                   (!spawn_space_check.Started || 
+                    spawn_space_check.Remaining < spawn_space_check.Period/2))
+                {
+                    if(col.CompareTag("Untagged"))
+                    {
+                        var p = col.attachedRigidbody.GetComponent<Part>();
+                        if(p != null && p.vessel != null && p.vessel != vessel)
+                            spawn_space_check.Restart();
+                    }
+                }
+            }
+        }
     }
 }
 
