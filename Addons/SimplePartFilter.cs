@@ -75,6 +75,9 @@ namespace AT_Utils
             return selectable_icon;
         }
 
+        protected static bool check_module<T>(T m) where T : PartModule
+        => m != null && m.isEnabled;
+
         protected virtual void add_filter()
         {
             if(string.IsNullOrEmpty(ICON) ||
