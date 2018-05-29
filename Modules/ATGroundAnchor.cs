@@ -18,9 +18,6 @@ namespace AT_Utils
         [KSPField] public string detachSndPath = string.Empty;
         public FXGroup fxSndAttach, fxSndDetach;
 
-        FixedJoint anchorJoint;
-        GameObject anchor;
-
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
@@ -43,29 +40,38 @@ namespace AT_Utils
             }
         }
 
-        void Update()
-        {
+		void FixedUpdate()
+		{
+            if (!HighLogic.LoadedSceneIsFlight ||
+                vessel == null || !vessel.loaded || vessel.packed)
+                return;
             if(isAttached)
             {
                 setup_ground_contact();
-                if(!anchor || !anchorJoint || !anchor.GetComponent<FixedJoint>())
-                    ForceAttach();
-                else 
-                    DumpVelocity();
+                DumpVelocity();
             }
         }
 
         void setup_ground_contact()
         {
             part.PermanentGroundContact = true;
-            if(vessel != null) vessel.permanentGroundContact = true;
+            if(vessel != null) 
+                vessel.permanentGroundContact = true;
         }
 
-        void detatch_anchor()
+        protected virtual void on_anchor_attached() 
         {
-            if(anchor) Destroy(anchor);
-            if(anchorJoint) Destroy(anchorJoint);
+            if(fxSndAttach.audio != null)
+                fxSndAttach.audio.Play();
         }
+
+        protected virtual void on_anchor_detached()
+        {
+            if(fxSndDetach.audio != null) 
+                fxSndDetach.audio.Play();
+        }
+
+        protected virtual void detatch_anchor() {}
 
         bool can_attach()
         {
@@ -105,17 +111,8 @@ namespace AT_Utils
         {
             detatch_anchor();
             DumpVelocity();
-            anchor = new GameObject("AnchorBody");
-            var rb = anchor.AddComponent<Rigidbody>();
-            rb.isKinematic = true;
-            anchor.transform.position = part.transform.position;
-            anchor.transform.rotation = part.transform.rotation;
-            anchorJoint = anchor.AddComponent<FixedJoint>();
-            anchorJoint.breakForce = float.PositiveInfinity;
-            anchorJoint.breakTorque = float.PositiveInfinity;
-            anchorJoint.connectedBody = part.Rigidbody;
-            if(!isAttached && fxSndAttach.audio != null) 
-                fxSndAttach.audio.Play();
+            if(!isAttached) 
+                on_anchor_attached();
             isAttached = true;
             update_part_events();
         }
@@ -131,8 +128,8 @@ namespace AT_Utils
         public void Detach()
         {
             detatch_anchor();
-            if(isAttached && fxSndDetach.audio != null) 
-                fxSndDetach.audio.Play();
+            if(isAttached) 
+                on_anchor_detached();
             isAttached = false;
             update_part_events();
         }
