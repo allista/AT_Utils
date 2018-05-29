@@ -20,33 +20,40 @@ namespace AT_Utils
         static readonly string cnode_name = typeof(IConfigNode).Name;
 
         string node_name = null;
-        public string NodeName 
-        { 
-            get 
-            { 
+        public string NodeName
+        {
+            get
+            {
                 if(node_name == null)
                 {
                     var T = GetType();
-                    var name_field = T.GetField("NODE_NAME", BindingFlags.Public|BindingFlags.Static|BindingFlags.FlattenHierarchy);
-                    node_name = name_field != null? name_field.GetValue(null) as string : T.Name;
-//                    Utils.Log("{}, field {}, name {}", T.Name, name_field, node_name);//debug
+                    var name_field = T.GetField("NODE_NAME", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+                    node_name = name_field != null ? name_field.GetValue(null) as string : T.Name;
                 }
                 return node_name;
             }
         }
 
-        protected bool not_persistant(FieldInfo fi) => 
+        protected bool not_persistant(FieldInfo fi) =>
         fi.GetCustomAttributes(typeof(Persistent), true).Length == 0;
 
-        T get_or_create<T>(FieldInfo fi) where T : class => 
+        T get_or_create<T>(FieldInfo fi) where T : class =>
         (fi.GetValue(this) ?? Activator.CreateInstance(fi.FieldType)) as T;
 
         FieldInfo[] get_fields() =>
-        GetType().GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance);
+        GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
         virtual public void Load(ConfigNode node)
-        { 
-            ConfigNode.LoadObjectFromConfig(this, node);
+        {
+            try
+            {
+                ConfigNode.LoadObjectFromConfig(this, node);
+            }
+            catch(Exception e)
+            {
+                Utils.Log("Exception while loading {}\n{}\n{}\n{}", 
+                          this, e.Message, e.StackTrace, node);
+            }
             foreach(var fi in get_fields())
             {
                 if(not_persistant(fi)) continue;
@@ -71,7 +78,7 @@ namespace AT_Utils
                 }
                 //restore types saved as values
                 var v = node.GetValue(fi.Name);
-                if(v != null) 
+                if(v != null)
                 {
                     if(fi.FieldType == typeof(Guid))
                         fi.SetValue(this, new Guid(v));
@@ -94,8 +101,8 @@ namespace AT_Utils
         }
 
         virtual public void Save(ConfigNode node)
-        { 
-            ConfigNode.CreateConfigFromObject(this, node); 
+        {
+            ConfigNode.CreateConfigFromObject(this, node);
             foreach(var fi in get_fields())
             {
                 if(not_persistant(fi)) continue;
@@ -172,7 +179,7 @@ namespace AT_Utils
                 if(fi.FieldType.IsSubclassOf(typeof(TypedConfigNodeObject)))
                 {
                     var n = node.GetNode(fi.Name);
-                    fi.SetValue(this, n == null? null : FromConfig(n));
+                    fi.SetValue(this, n == null ? null : FromConfig(n));
                 }
             }
         }
@@ -188,8 +195,8 @@ namespace AT_Utils
                 Utils.Log("Unable to create {}: Type not found.", typename);
                 return obj;
             }
-            try 
-            { 
+            try
+            {
                 obj = Activator.CreateInstance(type) as TypedConfigNodeObject;
                 obj.Load(node);
             }
@@ -200,12 +207,12 @@ namespace AT_Utils
 
     public class PersistentList<T> : List<T>, IConfigNode where T : IConfigNode, new()
     {
-        public PersistentList() {}
-        public PersistentList(IEnumerable<T> content) : base(content) {}
+        public PersistentList() { }
+        public PersistentList(IEnumerable<T> content) : base(content) { }
 
         public void Save(ConfigNode node)
         {
-            for(int i = 0, count = Count; i < count; i++) 
+            for(int i = 0, count = Count; i < count; i++)
                 this[i].Save(node.AddNode("Item"));
         }
 
@@ -222,10 +229,10 @@ namespace AT_Utils
         }
     }
 
-    public class PersistentDictS<T> : Dictionary<string,T>, IConfigNode where T : IConfigNode, new()
+    public class PersistentDictS<T> : Dictionary<string, T>, IConfigNode where T : IConfigNode, new()
     {
-        public PersistentDictS() {}
-        public PersistentDictS(IDictionary<string,T> data) : base(data) {}
+        public PersistentDictS() { }
+        public PersistentDictS(IDictionary<string, T> data) : base(data) { }
 
         public void Save(ConfigNode node)
         {
@@ -249,8 +256,8 @@ namespace AT_Utils
 
     public class PersistentQueue<T> : Queue<T>, IConfigNode where T : IConfigNode, new()
     {
-        public PersistentQueue() {}
-        public PersistentQueue(IEnumerable<T> content) : base(content) {}
+        public PersistentQueue() { }
+        public PersistentQueue(IEnumerable<T> content) : base(content) { }
 
         public void Save(ConfigNode node)
         {
@@ -289,7 +296,7 @@ namespace AT_Utils
         public override void Save(ConfigNode node)
         {
             base.Save(node);
-            for(int i = 0, count = List.Count; i < count; i++) 
+            for(int i = 0, count = List.Count; i < count; i++)
                 List[i].Save(node.AddNode(i.ToString()));
         }
 
