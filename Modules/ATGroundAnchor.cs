@@ -11,8 +11,8 @@ namespace AT_Utils
 {
     public class ATGroundAnchor : PartModule
     {
-		[KSPField] bool Controllable = true;
-        [KSPField (isPersistant = true)] bool isAttached;
+		[KSPField] public bool Controllable = true;
+        [KSPField (isPersistant = true)] protected bool isAttached;
 
         [KSPField] public string attachSndPath = string.Empty;
         [KSPField] public string detachSndPath = string.Empty;
