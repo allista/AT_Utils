@@ -16,15 +16,20 @@ namespace AT_Utils
     {
         public Mesh m;
         public Transform t;
+		public Renderer r;
+
+		public bool Valid => m != null && t != null && r != null && t.gameObject != null;
 
         public MeshTransform(MeshFilter mesh_filter)
         {
             t = mesh_filter.transform;
             m = mesh_filter.sharedMesh; 
+			r = mesh_filter.GetComponent<MeshRenderer>();
         }
 
         public MeshTransform(SkinnedMeshRenderer skin)
         {
+			r = skin;
             t = skin.transform;
             m = new Mesh();
             skin.BakeMesh(m);
@@ -138,24 +143,26 @@ namespace AT_Utils
                 if(p == null)
                     continue;
                 //EditorLogic.SortedShipList returns List<Part>{null} when all parts are deleted
-                //if it's a wheel, get all meshes under the wheel collider
+                //check for weels; if it's a wheel, get all meshes under the wheel collider
                 var wheel = p.Modules.GetModule<ModuleWheelBase>();
                 var wheel_transform = wheel != null && wheel.Wheel != null && wheel.Wheel.wheelCollider != null ? wheel.Wheel.wheelCollider.wheelTransform : null;
+                //check for asteroids
                 var is_asteroid = p.Modules.GetModule<ModuleAsteroid>() != null;
-                foreach(var mesh in p.GetComponentsInChildren<MeshFilter>()
+                foreach(var mesh in p.FindModelComponents<MeshFilter>()
                         .Select(c => new MeshTransform(c))
-                        .Union(p.GetComponentsInChildren<SkinnedMeshRenderer>()
+                        .Union(p.FindModelComponents<SkinnedMeshRenderer>()
                                .Select(c =>  new MeshTransform(c))))
                 {
                     //skip disabled objects
-                    if(mesh.t.gameObject == null || exclude_disabled && !mesh.t.gameObject.activeInHierarchy)
+                    if(!mesh.Valid || exclude_disabled 
+                       && (!mesh.r.enabled || !mesh.t.gameObject.activeInHierarchy))
                         continue;
                     //skip meshes from the blacklist
                     bool skip_mesh = false;
                     for(int j = 0, count = MeshesToSkip.Count; j < count; j++)
                     {
-                        string mesh_name = MeshesToSkip[j];
-                        if(mesh_name == "")
+                        var mesh_name = MeshesToSkip[j];
+						if(string.IsNullOrEmpty(mesh_name))
                             continue;
                         skip_mesh = mesh.t.name.IndexOf(mesh_name, StringComparison.OrdinalIgnoreCase) >= 0;
                         if(skip_mesh)
@@ -168,16 +175,16 @@ namespace AT_Utils
                     if(compute_hull)
                     {
                         float m_size = Vector3.Scale(mesh.m.bounds.size, mesh.t.lossyScale).sqrMagnitude;
-                        verts = refT != null?
-                            local2local(mesh.t, refT, (full_mesh || m_size > b_size / 10 ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds))) : 
-                            local2world(mesh.t, (full_mesh || m_size > b_size / 10 ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds)));
+						verts = full_mesh || m_size > b_size / 10 ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds);
+                        verts = refT != null? local2local(mesh.t, refT, verts) : local2world(mesh.t, verts);
                         hull_points.AddRange(verts);
                         b_size = b.size.sqrMagnitude;
                     }
                     else
-                        verts = refT != null?
-                            local2local(mesh.t, refT, (full_mesh ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds))) :
-                            local2world(mesh.t, (full_mesh ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds)));
+					{
+						verts = full_mesh ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds);
+                        verts = refT != null? local2local(mesh.t, refT, verts) : local2world(mesh.t, verts);
+					}
                     updateBounds(ref b, verts);
                 }
                 CrewCapacity += p.CrewCapacity;

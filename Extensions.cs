@@ -788,9 +788,9 @@ namespace AT_Utils
                 Part p = parts[i];
                 if(p == null) continue;
                 var full_mesh = p.Modules.GetModule<ModuleAsteroid>() != null;
-                foreach(var mesh in p.transform.GetComponentsInChildren<MeshFilter>()
+				foreach(var mesh in p.FindModelComponents<MeshFilter>()
                         .Select(c => new MeshTransform(c))
-                        .Union(p.transform.GetComponentsInChildren<SkinnedMeshRenderer>()
+				        .Union(p.FindModelComponents<SkinnedMeshRenderer>()
                                .Select(c => new MeshTransform(c))))
                 {
                     var verts = full_mesh? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds);
