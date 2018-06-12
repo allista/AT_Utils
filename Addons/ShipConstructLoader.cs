@@ -65,12 +65,9 @@ namespace AT_Utils
         {
             foreach(var p in construct.Parts)
             {
-                var renderers = p.GetComponentsInChildren<MeshRenderer>();
+                var renderers = p.GetComponentsInChildren<Renderer>();
                 for(int i = 0, len = renderers.Length; i < len; i++)
                     renderers[i].enabled = render;
-                var skinned_renderers = p.GetComponentsInChildren<SkinnedMeshRenderer>();
-                for(int i = 0, len = skinned_renderers.Length; i < len; i++)
-                    skinned_renderers[i].enabled = render;
             }
         }
 
@@ -82,6 +79,7 @@ namespace AT_Utils
             SetShipRendering(construct, false);
             if(HighLogic.LoadedSceneIsEditor)
                 for(int i = 0; i < 3; i++) yield return null;
+            SetShipRendering(construct, true);
             process_loaded_construct(construct);
             Utils.LockControls(lock_name, false);
         }

@@ -690,6 +690,12 @@ namespace AT_Utils
             p.RecurseHighlight = false;
             p.SetHighlightType(Part.HighlightType.AlwaysOn);
         }
+
+        public static IEnumerable<MeshTransform> AllModelMeshes(this Part p) =>
+        p.FindModelComponents<MeshFilter>()
+         .Select(c => new MeshTransform(c))
+         .Union(p.FindModelComponents<SkinnedMeshRenderer>()
+                .Select(c => new MeshTransform(c)));
         #endregion
     }
 
@@ -788,21 +794,29 @@ namespace AT_Utils
                 Part p = parts[i];
                 if(p == null) continue;
                 var full_mesh = p.Modules.GetModule<ModuleAsteroid>() != null;
-				foreach(var mesh in p.FindModelComponents<MeshFilter>()
-                        .Select(c => new MeshTransform(c))
-				        .Union(p.FindModelComponents<SkinnedMeshRenderer>()
-                               .Select(c => new MeshTransform(c))))
+                var pname = p.partInfo != null? p.partInfo.name : p.name;
+                var bad_part = Utils.NameMatches(p.name, AT_UtilsGlobals.Instance.BadPartsList);
+                foreach(var mesh in p.AllModelMeshes())
                 {
-                    var verts = full_mesh? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds);
+                    if(!mesh.Valid)
+                        continue;
+                    bool local = true;
+                    Vector3[] verts;
+                    if(bad_part)
+                    {
+                        local = false;
+                        verts = Utils.BoundCorners(mesh.r.bounds);
+                    }
+                    else
+                        verts = full_mesh? 
+                            mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds);
                     for(int j = 0, len = verts.Length; j < len; j++)
                     {
-                        Vector3 c;
+                        Vector3 c = verts[j];
+                        if(local) 
+                            c = mesh.t.TransformPoint(c);
                         if(refT != null)
-                            c = refT == mesh.t? 
-                                            verts[j] : 
-                                            refT.InverseTransformPoint(mesh.t.TransformPoint(verts[j]));
-                        else
-                            c = mesh.t.TransformPoint(verts[j]);
+                            c = refT.InverseTransformPoint(c);
                         if(b == default(Bounds)) 
                             b = new Bounds(c, Vector3.zero);
                         else

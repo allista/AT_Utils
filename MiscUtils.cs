@@ -394,6 +394,36 @@ namespace AT_Utils
                 yield return new WaitForSeconds(period);
             }
         }
+
+        public static bool NameMatches(string name, IList<string> list)
+        {
+            if(string.IsNullOrEmpty(name))
+                return false;
+            for(int j = 0, count = list.Count; j < count; j++)
+            {
+                var lname = list[j];
+                if(string.IsNullOrEmpty(lname))
+                    continue;
+                if(name.IndexOf(lname, StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
+            }
+            return false;
+        }
+
+        public static Collider AddCollider(this MeshFilter mesh, bool isTrigger = false)
+        {
+            var col = mesh.GetComponent<Collider>();
+            if(col == null || !col.isTrigger)
+            {
+                var collider = mesh.gameObject.AddComponent<MeshCollider>();
+                collider.sharedMesh = mesh.sharedMesh;
+                collider.convex = true;
+                collider.isTrigger = isTrigger;
+                col = collider;
+            }
+            col.enabled = true;
+            return col;
+        }
     }
 
     public static class WaitWithPhysics

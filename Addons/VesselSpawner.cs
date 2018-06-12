@@ -91,7 +91,6 @@ namespace AT_Utils
             //initialize new vessel
             AssembleForLaunchUnlanded(construct, new Orbit(vessel.orbit), 
                                       part.flagURL, FlightDriver.FlightStateCache);
-            ShipConstructLoader.SetShipRendering(construct, true);
             launched_vessel = FlightGlobals.Vessels[FlightGlobals.Vessels.Count - 1];
             on_vessel_positioned?.Invoke(launched_vessel);
             //launch the vessel

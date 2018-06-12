@@ -95,18 +95,8 @@ namespace AT_Utils
         public void SetupSensor()
         {
             if(Space == null) return;
-            var space_collider = Space.GetComponent<Collider>();
-            if(space_collider == null || !space_collider.isTrigger)
-            {
-                Utils.Log("Adding a Sensor collider to the SpawnSpaceMesh: {}", Space);
-                var collider = Space.gameObject.AddComponent<MeshCollider>();
-                collider.sharedMesh = Space.sharedMesh;
-                collider.convex = true;
-                collider.isTrigger = true;
-                space_collider = collider;
-            }
-            space_collider.enabled = true;
-            Sensor = space_collider.gameObject.AddComponent<SpawnSpaceSensor>();
+            Space.AddCollider(true);
+            Sensor = Space.gameObject.AddComponent<SpawnSpaceSensor>();
             Sensor.Init(vessel);
         }
 

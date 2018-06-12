@@ -11,7 +11,7 @@ namespace AT_Utils
 {
     public class ATGroundAnchor : PartModule
     {
-		[KSPField] public bool Controllable = true;
+        [KSPField] public bool Controllable = true;
         [KSPField (isPersistant = true)] protected bool isAttached;
 
         [KSPField] public string attachSndPath = string.Empty;
@@ -35,13 +35,13 @@ namespace AT_Utils
         {
             if(isAttached)
             {
-				setup_ground_contact();
+                setup_ground_contact();
                 ForceAttach();
             }
         }
 
-		void FixedUpdate()
-		{
+        void FixedUpdate()
+        {
             if (!HighLogic.LoadedSceneIsFlight ||
                 vessel == null || !vessel.loaded || vessel.packed)
                 return;

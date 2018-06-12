@@ -112,10 +112,5 @@ namespace AT_Utils
             instance.Load(instance.AllConfigFiles.ToArray());
         }
     }
-
-    public class AT_UtilsGlobals : PluginGlobals<AT_UtilsGlobals>
-    {
-        [Persistent] public Styles.Config StylesConfig = new Styles.Config();
-    }
 }
 

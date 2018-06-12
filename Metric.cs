@@ -16,20 +16,20 @@ namespace AT_Utils
     {
         public Mesh m;
         public Transform t;
-		public Renderer r;
+        public Renderer r;
 
-		public bool Valid => m != null && t != null && r != null && t.gameObject != null;
+        public bool Valid => m != null && t != null && r != null && t.gameObject != null;
 
         public MeshTransform(MeshFilter mesh_filter)
         {
             t = mesh_filter.transform;
             m = mesh_filter.sharedMesh; 
-			r = mesh_filter.GetComponent<MeshRenderer>();
+            r = mesh_filter.GetComponent<MeshRenderer>();
         }
 
         public MeshTransform(SkinnedMeshRenderer skin)
         {
-			r = skin;
+            r = skin;
             t = skin.transform;
             m = new Mesh();
             skin.BakeMesh(m);
@@ -38,8 +38,6 @@ namespace AT_Utils
 
     public struct Metric : IConfigNode
     {
-        public static List<string> MeshesToSkip = new List<string>();
-
         //convex hull
         public ConvexHull3D hull { get; private set; }
 
@@ -90,6 +88,13 @@ namespace AT_Utils
         {
             for(int p = 0; p < points.Length; p++)
                 points[p] = _from.TransformPoint(points[p]);
+            return points;
+        }
+
+        static Vector3[] world2local(Transform _to, Vector3[] points)
+        {
+            for(int p = 0; p < points.Length; p++)
+                points[p]  = _to.InverseTransformPoint(points[p]);
             return points;
         }
 
@@ -148,44 +153,42 @@ namespace AT_Utils
                 var wheel_transform = wheel != null && wheel.Wheel != null && wheel.Wheel.wheelCollider != null ? wheel.Wheel.wheelCollider.wheelTransform : null;
                 //check for asteroids
                 var is_asteroid = p.Modules.GetModule<ModuleAsteroid>() != null;
-                foreach(var mesh in p.FindModelComponents<MeshFilter>()
-                        .Select(c => new MeshTransform(c))
-                        .Union(p.FindModelComponents<SkinnedMeshRenderer>()
-                               .Select(c =>  new MeshTransform(c))))
+                //check for bad parts
+                var pname = p.partInfo != null? p.partInfo.name : p.name;
+                var bad_part = Utils.NameMatches(p.name, AT_UtilsGlobals.Instance.BadPartsList);
+                foreach(var mesh in p.AllModelMeshes())
                 {
                     //skip disabled objects
                     if(!mesh.Valid || exclude_disabled 
                        && (!mesh.r.enabled || !mesh.t.gameObject.activeInHierarchy))
                         continue;
                     //skip meshes from the blacklist
-                    bool skip_mesh = false;
-                    for(int j = 0, count = MeshesToSkip.Count; j < count; j++)
-                    {
-                        var mesh_name = MeshesToSkip[j];
-						if(string.IsNullOrEmpty(mesh_name))
-                            continue;
-                        skip_mesh = mesh.t.name.IndexOf(mesh_name, StringComparison.OrdinalIgnoreCase) >= 0;
-                        if(skip_mesh)
-                            break;
-                    }
-                    if(skip_mesh)
+                    if(Utils.NameMatches(mesh.t.name, AT_UtilsGlobals.Instance.MeshesToSkipList))
                         continue;
                     var full_mesh = is_asteroid || wheel_transform != null && mesh.t.IsChildOf(wheel_transform);
                     Vector3[] verts;
+                    if(bad_part)
+                    {
+                        verts = Utils.BoundCorners(mesh.r.bounds);
+                        if(refT != null)
+                            verts = world2local(refT, verts);
+                    }
+                    else 
+                    {
+                        if(full_mesh 
+                                || (compute_hull 
+                                    && Vector3.Scale(mesh.m.bounds.size, mesh.t.lossyScale).sqrMagnitude > b_size / 10))
+                            verts = mesh.m.uniqueVertices();
+                        else
+                            verts = Utils.BoundCorners(mesh.m.bounds);
+                        verts = refT != null? local2local(mesh.t, refT, verts) : local2world(mesh.t, verts);
+                    }
+                    updateBounds(ref b, verts);
                     if(compute_hull)
                     {
-                        float m_size = Vector3.Scale(mesh.m.bounds.size, mesh.t.lossyScale).sqrMagnitude;
-						verts = full_mesh || m_size > b_size / 10 ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds);
-                        verts = refT != null? local2local(mesh.t, refT, verts) : local2world(mesh.t, verts);
                         hull_points.AddRange(verts);
                         b_size = b.size.sqrMagnitude;
                     }
-                    else
-					{
-						verts = full_mesh ? mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds);
-                        verts = refT != null? local2local(mesh.t, refT, verts) : local2world(mesh.t, verts);
-					}
-                    updateBounds(ref b, verts);
                 }
                 CrewCapacity += p.CrewCapacity;
                 mass += p.TotalMass();
