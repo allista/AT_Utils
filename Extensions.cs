@@ -793,36 +793,26 @@ namespace AT_Utils
             {
                 Part p = parts[i];
                 if(p == null) continue;
-                var full_mesh = p.Modules.GetModule<ModuleAsteroid>() != null;
-                var pname = p.partInfo != null? p.partInfo.name : p.name;
-                var bad_part = Utils.NameMatches(p.name, AT_UtilsGlobals.Instance.BadPartsList);
-                foreach(var mesh in p.AllModelMeshes())
+                var part_rot = p.partTransform.rotation;
+                p.partTransform.rotation = Quaternion.identity;
+                foreach(var rend in p.FindModelComponents<Renderer>())
                 {
-                    if(!mesh.Valid)
+                    if(rend.gameObject == null 
+                       || !(rend is MeshRenderer || rend is SkinnedMeshRenderer))
                         continue;
-                    bool local = true;
-                    Vector3[] verts;
-                    if(bad_part)
-                    {
-                        local = false;
-                        verts = Utils.BoundCorners(mesh.r.bounds);
-                    }
-                    else
-                        verts = full_mesh? 
-                            mesh.m.uniqueVertices() : Utils.BoundCorners(mesh.m.bounds);
+                    var verts = Utils.BoundCorners(rend.bounds);
                     for(int j = 0, len = verts.Length; j < len; j++)
                     {
-                        Vector3 c = verts[j];
-                        if(local) 
-                            c = mesh.t.TransformPoint(c);
+                        var v = p.partTransform.position + part_rot * (verts[j]-p.partTransform.position);
                         if(refT != null)
-                            c = refT.InverseTransformPoint(c);
+                            v = refT.InverseTransformPoint(v);
                         if(b == default(Bounds)) 
-                            b = new Bounds(c, Vector3.zero);
+                            b = new Bounds(v, Vector3.zero);
                         else
-                            b.Encapsulate(c);
+                            b.Encapsulate(v);
                     }
                 }
+                p.partTransform.rotation = part_rot;
             }
             return b;
         }

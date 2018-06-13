@@ -156,6 +156,9 @@ namespace AT_Utils
                 //check for bad parts
                 var pname = p.partInfo != null? p.partInfo.name : p.name;
                 var bad_part = Utils.NameMatches(p.name, AT_UtilsGlobals.Instance.BadPartsList);
+                var part_rot = p.partTransform.rotation;
+                if(bad_part) 
+                    p.partTransform.rotation = Quaternion.identity;
                 foreach(var mesh in p.AllModelMeshes())
                 {
                     //skip disabled objects
@@ -165,19 +168,23 @@ namespace AT_Utils
                     //skip meshes from the blacklist
                     if(Utils.NameMatches(mesh.t.name, AT_UtilsGlobals.Instance.MeshesToSkipList))
                         continue;
-                    var full_mesh = is_asteroid || wheel_transform != null && mesh.t.IsChildOf(wheel_transform);
                     Vector3[] verts;
                     if(bad_part)
                     {
                         verts = Utils.BoundCorners(mesh.r.bounds);
-                        if(refT != null)
-                            verts = world2local(refT, verts);
+                        for(int j = 0, len = verts.Length; j < len; j++)
+                        {
+                            var v = p.partTransform.position + part_rot * (verts[j]-p.partTransform.position);
+                            if(refT != null)
+                                v = refT.InverseTransformPoint(v);
+                            verts[j] = v;
+                        }
                     }
                     else 
                     {
-                        if(full_mesh 
-                                || (compute_hull 
-                                    && Vector3.Scale(mesh.m.bounds.size, mesh.t.lossyScale).sqrMagnitude > b_size / 10))
+                        if(is_asteroid || wheel_transform != null && mesh.t.IsChildOf(wheel_transform)
+                           || (compute_hull 
+                               && Vector3.Scale(mesh.m.bounds.size, mesh.t.lossyScale).sqrMagnitude > b_size / 10))
                             verts = mesh.m.uniqueVertices();
                         else
                             verts = Utils.BoundCorners(mesh.m.bounds);
@@ -193,6 +200,8 @@ namespace AT_Utils
                 CrewCapacity += p.CrewCapacity;
                 mass += p.TotalMass();
                 cost += p.TotalCost();
+                if(bad_part) 
+                    p.partTransform.rotation = part_rot;
             }
             if(compute_hull && hull_points.Count >= 4)
             {

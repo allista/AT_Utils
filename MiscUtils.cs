@@ -330,18 +330,18 @@ namespace AT_Utils
 
         public static Vector3[] BoundCorners(Bounds b)
         {
-            var edges = new Vector3[8];
+            var corners = new Vector3[8];
             Vector3 min = b.min;
             Vector3 max = b.max;
-            edges[0] = new Vector3(min.x, min.y, min.z); //left-bottom-back
-            edges[1] = new Vector3(min.x, min.y, max.z); //left-bottom-front
-            edges[2] = new Vector3(min.x, max.y, min.z); //left-top-back
-            edges[3] = new Vector3(min.x, max.y, max.z); //left-top-front
-            edges[4] = new Vector3(max.x, min.y, min.z); //right-bottom-back
-            edges[5] = new Vector3(max.x, min.y, max.z); //right-bottom-front
-            edges[6] = new Vector3(max.x, max.y, min.z); //right-top-back
-            edges[7] = new Vector3(max.x, max.y, max.z); //right-top-front
-            return edges;
+            corners[0] = new Vector3(min.x, min.y, min.z); //left-bottom-back
+            corners[1] = new Vector3(min.x, min.y, max.z); //left-bottom-front
+            corners[2] = new Vector3(min.x, max.y, min.z); //left-top-back
+            corners[3] = new Vector3(min.x, max.y, max.z); //left-top-front
+            corners[4] = new Vector3(max.x, min.y, min.z); //right-bottom-back
+            corners[5] = new Vector3(max.x, min.y, max.z); //right-bottom-front
+            corners[6] = new Vector3(max.x, max.y, min.z); //right-top-back
+            corners[7] = new Vector3(max.x, max.y, max.z); //right-top-front
+            return corners;
         }
 
         public static Vector3[] BoundCorners(Vector3 center, Vector3 size)
