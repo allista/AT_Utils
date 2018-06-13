@@ -134,6 +134,7 @@
     <Compile Include="Modules\ATMagneticDamper.cs" />
     <Compile Include="Configuration\Globals.cs" />
     <Compile Include="Addons\ShipConstructLoader.cs" />
+    <Compile Include="Debugging\MetricDebug.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
