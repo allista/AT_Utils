@@ -1,6 +1,27 @@
 #AT Utils ChangeLog
 
-* **v1.5.2**
+* **v1.6.0**
+    * Added ShipConstructLoader component that loads both complete .crafts and subsassemblies.
+    * GUIWindowBase.HUD_enabled takes into account level_loaded flag.
+    * Added SlowUpdate coroutine helper.
+    * Both IShipConstruction.Bounds and Metric support world-space calculation.
+    * Added variants of ButtonSwitch that change the label on switch as well as style.
+    * **Merged HangarSpaceManager into SpawnSpaceManager**, which now uses .Init instead of .Load to get spawn transform/mesh.
+        * Added more variants of GetSpawnTransform/Offset.
+        * Added an option to setup a sensor collider to SpawnSpace.
+    * Added VesselSpawner class that generalizes Hangar's algorithm to launch vessels in flight from both ProtoVessels and ShipConstructs, and also to launch ShipConstructs to ground, as GC does.
+    * Added ATGroundAnchor module that combines GC's and Hangar's anchors.
+    * Added ATMagneticDamper module that slows down parts inside a trigger collider defined on the specified mesh.
+    * **Removed ModuleAsteroidFix**
+    * Added check_module static method to SimplePartFilter.
+    * Fixed Metric and Bounds for RadialDrill via explicit workaround.
+    * Adde MeshesToSkip and BadParts lists to AT_UtilsGlobals.
+    * Optimized IShipConstruct.Bounds.
+    * Added Part.AllModelMeshes extension; used in Metric.
+    * Added MeshFilter.AddCollider extension; used in SpawnSpaceManager and ATMagneticDamper.
+    * Added MetricDebug module to visualize both Metric and .Bounds
+    
+* v1.5.2
     * Added FeedForward input to PID controllers.
     * Fixed FCO mode switching without changing the anchor.
         * Plus, OrbitAround anchors at CoMs of vessels.
@@ -85,8 +106,8 @@
     * Converted DebugInfo props of filters into ToString overrides.
     * Added two Utils.LerpTime methods.
     * In SimplePartFilter:
-    	* Fixed module matching with moduleInfo.moduleName: Converted MODULES to List of strings that is filled with SetMODULES methods that accepts IEnumerable of Types and converts Type.Name to moduleName/categoryName format.
-    	* Added default implementation of the filter method.
+        * Fixed module matching with moduleInfo.moduleName: Converted MODULES to List of strings that is filled with SetMODULES methods that accepts IEnumerable of Types and converts Type.Name to moduleName/categoryName format.
+        * Added default implementation of the filter method.
 
 * v1.4.3
     * Compatible with KSP-1.3
@@ -164,7 +185,7 @@
     * Numerous small bugfixes.
 
 * v1.3.1
-	* Moved CrewTransferBatch from Hangar here.
+    * Moved CrewTransferBatch from Hangar here.
     * Fixed resource transfer UI.
     * Removed IsPhysicallySignificant as it was obsolete.
     * Improved GLDrawBounds/Point.
@@ -173,7 +194,7 @@
 * v1.3.0
     * Compiled against **KSP-1.2.2**
     * Added **SerializableFieldsPartModule** -- a base PartModule that uses reflection to serialize any field with [SerializeField] attribute that is of either [Serializable] type, or an IConfigNode, or the ConfigNode itself.
-    	* So **ConfigNodeWrapper is now obsolete.**
+        * So **ConfigNodeWrapper is now obsolete.**
     * Added **Resource Transfer framework** that facilitates transfer of resources between ships represented by either a Vessel object, a ProtoVessel object or a ConfigNode produced by ProtoVessel.Save.
     * Factored most of the **SimpleTextureSwitcher** into the new **TextureSwitcherServer**.
         * The STS now only provides the UI, while all the switching is done by TSS.
@@ -187,10 +208,10 @@
         * Fixed VectorCurve.Load, improved VectorCurve.Save performance using string.Join.
         * Optimized CNO Load/Save performance.
         * Fixed ConvexHull calculation in Metric.init_with_mesh.
-	    * Made LockName of GUIWindowBase unique.
-	    * Fixed Utils.formatSmallValue. Improved performance of convert_args.
-    	* Declared Metric as IConfigNode for easy persistence. Added Metric(IShipConstruct).
-    	* Made tooltips light-green with black text for better visibility.
+        * Made LockName of GUIWindowBase unique.
+        * Fixed Utils.formatSmallValue. Improved performance of convert_args.
+        * Declared Metric as IConfigNode for easy persistence. Added Metric(IShipConstruct).
+        * Made tooltips light-green with black text for better visibility.
         * Fixed Part.TotalCost.
         * Added ShipConstruct.Unload extension.
 * v1.2.2
