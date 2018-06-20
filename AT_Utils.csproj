@@ -135,6 +135,7 @@
     <Compile Include="Configuration\Globals.cs" />
     <Compile Include="Addons\ShipConstructLoader.cs" />
     <Compile Include="Debugging\MetricDebug.cs" />
+    <Compile Include="AnimatedNode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
