@@ -16,8 +16,8 @@ namespace AT_Utils
 {
     public class VesselSpawner
     {
-        protected Part part;
-        protected Vessel vessel => part.vessel;
+        Part part;
+        Vessel vessel => part.vessel;
 
         public bool LaunchInProgress { get; private set; }
         Vessel launched_vessel;
@@ -25,6 +25,9 @@ namespace AT_Utils
 
         public VesselSpawner() { }
         public VesselSpawner(Part part) { this.part = part; }
+
+        public void BeginLaunch() => LaunchInProgress = true;
+        public void AbortLaunch() => LaunchInProgress = false;
 
         public IEnumerator<YieldInstruction> SpawnShipConstructToGround(ShipConstruct construct,
                                                                         Transform spawn_transform,
@@ -300,8 +303,6 @@ namespace AT_Utils
             vessel_loaded = false;
             FlightCameraOverride.AnchorForSeconds(FlightCameraOverride.Mode.Hold,
                                                   FlightGlobals.ActiveVessel.transform, 1);
-            //if(FlightGlobals.ready)
-                //FloatingOrigin.SetOffset(spawn_transform.position);
         }
 
         void end_launch()
