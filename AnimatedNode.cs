@@ -85,7 +85,7 @@ namespace AT_Utils
         {
             //update node
             //node.size = 0; //force node size to be zero; otherwise the Kraken comes when inflating
-			node.position = part.partTransform.InverseTransformPoint(nT.position);
+            node.position = part.partTransform.InverseTransformPoint(nT.position);
             node.originalPosition = node.position;
             //update attached parts
             attached_part = node.attachedPart;
@@ -109,12 +109,12 @@ namespace AT_Utils
             if(joint == null) return;
             if(update_anchor)
             {
-				Utils.DrawPoint(joint.anchor, part.partTransform, Color.red);
+                Utils.DrawPoint(joint.anchor, part.partTransform, Color.red);
                 Utils.DrawPoint(joint.connectedAnchor, a_part.transform, Color.green);
             }
             else
             {
-				Utils.DrawPoint(joint.connectedAnchor, part.partTransform, Color.red);
+                Utils.DrawPoint(joint.connectedAnchor, part.partTransform, Color.red);
                 Utils.DrawPoint(joint.anchor, a_part.transform, Color.green);
             }
         }
