@@ -32,7 +32,7 @@ namespace AT_Utils
             var dp =
                 part.transform.TransformPoint(node.position) -
                 attached_part.transform.TransformPoint(attached_node.position);
-			part.UpdateAttachedPartPosProportional(attached_part, dp);
+            part.UpdateAttachedPartPosProportional(attached_part, dp);
         }
 
         bool UpdateJoint()

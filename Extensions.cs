@@ -398,17 +398,17 @@ namespace AT_Utils
 
         public static Vector2d Rotate90(this Vector2d v) => new Vector2d(-v.y, v.x);
 
-		public static Vector3 Local2LocalDir(this Vector3 vec, Transform from, Transform to) =>
-		to.InverseTransformDirection(from.TransformDirection(vec));
-
-		public static Vector3d Local2LocalDir(this Vector3d vec, Transform from, Transform to) =>
+        public static Vector3 Local2LocalDir(this Vector3 vec, Transform from, Transform to) =>
         to.InverseTransformDirection(from.TransformDirection(vec));
 
-		public static Vector3 Local2Local(this Vector3 vec, Transform from, Transform to) =>
+        public static Vector3d Local2LocalDir(this Vector3d vec, Transform from, Transform to) =>
+        to.InverseTransformDirection(from.TransformDirection(vec));
+
+        public static Vector3 Local2Local(this Vector3 vec, Transform from, Transform to) =>
         to.InverseTransformDirection(from.TransformDirection(vec));
 
         public static Vector3d Local2Local(this Vector3d vec, Transform from, Transform to) =>
-		to.InverseTransformPoint(from.TransformPoint(vec));
+        to.InverseTransformPoint(from.TransformPoint(vec));
     }
 
 
@@ -635,94 +635,94 @@ namespace AT_Utils
         public static void UpdateAttachedPartPos(this Part part, AttachNode node, bool proportional = false)
         {
             if(node == null) return;
-			var attached_part = node.attachedPart; 
+            var attached_part = node.attachedPart; 
             if(attached_part == null) return;
             var an = attached_part.FindAttachNodeByPart(part);    
             if(an == null) return;
             var dp =
                 part.transform.TransformPoint(node.position) -
                 attached_part.transform.TransformPoint(an.position);
-			if(proportional)
-				part.UpdateAttachedPartPosProportional(attached_part, dp);
-			else
-				part.UpdateAttachedPartPos(attached_part, dp);
+            if(proportional)
+                part.UpdateAttachedPartPosProportional(attached_part, dp);
+            else
+                part.UpdateAttachedPartPos(attached_part, dp);
         }
 
-		public static void UpdateAttachedPartPos(this Part part, Part attached_part, Vector3 delta)
+        public static void UpdateAttachedPartPos(this Part part, Part attached_part, Vector3 delta)
         {
             if(attached_part == part.parent) 
             {
-				var has_part_joint = part.attachJoint != null;
-				if(has_part_joint)
-					part.attachJoint.DestroyJoint();
-                part.transform.position -= delta;
-				attached_part = attached_part.localRoot;
-				var vsl = attached_part.vessel;
-				if(vsl != null)
-					vsl.SetPosition(vsl.vesselTransform.position+delta);
-				else
-					attached_part.transform.position += delta;
-				if(has_part_joint)
-				{
-    				part.CreateAttachJoint(part.attachMode);
-    				part.ResetJoints();
-				}
-            } 
-			else if(attached_part.parent == part) 
-			{
-				var has_part_joint = attached_part.attachJoint != null;
+                var has_part_joint = part.attachJoint != null;
                 if(has_part_joint)
-					attached_part.attachJoint.DestroyJoint();
-				attached_part.transform.position += delta;
-				if(has_part_joint)
+                    part.attachJoint.DestroyJoint();
+                part.transform.position -= delta;
+                attached_part = attached_part.localRoot;
+                var vsl = attached_part.vessel;
+                if(vsl != null)
+                    vsl.SetPosition(vsl.vesselTransform.position+delta);
+                else
+                    attached_part.transform.position += delta;
+                if(has_part_joint)
+                {
+                    part.CreateAttachJoint(part.attachMode);
+                    part.ResetJoints();
+                }
+            } 
+            else if(attached_part.parent == part) 
+            {
+                var has_part_joint = attached_part.attachJoint != null;
+                if(has_part_joint)
+                    attached_part.attachJoint.DestroyJoint();
+                attached_part.transform.position += delta;
+                if(has_part_joint)
                 {
                     attached_part.CreateAttachJoint(attached_part.attachMode);
-					attached_part.ResetJoints();
-				}
-			}
+                    attached_part.ResetJoints();
+                }
+            }
         }
 
-		public static void UpdateAttachedPartPosProportional(this Part part, Part attached_part, Vector3 delta)
-		{
-			var root  = part.localRoot;
+        public static void UpdateAttachedPartPosProportional(this Part part, Part attached_part, Vector3 delta)
+        {
+            var root  = part.localRoot;
             var vsl = root.vessel;
             var total_mass = root.MassWithChildren();
             float this_mass, attached_mass;
             if(attached_part == part.parent) 
             {
                 this_mass = part.MassWithChildren();
-				var has_part_joint = part.attachJoint != null;
+                var has_part_joint = part.attachJoint != null;
                 if(has_part_joint)
-					part.attachJoint.DestroyJoint();
+                    part.attachJoint.DestroyJoint();
                 part.transform.position -= delta;
-				if(has_part_joint)
+                if(has_part_joint)
                 {
                     part.CreateAttachJoint(part.attachMode);
-					part.ResetJoints();
-				}
-				if(vsl != null) 
-					vsl.SetPosition(vsl.vesselTransform.position+delta*(this_mass/total_mass));
+                    part.ResetJoints();
+                }
+                if(vsl != null) 
+                    vsl.SetPosition(vsl.vesselTransform.position+delta*(this_mass/total_mass));
                 else 
-					root.transform.position += delta*(this_mass/total_mass);
+                    root.transform.position += delta*(this_mass/total_mass);
             } 
-			else if(attached_part.parent == part) 
+            else if(attached_part.parent == part) 
             {
-				var has_part_joint = attached_part.attachJoint != null;
+                var has_part_joint = attached_part.attachJoint != null;
                 if(has_part_joint)
-				attached_part.attachJoint.DestroyJoint();
+                attached_part.attachJoint.DestroyJoint();
                 attached_mass = attached_part.MassWithChildren();
                 attached_part.transform.position += delta;
-				if(has_part_joint)
+                if(has_part_joint)
                 {
                     attached_part.CreateAttachJoint(attached_part.attachMode);
-					attached_part.ResetJoints();
-				}
-				if(vsl != null) 
-					vsl.SetPosition(vsl.vesselTransform.position-delta*(attached_mass/total_mass));
+                    attached_part.ResetJoints();
+                }
+                if(vsl != null) 
+                    vsl.SetPosition(vsl.vesselTransform.position-delta*(attached_mass/total_mass));
                 else 
-					root.transform.position -= delta*(attached_mass/total_mass);
+                    root.transform.position -= delta*(attached_mass/total_mass);
             }
-		}
+        }
         #endregion
 
         #region Logging
@@ -869,9 +869,9 @@ namespace AT_Utils
             return new_verts;
         }
 
-		static Bounds Bounds(this Part p, Transform refT, ref Bounds b, ref bool inited)
-		{
-			var part_rot = p.partTransform.rotation;
+        static Bounds Bounds(this Part p, Transform refT, ref Bounds b, ref bool inited)
+        {
+            var part_rot = p.partTransform.rotation;
             p.partTransform.rotation = Quaternion.identity;
             foreach(var rend in p.FindModelComponents<Renderer>())
             {
@@ -885,37 +885,37 @@ namespace AT_Utils
                     if(refT != null)
                         v = refT.InverseTransformPoint(v);
                     if(inited) 
-						b.Encapsulate(v);
+                        b.Encapsulate(v);
                     else
-					{
-						b.center = v;
-						inited = true;
-					}
+                    {
+                        b.center = v;
+                        inited = true;
+                    }
                 }
             }
             p.partTransform.rotation = part_rot;
-			return b;
-		}
+            return b;
+        }
 
-		public static Bounds Bounds(this Part p, Transform refT)
-		{
-			var b = new Bounds();
+        public static Bounds Bounds(this Part p, Transform refT)
+        {
+            var b = new Bounds();
             var inited = false;
             return p.Bounds(refT, ref b, ref inited);
-		}
+        }
 
         public static Bounds Bounds(this IShipconstruct vessel, Transform refT = null)
         {
             //update physical bounds
             var b = new Bounds();
-			var inited = false;
+            var inited = false;
             var parts = vessel.Parts;
             for(int i = 0, partsCount = parts.Count; i < partsCount; i++)
             {
                 var p = parts[i];
-				if(p != null)
-					p.Bounds(refT, ref b, ref inited);
-			}
+                if(p != null)
+                    p.Bounds(refT, ref b, ref inited);
+            }
             return b;
         }
 

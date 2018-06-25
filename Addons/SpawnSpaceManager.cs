@@ -144,7 +144,7 @@ namespace AT_Utils
                    SpawnOffset :
                    Vector3.Scale(local_bounds.extents, SpawnOffset);
 
-		public Vector3 GetSpawnOffset(Vector3 local_bounds_extents) =>
+        public Vector3 GetSpawnOffset(Vector3 local_bounds_extents) =>
         SpawnOffset.IsZero() ? 
                    SpawnOffset :
                    Vector3.Scale(local_bounds_extents, SpawnOffset);
