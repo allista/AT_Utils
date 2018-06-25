@@ -32,24 +32,7 @@ namespace AT_Utils
             var dp =
                 part.transform.TransformPoint(node.position) -
                 attached_part.transform.TransformPoint(attached_node.position);
-            Part root  = part.RootPart();
-            Vessel vsl = root.vessel;
-            float total_mass = root.MassWithChildren();
-            float this_mass, attached_mass;
-            if(attached_part == part.parent) 
-            {
-                this_mass = part.MassWithChildren();
-                part.transform.position -= dp;
-                if(vsl != null) vsl.SetPosition(vsl.transform.position+dp*(this_mass/total_mass));
-                else root.transform.position += dp*(this_mass/total_mass);
-            } 
-            else 
-            {
-                attached_mass = attached_part.MassWithChildren();
-                attached_part.transform.position += dp;
-                if(vsl != null) vsl.SetPosition(vsl.transform.position-dp*(attached_mass/total_mass));
-                else root.transform.position -= dp*(attached_mass/total_mass);
-            }
+			part.UpdateAttachedPartPosProportional(attached_part, dp);
         }
 
         bool UpdateJoint()
