@@ -405,7 +405,7 @@ namespace AT_Utils
         to.InverseTransformDirection(from.TransformDirection(vec));
 
         public static Vector3 Local2Local(this Vector3 vec, Transform from, Transform to) =>
-        to.InverseTransformDirection(from.TransformDirection(vec));
+        to.InverseTransformPoint(from.TransformPoint(vec));
 
         public static Vector3d Local2Local(this Vector3d vec, Transform from, Transform to) =>
         to.InverseTransformPoint(from.TransformPoint(vec));
@@ -632,6 +632,9 @@ namespace AT_Utils
             }
         }
 
+        public static void UpdateOrgPos(this Part part, Part root) =>
+        part.orgPos = root.partTransform.InverseTransformPoint(part.transform.position);
+
         public static void UpdateAttachedPartPos(this Part part, AttachNode node, bool proportional = false)
         {
             if(node == null) return;
@@ -650,6 +653,7 @@ namespace AT_Utils
 
         public static void UpdateAttachedPartPos(this Part part, Part attached_part, Vector3 delta)
         {
+            var vsl = attached_part.vessel;
             if(attached_part == part.parent) 
             {
                 var has_part_joint = part.attachJoint != null;
@@ -657,9 +661,12 @@ namespace AT_Utils
                     part.attachJoint.DestroyJoint();
                 part.transform.position -= delta;
                 attached_part = attached_part.localRoot;
-                var vsl = attached_part.vessel;
-                if(vsl != null)
+                if(vsl != null) 
+                {
                     vsl.SetPosition(vsl.vesselTransform.position+delta);
+                    part.UpdateOrgPos(vsl.rootPart);
+                    //part.UpdateOrgPosAndRot(vsl.rootPart);
+                }
                 else
                     attached_part.transform.position += delta;
                 if(has_part_joint)
@@ -674,6 +681,9 @@ namespace AT_Utils
                 if(has_part_joint)
                     attached_part.attachJoint.DestroyJoint();
                 attached_part.transform.position += delta;
+                if(vsl != null) 
+                    part.UpdateOrgPos(vsl.rootPart);
+                //part.UpdateOrgPosAndRot(vsl.rootPart);
                 if(has_part_joint)
                 {
                     attached_part.CreateAttachJoint(attached_part.attachMode);
@@ -695,32 +705,40 @@ namespace AT_Utils
                 if(has_part_joint)
                     part.attachJoint.DestroyJoint();
                 part.transform.position -= delta;
+                if(vsl != null) 
+                {
+                    vsl.SetPosition(vsl.vesselTransform.position+delta*(this_mass/total_mass));
+                    part.UpdateOrgPos(vsl.rootPart);
+                    //part.UpdateOrgPosAndRot(vsl.rootPart);
+                }
+                else 
+                    root.transform.position += delta*(this_mass/total_mass);
                 if(has_part_joint)
                 {
                     part.CreateAttachJoint(part.attachMode);
                     part.ResetJoints();
                 }
-                if(vsl != null) 
-                    vsl.SetPosition(vsl.vesselTransform.position+delta*(this_mass/total_mass));
-                else 
-                    root.transform.position += delta*(this_mass/total_mass);
             } 
             else if(attached_part.parent == part) 
             {
                 var has_part_joint = attached_part.attachJoint != null;
                 if(has_part_joint)
-                attached_part.attachJoint.DestroyJoint();
+                    attached_part.attachJoint.DestroyJoint();
                 attached_mass = attached_part.MassWithChildren();
                 attached_part.transform.position += delta;
+                if(vsl != null) 
+                {
+                    vsl.SetPosition(vsl.vesselTransform.position-delta*(attached_mass/total_mass));
+                    part.UpdateOrgPos(vsl.rootPart);
+                    //part.UpdateOrgPosAndRot(vsl.rootPart);
+                }
+                else 
+                    root.transform.position -= delta*(attached_mass/total_mass);
                 if(has_part_joint)
                 {
                     attached_part.CreateAttachJoint(attached_part.attachMode);
                     attached_part.ResetJoints();
                 }
-                if(vsl != null) 
-                    vsl.SetPosition(vsl.vesselTransform.position-delta*(attached_mass/total_mass));
-                else 
-                    root.transform.position -= delta*(attached_mass/total_mass);
             }
         }
         #endregion
