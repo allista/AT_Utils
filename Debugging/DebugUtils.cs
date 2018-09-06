@@ -201,6 +201,22 @@ namespace AT_Utils
             return string.Join("", log.ToArray());
         }
 
+        public static string formatPartJointsTree(Part p, string indent = "")
+        {
+            var count = p.children.Count;
+            var log = new string[count+1];
+            log[0] = string.Format("{0}{1}: attachJoint [child {2}, parent {3}, host {4}, target {5}]\n", 
+                                   indent, p, 
+                                   p.attachJoint?.Child,
+                                   p.attachJoint?.Parent,
+                                   p.attachJoint?.Host,
+                                   p.attachJoint?.Target);
+            indent += "\t";
+            for(int i = 0; i < count; i++)
+                log[i+1] = formatPartJointsTree(p.children[i], indent);
+            return string.Join("", log);
+        }
+
         public static void logShipConstruct(ShipConstruct ship)
         {
             Utils.Log("ShipConstruct: {}\n{}",
