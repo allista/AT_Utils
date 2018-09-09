@@ -665,7 +665,7 @@ namespace AT_Utils
                 {
                     vsl.SetPosition(vsl.vesselTransform.position+delta);
                     part.UpdateOrgPos(vsl.rootPart);
-                    //part.UpdateOrgPosAndRot(vsl.rootPart);
+                    part.transform.rotation = vsl.transform.rotation * part.orgRot;
                 }
                 else
                     attached_part.transform.position += delta;
@@ -682,8 +682,10 @@ namespace AT_Utils
                     attached_part.attachJoint.DestroyJoint();
                 attached_part.transform.position += delta;
                 if(vsl != null) 
+                {
                     part.UpdateOrgPos(vsl.rootPart);
-                //part.UpdateOrgPosAndRot(vsl.rootPart);
+                    part.transform.rotation = vsl.transform.rotation * part.orgRot;
+                }
                 if(has_part_joint)
                 {
                     attached_part.CreateAttachJoint(attached_part.attachMode);
@@ -709,7 +711,7 @@ namespace AT_Utils
                 {
                     vsl.SetPosition(vsl.vesselTransform.position+delta*(this_mass/total_mass));
                     part.UpdateOrgPos(vsl.rootPart);
-                    //part.UpdateOrgPosAndRot(vsl.rootPart);
+                    part.transform.rotation = vsl.transform.rotation * part.orgRot;
                 }
                 else 
                     root.transform.position += delta*(this_mass/total_mass);
@@ -730,7 +732,7 @@ namespace AT_Utils
                 {
                     vsl.SetPosition(vsl.vesselTransform.position-delta*(attached_mass/total_mass));
                     part.UpdateOrgPos(vsl.rootPart);
-                    //part.UpdateOrgPosAndRot(vsl.rootPart);
+                    part.transform.rotation = vsl.transform.rotation * part.orgRot;
                 }
                 else 
                     root.transform.position -= delta*(attached_mass/total_mass);
