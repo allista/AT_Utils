@@ -409,6 +409,12 @@ namespace AT_Utils
 
         public static Vector3d Local2Local(this Vector3d vec, Transform from, Transform to) =>
         to.InverseTransformPoint(from.TransformPoint(vec));
+
+        public static Vector3 TransformPointUnscaled(this Transform T, Vector3 local) =>
+        T.position + T.TransformDirection(local);
+
+        public static Vector3 InverseTransformPointUnscaled(this Transform T, Vector3 world) =>
+        T.InverseTransformDirection(world-T.position);
     }
 
 
