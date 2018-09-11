@@ -88,8 +88,7 @@ namespace AT_Utils
             Vector3 axis;
             spawn_transform.rotation.ToAngleAxis(out angle, out axis);
             var root = construct.parts[0].localRoot.transform;
-            var rootPos = spawn_transform.position + spawn_transform.TransformDirection(spawn_offset);
-            root.Translate(rootPos, Space.World);
+            root.Translate(spawn_transform.TransformPointUnscaled(spawn_offset), Space.World);
             root.RotateAround(spawn_transform.position, axis, angle);
             //initialize new vessel
             AssembleForLaunchUnlanded(construct, new Orbit(vessel.orbit), 
@@ -97,7 +96,10 @@ namespace AT_Utils
             launched_vessel = FlightGlobals.Vessels[FlightGlobals.Vessels.Count - 1];
             on_vessel_positioned?.Invoke(launched_vessel);
             //launch the vessel
-            foreach(var i in launch_moving_vessel(spawn_transform, spawn_offset, dV,
+            foreach(var i in launch_moving_vessel(spawn_transform, 
+                                                  spawn_offset,
+                                                  spawn_transform.rotation.Inverse()*root.rotation,
+                                                  dV,
                                                   on_vessel_loaded,
                                                   on_vessel_off_rails,
                                                   on_vessel_launched))
@@ -123,6 +125,7 @@ namespace AT_Utils
             launched_vessel.skipGroundPositioning = true;
             foreach(var i in launch_moving_vessel(spawn_transform, 
                                                   spawn_offset, 
+                                                  Quaternion.identity, 
                                                   dV,
                                                   on_vessel_loaded,
                                                   on_vessel_off_rails,
@@ -323,6 +326,7 @@ namespace AT_Utils
 
         IEnumerable<YieldInstruction> launch_moving_vessel(Transform spawn_transform,
                                                            Vector3 spawn_offset,
+                                                           Quaternion spawn_rot_offset,
                                                            Vector3 dV,
                                                            Callback<Vessel> on_vessel_loaded,
                                                            Callback<Vessel> on_vessel_off_rails,
@@ -341,8 +345,8 @@ namespace AT_Utils
                     FlightCameraOverride.UpdateDurationSeconds(1);
                     try
                     {
-                        launched_vessel.SetPosition(spawn_transform.position + spawn_transform.TransformDirection(spawn_offset));
-                        launched_vessel.SetRotation(spawn_transform.rotation);
+                        launched_vessel.SetPosition(spawn_transform.TransformPointUnscaled(spawn_offset));
+                        launched_vessel.SetRotation(spawn_transform.rotation*spawn_rot_offset);
                     }
                     catch(Exception e)
                     { Utils.Log("Exception occured during launched_vessel.SetPosition/Rotation call. Ignoring it:\n{}", e.StackTrace); }
@@ -350,8 +354,8 @@ namespace AT_Utils
                     yield return new WaitForFixedUpdate();
                 }
                 if(launched_vessel == null) goto end;
-                launched_vessel.SetPosition(spawn_transform.position + spawn_transform.TransformDirection(spawn_offset));
-                launched_vessel.SetRotation(spawn_transform.rotation);
+                launched_vessel.SetPosition(spawn_transform.TransformPointUnscaled(spawn_offset));
+                launched_vessel.SetRotation(spawn_transform.rotation*spawn_rot_offset);
             }
             else
             {
@@ -363,16 +367,16 @@ namespace AT_Utils
                     FlightCameraOverride.UpdateDurationSeconds(1);
                     try
                     {
-                        launched_vessel.SetPosition(spawn_transform.position + spawn_transform.TransformDirection(spawn_offset));
-                        launched_vessel.SetRotation(spawn_transform.rotation);
+                        launched_vessel.SetPosition(spawn_transform.TransformPointUnscaled(spawn_offset));
+                        launched_vessel.SetRotation(spawn_transform.rotation*spawn_rot_offset);
                     }
                     catch(Exception e)
                     { Utils.Log("Exception occured during launched_vessel.SetPosition/Rotation call. Ignoring it:\n{}", e.StackTrace); }
                     yield return new WaitForFixedUpdate();
                 }
                 if(launched_vessel == null) goto end;
-                launched_vessel.SetPosition(spawn_transform.position + spawn_transform.TransformDirection(spawn_offset));
-                launched_vessel.SetRotation(spawn_transform.rotation);
+                launched_vessel.SetPosition(spawn_transform.TransformPointUnscaled(spawn_offset));
+                launched_vessel.SetRotation(spawn_transform.rotation*spawn_rot_offset);
             }
             launched_vessel.situation = vessel.situation;
             FlightGlobals.ForceSetActiveVessel(launched_vessel);
