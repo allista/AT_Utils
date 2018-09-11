@@ -88,9 +88,11 @@ namespace AT_Utils
             affected_objects = Utils.ParseLine(AffectedObjects, Utils.Comma).Select(s => new Regex(s)).ToList();
             foreach(var r in part.FindModelComponents<Renderer>())
             {
-                if(r == null || !r.enabled) continue;
-                if(affected_objects.Any(exp => exp.IsMatch(r.name.Replace("(Instance)", "").Trim())))
-                    renderers.Add(r);
+                if(r != null) 
+                {
+                    if(affected_objects.Any(exp => exp.IsMatch(r.name.Replace("(Instance)", "").Trim())))
+                        renderers.Add(r);
+                }
             }
             if(renderers.Count == 0)
                 this.Log("None of the following objects were found in the model: {}", AffectedObjects);
