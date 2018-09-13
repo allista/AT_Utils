@@ -1,6 +1,16 @@
 #AT Utils ChangeLog
 
-* **v1.6.0**
+* **v1.6.1**
+    * Added DebugUtils.formatPartJointsTree
+    * Fixed Local2Local; fixed UpdateAttachedPartPos*
+    * Fixed messed up part rotation when animating part resizing
+    * Added Transform.(Inverse)TransformPointUnscaled extensions
+    * Fixed VesselSpawner.SpawnShipConstruct positioning.
+    * Consider disabled renderers when searching for AffectedObjects in STS
+
+* v1.6.0.1 -- compatible with KSP-1.4.5
+
+* v1.6.0
     * Added ShipConstructLoader component that loads both complete .crafts and subsassemblies.
     * GUIWindowBase.HUD_enabled takes into account level_loaded flag.
     * Added SlowUpdate coroutine helper.
