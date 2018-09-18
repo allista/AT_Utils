@@ -422,7 +422,7 @@ namespace AT_Utils
     {
         public static TSource SelectMax<TSource>(this IEnumerable<TSource> s, Func<TSource, float> metric)
         {
-            float max_v = -1;
+            float max_v = float.NegativeInfinity;
             TSource max_e = default(TSource);
             foreach(TSource e in s)
             {
@@ -754,14 +754,11 @@ namespace AT_Utils
         #region Logging
         public static string Title(this Part p) { return p.partInfo != null? p.partInfo.title : p.name; }
 
-        public static void Log(this MonoBehaviour mb, string msg, params object[] args)
-        { Utils.Log(string.Format("{0}: {1}", mb.name, msg), args); }
+        public static void Log(this MonoBehaviour mb, string msg, params object[] args) =>
+        Utils.Log(string.Format("{0}: {1}", mb.GetID(), msg), args);
 
-        public static void Log(this Part p, string msg, params object[] args)
-        {
-            var vn = p.vessel == null? "_vessel" : (string.IsNullOrEmpty(p.vessel.vesselName)? p.vessel.id.ToString() : p.vessel.vesselName);
-            Utils.Log(string.Format("{0}.{1} [{2}]: {3}", vn, p.Title(), p.flightID, msg), args);
-        }
+        public static void Log(this Part p, string msg, params object[] args) =>
+        Utils.Log(string.Format("{0}: {1}", p.GetID(), msg), args);
         #endregion
 
         #region Misc
@@ -829,18 +826,15 @@ namespace AT_Utils
             return;
         }
 
-        public static void Log(this PartModule pm, string msg, params object[] args)
-        { 
-            var vn = pm.vessel == null? "_vessel" : (string.IsNullOrEmpty(pm.vessel.vesselName)? pm.vessel.id.ToString() : pm.vessel.vesselName);
-            Utils.Log(string.Format("{0}:{1}:{2} [{3}]: {4}", vn, pm.part == null? "_part" : pm.part.Title(), pm.moduleName, pm.GetInstanceID(), msg), args); 
-        }
+        public static void Log(this PartModule pm, string msg, params object[] args) =>
+        Utils.Log(string.Format("{0}: {1}", pm.GetID(), msg), args);
     }
 
 
     public static class VesselExtensions
     {
-        public static void Log(this Vessel v, string msg, params object[] args)
-        { Utils.Log(string.Format("{0}: {1}", v.vesselName, msg), args); }
+        public static void Log(this Vessel v, string msg, params object[] args) =>
+        Utils.Log(string.Format("{0}: {1}", v.GetID(), msg), args);
 
         public static Part GetPart<T>(this Vessel v) where T : PartModule
         { return v.parts.FirstOrDefault(p => p.HasModule<T>()); }
