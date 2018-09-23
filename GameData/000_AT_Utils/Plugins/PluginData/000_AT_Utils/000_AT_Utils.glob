@@ -1,5 +1,5 @@
 MeshesToSkip = flagtransform canopy
-BadParts = RadialDrill
+BadParts = RadialDrill MKS_Drill_02 MKS_Drill_02A MKS_Drill_03 MKS_Drill_03A
 
 StylesConfig
 {
