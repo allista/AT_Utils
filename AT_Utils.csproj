@@ -137,6 +137,7 @@
     <Compile Include="Debugging\MetricDebug.cs" />
     <Compile Include="AnimatedNode.cs" />
     <Compile Include="StringID.cs" />
+    <Compile Include="Modules\NamedDockingNode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
