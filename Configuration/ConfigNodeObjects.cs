@@ -10,6 +10,10 @@
 using System;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
+using System.IO;
+using System.Text;
 
 namespace AT_Utils
 {
@@ -74,6 +78,12 @@ namespace AT_Utils
                     //restore ConfigNodes
                     else if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
                         fi.SetValue(this, n.CreateCopy());
+                    //restore Orbit
+                    else if(fi.FieldType == typeof(Orbit))
+                    {
+                        var obt = new OrbitSnapshot(n);
+                        fi.SetValue(this, obt.Load());
+                    }
                     continue;
                 }
                 //restore types saved as values
@@ -82,6 +92,8 @@ namespace AT_Utils
                 {
                     if(fi.FieldType == typeof(Guid))
                         fi.SetValue(this, new Guid(v));
+                    else if(fi.FieldType == typeof(Vector3d))
+                        fi.SetValue(this, KSPUtil.ParseVector3d(v));
                 }
             }
         }
@@ -102,27 +114,43 @@ namespace AT_Utils
 
         virtual public void Save(ConfigNode node)
         {
-            ConfigNode.CreateConfigFromObject(this, node);
+            try
+            {
+                ConfigNode.CreateConfigFromObject(this, node);
+            }
+            catch(Exception e)
+            {
+                Utils.Log("Exception while saving {}\n{}\n{}\n{}", 
+                          this, e.Message, e.StackTrace, node);
+            }
             foreach(var fi in get_fields())
             {
                 if(not_persistant(fi)) continue;
-                //save all IConfigNodes
+                //save all IConfigNode
                 if(fi.FieldType.GetInterface(cnode_name) != null)
                 {
                     var f = fi.GetValue(this) as IConfigNode;
                     if(f != null) f.Save(get_field_node(fi, node));
                 }
-                //save ConfigNodes
+                //save ConfigNode
                 else if(typeof(ConfigNode).IsAssignableFrom(fi.FieldType))
                 {
                     var f = fi.GetValue(this) as ConfigNode;
                     if(f != null) get_field_node(fi, node).AddData(f);
                 }
-                //save some often used ValueTypes
+                //save some often used types
                 else if(fi.FieldType == typeof(Guid))
+                    node.AddValue(fi.Name, ((Guid)fi.GetValue(this)).ToString("N"));
+                else if(fi.FieldType == typeof(Vector3d))
+                    node.AddValue(fi.Name, KSPUtil.WriteVector((Vector3d)fi.GetValue(this)));
+                else if(fi.FieldType == typeof(Orbit))
                 {
-                    var f = (Guid)fi.GetValue(this);
-                    node.AddValue(fi.Name, f.ToString("N"));
+                    var f = fi.GetValue(this) as Orbit;
+                    if(f != null)
+                    {
+                        var obt = new OrbitSnapshot(f);
+                        obt.Save(get_field_node(fi, node));
+                    }
                 }
             }
         }
@@ -159,6 +187,26 @@ namespace AT_Utils
             Save(n);
             return n.ToString();
         }
+
+        #region Binary Serializer
+        static MemoryStream memoryStream = new MemoryStream();
+        static BinaryFormatter binaryFormatter = new BinaryFormatter();
+
+        public static string Serialize(object obj)
+        {
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            binaryFormatter.Serialize(memoryStream, obj);
+            return Convert.ToBase64String(memoryStream.ToArray());
+        }
+
+        public static T Deserialize<T>(string data)
+        {
+            var bytes = Convert.FromBase64String(data);
+            memoryStream.SetLength(0);
+            memoryStream.Write(bytes, 0, bytes.Length);
+            return (T)binaryFormatter.Deserialize(memoryStream);
+        }
+        #endregion
     }
 
     public class TypedConfigNodeObject : ConfigNodeObject
