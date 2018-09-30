@@ -9,6 +9,8 @@ namespace AT_Utils
 {
     public class ResourceInfo : ConfigNodeObject
     {
+        new public const string NODE_NAME = "RESOURCE_INFO";
+
         [Persistent] public string name = "";
 
         PartResourceDefinition _resource;
@@ -24,6 +26,8 @@ namespace AT_Utils
         }
 
         public int id { get { return def.id; } }
+
+        public ResourceInfo() {}
 
         public ResourceInfo(string name = "")
         {
