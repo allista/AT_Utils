@@ -184,7 +184,7 @@ namespace AT_Utils
         public virtual void UnlockControls()
         { 
             Utils.LockIfMouseOver(LockName, WindowPos, false); 
-            subwindows.ForEach(sw => sw.UnlockControls());
+            subwindows.ForEach(sw => sw?.UnlockControls());
         }
 
         public virtual void LockControls()
