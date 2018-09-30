@@ -11,15 +11,14 @@ namespace AT_Utils
 {
     public class SimpleScrollView : GUIWindowBase
     {
-        public Action DrawContent;
+        public Action DrawContent = () => { };
         Vector2 scroll = Vector2.zero;
 
-        public SimpleScrollView(int width = 400, int height = 300)
+        public SimpleScrollView()
         {
-            this.width = width;
-            this.height = height;
+            width = 400;
+            height = 300;
             WindowPos = new Rect(Screen.width / 2 - width / 2, 100, width, height);
-            DrawContent = () => {};
         }
 
         void DialogWindow(int windowId)
