@@ -28,6 +28,8 @@ namespace AT_Utils
         {
             base.OnAwake();
             name_editor = gameObject.AddComponent<SimpleTextEntry>();
+            foreach(var evt in Events)
+                event_names.Add(evt, evt.guiName);
         }
 
         protected void OnDestroy()
@@ -41,8 +43,6 @@ namespace AT_Utils
             if(string.IsNullOrEmpty(PortName))
                 PortName = string.IsNullOrEmpty(referenceAttachNode) ?
                              nodeTransformName : referenceAttachNode;
-            foreach(var evt in Events)
-                event_names.Add(evt, evt.guiName);
             update_event_names();
         }
 
