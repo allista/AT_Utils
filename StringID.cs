@@ -15,11 +15,18 @@ namespace AT_Utils
         string.Format("{0}[{1:X}]", 
                       o.GetType().Name, o.GetHashCode());
 
+        public static string GetID(this GameObject o) =>
+        o == null ? 
+        "_GO" : 
+        string.Format("{0}[{1:X}]", 
+                      o.name, o.GetHashCode());
+
         public static string GetID(this MonoBehaviour mb) =>
         mb == null ? 
         "_behaviour" : 
-        string.Format("{0}[{1:X}]", 
-                      mb.name, mb.GetHashCode());
+        string.Format("{0}:{1}[{2:X}]", 
+                      mb.gameObject.GetID(),
+                      mb.GetType().Name, mb.GetHashCode());
 
         public static string GetID(this Vessel vessel) =>
         vessel == null ?
