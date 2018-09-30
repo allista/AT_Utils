@@ -34,14 +34,15 @@ namespace AT_Utils
 
         #region Subwindows
         public string Name = "";
-        protected List<FieldInfo> subwindow_fields = new List<FieldInfo>();
-        protected List<GUIWindowBase> subwindows = new List<GUIWindowBase>();
+        protected List<FieldInfo> subwindow_fields;
+        protected List<GUIWindowBase> subwindows;
 
         void init_subwindows()
         {
             subwindow_fields = GetType()
                 .GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.FlattenHierarchy)
                 .Where(fi => typeof(GUIWindowBase).IsAssignableFrom(fi.FieldType)).ToList();
+            subwindows = new List<GUIWindowBase>();
             foreach(var sw in subwindow_fields)
             {
                 var obj = gameObject.AddComponent(sw.FieldType) as GUIWindowBase;
@@ -183,8 +184,8 @@ namespace AT_Utils
 
         public virtual void UnlockControls()
         { 
-            Utils.LockIfMouseOver(LockName, WindowPos, false); 
-            subwindows.ForEach(sw => sw?.UnlockControls());
+            Utils.LockIfMouseOver(LockName, WindowPos, false);
+            subwindows.ForEach(sw => sw.UnlockControls());
         }
 
         public virtual void LockControls()
