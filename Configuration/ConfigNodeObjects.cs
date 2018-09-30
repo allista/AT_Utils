@@ -121,7 +121,7 @@ namespace AT_Utils
             catch(Exception e)
             {
                 Utils.Log("Exception while saving {}\n{}\n{}\n{}", 
-                          this, e.Message, e.StackTrace, node);
+                          GetType().Name, e.Message, e.StackTrace, node);
             }
             foreach(var fi in get_fields())
             {
