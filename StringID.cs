@@ -9,24 +9,35 @@ namespace AT_Utils
 {
     public static class StringID
     {
+        static string GetSystemID(object o) =>
+        string.Format("{0}[{1:X}]", o.GetType().Name, o.GetHashCode());
+
+        static string GetObjectID(Object o) =>
+        string.Format("{0}[{1:X}]", o.name, o.GetHashCode());
+
+        static string GetComponentID(Component c) =>
+        string.Format("{0}:{1}", c.gameObject.GetID(), GetObjectID(c));
+
+        static string GetComponentSysID(Component c) =>
+        string.Format("{0}:{1}", c.gameObject.GetID(), GetSystemID(c));
+
         public static string GetID(this object o) =>
-        o == null ? 
-        "_object" : 
-        string.Format("{0}[{1:X}]", 
-                      o.GetType().Name, o.GetHashCode());
+        o == null ? "_object" : GetSystemID(o);
+
+        public static string GetID(this Object o) =>
+        o == null ? "_Object" : GetSystemID(o);
 
         public static string GetID(this GameObject o) =>
-        o == null ? 
-        "_GO" : 
-        string.Format("{0}[{1:X}]", 
-                      o.name, o.GetHashCode());
+        o == null ? "_GO" : GetObjectID(o);
+
+        public static string GetID(this Component c) =>
+        c == null ? "_component" : GetComponentSysID(c);
+
+        public static string GetID(this Transform t) =>
+        t == null ? "_transform" : GetComponentID(t);
 
         public static string GetID(this MonoBehaviour mb) =>
-        mb == null ? 
-        "_behaviour" : 
-        string.Format("{0}:{1}[{2:X}]", 
-                      mb.gameObject.GetID(),
-                      mb.GetType().Name, mb.GetHashCode());
+        mb == null ? "_behaviour" : GetComponentSysID(mb);
 
         public static string GetID(this Vessel vessel) =>
         vessel == null ?
