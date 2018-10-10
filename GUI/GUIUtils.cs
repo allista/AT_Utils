@@ -183,7 +183,10 @@ namespace AT_Utils
         }
 
         public static void UpdateEditorGUI()
-        { if(EditorLogic.fetch != null)    GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship); }
+        { 
+            if(EditorLogic.fetch != null)
+                GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship); 
+        }
         #endregion
 
         public static void Message(float duration, string msg, params object[] args)
