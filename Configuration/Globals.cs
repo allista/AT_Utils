@@ -24,9 +24,11 @@ namespace AT_Utils
         {
             //init meshes and parts names
             if(!string.IsNullOrEmpty(MeshesToSkip))
-                MeshesToSkipList.AddUniqueRange(Utils.ParseLine(MeshesToSkip, Utils.Comma));
+                MeshesToSkipList.AddUniqueRange(Utils.ParseLine(MeshesToSkip, Utils.Delimiters));
             if(!string.IsNullOrEmpty(BadParts))
-                BadPartsList.AddUniqueRange(Utils.ParseLine(BadParts, Utils.Comma));
+                BadPartsList.AddUniqueRange(Utils.ParseLine(BadParts, Utils.Delimiters));
+            Utils.Log("Meshes to skip: {}", MeshesToSkipList);
+            Utils.Log("Bad parts: {}", BadPartsList);
         }
     }
 }

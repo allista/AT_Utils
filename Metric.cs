@@ -155,7 +155,7 @@ namespace AT_Utils
                 var is_asteroid = p.Modules.GetModule<ModuleAsteroid>() != null;
                 //check for bad parts
                 var pname = p.partInfo != null? p.partInfo.name : p.name;
-                var bad_part = Utils.NameMatches(p.name, AT_UtilsGlobals.Instance.BadPartsList);
+                var bad_part = Utils.NameMatches(pname, AT_UtilsGlobals.Instance.BadPartsList);
                 var part_rot = p.partTransform.rotation;
                 if(bad_part) 
                     p.partTransform.rotation = Quaternion.identity;

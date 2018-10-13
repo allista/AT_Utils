@@ -1,5 +1,5 @@
 MeshesToSkip = flagtransform canopy
-BadParts = RadialDrill MKS_Drill_02 MKS_Drill_02A MKS_Drill_03 MKS_Drill_03A
+BadParts = RadialDrill MKS.Drill.02 MKS.Drill.03
 
 StylesConfig
 {
@@ -12,4 +12,4 @@ StylesConfig
     CloseButtonColor = red
     DangerButtonColor = red
 }
-
+//:mode=c#:
