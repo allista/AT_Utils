@@ -25,14 +25,13 @@ namespace AT_Utils
             nT        = node_transform; 
         }
 
-        //move parts proportionally to the masses
         void UpdatePartsPos()
         {
             if(attached_part == null || attached_node == null) return;
             var dp =
                 part.transform.TransformPoint(node.position) -
                 attached_part.transform.TransformPoint(attached_node.position);
-            part.UpdateAttachedPartPosProportional(attached_part, dp);
+            part.UpdateAttachedPartPos(attached_part, dp);
         }
 
         bool UpdateJoint()

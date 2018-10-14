@@ -7,7 +7,7 @@
 // To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ 
 // or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,19 +19,19 @@ namespace AT_Utils
     {
         public static Color Normalized(this Color c)
         {
-            var max = c.r > c.g? (c.r > c.b? c.r : c.b) : (c.g > c.b? c.g : c.b);
-            return max.Equals(0)? c : new Color(c.r / max, c.g / max, c.b / max);
+            var max = c.r > c.g ? (c.r > c.b ? c.r : c.b) : (c.g > c.b ? c.g : c.b);
+            return max.Equals(0) ? c : new Color(c.r / max, c.g / max, c.b / max);
         }
 
         #region From blizzy's Toolbar
-        public static Vector2 clampToScreen(this Vector2 pos) 
+        public static Vector2 clampToScreen(this Vector2 pos)
         {
             pos.x = Mathf.Clamp(pos.x, 0, Screen.width - 1);
             pos.y = Mathf.Clamp(pos.y, 0, Screen.height - 1);
             return pos;
         }
 
-        public static Rect clampToScreen(this Rect rect) 
+        public static Rect clampToScreen(this Rect rect)
         {
             rect.width = Mathf.Clamp(rect.width, 0, Screen.width);
             rect.height = Mathf.Clamp(rect.height, 0, Screen.height);
@@ -40,7 +40,7 @@ namespace AT_Utils
             return rect;
         }
 
-        public static Rect clampToWindow(this Rect rect, Rect window) 
+        public static Rect clampToWindow(this Rect rect, Rect window)
         {
             rect.width = Mathf.Clamp(rect.width, 0, window.width);
             rect.height = Mathf.Clamp(rect.height, 0, window.height);
@@ -55,10 +55,10 @@ namespace AT_Utils
         { n.AddValue(name, ConfigNode.WriteQuaternion(new Quaternion(r.x, r.y, r.width, r.height))); }
 
         public static Rect GetRect(this ConfigNode n, string name)
-        { 
-            try 
-            { 
-                var q = ConfigNode.ParseQuaternion(n.GetValue(name)); 
+        {
+            try
+            {
+                var q = ConfigNode.ParseQuaternion(n.GetValue(name));
                 return new Rect(q.x, q.y, q.z, q.w);
             }
             catch { return default(Rect); }
@@ -94,7 +94,7 @@ namespace AT_Utils
                 var ai = Mathf.Abs(v[i]);
                 if(max < ai) max = ai;
             }
-            return v/max;
+            return v / max;
         }
 
         public static Vector3d CubeNorm(this Vector3d v)
@@ -106,23 +106,23 @@ namespace AT_Utils
                 var ai = Math.Abs(v[i]);
                 if(max < ai) max = ai;
             }
-            return v/max;
+            return v / max;
         }
 
-        public static Vector3 Inverse(this Vector3 v, float inf=float.MaxValue) 
-        { 
+        public static Vector3 Inverse(this Vector3 v, float inf = float.MaxValue)
+        {
             return new Vector3(
-                v.x.Equals(0)? inf : 1/v.x, 
-                v.y.Equals(0)? inf : 1/v.y, 
-                v.z.Equals(0)? inf : 1/v.z); 
+                v.x.Equals(0) ? inf : 1 / v.x,
+                v.y.Equals(0) ? inf : 1 / v.y,
+                v.z.Equals(0) ? inf : 1 / v.z);
         }
 
-        public static Vector3d Inverse(this Vector3d v, double inf=double.MaxValue) 
-        { 
+        public static Vector3d Inverse(this Vector3d v, double inf = double.MaxValue)
+        {
             return new Vector3d(
-                v.x.Equals(0)? inf : 1/v.x, 
-                v.y.Equals(0)? inf : 1/v.y, 
-                v.z.Equals(0)? inf : 1/v.z); 
+                v.x.Equals(0) ? inf : 1 / v.x,
+                v.y.Equals(0) ? inf : 1 / v.y,
+                v.z.Equals(0) ? inf : 1 / v.z);
         }
 
         public static Vector3 ScaleChain(this Vector3 vec, params Vector3[] vectors)
@@ -151,126 +151,126 @@ namespace AT_Utils
             return result;
         }
 
-        public static Vector3 SquaredComponents(this Vector3 v) 
+        public static Vector3 SquaredComponents(this Vector3 v)
         { return new Vector3(v.x * v.x, v.y * v.y, v.z * v.z); }
 
-        public static Vector3d SquaredComponents(this Vector3d v) 
+        public static Vector3d SquaredComponents(this Vector3d v)
         { return new Vector3d(v.x * v.x, v.y * v.y, v.z * v.z); }
 
-        public static Vector3 SqrtComponents(this Vector3 v) 
+        public static Vector3 SqrtComponents(this Vector3 v)
         { return new Vector3(Mathf.Sqrt(v.x), Mathf.Sqrt(v.y), Mathf.Sqrt(v.z)); }
 
-        public static Vector3d SqrtComponents(this Vector3d v) 
+        public static Vector3d SqrtComponents(this Vector3d v)
         { return new Vector3d(Math.Sqrt(v.x), Math.Sqrt(v.y), Math.Sqrt(v.z)); }
 
-        public static Vector3 PowComponents(this Vector3 v, float pow) 
+        public static Vector3 PowComponents(this Vector3 v, float pow)
         { return new Vector3(Mathf.Pow(v.x, pow), Mathf.Pow(v.y, pow), Mathf.Pow(v.z, pow)); }
 
-        public static Vector3d PowComponents(this Vector3d v, double pow) 
+        public static Vector3d PowComponents(this Vector3d v, double pow)
         { return new Vector3d(Math.Pow(v.x, pow), Math.Pow(v.y, pow), Math.Pow(v.z, pow)); }
 
-        public static Vector3 ClampComponents(this Vector3 v, float min, float max) 
-        { 
-            return new Vector3(Mathf.Clamp(v.x, min, max), 
-                               Mathf.Clamp(v.y, min, max), 
-                               Mathf.Clamp(v.z, min, max)); 
+        public static Vector3 ClampComponents(this Vector3 v, float min, float max)
+        {
+            return new Vector3(Mathf.Clamp(v.x, min, max),
+                               Mathf.Clamp(v.y, min, max),
+                               Mathf.Clamp(v.z, min, max));
         }
 
-        public static Vector3 ClampComponents(this Vector3 v, Vector3 min, Vector3 max) 
-        { 
-            return new Vector3(Mathf.Clamp(v.x, min.x, max.x), 
-                               Mathf.Clamp(v.y, min.y, max.y), 
-                               Mathf.Clamp(v.z, min.z, max.z)); 
+        public static Vector3 ClampComponents(this Vector3 v, Vector3 min, Vector3 max)
+        {
+            return new Vector3(Mathf.Clamp(v.x, min.x, max.x),
+                               Mathf.Clamp(v.y, min.y, max.y),
+                               Mathf.Clamp(v.z, min.z, max.z));
         }
 
-        public static Vector3 ClampComponentsL(this Vector3 v, Vector3 min) 
-        { 
-            return new Vector3(Utils.ClampL(v.x, min.x), 
-                               Utils.ClampL(v.y, min.y), 
-                               Utils.ClampL(v.z, min.z)); 
+        public static Vector3 ClampComponentsL(this Vector3 v, Vector3 min)
+        {
+            return new Vector3(Utils.ClampL(v.x, min.x),
+                               Utils.ClampL(v.y, min.y),
+                               Utils.ClampL(v.z, min.z));
         }
 
-        public static Vector3 ClampComponentsH(this Vector3 v, Vector3 max) 
-        { 
-            return new Vector3(Utils.ClampH(v.x, max.x), 
-                               Utils.ClampH(v.y, max.y), 
+        public static Vector3 ClampComponentsH(this Vector3 v, Vector3 max)
+        {
+            return new Vector3(Utils.ClampH(v.x, max.x),
+                               Utils.ClampH(v.y, max.y),
                                Utils.ClampH(v.z, max.z));
         }
 
-        public static Vector3d ClampComponents(this Vector3d v, double min, double max) 
-        { 
-            return new Vector3d(Utils.Clamp(v.x, min, max), 
-                                Utils.Clamp(v.y, min, max), 
-                                Utils.Clamp(v.z, min, max)); 
+        public static Vector3d ClampComponents(this Vector3d v, double min, double max)
+        {
+            return new Vector3d(Utils.Clamp(v.x, min, max),
+                                Utils.Clamp(v.y, min, max),
+                                Utils.Clamp(v.z, min, max));
         }
 
-        public static Vector3d ClampComponents(this Vector3d v, Vector3d min, Vector3d max) 
-        { 
-            return new Vector3d(Utils.Clamp(v.x, min.x, max.x), 
-                                Utils.Clamp(v.y, min.y, max.y), 
-                                Utils.Clamp(v.z, min.z, max.z)); 
+        public static Vector3d ClampComponents(this Vector3d v, Vector3d min, Vector3d max)
+        {
+            return new Vector3d(Utils.Clamp(v.x, min.x, max.x),
+                                Utils.Clamp(v.y, min.y, max.y),
+                                Utils.Clamp(v.z, min.z, max.z));
         }
 
-        public static Vector3d ClampComponentsH(this Vector3d v, Vector3d max) 
-        { 
-            return new Vector3d(Utils.ClampH(v.x, max.x), 
-                                Utils.ClampH(v.y, max.y), 
-                                Utils.ClampH(v.z, max.z)); 
+        public static Vector3d ClampComponentsH(this Vector3d v, Vector3d max)
+        {
+            return new Vector3d(Utils.ClampH(v.x, max.x),
+                                Utils.ClampH(v.y, max.y),
+                                Utils.ClampH(v.z, max.z));
         }
 
-        public static Vector3d ClampComponentsL(this Vector3d v, Vector3d min) 
-        { 
-            return new Vector3d(Utils.ClampL(v.x, min.x), 
-                                Utils.ClampL(v.y, min.y), 
-                                Utils.ClampL(v.z, min.z)); 
+        public static Vector3d ClampComponentsL(this Vector3d v, Vector3d min)
+        {
+            return new Vector3d(Utils.ClampL(v.x, min.x),
+                                Utils.ClampL(v.y, min.y),
+                                Utils.ClampL(v.z, min.z));
         }
 
-        public static Vector3 ClampComponentsH(this Vector3 v, float max) 
-        { 
-            return new Vector3(Utils.ClampH(v.x, max), 
-                               Utils.ClampH(v.y, max), 
-                               Utils.ClampH(v.z, max)); 
+        public static Vector3 ClampComponentsH(this Vector3 v, float max)
+        {
+            return new Vector3(Utils.ClampH(v.x, max),
+                               Utils.ClampH(v.y, max),
+                               Utils.ClampH(v.z, max));
         }
 
-        public static Vector3 ClampComponentsL(this Vector3 v, float min) 
-        { 
-            return new Vector3(Utils.ClampL(v.x, min), 
-                               Utils.ClampL(v.y, min), 
-                               Utils.ClampL(v.z, min)); 
+        public static Vector3 ClampComponentsL(this Vector3 v, float min)
+        {
+            return new Vector3(Utils.ClampL(v.x, min),
+                               Utils.ClampL(v.y, min),
+                               Utils.ClampL(v.z, min));
         }
 
-        public static Vector3d ClampComponentsH(this Vector3d v, double max) 
-        { 
-            return new Vector3d(Utils.ClampH(v.x, max), 
-                                Utils.ClampH(v.y, max), 
-                                Utils.ClampH(v.z, max)); 
+        public static Vector3d ClampComponentsH(this Vector3d v, double max)
+        {
+            return new Vector3d(Utils.ClampH(v.x, max),
+                                Utils.ClampH(v.y, max),
+                                Utils.ClampH(v.z, max));
         }
 
-        public static Vector3d ClampComponentsL(this Vector3d v, double min) 
-        { 
-            return new Vector3d(Utils.ClampL(v.x, min), 
-                                Utils.ClampL(v.y, min), 
-                                Utils.ClampL(v.z, min)); 
+        public static Vector3d ClampComponentsL(this Vector3d v, double min)
+        {
+            return new Vector3d(Utils.ClampL(v.x, min),
+                                Utils.ClampL(v.y, min),
+                                Utils.ClampL(v.z, min));
         }
 
 
         public static Vector3 ClampMagnitudeH(this Vector3 v, float max)
-        { 
+        {
             var vm = v.magnitude;
-            return vm > max? v/vm*max : v;
+            return vm > max ? v / vm * max : v;
 
         }
 
         public static Vector3d ClampMagnitudeH(this Vector3d v, double max)
-        { 
+        {
             var vm = v.magnitude;
-            return vm > max? v/vm*max : v;
+            return vm > max ? v / vm * max : v;
         }
 
         public static Vector3d ClampMagnitudeL(this Vector3d v, double min)
-        { 
+        {
             var vm = v.magnitude;
-            return vm < min? v/vm*min : v;
+            return vm < min ? v / vm * min : v;
         }
 
         public static Vector3 Sign(this Vector3 v)
@@ -282,7 +282,7 @@ namespace AT_Utils
         public static int MaxI(this Vector3 v)
         {
             var maxi = 0;
-            var max  = 0f;
+            var max = 0f;
             for(int i = 0; i < 3; i++)
             {
                 if(Mathf.Abs(v[i]) > Mathf.Abs(max))
@@ -294,7 +294,7 @@ namespace AT_Utils
         public static int MinI(this Vector3 v)
         {
             var mini = 0;
-            var min   = float.MaxValue;
+            var min = float.MaxValue;
             for(int i = 0; i < 3; i++)
             {
                 if(Mathf.Abs(v[i]) < Mathf.Abs(min))
@@ -306,7 +306,7 @@ namespace AT_Utils
         public static int MaxI(this Vector3d v)
         {
             var maxi = 0;
-            var max  = 0.0;
+            var max = 0.0;
             for(int i = 0; i < 3; i++)
             {
                 if(Math.Abs(v[i]) > Math.Abs(max))
@@ -318,7 +318,7 @@ namespace AT_Utils
         public static int MinI(this Vector3d v)
         {
             var mini = 0;
-            var min   = double.MaxValue;
+            var min = double.MaxValue;
             for(int i = 0; i < 3; i++)
             {
                 if(Math.Abs(v[i]) < Math.Abs(min))
@@ -386,14 +386,14 @@ namespace AT_Utils
             angle *= Mathf.Deg2Rad;
             var sin = Math.Sin(angle);
             var cos = Math.Cos(angle);
-            return new Vector2d(cos*v.x-sin*v.y, sin*v.x+cos*v.y);
+            return new Vector2d(cos * v.x - sin * v.y, sin * v.x + cos * v.y);
         }
 
         public static Vector2d RotateRad(this Vector2d v, double angle)
         {
             var sin = Math.Sin(angle);
             var cos = Math.Cos(angle);
-            return new Vector2d(cos*v.x-sin*v.y, sin*v.x+cos*v.y);
+            return new Vector2d(cos * v.x - sin * v.y, sin * v.x + cos * v.y);
         }
 
         public static Vector2d Rotate90(this Vector2d v) => new Vector2d(-v.y, v.x);
@@ -414,7 +414,7 @@ namespace AT_Utils
         T.position + T.TransformDirection(local);
 
         public static Vector3 InverseTransformPointUnscaled(this Transform T, Vector3 world) =>
-        T.InverseTransformDirection(world-T.position);
+        T.InverseTransformDirection(world - T.position);
     }
 
 
@@ -469,24 +469,26 @@ namespace AT_Utils
             return max;
         }
 
-        public static K Next<K, V>(this SortedList<K,V> list, K key)
+        public static K Next<K, V>(this SortedList<K, V> list, K key)
         {
             try
             {
                 var i = list.IndexOfKey(key);
-                var ni = (i+1) % list.Count;
+                var ni = (i + 1) % list.Count;
                 return list.Keys[ni];
-            } catch { return default(K); }
+            }
+            catch { return default(K); }
         }
 
-        public static K Prev<K, V>(this SortedList<K,V> list, K key)
+        public static K Prev<K, V>(this SortedList<K, V> list, K key)
         {
             try
             {
                 var i = list.IndexOfKey(key);
-                var ni = i > 0? i-1 : list.Count-1;
+                var ni = i > 0 ? i - 1 : list.Count - 1;
                 return list.Keys[ni];
-            } catch { return default(K); }
+            }
+            catch { return default(K); }
         }
 
         public static T Next<T>(this IList<T> list, T key)
@@ -494,9 +496,10 @@ namespace AT_Utils
             try
             {
                 var i = list.IndexOf(key);
-                var ni = (i+1) % list.Count;
+                var ni = (i + 1) % list.Count;
                 return list[ni];
-            } catch { return default(T); }
+            }
+            catch { return default(T); }
         }
 
         public static T Prev<T>(this IList<T> list, T key)
@@ -504,9 +507,10 @@ namespace AT_Utils
             try
             {
                 var i = list.IndexOf(key);
-                var ni = i > 0? i-1 : list.Count-1;
+                var ni = i > 0 ? i - 1 : list.Count - 1;
                 return list[ni];
-            } catch { return default(T); }
+            }
+            catch { return default(T); }
         }
 
         #region Queue extensions
@@ -514,7 +518,7 @@ namespace AT_Utils
         { q.Clear(); content.ForEach(q.Enqueue); }
 
         public static bool Remove<T>(this Queue<T> q, T item)
-        { 
+        {
             var count = q.Count;
             var new_content = q.Where(it => !object.Equals(it, item)).ToList();
             q.Clear(); new_content.ForEach(q.Enqueue);
@@ -527,8 +531,8 @@ namespace AT_Utils
             var new_content = q.ToList();
             var upi = new_content.IndexOf(up);
             if(upi < 0) return false;
-            new_content[upi] = new_content[upi-1];
-            new_content[upi-1] = up;
+            new_content[upi] = new_content[upi - 1];
+            new_content[upi - 1] = up;
             q.Clear(); new_content.ForEach(q.Enqueue);
             return true;
         }
@@ -542,17 +546,17 @@ namespace AT_Utils
         public static bool HasModule<T>(this Part p) where T : PartModule
         { return p.Modules.GetModule<T>() != null; }
 
-        public static float TotalMass(this Part p) { return p.mass+p.GetResourceMass(); }
+        public static float TotalMass(this Part p) { return p.mass + p.GetResourceMass(); }
         #endregion
 
         #region Find Modules or Parts
-        public static Part RootPart(this Part p) 
+        public static Part RootPart(this Part p)
         { return p.parent == null ? p : p.parent.RootPart(); }
 
         public static List<Part> AllChildren(this Part p)
         {
-            var all_children = new List<Part>{};
-            foreach(Part ch in p.children) 
+            var all_children = new List<Part> { };
+            foreach(Part ch in p.children)
             {
                 all_children.Add(ch);
                 all_children.AddRange(ch.AllChildren());
@@ -563,7 +567,7 @@ namespace AT_Utils
         public static List<Part> AllConnectedParts(this Part p)
         {
             if(p.parent != null) return p.parent.AllConnectedParts();
-            var all_parts = new List<Part>{p};
+            var all_parts = new List<Part> { p };
             all_parts.AddRange(p.AllChildren());
             return all_parts;
         }
@@ -598,17 +602,17 @@ namespace AT_Utils
         #endregion
 
         #region Resources and Phys-Props
-        public static float TotalCost(this Part p) { return p.partInfo != null? p.partInfo.cost+p.GetModuleCosts(p.partInfo.cost) : 0; }
+        public static float TotalCost(this Part p) { return p.partInfo != null ? p.partInfo.cost + p.GetModuleCosts(p.partInfo.cost) : 0; }
 
-        public static float ResourcesCost(this Part p) 
-        { 
+        public static float ResourcesCost(this Part p)
+        {
             var cost = 0.0;
             p.Resources.ForEach(r => cost += r.amount * r.info.unitCost);
             return (float)cost;
         }
 
-        public static float MaxResourcesCost(this Part p) 
-        { 
+        public static float MaxResourcesCost(this Part p)
+        {
             var cost = 0.0;
             p.Resources.ForEach(r => cost += r.maxAmount * r.info.unitCost);
             return (float)cost;
@@ -639,120 +643,96 @@ namespace AT_Utils
         }
 
         public static void UpdateOrgPos(this Part part, Part root) =>
-        part.orgPos = root.partTransform.InverseTransformPoint(part.transform.position);
+        part.orgPos = root.partTransform.InverseTransformPoint(part.partTransform.position);
 
-        public static void UpdateAttachedPartPos(this Part part, AttachNode node, bool proportional = false)
+        public static Vector3 AttachNodeDeltaPos(this Part part, AttachNode node)
         {
-            if(node == null) return;
-            var attached_part = node.attachedPart; 
-            if(attached_part == null) return;
-            var an = attached_part.FindAttachNodeByPart(part);    
-            if(an == null) return;
-            var dp =
-                part.transform.TransformPoint(node.position) -
-                attached_part.transform.TransformPoint(an.position);
-            if(proportional)
-                part.UpdateAttachedPartPosProportional(attached_part, dp);
-            else
-                part.UpdateAttachedPartPos(attached_part, dp);
+            var an = node.attachedPart.FindAttachNodeByPart(part);
+            return an != null ? (part.partTransform.TransformPoint(node.position)
+                                 - node.attachedPart.partTransform.TransformPoint(an.position))
+                    : Vector3.zero;
+        }
+
+        public static void UpdateAttachedPartPos(this Part part, AttachNode node)
+        {
+            if(node != null && node.attachedPart != null)
+            {
+                var dp = part.AttachNodeDeltaPos(node);
+                if(!dp.IsZero())
+                    part.UpdateAttachedPartPos(node.attachedPart, dp);
+            }
         }
 
         public static void UpdateAttachedPartPos(this Part part, Part attached_part, Vector3 delta)
         {
-            var vsl = attached_part.vessel;
-            if(attached_part == part.parent) 
+            if(HighLogic.LoadedSceneIsFlight && part.vessel != null)
+                part.UpdateAttachedPartPosFlight(attached_part, delta);
+            else
+                part.UpdateAttachedPartPosEditor(attached_part, delta);
+        }
+
+        public static void UpdateAttachedPartPosEditor(this Part part, Part attached_part, Vector3 delta)
+        {
+            if(attached_part == part.parent)
             {
-                var has_part_joint = part.attachJoint != null;
+                part.partTransform.position -= delta;
+                attached_part = attached_part.localRoot;
+                attached_part.partTransform.position += delta;
+                part.UpdateOrgPos(attached_part);
+            }
+            else if(attached_part.parent == part)
+            {
+                attached_part.partTransform.position += delta;
+                attached_part.UpdateOrgPos(attached_part.localRoot);
+            }
+        }
+
+        public class PartJoinRecreate : IDisposable
+        {
+            public readonly Part part;
+            public readonly bool has_part_joint;
+            public PartJoinRecreate(Part part)
+            {
+                this.part = part;
+                has_part_joint = part.attachJoint != null;
                 if(has_part_joint)
                     part.attachJoint.DestroyJoint();
-                part.transform.position -= delta;
-                attached_part = attached_part.localRoot;
-                if(vsl != null) 
-                {
-                    vsl.SetPosition(vsl.vesselTransform.position+delta);
-                    part.UpdateOrgPos(vsl.rootPart);
-                    part.transform.rotation = vsl.transform.rotation * part.orgRot;
-                }
-                else
-                    attached_part.transform.position += delta;
-                if(has_part_joint)
+            }
+
+            public void Dispose()
+            {
+                if(has_part_joint && part != null)
                 {
                     part.CreateAttachJoint(part.attachMode);
                     part.ResetJoints();
-                }
-            } 
-            else if(attached_part.parent == part) 
-            {
-                var has_part_joint = attached_part.attachJoint != null;
-                if(has_part_joint)
-                    attached_part.attachJoint.DestroyJoint();
-                attached_part.transform.position += delta;
-                if(vsl != null) 
-                {
-                    part.UpdateOrgPos(vsl.rootPart);
-                    part.transform.rotation = vsl.transform.rotation * part.orgRot;
-                }
-                if(has_part_joint)
-                {
-                    attached_part.CreateAttachJoint(attached_part.attachMode);
-                    attached_part.ResetJoints();
                 }
             }
         }
 
-        public static void UpdateAttachedPartPosProportional(this Part part, Part attached_part, Vector3 delta)
+        public static void UpdateAttachedPartPosFlight(this Part part, Part attached_part, Vector3 delta)
         {
-            var root  = part.localRoot;
-            var vsl = root.vessel;
-            var total_mass = root.MassWithChildren();
-            float this_mass, attached_mass;
-            if(attached_part == part.parent) 
+            if(part.vessel != null && attached_part.vessel == part.vessel)
             {
-                this_mass = part.MassWithChildren();
-                var has_part_joint = part.attachJoint != null;
-                if(has_part_joint)
-                    part.attachJoint.DestroyJoint();
-                part.transform.position -= delta;
-                if(vsl != null) 
+                if(attached_part == part.parent)
                 {
-                    vsl.SetPosition(vsl.vesselTransform.position+delta*(this_mass/total_mass));
-                    part.UpdateOrgPos(vsl.rootPart);
-                    part.transform.rotation = vsl.transform.rotation * part.orgRot;
+                    using(new PartJoinRecreate(part))
+                    {
+                        part.partTransform.position -= delta;
+                        part.UpdateOrgPos(part.vessel.rootPart);
+                        part.partTransform.rotation = part.vessel.vesselTransform.rotation * part.orgRot;
+                    }
                 }
-                else 
-                    root.transform.position += delta*(this_mass/total_mass);
-                if(has_part_joint)
+                else if(attached_part.parent == part)
                 {
-                    part.CreateAttachJoint(part.attachMode);
-                    part.ResetJoints();
-                }
-            } 
-            else if(attached_part.parent == part) 
-            {
-                var has_part_joint = attached_part.attachJoint != null;
-                if(has_part_joint)
-                    attached_part.attachJoint.DestroyJoint();
-                attached_mass = attached_part.MassWithChildren();
-                attached_part.transform.position += delta;
-                if(vsl != null) 
-                {
-                    vsl.SetPosition(vsl.vesselTransform.position-delta*(attached_mass/total_mass));
-                    part.UpdateOrgPos(vsl.rootPart);
-                    part.transform.rotation = vsl.transform.rotation * part.orgRot;
-                }
-                else 
-                    root.transform.position -= delta*(attached_mass/total_mass);
-                if(has_part_joint)
-                {
-                    attached_part.CreateAttachJoint(attached_part.attachMode);
-                    attached_part.ResetJoints();
+                    using(new PartJoinRecreate(part))
+                        attached_part.partTransform.position += delta;
                 }
             }
         }
         #endregion
 
         #region Logging
-        public static string Title(this Part p) => p.partInfo != null? p.partInfo.title : p.name;
+        public static string Title(this Part p) => p.partInfo != null ? p.partInfo.title : p.name;
 
         public static void Log(this MonoBehaviour mb, string msg, params object[] args) =>
         Utils.Log(string.Format("{0}: {1}", mb.GetID(), msg), args);
@@ -810,8 +790,8 @@ namespace AT_Utils
 
     public static class PartModuleExtensions
     {
-        public static string Title(this PartModule pm) 
-        { return pm.part.partInfo != null? pm.part.partInfo.title : pm.part.name; }
+        public static string Title(this PartModule pm)
+        { return pm.part.partInfo != null ? pm.part.partInfo.title : pm.part.name; }
 
         public static void EnableModule(this PartModule pm, bool enable)
         { pm.enabled = pm.isEnabled = enable; }
@@ -819,8 +799,8 @@ namespace AT_Utils
         public static void ConfigurationInvalid(this PartModule pm, string msg, params object[] args)
         {
             Utils.Message(6, "WARNING: {0}.\n" +
-                          "Configuration of \"{1}\" is INVALID.", 
-                          string.Format(msg, args), 
+                          "Configuration of \"{1}\" is INVALID.",
+                          string.Format(msg, args),
                           pm.Title());
             pm.enabled = pm.isEnabled = false;
             return;
@@ -851,7 +831,7 @@ namespace AT_Utils
         }
 
         public static bool OnPlanet(this Vessel v)
-        { 
+        {
             return v.LandedOrSplashed ||
                 v.situation != Vessel.Situations.ORBITING &&
                 v.situation != Vessel.Situations.ESCAPING ||
@@ -895,16 +875,16 @@ namespace AT_Utils
             p.partTransform.rotation = Quaternion.identity;
             foreach(var rend in p.FindModelComponents<Renderer>())
             {
-                if(rend.gameObject == null 
+                if(rend.gameObject == null
                        || !(rend is MeshRenderer || rend is SkinnedMeshRenderer))
                     continue;
                 var verts = Utils.BoundCorners(rend.bounds);
                 for(int j = 0, len = verts.Length; j < len; j++)
                 {
-                    var v = p.partTransform.position + part_rot * (verts[j]-p.partTransform.position);
+                    var v = p.partTransform.position + part_rot * (verts[j] - p.partTransform.position);
                     if(refT != null)
                         v = refT.InverseTransformPoint(v);
-                    if(inited) 
+                    if(inited)
                         b.Encapsulate(v);
                     else
                     {
@@ -972,29 +952,29 @@ namespace AT_Utils
         }
 
         public static float Radius(this Vessel vessel, bool fromCoM = false)
-        { 
-            if(!vessel.loaded) 
+        {
+            if(!vessel.loaded)
             {
                 if(vessel.vesselType == VesselType.SpaceObject)
                 {
                     var ast = vessel.protoVessel.protoPartSnapshots
                         .Select(p => p.FindModule("ModuleAsteroid"))
                         .FirstOrDefault();
-                    if(ast != null) 
+                    if(ast != null)
                     {
                         float rho;
                         if(float.TryParse(ast.moduleValues.GetValue("density"), out rho))
-                            return (float)Math.Pow(vessel.GetTotalMass()/rho, 1/3.0);
+                            return (float)Math.Pow(vessel.GetTotalMass() / rho, 1 / 3.0);
                     }
                 }
-                return (float)Math.Pow(vessel.GetTotalMass()/2, 1/3.0);
+                return (float)Math.Pow(vessel.GetTotalMass() / 2, 1 / 3.0);
             }
-            var refT = vessel.packed? vessel.transform : vessel.ReferenceTransform;
+            var refT = vessel.packed ? vessel.transform : vessel.ReferenceTransform;
             var bounds = vessel.BoundsWithExhaust(refT);
             if(fromCoM)
             {
-                var shift = refT.TransformPoint(bounds.center)-vessel.CoM;
-                return bounds.extents.magnitude+shift.magnitude;
+                var shift = refT.TransformPoint(bounds.center) - vessel.CoM;
+                return bounds.extents.magnitude + shift.magnitude;
             }
             return bounds.extents.magnitude;
         }
@@ -1038,59 +1018,59 @@ namespace AT_Utils
 
     public static class OrbitalExtensions
     {
-        public static bool ApAhead(this Orbit obt) => 
+        public static bool ApAhead(this Orbit obt) =>
         obt.timeToAp < obt.timeToPe;
 
-        public static bool Contains(this Orbit obt, double UT) => 
+        public static bool Contains(this Orbit obt, double UT) =>
         obt.StartUT <= UT && UT <= obt.EndUT;
 
         public static double MinPeR(this Orbit obt)
-        { 
-            return obt.referenceBody.atmosphere? 
-                obt.referenceBody.Radius+obt.referenceBody.atmosphereDepth : 
-                obt.referenceBody.Radius+CelestialUtilities.GetHighestPeak(obt.referenceBody)+1000; 
+        {
+            return obt.referenceBody.atmosphere ?
+                obt.referenceBody.Radius + obt.referenceBody.atmosphereDepth :
+                obt.referenceBody.Radius + CelestialUtilities.GetHighestPeak(obt.referenceBody) + 1000;
         }
 
         public static double GetEndUT(this Orbit obt)
         {
             var end = obt.EndUT;
-            while(obt.nextPatch != null && 
+            while(obt.nextPatch != null &&
                   obt.nextPatch.referenceBody != null &&
                   obt.patchEndTransition != Orbit.PatchTransitionType.FINAL)
             {
                 obt = obt.nextPatch;
-                end = obt.EndUT; 
+                end = obt.EndUT;
             }
             return end;
         }
 
-        public static Vector3d hV(this Orbit obt, double UT) => 
+        public static Vector3d hV(this Orbit obt, double UT) =>
         Vector3d.Exclude(obt.getRelativePositionAtUT(UT), obt.getOrbitalVelocityAtUT(UT));
 
         public static double TerrainAltitude(this CelestialBody body, double Lat, double Lon)
         {
             if(body.pqsController == null) return 0;
             var alt = body.pqsController.GetSurfaceHeight(body.GetRelSurfaceNVector(Lat, Lon)) - body.pqsController.radius;
-            return body.ocean && alt < 0? 0 : alt;
+            return body.ocean && alt < 0 ? 0 : alt;
         }
 
-        public static double TerrainAltitude(this CelestialBody body, Vector3d wpos) => 
+        public static double TerrainAltitude(this CelestialBody body, Vector3d wpos) =>
         TerrainAltitude(body, body.GetLatitude(wpos), body.GetLongitude(wpos));
 
         public static AtmosphereParams AtmoParamsAtAltitude(this CelestialBody body, double alt) =>
         new AtmosphereParams(body, alt);
 
         public static double ApAUT(this Orbit orb) =>
-        Planetarium.GetUniversalTime()+orb.timeToAp;
+        Planetarium.GetUniversalTime() + orb.timeToAp;
 
         public static double PeAUT(this Orbit orb) =>
-        Planetarium.GetUniversalTime()+orb.timeToPe;
+        Planetarium.GetUniversalTime() + orb.timeToPe;
 
         public static Vector3d ApV(this Orbit orb) =>
-        orb.getRelativePositionAtUT(Planetarium.GetUniversalTime()+orb.timeToAp);
+        orb.getRelativePositionAtUT(Planetarium.GetUniversalTime() + orb.timeToAp);
 
         public static Vector3d PeV(this Orbit orb) =>
-        orb.getRelativePositionAtUT(Planetarium.GetUniversalTime()+orb.timeToPe);
+        orb.getRelativePositionAtUT(Planetarium.GetUniversalTime() + orb.timeToPe);
     }
 }
 
