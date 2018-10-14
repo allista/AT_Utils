@@ -46,7 +46,6 @@ namespace AT_Utils
                                                new VesselCrewManifest());
             launched_vessel = FlightGlobals.Vessels[FlightGlobals.Vessels.Count - 1];
             on_vessel_positioned?.Invoke(launched_vessel);
-            StageManager.BeginFlight();
             while(!launched_vessel.loaded)
             {
                 FlightCameraOverride.UpdateDurationSeconds(1);
@@ -71,6 +70,7 @@ namespace AT_Utils
                 }
             }
             on_vessel_launched?.Invoke(launched_vessel);
+            StageManager.BeginFlight();
             end_launch();
         }
 
@@ -104,6 +104,7 @@ namespace AT_Utils
                                                   on_vessel_off_rails,
                                                   on_vessel_launched))
                 yield return i;
+            StageManager.BeginFlight();
             end_launch();
         }
 
