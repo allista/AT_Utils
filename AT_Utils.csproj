@@ -139,6 +139,8 @@
     <Compile Include="StringID.cs" />
     <Compile Include="Modules\NamedDockingNode.cs" />
     <Compile Include="GUI\Dialogs\SimpleScrollView.cs" />
+    <Compile Include="Addons\PartMaker.cs" />
+    <Compile Include="GUI\Windows\PartSelector.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
