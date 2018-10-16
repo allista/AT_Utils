@@ -27,14 +27,14 @@ namespace AT_Utils
         static Regex CCR = new Regex(CamelCaseRegexp);
         public static string ParseCamelCase(string s) { return CCR.Replace(s, "$1 "); }
 
-        public static readonly char[] Delimiters = {' ', '\t', ',', ';'};
-        public static readonly char[] Whitespace = {' ', '\t'};
-        public static readonly char[] Semicolon = {';'};
-        public static readonly char[] Comma = {','};
+        public static readonly char[] Delimiters = { ' ', '\t', ',', ';' };
+        public static readonly char[] Whitespace = { ' ', '\t' };
+        public static readonly char[] Semicolon = { ';' };
+        public static readonly char[] Comma = { ',' };
 
         public static string[] ParseLine(string line, char[] delims, bool trim = true)
         {
-            if(string.IsNullOrEmpty(line)) return new string[]{};
+            if(string.IsNullOrEmpty(line)) return new string[] { };
             var array = line.Split(delims, StringSplitOptions.RemoveEmptyEntries);
             if(trim) { for(int i = 0, len = array.Length; i < len; i++) array[i] = array[i].Trim(); }
             return array;
@@ -49,16 +49,16 @@ namespace AT_Utils
             else if(value > 1e15) { value /= 1e15f; mod = "P"; }
             else if(value > 1e12) { value /= 1e12f; mod = "T"; }
             else return formatBigValue(value, unit, format);
-            return value.ToString(format)+mod+unit;
+            return value.ToString(format) + mod + unit;
         }
 
         public static string formatBigValue(float value, string unit, string format = "F1")
         {
             string mod = "";
-            if     (value > 1e9) { value /= 1e9f; mod = "G"; }
+            if(value > 1e9) { value /= 1e9f; mod = "G"; }
             else if(value > 1e6) { value /= 1e6f; mod = "M"; }
             else if(value > 1e3) { value /= 1e3f; mod = "k"; }
-            return value.ToString(format)+mod+unit;
+            return value.ToString(format) + mod + unit;
         }
 
         public static string formatSmallValue(float value, string unit, string format = "F1")
@@ -70,7 +70,7 @@ namespace AT_Utils
                 else if(value > 1e-6) { value *= 1e6f; mod = "μ"; }
                 else if(value > 1e-9) { value *= 1e9f; mod = "n"; }
             }
-            return value.ToString(format)+mod+unit;
+            return value.ToString(format) + mod + unit;
         }
 
         public static string formatMass(float mass)
@@ -85,7 +85,7 @@ namespace AT_Utils
         public static string formatVolume(double volume)
         {
             if(volume < 1f)
-                return (volume * 1e3f).ToString ("n0") + "L";
+                return (volume * 1e3f).ToString("n0") + "L";
             return volume.ToString("n1") + "m3";
         }
 
@@ -93,25 +93,25 @@ namespace AT_Utils
         {
             units = Mathf.Abs(units);
             if(units >= 1f)
-                return units.ToString ("n2") + "u";
+                return units.ToString("n2") + "u";
             if(units >= 1e-3f)
-                return (units * 1e3f).ToString ("n1") + "mu";
+                return (units * 1e3f).ToString("n1") + "mu";
             if(units >= 1e-6f)
-                return (units * 1e6f).ToString ("n1") + "mku";
+                return (units * 1e6f).ToString("n1") + "mku";
             if(units >= 1e-9f)
-                return (units * 1e9f).ToString ("n1") + "nu";
+                return (units * 1e9f).ToString("n1") + "nu";
             if(units >= 1e-13f) //to fully use the last digit 
-                return (units * 1e12f).ToString ("n1") + "pu";
+                return (units * 1e12f).ToString("n1") + "pu";
             return "0.0u"; //effectivly zero
         }
 
-        struct _DateTime 
-        { 
-            public int seconds, minutes, hours, days, years; 
+        struct _DateTime
+        {
+            public int seconds, minutes, hours, days, years;
             public _DateTime(double time, int year_len, int day_len)
             {
-                years = (int)(time/year_len);
-                time -= years*year_len;
+                years = (int)(time / year_len);
+                time -= years * year_len;
                 int secs = (int)time;
                 seconds = secs % 60;
                 minutes = secs / 60 % 60;
@@ -123,7 +123,7 @@ namespace AT_Utils
         public static string formatTimeDelta(double delta)
         {
             var dt = new _DateTime(delta, KSPUtil.dateTimeFormatter.Year, KSPUtil.dateTimeFormatter.Day);
-            return string.Format("{0}y {1,3}d {2,2:}:{3:00}:{4:00}", 
+            return string.Format("{0}y {1,3}d {2,2:}:{3:00}:{4:00}",
                                  dt.years, dt.days, dt.hours, dt.minutes, dt.seconds);
         }
 
@@ -150,7 +150,7 @@ namespace AT_Utils
                 "\trotation: {} s\n" +
                 "\tradius:   {}\n" +
                 "\trot angle {} deg",
-                cb.bodyName, cb.rotationPeriod, 
+                cb.bodyName, cb.rotationPeriod,
                 formatBigValue((float)cb.Radius, "m"),
                 cb.rotationAngle);
         }
@@ -183,21 +183,21 @@ namespace AT_Utils
                 "Pos: {} m\n",
                 formatCB(o.referenceBody),
                 o.PeA, o.ApA,
-                o.PeR, o.ApR, 
+                o.PeR, o.ApR,
                 o.semiMajorAxis, o.semiMinorAxis,
                 o.eccentricity, o.inclination, o.LAN, o.meanAnomaly, o.trueAnomaly, o.argumentOfPeriapsis,
                 o.period, o.epoch, o.ObTAtEpoch, o.ObT,
                 o.timeToPe, o.timeToAp,
                 o.StartUT, o.patchStartTransition,
-                o.EndUT, o.patchEndTransition, 
+                o.EndUT, o.patchEndTransition,
                 formatVector(o.vel), formatVector(o.pos));
         }
 
         public static string formatPatches(Orbit o, string tag)
         {
             var with_tag = !string.IsNullOrEmpty(tag);
-            var ret = with_tag? 
-                Format("===================== {} : {} =======================\n{}", 
+            var ret = with_tag ?
+                Format("===================== {} : {} =======================\n{}",
                        tag, Planetarium.GetUniversalTime(), o) :
                 formatOrbit(o);
             ret += "\n";
@@ -210,16 +210,16 @@ namespace AT_Utils
             return ret;
         }
 
-        public static string formatBounds(Bounds b, string name="")
+        public static string formatBounds(Bounds b, string name = "")
         {
             return string.Format("Bounds:  {0}\n" +
                                  "Center:  {1}\n" +
                                  "Extents: {2}\n" +
                                  "Min:     {3}\n" +
                                  "Max:     {4}\n" +
-                                 "Volume:  {5}", 
+                                 "Volume:  {5}",
                                  name, b.center, b.extents, b.min, b.max,
-                                 b.size.x*b.size.y*b.size.z);
+                                 b.size.x * b.size.y * b.size.z);
         }
 
         public static string formatException(Exception ex)
@@ -231,8 +231,8 @@ namespace AT_Utils
             convert_args(args);
             for(int i = 0, argsLength = args.Length; i < argsLength; i++)
             {
-                var ind = s.IndexOf("{}", StringComparison.InvariantCulture); 
-                if(ind >= 0) s = s.Substring(0, ind)+"{"+i+"}"+s.Substring(ind+2);
+                var ind = s.IndexOf("{}", StringComparison.InvariantCulture);
+                if(ind >= 0) s = s.Substring(0, ind) + "{" + i + "}" + s.Substring(ind + 2);
                 else s += string.Format(" arg{0}: {{{0}}}", i);
             }
             return string.Format(s.Replace("{}", "[no arg]"), args);
@@ -240,7 +240,7 @@ namespace AT_Utils
 
         static void convert_args(object[] args)
         {
-            for(int i = 0, argsL = args.Length; i < argsL; i++) 
+            for(int i = 0, argsL = args.Length; i < argsL; i++)
             {
                 var arg = args[i];
                 if(arg is string) continue;
@@ -251,18 +251,18 @@ namespace AT_Utils
                 else if(arg is Orbit) args[i] = formatOrbit((Orbit)arg);
                 else if(arg is Bounds) args[i] = formatBounds((Bounds)arg);
                 else if(arg is Exception) args[i] = formatException((Exception)arg);
-                else if(arg is Transform) 
+                else if(arg is Transform)
                 {
                     var T = arg as Transform;
                     args[i] = string.Format("{0}: pos {1}, rot {2}", T.name, T.position, T.rotation.eulerAngles);
                 }
-                else if(arg is IEnumerable) 
+                else if(arg is IEnumerable)
                 {
                     var arr = (arg as IEnumerable).Cast<object>().ToArray();
                     convert_args(arr);
-                    args[i] = string.Join("\n", new [] 
-                    { 
-                        "Count: "+arr.Length, 
+                    args[i] = string.Join("\n", new[]
+                    {
+                        "Count: "+arr.Length,
                         "[", string.Join(",\n", arr.Cast<string>().ToArray()), "]"
                     });
                 }
@@ -281,15 +281,15 @@ namespace AT_Utils
                 mod_name = method.DeclaringType.Assembly.GetName().Name;
                 break;
             }
-            #if DEBUG
+#if DEBUG
             UnityEngine.Debug.Log(stack);
-            #endif
+#endif
             return string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", mod_name, DateTime.Now, msg);
         }
 
         static readonly Regex log_re = new Regex("[Ll]og");
         public static void Log(string msg, params object[] args)
-        { 
+        {
             msg = prepare_message(msg);
             if(args.Length > 0)
             {
@@ -297,9 +297,9 @@ namespace AT_Utils
                 msg = Format(msg, args);
             }
             UnityEngine.Debug.Log(msg);
-            #if DEBUG
+#if DEBUG
             BackupLogger.LogRaw(msg);
-            #endif
+#endif
         }
 
         public static void Log2File(string filename, string msg, params object[] args)
@@ -324,8 +324,14 @@ namespace AT_Utils
         {
             if(PartLoader.Instance == null) return false;
             var info = PartLoader.getPartInfoByName(name);
-            if(info == null || HighLogic.CurrentGame == null) return false;
-            return HighLogic.CurrentGame.Mode == Game.Modes.SANDBOX || ResearchAndDevelopment.PartModelPurchased(info);
+            return info != null && PartIsPurchased(info);
+        }
+
+        public static bool PartIsPurchased(AvailablePart info)
+        {
+            return (HighLogic.CurrentGame != null
+                    && (HighLogic.CurrentGame.Mode == Game.Modes.SANDBOX
+                        || ResearchAndDevelopment.PartModelPurchased(info)));
         }
 
         public static Vector3[] BoundCorners(Bounds b)
@@ -379,7 +385,7 @@ namespace AT_Utils
         }
 
         public static void SaveGame(string name, bool with_message = true)
-        { 
+        {
             Game game = HighLogic.CurrentGame.Updated();
             game.startScene = GameScenes.FLIGHT;
             GamePersistence.SaveGame(game, name, HighLogic.SaveFolder, SaveMode.OVERWRITE);
@@ -429,7 +435,7 @@ namespace AT_Utils
     public static class WaitWithPhysics
     {
         public static void DelayPhysicsForSeconds(float dt)
-        { OrbitPhysicsManager.HoldVesselUnpack(Mathf.CeilToInt(dt/TimeWarp.fixedDeltaTime)+1); }
+        { OrbitPhysicsManager.HoldVesselUnpack(Mathf.CeilToInt(dt / TimeWarp.fixedDeltaTime) + 1); }
 
         public static WaitForSeconds ForSeconds(float dt)
         {
@@ -450,14 +456,14 @@ namespace AT_Utils
         }
     }
 
-    public class ListDict<K,V> : Dictionary<K, List<V>>
+    public class ListDict<K, V> : Dictionary<K, List<V>>
     {
         public void Add(K key, V value)
         {
             List<V> lst;
             if(TryGetValue(key, out lst))
                 lst.Add(value);
-            else this[key] = new List<V>{value};
+            else this[key] = new List<V> { value };
         }
     }
 }
