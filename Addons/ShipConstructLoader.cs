@@ -6,7 +6,6 @@
 //  Copyright (c) 2018 Allis Tauri
 using System;
 using System.Collections.Generic;
-using AT_Utils;
 using KSP.UI.Screens;
 using UnityEngine;
 
@@ -14,13 +13,17 @@ namespace AT_Utils
 {
     public class ShipConstructLoader : MonoBehaviour
     {
+        string flag_url;
+        PartSelector part_selector;
         SubassemblySelector subassembly_selector;
         CraftBrowserDialog vessel_selector;
         public EditorFacility Facility { get; private set; }
-        public Action<ShipConstruct> process_construct = delegate {};
+        public Action<ShipConstruct> process_construct = delegate { };
 
         public void Awake()
         {
+            part_selector = gameObject.AddComponent<PartSelector>();
+            part_selector.Show(false);
             subassembly_selector = gameObject.AddComponent<SubassemblySelector>();
             subassembly_selector.Show(false);
         }
@@ -28,12 +31,19 @@ namespace AT_Utils
         void OnDestroy()
         {
             Destroy(subassembly_selector);
+            Destroy(part_selector);
         }
 
-        void subassembly_selected(ShipTemplate template) => 
+        void subassembly_selected(ShipTemplate template) =>
         ShipConstruction
-            .CreateConstructFromTemplate(template, construct => 
+            .CreateConstructFromTemplate(template, construct =>
                                          StartCoroutine(delayed_process_construct(construct)));
+
+        void part_selected(AvailablePart part_info)
+        {
+            var construct = PartMaker.CreatePartConstruct(part_info, flag_url);
+            process_loaded_construct(construct);
+        }
 
         void vessel_selected(string filename, CraftBrowserDialog.LoadType t)
         {
@@ -74,7 +84,7 @@ namespace AT_Utils
         IEnumerator<YieldInstruction> delayed_process_construct(ShipConstruct construct)
         {
             if(construct == null) yield break;
-            var lock_name = "construct_loading"+GetHashCode();
+            var lock_name = "construct_loading" + GetHashCode();
             Utils.LockControls(lock_name);
             SetShipRendering(construct, false);
             if(HighLogic.LoadedSceneIsEditor)
@@ -90,14 +100,23 @@ namespace AT_Utils
                 process_construct(construct);
         }
 
-        public void Draw() => subassembly_selector.Draw(subassembly_selected);
-        public void Show(bool show) => subassembly_selector.Show(show);
+        public void Show(bool show)
+        {
+            subassembly_selector.Show(show);
+            part_selector.Show(Show);
+        }
+
+        public void Draw()
+        {
+            subassembly_selector.Draw(subassembly_selected);
+            part_selector.Draw(part_selected);
+        }
 
         public void SelectVessel()
         {
             if(vessel_selector != null) return;
-            var facility = EditorLogic.fetch != null?
-                                      EditorLogic.fetch.ship.shipFacility : 
+            var facility = EditorLogic.fetch != null ?
+                                      EditorLogic.fetch.ship.shipFacility :
                                       EditorFacility.VAB;
             vessel_selector =
                 CraftBrowserDialog.Spawn(
@@ -110,6 +129,12 @@ namespace AT_Utils
         public void SelectSubassembly()
         {
             subassembly_selector.Show(true);
+        }
+
+        public void SelectPart(string flagURL)
+        {
+            flag_url = flagURL;
+            part_selector.Show(true);
         }
     }
 }
