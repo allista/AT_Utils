@@ -188,19 +188,22 @@ namespace AT_Utils
             ConfigureButtons();
         }
 
+        static Color g = Color.gray;
+        static GUIStyle MakeButton(Color c) =>
+        normal_button.OtherColor(c, c + g);
+
         public static void ConfigureButtons()
         {
-            var g = Color.grey;
-            enabled_button = normal_button.OtherColor(Colors.Enabled, Colors.Enabled + g);
-            active_button = normal_button.OtherColor(Colors.Active, Colors.Active + g);
-            inactive_button = normal_button.OtherColor(Colors.Inactive, Colors.Inactive + g);
-            confirm_button = normal_button.OtherColor(Colors.Confirm, Colors.Confirm + g);
-            open_button = normal_button.OtherColor(Colors.Open, Colors.Open + g);
-            close_button = normal_button.OtherColor(Colors.Close, Colors.Close + g);
-            good_button = normal_button.OtherColor(Colors.Good, Colors.Good + g);
-            danger_button = normal_button.OtherColor(Colors.Danger, Colors.Danger + g);
-            sel1_button = normal_button.OtherColor(Colors.Selected1, Colors.Selected1 + g);
-            sel2_button = normal_button.OtherColor(Colors.Selected2, Colors.Selected2 + g);
+            enabled_button = MakeButton(Colors.Enabled);
+            active_button = MakeButton(Colors.Active);
+            inactive_button = normal_button.OtherColor(Colors.Inactive, Colors.Inactive);
+            confirm_button = MakeButton(Colors.Confirm);
+            open_button = MakeButton(Colors.Open);
+            close_button = MakeButton(Colors.Close);
+            good_button = MakeButton(Colors.Good);
+            danger_button = MakeButton(Colors.Danger);
+            sel1_button = MakeButton(Colors.Selected1);
+            sel2_button = MakeButton(Colors.Selected2);
         }
 
         static GUIStyle OtherColor(this GUIStyle style, Color normal)
