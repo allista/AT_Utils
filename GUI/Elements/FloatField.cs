@@ -66,7 +66,7 @@ namespace AT_Utils
                 { Value = _value+increment; updated = true; }
             }
             GUI.SetNextControlName(field_name);
-            svalue = GUILayout.TextField(svalue, svalue.Equals(formated_value)? (style ?? Styles.green) : Styles.white,
+            svalue = GUILayout.TextField(svalue, svalue.Equals(formated_value)? (style ?? Styles.enabled) : Styles.white,
                                          GUILayout.ExpandWidth(true), GUILayout.MinWidth(70));
             if(!string.IsNullOrEmpty(suffix)) 
                 GUILayout.Label(suffix, Styles.label, suffix_width < 0? 

@@ -27,7 +27,7 @@ namespace AT_Utils
             scroll = GUILayout.BeginScrollView(scroll);
             DrawContent();
             GUILayout.EndScrollView();
-            if(GUILayout.Button("Close", Styles.red_button, GUILayout.ExpandWidth(true)))
+            if(GUILayout.Button("Close", Styles.close_button, GUILayout.ExpandWidth(true)))
                 Show(false);
             GUILayout.EndVertical();
             TooltipsAndDragWindow();

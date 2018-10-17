@@ -96,10 +96,10 @@ namespace AT_Utils
         {
             width -= 40;
             GUILayout.BeginHorizontal();
-            var left  = GUILayout.Button("<", Styles.yellow_button, GUILayout.Width(20));
+            var left  = GUILayout.Button("<", Styles.active_button, GUILayout.Width(20));
             if(width > 0) GUILayout.Label(new GUIContent(text, tooltip), Styles.white, GUILayout.Width(width));
             else GUILayout.Label(new GUIContent(text, tooltip), Styles.white);
-            var right = GUILayout.Button(">", Styles.yellow_button, GUILayout.Width(20));
+            var right = GUILayout.Button(">", Styles.active_button, GUILayout.Width(20));
             GUILayout.EndHorizontal();
             return left? -1 : (right? 1 : 0);
         }

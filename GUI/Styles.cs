@@ -7,58 +7,56 @@
 // To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ 
 // or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
 namespace AT_Utils
 {
-    public static class Styles 
+    public static class Styles
     {
         public class Config : ConfigNodeObject
         {
-            [Persistent] public string EnabledButtonColor  = "green";
-            [Persistent] public string ActiveButtonColor   = "yellow";
-            [Persistent] public string InactiveButtonColor = "grey";
-            [Persistent] public string ConfirmButtonColor  = "green";
-            [Persistent] public string AddButtonColor      = "green";
-            [Persistent] public string CloseButtonColor    = "red";
-            [Persistent] public string DangerButtonColor   = "red";
         }
 
-        public static Config CFG { get { return AT_UtilsGlobals.Instance.StylesConfig; } }
+        public static Config CFG => AT_UtilsGlobals.Instance.StylesConfig;
+        public static Colors Colors => AT_UtilsGlobals.Instance.Colors;
 
         //This code is based on Styles class from Extraplanetary Launchpad plugin.
         public static GUISkin skin;
 
         public static GUIStyle normal_button;
+        public static GUIStyle inactive_button;
         public static GUIStyle active_button;
         public static GUIStyle enabled_button;
-        public static GUIStyle inactive_button;
+
         public static GUIStyle confirm_button;
-        public static GUIStyle add_button;
+        public static GUIStyle open_button;
         public static GUIStyle close_button;
+
+        public static GUIStyle good_button;
         public static GUIStyle danger_button;
 
-        public static GUIStyle grey_button;
-        public static GUIStyle red_button;
-        public static GUIStyle dark_red_button;
-        public static GUIStyle green_button;
-        public static GUIStyle dark_green_button;
-        public static GUIStyle yellow_button;
-        public static GUIStyle dark_yellow_button;
-        public static GUIStyle cyan_button;
-        public static GUIStyle magenta_button;
+        public static GUIStyle sel1_button;
+        public static GUIStyle sel2_button;
 
         public static GUIStyle white;
         public static GUIStyle white_on_black;
-        public static GUIStyle grey;
-        public static GUIStyle red;
-        public static GUIStyle yellow;
+
+        public static GUIStyle inactive;
+        public static GUIStyle active;
+        public static GUIStyle enabled;
+
+        public static GUIStyle good;
+        public static GUIStyle warning;
+        public static GUIStyle danger;
+
+        public static GUIStyle selected1;
+        public static GUIStyle selected2;
+
         public static GUIStyle green;
         public static GUIStyle blue;
-        public static GUIStyle cyan;
-        public static GUIStyle magenta;
 
         public static GUIStyle label;
         public static GUIStyle rich_label;
@@ -75,7 +73,7 @@ namespace AT_Utils
         public static GUIStyle no_window;
 
         public static FieldInfo[] StyleFields = typeof(Styles)
-            .GetFields(BindingFlags.Public|BindingFlags.Static)
+            .GetFields(BindingFlags.Public | BindingFlags.Static)
             .Where(fi => fi.FieldType == typeof(GUIStyle)).ToArray();
 
         public static void InitSkin()
@@ -96,40 +94,34 @@ namespace AT_Utils
 
             var alpha_texture = new Texture2D(1, 1);
             alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0));
-//            alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0.3f));//debug
+            //            alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0.3f));//debug
             alpha_texture.Apply();
 
             //buttons
             normal_button = GUI.skin.button.OtherColor(Color.white, Color.yellow);
-            normal_button.padding = new RectOffset (4, 4, 4, 4);
-
-            grey_button        = normal_button.OtherColor(Color.grey, Color.white);
-            red_button         = normal_button.OtherColor(Color.red, Color.white);
-            dark_red_button    = red_button.OtherColor(new Color(0.6f, 0, 0, 1));
-            green_button       = red_button.OtherColor(Color.green);
-            dark_green_button  = red_button.OtherColor(new Color(0, 0.6f, 0, 1));
-            yellow_button      = red_button.OtherColor(Color.yellow);
-            dark_yellow_button = red_button.OtherColor(new Color(0.6f, 0.6f, 0, 1));
-            cyan_button        = red_button.OtherColor(Color.cyan);
-            magenta_button     = red_button.OtherColor(Color.magenta);
+            normal_button.padding = new RectOffset(4, 4, 4, 4);
 
             //boxes
             white = GUI.skin.box.OtherColor(Color.white);
-            white.padding = new RectOffset (4, 4, 4, 4);
+            white.padding = new RectOffset(4, 4, 4, 4);
 
             white_on_black = new GUIStyle(white);
             white_on_black.normal.background = white_on_black.onNormal.background = white_on_black.hover.background = white_on_black.onHover.background = black_texture;
 
-            grey    = white.OtherColor(Color.grey);
-            red     = white.OtherColor(Color.red);
-            yellow  = white.OtherColor(Color.yellow);
-            green   = white.OtherColor(Color.green);
-            blue    = white.OtherColor(new Color(0.6f, 0.6f, 1f, 1f));
-            cyan    = white.OtherColor(Color.cyan);
-            magenta = white.OtherColor(Color.magenta);
+            inactive = white.OtherColor(Colors.Inactive);
+            active = white.OtherColor(Colors.Active);
+            enabled = white.OtherColor(Colors.Enabled);
+            good = white.OtherColor(Colors.Good);
+            warning = white.OtherColor(Colors.Warning);
+            danger = white.OtherColor(Colors.Danger);
+            selected1 = white.OtherColor(Colors.Selected1);
+            selected2 = white.OtherColor(Colors.Selected2);
+
+            green = white.OtherColor(Color.green);
+            blue = white.OtherColor(new Color(0.6f, 0.6f, 1f, 1f));
 
             //tooltip
-            tooltip  = white.OtherColor(Color.black);
+            tooltip = white.OtherColor(Color.black);
             tooltip.wordWrap = true;
             tooltip.richText = true;
             tooltip.alignment = TextAnchor.MiddleCenter;
@@ -151,11 +143,11 @@ namespace AT_Utils
 
             //slider
             slider = new GUIStyle(GUI.skin.horizontalSlider);
-            slider.margin = new RectOffset (0, 0, 0, 0);
+            slider.margin = new RectOffset(0, 0, 0, 0);
 
             slider_text = new GUIStyle(GUI.skin.label);
             slider_text.alignment = TextAnchor.MiddleCenter;
-            slider_text.margin = new RectOffset (0, 0, 0, 0);
+            slider_text.margin = new RectOffset(0, 0, 0, 0);
 
             //list box
             list_item = new GUIStyle(GUI.skin.box);
@@ -169,14 +161,14 @@ namespace AT_Utils
             list_box.normal.textColor = list_box.focused.textColor = Color.yellow;
             list_box.hover.textColor = list_box.active.textColor = Color.green;
             list_box.onNormal.textColor = list_box.onFocused.textColor = list_box.onHover.textColor = list_box.onActive.textColor = Color.green;
-            list_box.padding = new RectOffset (4, 4, 4, 4);
+            list_box.padding = new RectOffset(4, 4, 4, 4);
 
             //borderless window
             no_window = new GUIStyle(GUI.skin.window);
             no_window.normal.background = no_window.onNormal.background = no_window.hover.background = no_window.onHover.background = alpha_texture;
-            no_window.border = new RectOffset(0,0,0,0);
+            no_window.border = new RectOffset(0, 0, 0, 0);
             no_window.contentOffset = Vector2.zero;
-            no_window.padding = new RectOffset(4,4,4,4);
+            no_window.padding = new RectOffset(4, 4, 4, 4);
 
             //customization
             //vertical scrollbar texture
@@ -186,8 +178,8 @@ namespace AT_Utils
             //vertical scrollbar
             skin.verticalScrollbar.fixedWidth = 5;
             skin.verticalScrollbarThumb.fixedWidth = 5;
-            skin.verticalScrollbarThumb.border = new RectOffset(0,0,0,0);
-            skin.verticalScrollbarThumb.normal.background = skin.verticalScrollbarThumb.onNormal.background = 
+            skin.verticalScrollbarThumb.border = new RectOffset(0, 0, 0, 0);
+            skin.verticalScrollbarThumb.normal.background = skin.verticalScrollbarThumb.onNormal.background =
                 skin.verticalScrollbarThumb.hover.background = skin.verticalScrollbarThumb.onHover.background = scrollbar_texture;
             //horizontal scrollbar
             skin.horizontalScrollbar.fixedHeight = 10;
@@ -196,28 +188,19 @@ namespace AT_Utils
             ConfigureButtons();
         }
 
-        static GUIStyle find_style(string name)
-        {
-            foreach(var fi in StyleFields)
-            {
-                if(fi.Name == name) 
-                    return fi.GetValue(null) as GUIStyle;
-            }
-            return null;
-        }
-
-        static GUIStyle find_button_style(string color)
-        { return find_style(color.Replace(" ", "_")+"_button");    }
-
         public static void ConfigureButtons()
         {
-            enabled_button  = find_button_style(CFG.EnabledButtonColor)  ?? green_button;
-            active_button   = find_button_style(CFG.ActiveButtonColor)   ?? yellow_button;
-            inactive_button = find_button_style(CFG.InactiveButtonColor) ?? grey_button;
-            confirm_button  = find_button_style(CFG.ConfirmButtonColor)  ?? green_button;
-            add_button      = find_button_style(CFG.AddButtonColor)      ?? green_button;
-            close_button    = find_button_style(CFG.CloseButtonColor)    ?? red_button;
-            danger_button   = find_button_style(CFG.DangerButtonColor)   ?? red_button;
+            var g = Color.grey;
+            enabled_button = normal_button.OtherColor(Colors.Enabled, Colors.Enabled + g);
+            active_button = normal_button.OtherColor(Colors.Active, Colors.Active + g);
+            inactive_button = normal_button.OtherColor(Colors.Inactive, Colors.Inactive + g);
+            confirm_button = normal_button.OtherColor(Colors.Confirm, Colors.Confirm + g);
+            open_button = normal_button.OtherColor(Colors.Open, Colors.Open + g);
+            close_button = normal_button.OtherColor(Colors.Close, Colors.Close + g);
+            good_button = normal_button.OtherColor(Colors.Good, Colors.Good + g);
+            danger_button = normal_button.OtherColor(Colors.Danger, Colors.Danger + g);
+            sel1_button = normal_button.OtherColor(Colors.Selected1, Colors.Selected1 + g);
+            sel2_button = normal_button.OtherColor(Colors.Selected2, Colors.Selected2 + g);
         }
 
         static GUIStyle OtherColor(this GUIStyle style, Color normal)
@@ -237,17 +220,21 @@ namespace AT_Utils
 
         public static void Init()
         {
-            Styles.InitSkin();
-            GUI.skin = Styles.skin;
+            InitSkin();
+            GUI.skin = skin;
         }
 
+        static Dictionary<int, GUIStyle> frac_styles = new Dictionary<int, GUIStyle>();
         public static GUIStyle fracStyle(float frac)
         {
-            if(frac < 0.1) return Styles.red;
-            if(frac < 0.5) return Styles.yellow;
-            if(frac < 0.8) return Styles.white;
-            return Styles.green;
+            GUIStyle s;
+            var bin = Mathf.FloorToInt(frac * 10);
+            if(!frac_styles.TryGetValue(bin, out s))
+            {
+                s = white.OtherColor(Colors.FractionGradient.Evaluate((bin + 0.5f) / 10f));
+                frac_styles.Add(bin, s);
+            }
+            return s;
         }
     }
 }
-

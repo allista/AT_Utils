@@ -30,9 +30,9 @@ namespace AT_Utils
             DrawContent();
             GUILayout.BeginHorizontal();
             Result = Answer.None;
-            if(GUILayout.Button(No_text, Styles.red_button, GUILayout.ExpandWidth(false))) Result = Answer.No;
+            if(GUILayout.Button(No_text, Styles.close_button, GUILayout.ExpandWidth(false))) Result = Answer.No;
             GUILayout.FlexibleSpace();
-            if(GUILayout.Button(Yes_text, Styles.green_button, GUILayout.ExpandWidth(false))) Result = Answer.Yes;
+            if(GUILayout.Button(Yes_text, Styles.open_button, GUILayout.ExpandWidth(false))) Result = Answer.Yes;
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
             TooltipsAndDragWindow();
