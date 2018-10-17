@@ -141,6 +141,7 @@
     <Compile Include="GUI\Dialogs\SimpleScrollView.cs" />
     <Compile Include="Addons\PartMaker.cs" />
     <Compile Include="GUI\Windows\PartSelector.cs" />
+    <Compile Include="GUI\Colors.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
