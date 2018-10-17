@@ -25,9 +25,9 @@ using System.Reflection;
 // and "{Major}.{Minor}.{Build}.*" will update just the revision.
 
 #if NIGHTBUILD
-[assembly: AssemblyVersion("1.5.*")]
+[assembly: AssemblyVersion("1.6.*")]
 #else
-[assembly: AssemblyVersion("1.6.2.0")]
+[assembly: AssemblyVersion("1.6.3.0")]
 #endif
 [assembly: KSPAssembly("AT_Utils", 1, 6)]
 
