@@ -32,7 +32,7 @@ namespace AT_Utils
 
     public class PersistentColor : ConfigNodeObject
     {
-        [Persistent] string html = "FFFFFF";
+        [Persistent] string html = "#FFFFFF";
         Color _color = Color.white;
 
         public static PersistentColor white => new PersistentColor();
@@ -67,7 +67,7 @@ namespace AT_Utils
             set
             {
                 _color = value;
-                html = ColorUtility.ToHtmlStringRGBA(_color);
+                html = "#"+ColorUtility.ToHtmlStringRGBA(_color);
             }
         }
 
@@ -78,8 +78,9 @@ namespace AT_Utils
         {
             if(!ColorUtility.TryParseHtmlString(html, out _color))
             {
-                html = "FFFFFF";
+                html = "#FFFFFF";
                 c = Color.white;
+                Utils.Log("Unable to parse color: {}", html);
             }
         }
 
