@@ -11,9 +11,7 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization;
 using System.IO;
-using System.Text;
 
 namespace AT_Utils
 {
@@ -55,7 +53,7 @@ namespace AT_Utils
             }
             catch(Exception e)
             {
-                Utils.Log("Exception while loading {}\n{}\n{}\n{}", 
+                Utils.Log("Exception while loading {}\n{}\n{}\n{}",
                           this, e.Message, e.StackTrace, node);
             }
             foreach(var fi in get_fields())
@@ -120,7 +118,7 @@ namespace AT_Utils
             }
             catch(Exception e)
             {
-                Utils.Log("Exception while saving {}\n{}\n{}\n{}", 
+                Utils.Log("Exception while saving {}\n{}\n{}\n{}",
                           GetType().Name, e.Message, e.StackTrace, node);
             }
             foreach(var fi in get_fields())
@@ -207,6 +205,43 @@ namespace AT_Utils
             return (T)binaryFormatter.Deserialize(memoryStream);
         }
         #endregion
+
+        static void diff(ConfigNode a, ConfigNode b)
+        {
+            //compare values
+            for(int i = a.values.Count; i >= 0; i--)
+            {
+                if(i >= b.values.Count)
+                    break;
+                var v = a.values[i];
+                var v1 = b.values[i];
+                if(v.name == v1.name && v.value == v1.value)
+                    a.values.Remove(v);
+            }
+            //compare nodes
+            for(int i = a.nodes.Count; i >= 0; i--)
+            {
+                if(i >= b.values.Count)
+                    break;
+                var n = a.nodes[i];
+                var n1 = b.nodes[i];
+                diff(n, n1);
+                if(n.values.Count == 0
+                   && n.nodes.Count == 0)
+                    a.nodes.Remove(n);
+            }
+        }
+
+        virtual public ConfigNode Diff<CNO>(CNO other)
+            where CNO : ConfigNodeObject, new()
+        {
+            var other_node = new ConfigNode(other.NodeName);
+            var node = new ConfigNode(NodeName);
+            other.Save(other_node);
+            Save(node);
+            diff(node, other_node);
+            return node;
+        }
     }
 
     public class TypedConfigNodeObject : ConfigNodeObject
