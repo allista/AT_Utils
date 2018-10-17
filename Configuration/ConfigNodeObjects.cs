@@ -212,7 +212,7 @@ namespace AT_Utils
             for(int i = a.values.Count; i >= 0; i--)
             {
                 if(i >= b.values.Count)
-                    break;
+                    continue;
                 var v = a.values[i];
                 var v1 = b.values[i];
                 if(v.name == v1.name && v.value == v1.value)
@@ -221,8 +221,8 @@ namespace AT_Utils
             //compare nodes
             for(int i = a.nodes.Count; i >= 0; i--)
             {
-                if(i >= b.values.Count)
-                    break;
+                if(i >= b.nodes.Count)
+                    continue;
                 var n = a.nodes[i];
                 var n1 = b.nodes[i];
                 diff(n, n1);
