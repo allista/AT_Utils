@@ -103,7 +103,7 @@ namespace AT_Utils
         public void Show(bool show)
         {
             subassembly_selector.Show(show);
-            part_selector.Show(Show);
+            part_selector.Show(show);
         }
 
         public void Draw()
