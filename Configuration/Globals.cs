@@ -12,6 +12,7 @@ namespace AT_Utils
     public class AT_UtilsGlobals : PluginGlobals<AT_UtilsGlobals>
     {
         [Persistent] public Styles.Config StylesConfig = new Styles.Config();
+        [Persistent] public Colors Colors = new Colors();
 
         //for Metric
         [Persistent] public string MeshesToSkip = string.Empty;
