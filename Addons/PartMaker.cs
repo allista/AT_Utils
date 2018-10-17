@@ -4,6 +4,7 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2018 Allis Tauri
+using System;
 using UnityEngine;
 
 namespace AT_Utils
@@ -23,7 +24,7 @@ namespace AT_Utils
 
         public static Part CreatePart(AvailablePart part_info, string flag_url)
         {
-            var part = Object.Instantiate(part_info.partPrefab);
+            var part = UnityEngine.Object.Instantiate(part_info.partPrefab);
             part.gameObject.SetActive(true);
             part.partInfo = part_info;
             part.name = part_info.name;
@@ -39,10 +40,20 @@ namespace AT_Utils
             part.orgPos = part.transform.root.InverseTransformPoint(part.transform.position);
             part.orgRot = Quaternion.Inverse(part.transform.root.rotation) * part.transform.rotation;
             part.packed = true;
-            //initialize modules
-            part.InitializeModules();
+            // initialize modules
+            try { part.InitializeModules(); }
+            catch(Exception e) 
+            { 
+                Utils.Log("Error while initializing modules of {}: {}\n{}", 
+                          part, e.Message, e.StackTrace); 
+            }
+            //load modules
             var module_nodes = part_info.partConfig.GetNodes("MODULE");
-            for(int i = 0, maxLength = module_nodes.Length; i < maxLength; i++)
+            for(int i = 0, 
+                numNodes = module_nodes.Length, 
+                numModules = part.Modules.Count; 
+                i < numNodes && i < numModules; 
+                i++)
             {
                 var node = module_nodes[i];
                 var module_name = node.GetValue("name");
@@ -50,11 +61,28 @@ namespace AT_Utils
                 {
                     var module = part.Modules[i];
                     if(module != null && module.ClassName == module_name)
-                        module.Load(node);
+                    {
+                        try { module.Load(node); }
+                        catch(Exception e) 
+                        { 
+                            Utils.Log("Unable to load {}: {}\n{}", 
+                                      module, e.Message, e.StackTrace); 
+                        }
+                    }
                 }
             }
-            foreach(var module in part.Modules)
-                module.OnStart(PartModule.StartState.PreLaunch);
+            // start modules
+            var m = 0;
+            while(m < part.Modules.Count)
+            {
+                var module = part.Modules[m++];
+                try { module.OnStart(PartModule.StartState.None); }
+                catch(Exception e) 
+                { 
+                    Utils.Log("Error in OnStart of {}: {}\n{}", 
+                              module, e.Message, e.StackTrace); 
+                }
+            }
             return part;
         }
 
