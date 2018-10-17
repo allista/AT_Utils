@@ -434,8 +434,11 @@ namespace AT_Utils
 
         public static void ForEach<TSource>(this IEnumerable<TSource> E, Action<TSource> action)
         {
-            var en = E.GetEnumerator();
-            while(en.MoveNext()) action(en.Current);
+            if(E != null && action != null)
+            {
+                var en = E.GetEnumerator();
+                while(en.MoveNext()) action(en.Current);
+            }
         }
 
         public static void ForEach<TSource>(this IList<TSource> a, Action<TSource> action)
@@ -748,7 +751,7 @@ namespace AT_Utils
             var _state = PartModule.StartState.None;
             if(HighLogic.LoadedSceneIsEditor)
                 _state |= PartModule.StartState.Editor;
-            else if(HighLogic.LoadedSceneIsFlight)
+            else if(HighLogic.LoadedSceneIsFlight && part.vessel != null)
             {
                 if(part.vessel.situation == Vessel.Situations.PRELAUNCH)
                 {
@@ -1073,4 +1076,3 @@ namespace AT_Utils
         orb.getRelativePositionAtUT(Planetarium.GetUniversalTime() + orb.timeToPe);
     }
 }
-
