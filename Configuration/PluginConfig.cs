@@ -111,6 +111,16 @@ namespace AT_Utils
                 instance.CreateDefaultFile();
             instance.Load(instance.AllConfigFiles.ToArray());
         }
+
+        public static void SaveOverride()
+        {
+            var glob = new T();
+            if(glob.DefaultFileExists)
+            {
+                glob.LoadDefaultFile();
+                var diff = instance.Diff(glob);
+                SaveNode(diff, glob.DefaultOverride);
+            }
+        }
     }
 }
-
