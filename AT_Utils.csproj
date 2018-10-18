@@ -142,6 +142,7 @@
     <Compile Include="Addons\PartMaker.cs" />
     <Compile Include="GUI\Windows\PartSelector.cs" />
     <Compile Include="GUI\Colors.cs" />
+    <Compile Include="Addons\GlobalsEditor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
