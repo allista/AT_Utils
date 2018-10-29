@@ -53,6 +53,8 @@ namespace AT_Utils
         {
             fps.Tau = 1;
             base_fps.Tau = 2;
+            tasks = new List<Task>();
+            current = 0;
         }
 
         void OnDestroy() 
@@ -92,6 +94,8 @@ namespace AT_Utils
                 fps.Update(1 / Time.unscaledDeltaTime);
                 base_fps.Update(fps);
             }
+            //this.Log("tasks {}, unscaled dT {}, fps {}, fps avg {}", 
+                     //tasks.Count, Time.unscaledDeltaTime, fps.Value, base_fps.Value);//debug
             if(tasks.Count > 0)
             {
                 var dt = Time.unscaledDeltaTime / 100;
@@ -110,7 +114,8 @@ namespace AT_Utils
                             task.finished = true;
                             tasks.RemoveAt(current);
                         }
-                        else current = (current + 1) % tasks.Count;
+                        else 
+                            current += 1;
                     }
                     catch(Exception e)
                     {
@@ -119,11 +124,11 @@ namespace AT_Utils
                         tasks.RemoveAt(current);
                         Debug.Log(e);
                     }
+                    if(current >= tasks.Count)
+                        current = 0;
                     now = DateTime.Now;
                     //i++;
                 }
-                //Utils.Log("tasks: {}, steps: {}, fps {} base {}", 
-                          //tasks.Count, i, fps.Value, base_fps.Value);//debug
             }
         }
     }
