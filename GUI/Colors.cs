@@ -4,6 +4,8 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2018 Allis Tauri
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 namespace AT_Utils
 {
@@ -67,7 +69,7 @@ namespace AT_Utils
             set
             {
                 _color = value;
-                html = "#"+ColorUtility.ToHtmlStringRGBA(_color);
+                html = "#" + ColorUtility.ToHtmlStringRGBA(_color);
             }
         }
 
@@ -95,16 +97,46 @@ namespace AT_Utils
 
     public class Gradient : PersistentList<PersistentColor>
     {
+        UnityEngine.Gradient gradient;
+
+        public Gradient() { }
+
+        public Gradient(IEnumerable<PersistentColor> content)
+            : base(content)
+        { update(); }
+
+        void update()
+        {
+            if(Count > 1)
+            {
+                gradient = new UnityEngine.Gradient();
+                gradient.mode = GradientMode.Blend;
+                GradientColorKey[] colors = new GradientColorKey[Count];
+                for(int i = 0, count = Count; i < count; i++)
+                    colors[i] = new GradientColorKey { color = this[i], time = (float)i / count };
+                gradient.colorKeys = colors;
+                gradient.alphaKeys = new[]{
+                    new GradientAlphaKey{alpha=1, time=0},
+                    new GradientAlphaKey{alpha=1, time=1}
+                };
+                Utils.Log("Setup Gradient: {}", this);//debug
+            }
+            else
+                gradient = null;
+        }
+
+        public override void Load(ConfigNode node)
+        {
+            base.Load(node);
+            update();
+        }
+
         public Color Evaluate(float frac)
         {
+            if(gradient != null)
+                return gradient.Evaluate(frac);
             if(Count > 0)
-            {
-                var max = Count - 1;
-                var index = Mathf.FloorToInt(max * Utils.Clamp(frac, 0, 1));
-                var rem = frac * max - index;
-                return index < max ?
-                    Color.Lerp(this[index], this[index + 1], rem) : this[index];
-            }
+                return this[0];
             return Color.black;
         }
     }

@@ -293,13 +293,13 @@ namespace AT_Utils
         public PersistentList() { }
         public PersistentList(IEnumerable<T> content) : base(content) { }
 
-        public void Save(ConfigNode node)
+        public virtual void Save(ConfigNode node)
         {
             for(int i = 0, count = Count; i < count; i++)
                 this[i].Save(node.AddNode("Item"));
         }
 
-        public void Load(ConfigNode node)
+        public virtual void Load(ConfigNode node)
         {
             Clear();
             var nodes = node.GetNodes();
