@@ -102,6 +102,15 @@ namespace AT_Utils
 
     public static partial class Utils
     {
+        public static Camera CurrentCamera
+        {
+            get
+            {
+                if(HighLogic.LoadedSceneIsEditor) return EditorCamera.Instance.cam;
+                return MapView.MapIsEnabled ? PlanetariumCamera.Camera : FlightCamera.fetch.mainCamera;
+            }
+        }
+
         public static MaterialWrapper gl_material = new MaterialWrapper("Particles/Additive");
         public static MaterialWrapper no_z_material = new MaterialWrapper("GUI/Text Shader");
         public static MaterialWrapper diffuse_material = new MaterialWrapper("Diffuse");
