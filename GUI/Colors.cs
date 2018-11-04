@@ -24,7 +24,7 @@ namespace AT_Utils
         [Persistent] public PersistentColor Selected2 = PersistentColor.magenta;
 
         [Persistent]
-        public Gradient FractionGradient = new Gradient{
+        public SimpleGradient FractionGradient = new SimpleGradient{
             PersistentColor.red,
             PersistentColor.yellow,
             PersistentColor.white,
@@ -95,13 +95,15 @@ namespace AT_Utils
         public static implicit operator Color(PersistentColor c) => c.c;
     }
 
-    public class Gradient : PersistentList<PersistentColor>
+    public class SimpleGradient : PersistentList<PersistentColor>
     {
-        UnityEngine.Gradient gradient;
+        Gradient gradient;
 
-        public Gradient() { }
+        public static implicit operator Gradient(SimpleGradient g) => g.gradient;
 
-        public Gradient(IEnumerable<PersistentColor> content)
+        public SimpleGradient() { }
+
+        public SimpleGradient(IEnumerable<PersistentColor> content)
             : base(content)
         { update(); }
 
@@ -109,7 +111,7 @@ namespace AT_Utils
         {
             if(Count > 1)
             {
-                gradient = new UnityEngine.Gradient();
+                gradient = new Gradient();
                 gradient.mode = GradientMode.Blend;
                 GradientColorKey[] colors = new GradientColorKey[Count];
                 for(int i = 0, count = Count; i < count; i++)
@@ -119,7 +121,7 @@ namespace AT_Utils
                     new GradientAlphaKey{alpha=1, time=0},
                     new GradientAlphaKey{alpha=1, time=1}
                 };
-                Utils.Log("Setup Gradient: {}", this);//debug
+                Utils.Log("Set up SimpleGradient: {}", this);//debug
             }
             else
                 gradient = null;
