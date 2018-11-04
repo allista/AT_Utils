@@ -14,6 +14,9 @@ namespace AT_Utils
         [Persistent] public Styles.Config StylesConfig = new Styles.Config();
         [Persistent] public Colors Colors = new Colors();
 
+        [Persistent] public float LineWidthMult = 0.2f;
+        [Persistent] public float MinLineWidthMult = 0.02f;
+
         //for Metric
         [Persistent] public string MeshesToSkip = string.Empty;
         [Persistent] public string BadParts = string.Empty;

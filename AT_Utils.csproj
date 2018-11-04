@@ -143,7 +143,7 @@
     <Compile Include="GUI\Windows\PartSelector.cs" />
     <Compile Include="GUI\Colors.cs" />
     <Compile Include="Addons\GlobalsEditor.cs" />
-    <Compile Include="Addons\SimpleLineRenderer.cs" />
+    <Compile Include="Addons\LineRenderers.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
