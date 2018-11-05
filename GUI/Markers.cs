@@ -33,7 +33,8 @@ namespace AT_Utils
         {
             if(color.a.Equals(0)) return false;
             var icon_rect = new Rect(icon_center.x - size * 0.5f, (float)Screen.height - icon_center.y - size * 0.5f, size, size);
-            Graphics.DrawTexture(icon_rect, texture ?? DefaultTexture, texture_rect, 0, 0, 0, 0, color, IconMaterial);
+            //Graphics.DrawTexture(icon_rect, texture ?? DefaultTexture, texture_rect, 0, 0, 0, 0, color, IconMaterial);
+            GUI.DrawTexture(icon_rect, texture ?? DefaultTexture, ScaleMode.ScaleToFit, true, 1, color,0,0);
             return icon_rect.Contains(Event.current.mousePosition);
         }
 
