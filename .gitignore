@@ -13,3 +13,20 @@ obj/**
 *.user
 
 *.pdb
+
+.vs
+Temp
+Library
+ProjectSettings
+Assets/PartTools
+Assets/Plugins
+Assets/SquadCore
+
+*.meta
+/Assembly-CSharp-Editor.csproj
+/Assembly-CSharp.csproj
+/Assets/Editor/KSPCurveEditor.cs
+/Assets/Editor/TextMeshProResolver.cs
+/AT_Utils.sln
+AssetBundles
+/UnityPackageManager/manifest.json
