@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KSPBundleDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" UrlName="AT_Utils_UI.ksp" Name="AT_Utils_UI.ksp" CreatedTime="-8586601547672788228">
+  <Author>Allis Tauri</Author>
+  <Info>allista@gmail.com</Info>
+  <Assets>
+    <Asset Name="ColorItem" Path="Assets/UI/Prefabs/ColorItem.prefab" Type="GameObject" Url="UI/Prefabs/ColorItem" AutoLoad="false" />
+    <Asset Name="ColorList" Path="Assets/UI/Prefabs/ColorList.prefab" Type="GameObject" Url="UI/Prefabs/ColorList" AutoLoad="false" />
+  </Assets>
+  <Dependencies />
+</KSPBundleDefinition>
