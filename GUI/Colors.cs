@@ -5,8 +5,9 @@
 //
 //  Copyright (c) 2018 Allis Tauri
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using AT_Utils.UI;
+
 namespace AT_Utils
 {
     public class Colors : ConfigNodeObject
@@ -23,16 +24,21 @@ namespace AT_Utils
         [Persistent] public PersistentColor Selected1 = PersistentColor.cyan;
         [Persistent] public PersistentColor Selected2 = PersistentColor.magenta;
 
-        [Persistent]
         public SimpleGradient FractionGradient = new SimpleGradient{
             PersistentColor.red,
             PersistentColor.yellow,
             PersistentColor.white,
             PersistentColor.green
         };
+
+        public override void Load(ConfigNode node)
+        {
+            base.Load(node);
+            FractionGradient = new SimpleGradient { Danger, Warning, PersistentColor.white, Good };
+        }
     }
 
-    public class PersistentColor : ConfigNodeObject
+    public class PersistentColor : ConfigNodeObject, IColored
     {
         [Persistent] string html = "#FFFFFF";
         Color _color = Color.white;
@@ -58,12 +64,12 @@ namespace AT_Utils
 
         public PersistentColor(Color color)
         {
-            c = color;
+            this.color = color;
         }
 
         public string s => html;
 
-        public Color c
+        public Color color
         {
             get { return _color; }
             set
@@ -81,7 +87,7 @@ namespace AT_Utils
             if(!ColorUtility.TryParseHtmlString(html, out _color))
             {
                 html = "#FFFFFF";
-                c = Color.white;
+                color = Color.white;
                 Utils.Log("Unable to parse color: {}", html);
             }
         }
@@ -92,7 +98,7 @@ namespace AT_Utils
             parse();
         }
 
-        public static implicit operator Color(PersistentColor c) => c.c;
+        public static implicit operator Color(PersistentColor c) => c.color;
     }
 
     public class SimpleGradient : PersistentList<PersistentColor>

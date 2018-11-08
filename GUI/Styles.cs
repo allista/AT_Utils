@@ -8,9 +8,11 @@
 // or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections;
 using System.Reflection;
+using System.Linq;
 using UnityEngine;
+using AT_Utils.UI;
 
 namespace AT_Utils
 {
@@ -227,6 +229,12 @@ namespace AT_Utils
             GUI.skin = skin;
         }
 
+        public static void ReloadStyles()
+        {
+            skin = null;
+            Init();
+        }
+
         static Dictionary<int, GUIStyle> frac_styles = new Dictionary<int, GUIStyle>();
         public static GUIStyle fracStyle(float frac)
         {
@@ -239,5 +247,76 @@ namespace AT_Utils
             }
             return s;
         }
+
+        static List<FieldInfo> coloredFields = typeof(Colors)
+            .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .Where(fi => typeof(IColored).IsAssignableFrom(fi.FieldType)).ToList();
+        static GameObject colorListPrefab;
+        static ColorList colorList;
+        static Vector3 listPos = Vector3.zero;
+
+        static bool in_progress;
+        static public IEnumerator ShowUI()
+        {
+            if(in_progress || colorList != null)
+                yield break;
+            in_progress = true;
+            if(colorListPrefab == null)
+            {
+                foreach(var _ in UIBundle.LoadAsset("ColorList"))
+                    yield return null;
+                colorListPrefab = UIBundle.GetAsset("ColorList");
+                if(colorListPrefab == null)
+                    goto end;
+            }
+            var listObj = Object.Instantiate(colorListPrefab);
+            colorList = listObj.GetComponent<ColorList>();
+            if(colorList == null)
+            {
+                Utils.Log("{} does not have ColorList component: {}",
+                          listObj, listObj.GetComponents<MonoBehaviour>());
+                Object.Destroy(listObj);
+                goto end;
+            }
+            listObj.transform.SetParent(DialogCanvasUtil.DialogCanvasRect);
+            listObj.transform.localPosition = listPos;
+            foreach(var fi in coloredFields)
+            {
+                if(fi.GetValue(Colors) is IColored obj)
+                    colorList.AddColored(obj, fi.Name);
+            }
+            colorList.SetTitle("Color Scheme of AT Mods");
+            colorList.AddOnCancel(OnCancel);
+            colorList.AddOnApply(OnApply);
+            listObj.SetActive(true);
+        end:
+            in_progress = false;
+        }
+
+        static void OnCancel()
+        {
+            HideUI();
+            AT_UtilsGlobals.Load();
+        }
+
+        static void OnApply()
+        {
+            AT_UtilsGlobals.SaveOverride();
+            ReloadStyles();
+        }
+
+        static public void HideUI()
+        {
+            if(colorList != null)
+            {
+                listPos = colorList.transform.localPosition;
+                colorList.gameObject.SetActive(false);
+                Object.Destroy(colorList.gameObject);
+                colorList = null;
+            }
+        }
+
+        static public bool IsUiShown() =>
+        colorList != null;
     }
 }
