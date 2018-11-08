@@ -15,18 +15,18 @@ obj/**
 *.pdb
 
 .vs
-Temp
-Library
-ProjectSettings
-Assets/PartTools
-Assets/Plugins
-Assets/SquadCore
+Unity/Temp
+Unity/Library
+Unity/ProjectSettings
+Unity/Assets/PartTools
+Unity/Assets/Plugins
+Unity/Assets/SquadCore
 
 *.meta
-/Assembly-CSharp-Editor.csproj
-/Assembly-CSharp.csproj
-/Assets/Editor/KSPCurveEditor.cs
-/Assets/Editor/TextMeshProResolver.cs
-/AT_Utils.sln
-AssetBundles
-/UnityPackageManager/manifest.json
+Unity/Assembly-CSharp-Editor.csproj
+Unity/Assembly-CSharp.csproj
+Unity/Assets/Editor/KSPCurveEditor.cs
+Unity/Assets/Editor/TextMeshProResolver.cs
+Unity/AT_Utils.sln
+Unity/AssetBundles
+Unity/UnityPackageManager/manifest.json
