@@ -10,6 +10,6 @@
 [submodule "AnimatedConverters"]
 	path = AnimatedConverters
 	url = git@github.com:allista/AnimatedConverters.git
-[submodule "Assets/HSV-Color-Picker-Unity"]
-	path = Assets/HSV-Color-Picker-Unity
+[submodule "UI/HSV-Color-Picker-Unity"]
+	path = UI/HSV-Color-Picker-Unity
 	url = git@github.com:allista/HSV-Color-Picker-Unity.git
