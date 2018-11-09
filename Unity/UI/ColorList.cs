@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace AT_Utils.UI
 {
-    public class ColorList : DragablePanel
+    public class ColorList : ScreenBoundRect
     {
         [SerializeField]
         ColorPicker picker;
@@ -28,8 +28,9 @@ namespace AT_Utils.UI
         List<ColorItem> items = new List<ColorItem>();
         ToggleGroup colorItemsGroup;
 
-        protected virtual void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             colorItemsGroup = listContainer.GetComponent<ToggleGroup>();
         }
 
