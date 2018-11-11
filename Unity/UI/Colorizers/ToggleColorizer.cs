@@ -20,6 +20,8 @@ namespace AT_Utils.UI
         void Awake()
         {
             toggle.onValueChanged.AddListener(onToggle);
+            Colors.Enabled.onColorChanged.AddListener(c => onToggle(toggle.isOn));
+            Colors.Active.onColorChanged.AddListener(c => onToggle(toggle.isOn));
             onToggle(toggle.isOn);
         }
 
