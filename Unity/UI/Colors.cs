@@ -42,6 +42,8 @@ namespace AT_Utils.UI
         public static ColorSetting Selected1 = ColorSetting.cyan;
         public static ColorSetting Selected2 = ColorSetting.magenta;
 
+        public static SimpleGradient FractionGradient = new SimpleGradient{};
+
         public static SortedList<string, ColorSetting> All { get; } 
 
         static Colors()
@@ -50,6 +52,7 @@ namespace AT_Utils.UI
             foreach(var fi in typeof(Colors).GetFields(BindingFlags.Static|BindingFlags.Public)
                     .Where(fi => fi.FieldType == typeof(ColorSetting)))
                 All.Add(fi.Name, fi.GetValue(null) as ColorSetting);
+            FractionGradient = new SimpleGradient { Danger, Warning, Good };
         }
 
         public static ColorSetting GetColor(string key)
@@ -67,7 +70,7 @@ namespace AT_Utils.UI
     public class ColorSetting : IColored
     {
         Color _color = Color.white;
-        public string html { get; private set; } = "#FFFFFFFF";
+        public string _html = "#FFFFFFFF";
         public ColorChangedEvent onColorChanged = new ColorChangedEvent();
 
         public static ColorSetting white => new ColorSetting();
@@ -86,7 +89,6 @@ namespace AT_Utils.UI
         public ColorSetting(string html)
         {
             this.html = html;
-            parse();
         }
 
         public ColorSetting(Color color)
@@ -100,21 +102,31 @@ namespace AT_Utils.UI
             set
             {
                 _color = value;
-                html = "#" + ColorUtility.ToHtmlStringRGBA(_color);
+                _html = "#" + ColorUtility.ToHtmlStringRGBA(_color);
                 onColorChanged.Invoke(_color);
             }
         }
 
+        public string html
+        {
+            get { return _html; }
+            set 
+            {
+                _html = value;
+                parse();
+            }
+        }
+
         public string Tag(string msg) =>
-        string.Format("<color={0}>{1}</color>", html, msg);
+        string.Format("<color={0}>{1}</color>", _html, msg);
 
         void parse()
         {
-            if(!ColorUtility.TryParseHtmlString(html, out _color))
+            if(!ColorUtility.TryParseHtmlString(_html, out _color))
             {
-                html = "#FFFFFF";
+                Debug.LogFormat("Unable to parse color: {0}", _html);
+                _html = "#FFFFFFFF";
                 _color = Color.white;
-                Debug.LogFormat("Unable to parse color: {0}", html);
             }
             onColorChanged.Invoke(_color);
         }
@@ -132,7 +144,10 @@ namespace AT_Utils.UI
 
         public SimpleGradient(IEnumerable<ColorSetting> content)
             : base(content)
-        { update(); }
+        { 
+            update(); 
+            ForEach(cs => cs.onColorChanged.AddListener(c => update()));
+        }
 
         void update()
         {

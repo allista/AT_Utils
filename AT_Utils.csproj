@@ -145,7 +145,6 @@
     <Compile Include="GUI\Dialogs\SimpleScrollView.cs" />
     <Compile Include="Addons\PartMaker.cs" />
     <Compile Include="GUI\Windows\PartSelector.cs" />
-    <Compile Include="GUI\Colors.cs" />
     <Compile Include="Addons\GlobalsEditor.cs" />
     <Compile Include="Addons\LineRenderers.cs" />
     <Compile Include="GUI\UIBundle.cs" />

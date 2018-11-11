@@ -23,7 +23,6 @@ namespace AT_Utils
         }
 
         public static Config CFG => AT_UtilsGlobals.Instance.StylesConfig;
-        public static Colors Colors => AT_UtilsGlobals.Instance.Colors;
 
         //This code is based on Styles class from Extraplanetary Launchpad plugin.
         public static GUISkin skin;
@@ -280,26 +279,28 @@ namespace AT_Utils
             }
             listObj.transform.SetParent(DialogCanvasUtil.DialogCanvasRect);
             listObj.transform.localPosition = listPos;
-            foreach(var fi in coloredFields)
-            {
-                if(fi.GetValue(Colors) is IColored obj)
-                    colorList.AddColored(obj, fi.Name);
-            }
             colorList.SetTitle("Color Scheme of AT Mods");
-            colorList.AddOnCancel(OnCancel);
-            colorList.AddOnApply(OnApply);
+            colorList.closeButton.onClick.AddListener(Close);
+            colorList.saveButton.onClick.AddListener(Save);
+            colorList.resetButton.onClick.AddListener(Reset);
             listObj.SetActive(true);
         end:
             in_progress = false;
         }
 
-        static void OnCancel()
+        static void Close()
         {
             HideUI();
             AT_UtilsGlobals.Load();
         }
 
-        static void OnApply()
+        static void Reset()
+        {
+            AT_UtilsGlobals.Load();
+            ReloadStyles();
+        }
+
+        static void Save()
         {
             AT_UtilsGlobals.SaveOverride();
             ReloadStyles();
