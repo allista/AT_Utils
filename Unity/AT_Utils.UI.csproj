@@ -80,10 +80,15 @@
      <None Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Resources\Shaders\Compute\GenerateSVTexture.compute" />
      <Compile Include="UI\ColorList.cs" />
      <Compile Include="UI\ColorItem.cs" />
-     <Compile Include="UI\IColored.cs" />
+     <Compile Include="UI\Interfaces.cs" />
      <Compile Include="UI\DragableRect.cs" />
      <Compile Include="UI\AssemblyInfo.cs" />
      <Folder Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\" />
+     <Compile Include="UI\Colors.cs" />
+     <Folder Include="UI\Colorizers\" />
+     <Compile Include="UI\Colorizers\GenericColorizer.cs" />
+     <Compile Include="UI\Colorizers\ToggleColorizer.cs" />
+     <Compile Include="UI\Colorizers\ColorizerBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

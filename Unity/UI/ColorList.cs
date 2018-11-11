@@ -32,6 +32,8 @@ namespace AT_Utils.UI
         {
             base.Awake();
             colorItemsGroup = listContainer.GetComponent<ToggleGroup>();
+            foreach(var color in Colors.All)
+                AddColored(color.Value, color.Key);
         }
 
         public void SetTitle(string text)

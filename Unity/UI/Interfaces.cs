@@ -5,4 +5,9 @@ namespace AT_Utils.UI
     {
         Color color { get; set; }
     }
+
+    public interface IColorProvider
+    {
+        IColored GetColored(string name);
+    }
 }
