@@ -16,11 +16,9 @@ namespace AT_Utils.UI
         [SerializeField]
         GameObject colorItemPrefab;
 
-        [SerializeField]
-        Button cancelButton;
-
-        [SerializeField]
-        Button applyButton;
+        public Button closeButton;
+        public Button resetButton;
+        public Button saveButton;
 
         [SerializeField]
         Text title;
@@ -52,16 +50,6 @@ namespace AT_Utils.UI
             colorItemsGroup.RegisterToggle(item.pickerToggle);
             itemObj.transform.SetParent(listContainer.transform);
             items.Add(item);
-        }
-
-        public void AddOnCancel(UnityAction action)
-        {
-            cancelButton.onClick.AddListener(action);
-        }
-
-        public void AddOnApply(UnityAction action)
-        {
-            applyButton.onClick.AddListener(action);
         }
 
         void OnDestroy()
