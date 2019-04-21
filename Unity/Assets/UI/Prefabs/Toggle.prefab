@@ -209,7 +209,6 @@ MonoBehaviour:
   m_Script: {fileID: -332726052, guid: 23fd6eb82728348aba7ba3f92873da24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  toggle: {fileID: 114435872789632812}
   toggleText: {fileID: 114947441278520568}
 --- !u!114 &114947441278520568
 MonoBehaviour:
@@ -269,7 +268,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1079365957004726}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 74.9, y: -603.3, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 224564209354993578}
