@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<KSPBundleDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" UrlName="AT_Utils_UI.ksp" Name="AT_Utils_UI.ksp" CreatedTime="-8586596730602750998">
+<KSPBundleDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" UrlName="at_utils_ui.ksp" Name="at_utils_ui.ksp" CreatedTime="-8586545685501091278">
   <Author>Allis Tauri</Author>
   <Info>allista@gmail.com</Info>
   <Assets>
@@ -8,6 +8,7 @@
     <Asset Name="ColorList" Path="Assets/UI/Prefabs/ColorList.prefab" Type="GameObject" Url="UI/Prefabs/ColorList" AutoLoad="false" />
     <Asset Name="TextField" Path="Assets/UI/Prefabs/TextField.prefab" Type="GameObject" Url="UI/Prefabs/TextField" AutoLoad="false" />
     <Asset Name="Toggle" Path="Assets/UI/Prefabs/Toggle.prefab" Type="GameObject" Url="UI/Prefabs/Toggle" AutoLoad="false" />
+    <Asset Name="GenerateSVTexture" Path="Assets/UI/Shaders/Compute/GenerateSVTexture.compute" Type="ComputeShader" Url="UI/Shaders/Compute/GenerateSVTexture" AutoLoad="false" />
     <Asset Name="button-pressed" Path="Assets/UI/Textures/button-pressed.png" Type="Texture2D" Url="UI/Textures/button-pressed" AutoLoad="false" />
     <Asset Name="button" Path="Assets/UI/Textures/button.png" Type="Texture2D" Url="UI/Textures/button" AutoLoad="false" />
     <Asset Name="panel" Path="Assets/UI/Textures/panel.png" Type="Texture2D" Url="UI/Textures/panel" AutoLoad="false" />

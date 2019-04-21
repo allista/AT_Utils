@@ -8,14 +8,13 @@ using KSPAssets;
 using KSPAssets.Loaders;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace AT_Utils
 {
     public static class UIBundle
     {
-        const string BUNDLE = "000_AT_Utils/AT_Utils_UI";
+        const string BUNDLE = "000_AT_Utils/at_utils_ui";
         static BundleDefinition bundle_def;
         static Dictionary<string,GameObject> loaded_assets = new Dictionary<string, GameObject>();
 
