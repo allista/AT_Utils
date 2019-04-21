@@ -5,6 +5,7 @@
 //
 //  Copyright (c) 2016 Allis Tauri
 
+using System;
 using UnityEngine;
 
 namespace AT_Utils
@@ -13,7 +14,7 @@ namespace AT_Utils
     {
         const float eps = 1e-7f;
         const float min_request = 1e-5f;
-        float request;
+        double request;
 
         readonly Part part;
 
@@ -21,7 +22,7 @@ namespace AT_Utils
         public float Requested { get; private set; }
         public float Result    { get; private set; }
         public float Ratio     { get { return Mathf.Abs(Result/Requested); } }
-        public bool  PartialTransfer { get { return Mathf.Abs(Requested)-Mathf.Abs(Result) > eps; } }
+        public bool  PartialTransfer { get { return Math.Abs(Requested)-Math.Abs(Result) > eps; } }
         public bool  Valid     { get { return part != null; } }
 
         public ResourcePump(Part part, int res_ID)
@@ -42,9 +43,9 @@ namespace AT_Utils
 
         public bool TransferResource()
         {
-            if(Mathf.Abs(request) <= min_request) return false;
-            Result    = part.RequestResource(Resource.id, request);
-            Requested = request;
+            if(Math.Abs(request) <= min_request) return false;
+            Result    = (float)part.RequestResource(Resource.id, request);
+            Requested = (float)request;
             request   = 0;
             return true;
         }
@@ -55,7 +56,7 @@ namespace AT_Utils
         public void Revert()
         {
             if(Result.Equals(0)) return;
-            part.RequestResource(Resource.id, -Result);
+            part.RequestResource(Resource.id, -(double)Result);
             request = Result; Requested = Result = 0;
         }
     }
