@@ -18,6 +18,7 @@ namespace AT_Utils.UI
 
         public Button closeButton;
         public Button resetButton;
+        public Button restoreButton;
         public Button saveButton;
 
         [SerializeField]

@@ -228,12 +228,6 @@ namespace AT_Utils
             GUI.skin = skin;
         }
 
-        public static void ReloadStyles()
-        {
-            skin = null;
-            Init();
-        }
-
         static Dictionary<int, GUIStyle> frac_styles = new Dictionary<int, GUIStyle>();
         public static GUIStyle fracStyle(float frac)
         {
@@ -247,9 +241,6 @@ namespace AT_Utils
             return s;
         }
 
-        static List<FieldInfo> coloredFields = typeof(Colors)
-            .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            .Where(fi => typeof(IColored).IsAssignableFrom(fi.FieldType)).ToList();
         static GameObject colorListPrefab;
         static ColorList colorList;
         static Vector3 listPos = Vector3.zero;
@@ -260,6 +251,7 @@ namespace AT_Utils
             if(in_progress || colorList != null)
                 yield break;
             in_progress = true;
+            bool first_start = false;
             if(colorListPrefab == null)
             {
                 foreach(var _ in UIBundle.LoadAsset("ColorList"))
@@ -267,9 +259,11 @@ namespace AT_Utils
                 colorListPrefab = UIBundle.GetAsset("ColorList");
                 if(colorListPrefab == null)
                     goto end;
+                first_start = true;
             }
             var listObj = Object.Instantiate(colorListPrefab);
             colorList = listObj.GetComponent<ColorList>();
+            listObj.SetActive(false);
             if(colorList == null)
             {
                 Utils.Log("{} does not have ColorList component: {}",
@@ -277,12 +271,19 @@ namespace AT_Utils
                 Object.Destroy(listObj);
                 goto end;
             }
-            listObj.transform.SetParent(DialogCanvasUtil.DialogCanvasRect);
-            listObj.transform.localPosition = listPos;
             colorList.SetTitle("Color Scheme of AT Mods");
             colorList.closeButton.onClick.AddListener(Close);
             colorList.saveButton.onClick.AddListener(Save);
             colorList.resetButton.onClick.AddListener(Reset);
+            colorList.restoreButton.onClick.AddListener(Restore);
+            listObj.transform.SetParent(DialogCanvasUtil.DialogCanvasRect);
+            if(first_start)
+            {
+                yield return null;
+                var rect = (listObj.transform as RectTransform).rect;
+                listPos = new Vector3(-rect.width / 2, rect.height / 2);
+            }
+            listObj.transform.localPosition = listPos;
             listObj.SetActive(true);
         end:
             in_progress = false;
@@ -292,18 +293,25 @@ namespace AT_Utils
         {
             HideUI();
             AT_UtilsGlobals.Load();
+            skin = null;
         }
 
         static void Reset()
         {
-            AT_UtilsGlobals.Load();
-            ReloadStyles();
+            Colors.SetDefaults();
+            skin = null;
+        }
+
+        static void Restore()
+        {
+            AT_UtilsGlobals.Restore();
+            skin = null;
         }
 
         static void Save()
         {
-            AT_UtilsGlobals.SaveOverride();
-            ReloadStyles();
+            AT_UtilsGlobals.Save();
+            skin = null;
         }
 
         static public void HideUI()
@@ -318,6 +326,6 @@ namespace AT_Utils
         }
 
         static public bool IsUiShown() =>
-        colorList != null;
+        !in_progress && colorList != null;
     }
 }

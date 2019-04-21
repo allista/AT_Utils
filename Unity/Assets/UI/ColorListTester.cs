@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
+
 namespace AT_Utils.UI
 {
     public class ColorListTester : MonoBehaviour
@@ -12,6 +14,14 @@ namespace AT_Utils.UI
             public ColoredTest(int i)
             {
                 color = Color.white;
+            }
+
+            public void addOnColorChangeListner(UnityAction<Color> action)
+            {
+            }
+
+            public void removeOnColorChangeListner(UnityAction<Color> action)
+            {
             }
         }
 

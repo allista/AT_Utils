@@ -25,19 +25,28 @@ namespace AT_Utils.UI
             pickerToggle.onValueChanged.AddListener(togglePicker);
         }
 
+        void displayColor(Color color)
+        {
+            colorDisplay.color = color;
+            colorHTML.text = "#" + ColorUtility.ToHtmlStringRGBA(color);
+            if(picker != null && pickerToggle.isOn)
+                picker.CurrentColor = color;
+        }
+
         public void SetColored(IColored colored, string name)
         {
             this.colored = colored;
             pickerToggleText.text = name;
-            ChangeColor(colored.color);
+            displayColor(colored.color);
+            colored.addOnColorChangeListner(displayColor);
         }
 
         public void ChangeColor(Color color)
         {
             if(colored != null)
                 colored.color = color;
-            colorDisplay.color = color;
-            colorHTML.text = "#" + ColorUtility.ToHtmlStringRGBA(color);
+            else
+                displayColor(color);
         }
 
         void togglePicker(bool toggle)

@@ -11,9 +11,9 @@ namespace AT_Utils.UI
     public abstract class ColorizerBase : MonoBehaviour
     {
         public string Color;
-        ColorSetting setting;
+        protected ColorSetting setting { get; private set; }
 
-        void Awake()
+        protected virtual void Awake()
         {
             if(!string.IsNullOrEmpty(Color))
             {
@@ -26,7 +26,7 @@ namespace AT_Utils.UI
             }
         }
 
-        void OnDestroy()
+        protected virtual void OnDestroy()
         {
             if(setting != null)
                 setting.onColorChanged.RemoveListener(onColorChanged);

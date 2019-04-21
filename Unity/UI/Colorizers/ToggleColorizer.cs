@@ -11,7 +11,6 @@ namespace AT_Utils.UI
 {
     public class ToggleColorizer : MonoBehaviour
     {
-        [SerializeField]
         Toggle toggle;
 
         [SerializeField]
@@ -19,15 +18,22 @@ namespace AT_Utils.UI
 
         void Awake()
         {
-            toggle.onValueChanged.AddListener(onToggle);
-            Colors.Enabled.onColorChanged.AddListener(c => onToggle(toggle.isOn));
-            Colors.Active.onColorChanged.AddListener(c => onToggle(toggle.isOn));
-            onToggle(toggle.isOn);
+            toggle = gameObject.GetComponent<Toggle>();
+            if(toggle != null)
+            {
+                toggle.onValueChanged.AddListener(isOn => updateColor());
+                Colors.Enabled.onColorChanged.AddListener(c => updateColor());
+                Colors.Active.onColorChanged.AddListener(c => updateColor());
+                updateColor();
+            }
+            else
+                enabled = false;
         }
 
-        void onToggle(bool isOn)
+        public void SetInteractable(bool interactable)
         {
-            changeColor(isOn? Colors.Enabled: Colors.Active);
+            toggle.interactable = interactable;
+            updateColor();
         }
 
         void changeColor(Color color)
@@ -36,6 +42,15 @@ namespace AT_Utils.UI
             var colors = toggle.colors;
             colors.highlightedColor = color;
             toggle.colors = colors;
+        }
+
+        void updateColor()
+        {
+            changeColor(toggle.isOn
+                        ? Colors.Enabled
+                        : (toggle.interactable
+                           ? Colors.Active
+                           : Colors.Inactive));
         }
     }
 }

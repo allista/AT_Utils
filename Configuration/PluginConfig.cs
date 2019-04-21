@@ -69,6 +69,8 @@ namespace AT_Utils
 
     public abstract class PluginConfig : CustomConfig
     {
+        ConfigNode current_config;
+
         public string DefaultFile { get { return PluginData(AssemblyName+".glob"); } }
         public string DefaultOverride { get { return PluginFolder(AssemblyName+".user"); } }
         public bool   DefaultFileExists { get { return File.Exists(DefaultFile); } }
@@ -85,16 +87,45 @@ namespace AT_Utils
                 if(gnode != null) Load(gnode);
             }
             Init();
+            current_config = new ConfigNode(NodeName);
+            Save(current_config);
         }
         public void LoadDefaultFile() { Load(DefaultFile); }
         public void CreateDefaultFile() { Create(DefaultFile); }
         public void CreateDefaultOverride() { Create(DefaultOverride); }
+
+        public void SaveOverride()
+        {
+            ConfigNode gnode = null;
+            if(DefaultFileExists)
+                gnode = LoadNode(DefaultFile);
+            else
+                gnode = new ConfigNode(NodeName);
+            var diff = Diff(gnode);
+            SaveNode(diff, DefaultOverride);
+        }
+
+        public void RestoreCurrentConfig()
+        {
+            if(current_config != null)
+            {
+                Load(current_config);
+                Init();
+            }
+        }
     }
 
 
     public abstract class PluginGlobals<T> : PluginConfig where T : PluginConfig, new()
     {
         static T instance { get; set; }
+        static void init_instance()
+        {
+            instance = new T();
+            if(!instance.DefaultFileExists)
+                instance.CreateDefaultFile();
+        }
+
         public static T Instance 
         {
             get
@@ -106,21 +137,17 @@ namespace AT_Utils
 
         public static void Load()
         {
-            instance = new T();
-            if(!instance.DefaultFileExists)
-                instance.CreateDefaultFile();
+            init_instance();
             instance.Load(instance.AllConfigFiles.ToArray());
         }
 
-        public static void SaveOverride()
+        public static void LoadDefault()
         {
-            var glob = new T();
-            if(glob.DefaultFileExists)
-            {
-                glob.LoadDefaultFile();
-                var diff = instance.Diff(glob);
-                SaveNode(diff, glob.DefaultOverride);
-            }
+            init_instance();
+            instance.LoadDefaultFile();
         }
+
+        public static void Save() => instance.SaveOverride();
+        public static void Restore() => instance.RestoreCurrentConfig();
     }
 }

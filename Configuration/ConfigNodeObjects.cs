@@ -209,38 +209,62 @@ namespace AT_Utils
         static void diff(ConfigNode a, ConfigNode b)
         {
             //compare values
-            for(int i = a.values.Count; i >= 0; i--)
+            for(int i = a.values.Count-1; i >= 0; i--)
             {
-                if(i >= b.values.Count)
-                    continue;
                 var v = a.values[i];
-                var v1 = b.values[i];
-                if(v.name == v1.name && v.value == v1.value)
-                    a.values.Remove(v);
+                var b_vals = b.GetValues(v.name);
+                if(b_vals != null)
+                {
+                    for(int j = b_vals.Length-1; j >= 0; j--)
+                    {
+                        var v1 = b_vals[j];
+                        Utils.Log("{}.{}: {} vs {} = {}", a.name, v.name, v.value, v1, v.value.Equals(v1));//debug
+                        if(v.value.Equals(v1))
+                        {
+                            a.values.Remove(v);
+                            break;
+                        }
+                    }
+                }
             }
             //compare nodes
-            for(int i = a.nodes.Count; i >= 0; i--)
+            for(int i = a.nodes.Count-1; i >= 0; i--)
             {
-                if(i >= b.nodes.Count)
-                    continue;
                 var n = a.nodes[i];
-                var n1 = b.nodes[i];
-                diff(n, n1);
-                if(n.values.Count == 0
-                   && n.nodes.Count == 0)
-                    a.nodes.Remove(n);
+                var b_nodes = b.GetNodes(n.name);
+                if(b_nodes != null)
+                {
+                    for(int j = b_nodes.Length-1; j >= 0; j--)
+                    {
+                        var n1 = b_nodes[j];
+                        diff(n, n1);
+                        if(n.values.Count == 0
+                           && n.nodes.Count == 0)
+                        {
+                            a.nodes.Remove(n);
+                            break;
+                        }
+                    }
+                }
             }
+        }
+
+        public ConfigNode Diff(ConfigNode other)
+        {
+            var node = new ConfigNode(NodeName);
+            Save(node);
+            Utils.Log("Saved CNO: {}", node);
+            diff(node, other);
+            Utils.Log("Diff CNO: {}", node);
+            return node;
         }
 
         virtual public ConfigNode Diff<CNO>(CNO other)
             where CNO : ConfigNodeObject, new()
         {
             var other_node = new ConfigNode(other.NodeName);
-            var node = new ConfigNode(NodeName);
             other.Save(other_node);
-            Save(node);
-            diff(node, other_node);
-            return node;
+            return Diff(other_node);
         }
     }
 

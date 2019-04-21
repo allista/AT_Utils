@@ -55,12 +55,25 @@ namespace AT_Utils.UI
             FractionGradient = new SimpleGradient { Danger, Warning, Good };
         }
 
+        public static void SetDefaults()
+        {
+            Enabled.color = ColorSetting.green;
+            Active.color = ColorSetting.yellow;
+            Inactive.color = ColorSetting.grey;
+            Confirm.color = ColorSetting.green;
+            Open.color = ColorSetting.green;
+            Close.color = ColorSetting.red;
+            Good.color = ColorSetting.green;
+            Warning.color = ColorSetting.yellow;
+            Danger.color = ColorSetting.red;
+            Selected1.color = ColorSetting.cyan;
+            Selected2.color = ColorSetting.magenta;
+        }
+
         public static ColorSetting GetColor(string key)
         {
             ColorSetting color;
-            if(All.TryGetValue(key, out color))
-                return color;
-            return null;
+            return All.TryGetValue(key, out color)? color : null;
         }
 
         public IColored GetColored(string key) => GetColor(key);
@@ -101,6 +114,8 @@ namespace AT_Utils.UI
             get { return _color; }
             set
             {
+                if(_color == value)
+                    return;
                 _color = value;
                 _html = "#" + ColorUtility.ToHtmlStringRGBA(_color);
                 onColorChanged.Invoke(_color);
@@ -112,6 +127,8 @@ namespace AT_Utils.UI
             get { return _html; }
             set 
             {
+                if(_html == value)
+                    return;
                 _html = value;
                 parse();
             }
@@ -130,6 +147,12 @@ namespace AT_Utils.UI
             }
             onColorChanged.Invoke(_color);
         }
+
+        public void addOnColorChangeListner(UnityAction<Color> action) =>
+        onColorChanged.AddListener(action);
+
+        public void removeOnColorChangeListner(UnityAction<Color> action) =>
+        onColorChanged.RemoveListener(action);
 
         public static implicit operator Color(ColorSetting c) => c.color;
     }

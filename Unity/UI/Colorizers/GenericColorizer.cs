@@ -20,8 +20,20 @@ namespace AT_Utils.UI
         [SerializeField]
         Selectable selectable;
 
+        public void SetInteractable(bool interactable)
+        {
+            if(selectable != null)
+            {
+                selectable.interactable = interactable;
+                onColorChanged(setting);
+            }
+        }
+
         protected override void onColorChanged(Color color)
         {
+            if(selectable != null 
+               && !selectable.interactable)
+                color = Colors.Inactive;
             if(text != null)
                 text.color = color;
             if(image != null)
