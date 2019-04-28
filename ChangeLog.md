@@ -1,6 +1,19 @@
 #AT Utils ChangeLog
 
-* **v1.6.2**
+* **v1.6.3**
+    * Added ShipConstruct.SelectPart(flagURL)
+    * Added PartMaker to make a part from the name and a ShipConstruct from the part
+        * Added PartSelector: like SubassemblySelector, but selects AvailableParts
+    * Added Utils.PartIsPurchased(AvailablePart)
+    * Try and catch everything while creating a part in PartMaker.
+        * Also, consider the possibility of unequal module nodes and modules counts.
+        * And of modules that add other modules (like CC does).
+    * Safer ForEach extension; fixed NRE in StartState.
+    * PartSelector uses pagination, async loading and title filter.
+    * Fixed Out of memory exception in ComputationBalancer on scene change
+    * ResourcePump.request is double, which fixes some issues with KSP-1.6
+
+* v1.6.2
     * Added StringID extensions for classes in ksp object's hierarchy.
         * To better track what happens where during debugging.
     * Fixed SelectMax; .Log extensions use GetID() for prefixes.
