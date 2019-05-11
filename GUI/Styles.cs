@@ -277,14 +277,19 @@ namespace AT_Utils
             colorList.resetButton.onClick.AddListener(Reset);
             colorList.restoreButton.onClick.AddListener(Restore);
             listObj.transform.SetParent(DialogCanvasUtil.DialogCanvasRect);
+            listObj.SetActive(true);
             if(first_start)
             {
-                yield return null;
-                var rect = (listObj.transform as RectTransform).rect;
+                listObj.transform.localPosition = new Vector3(-Screen.width, 0);
+                Rect rect = new Rect();
+                while(rect.width.Equals(0))
+                {
+                    rect = (listObj.transform as RectTransform).rect;
+                    yield return null;
+                }
                 listPos = new Vector3(-rect.width / 2, rect.height / 2);
             }
             listObj.transform.localPosition = listPos;
-            listObj.SetActive(true);
         end:
             in_progress = false;
         }
