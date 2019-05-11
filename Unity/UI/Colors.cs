@@ -30,6 +30,7 @@ namespace AT_Utils.UI
             }
         }
 
+        public static ColorSetting Neutral = ColorSetting.white;
         public static ColorSetting Enabled = ColorSetting.green;
         public static ColorSetting Active = ColorSetting.yellow;
         public static ColorSetting Inactive = ColorSetting.grey;
