@@ -39,7 +39,7 @@ namespace AT_Utils
         public static ConfigNode LoadNode(string filepath, bool with_message = false)
         {
             var node = ConfigNode.Load(filepath);
-            if(node == null && with_message) 
+            if(node == null && with_message)
                 Utils.Log("Unable to read {}", filepath);
             return node;
         }
@@ -52,9 +52,9 @@ namespace AT_Utils
                 node.Save(filepath);
                 return true;
             }
-            catch(Exception ex) 
-            { 
-                Utils.Log("Error writing {} file:\n{}", filepath, ex); 
+            catch(Exception ex)
+            {
+                Utils.Log("Error writing {} file:\n{}", filepath, ex);
                 return false;
             }
         }
@@ -71,12 +71,12 @@ namespace AT_Utils
     {
         ConfigNode current_config;
 
-        public string DefaultFile { get { return PluginData(AssemblyName+".glob"); } }
-        public string DefaultOverride { get { return PluginFolder(AssemblyName+".user"); } }
-        public bool   DefaultFileExists { get { return File.Exists(DefaultFile); } }
-        public virtual List<string> AllConfigFiles { get { return new List<string>{DefaultFile, DefaultOverride}; } }
+        public string DefaultFile { get { return PluginData(AssemblyName + ".glob"); } }
+        public string DefaultOverride { get { return PluginFolder(AssemblyName + ".user"); } }
+        public bool DefaultFileExists { get { return File.Exists(DefaultFile); } }
+        public virtual List<string> AllConfigFiles { get { return new List<string> { DefaultFile, DefaultOverride }; } }
 
-        public virtual void Init() {}
+        public virtual void Init() { }
 
         public void Load(params string[] files)
         {
@@ -94,15 +94,16 @@ namespace AT_Utils
         public void CreateDefaultFile() { Create(DefaultFile); }
         public void CreateDefaultOverride() { Create(DefaultOverride); }
 
-        public void SaveOverride()
+        public void SaveOverride(params string[] paths)
         {
-            ConfigNode gnode = null;
-            if(DefaultFileExists)
-                gnode = LoadNode(DefaultFile);
+            if(paths.Length == 0) return;
+            ConfigNode node = null;
+            if(File.Exists(DefaultOverride))
+                node = LoadNode(DefaultOverride);
             else
-                gnode = new ConfigNode(NodeName);
-            var diff = Diff(gnode);
-            SaveNode(diff, DefaultOverride);
+                node = new ConfigNode(NodeName);
+            SavePartial(node, paths);
+            SaveNode(node, DefaultOverride);
         }
 
         public void RestoreCurrentConfig()
@@ -126,7 +127,7 @@ namespace AT_Utils
                 instance.CreateDefaultFile();
         }
 
-        public static T Instance 
+        public static T Instance
         {
             get
             {
@@ -147,7 +148,7 @@ namespace AT_Utils
             instance.LoadDefaultFile();
         }
 
-        public static void Save() => instance.SaveOverride();
+        public static void Save(params string[] paths) => instance.SaveOverride(paths);
         public static void Restore() => instance.RestoreCurrentConfig();
     }
 }

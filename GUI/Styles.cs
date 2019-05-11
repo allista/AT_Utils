@@ -310,7 +310,7 @@ namespace AT_Utils
 
         static void Save()
         {
-            AT_UtilsGlobals.Save();
+            AT_UtilsGlobals.Save("Colors");
             skin = null;
         }
 

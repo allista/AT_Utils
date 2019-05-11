@@ -8,6 +8,7 @@
 // or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -206,65 +207,80 @@ namespace AT_Utils
         }
         #endregion
 
-        static void diff(ConfigNode a, ConfigNode b)
+        ConfigNode extract_path(ConfigNode node, List<string> path)
         {
-            //compare values
-            for(int i = a.values.Count-1; i >= 0; i--)
+            var new_node = new ConfigNode(node.name) { id = node.id };
+            if(path.Count > 1)
             {
-                var v = a.values[i];
-                var b_vals = b.GetValues(v.name);
-                if(b_vals != null)
+                foreach(var subnode in node.GetNodes(path[0]))
+                    new_node.AddNode(extract_path(subnode, path.GetRange(1, path.Count - 1)));
+            }
+            else
+            {
+                var leaf_spec = path[0].Split(new[] { ':' }, 2);
+                var leaf_node = leaf_spec[0];
+                var leaf_value = leaf_spec.Length > 1 ? leaf_spec[1] : null;
+                if(string.IsNullOrEmpty(leaf_node))
                 {
-                    for(int j = b_vals.Length-1; j >= 0; j--)
+                    if(string.IsNullOrEmpty(leaf_value))
+                        node.CopyTo(new_node);
+                    else
+                        foreach(var val in node.GetValues(leaf_value))
+                            new_node.AddValue(leaf_value, val);
+                }
+                else
+                {
+                    foreach(var subnode in node.GetNodes(leaf_node))
                     {
-                        var v1 = b_vals[j];
-                        Utils.Log("{}.{}: {} vs {} = {}", a.name, v.name, v.value, v1, v.value.Equals(v1));//debug
-                        if(v.value.Equals(v1))
+                        if(string.IsNullOrEmpty(leaf_value))
+                            new_node.AddNode(subnode.CreateCopy());
+                        else
                         {
-                            a.values.Remove(v);
-                            break;
+                            var new_subnode = new ConfigNode(subnode.name) { id = subnode.id };
+                            foreach(var val in subnode.GetValues(leaf_value))
+                                new_subnode.AddValue(leaf_value, val);
+                            new_node.AddNode(new_subnode);
                         }
                     }
                 }
             }
-            //compare nodes
-            for(int i = a.nodes.Count-1; i >= 0; i--)
+            return new_node;
+        }
+
+        void merge_nodes(ConfigNode base_node, ConfigNode node)
+        {
+            int idx = 0;
+            var value_indexes = new Dictionary<string, int>();
+            foreach(ConfigNode.Value value in node.values)
             {
-                var n = a.nodes[i];
-                var b_nodes = b.GetNodes(n.name);
-                if(b_nodes != null)
-                {
-                    for(int j = b_nodes.Length-1; j >= 0; j--)
-                    {
-                        var n1 = b_nodes[j];
-                        diff(n, n1);
-                        if(n.values.Count == 0
-                           && n.nodes.Count == 0)
-                        {
-                            a.nodes.Remove(n);
-                            break;
-                        }
-                    }
-                }
+                if(!value_indexes.TryGetValue(value.name, out idx))
+                    idx = 0;
+                base_node.SetValue(value.name, value.value, idx, true);
+                value_indexes[value.name] = idx + 1;
+            }
+            var node_indexes = new Dictionary<string, int>();
+            foreach(ConfigNode subnode in node.nodes)
+            {
+                if(!node_indexes.TryGetValue(subnode.name, out idx))
+                    idx = 0;
+                var base_subnode = base_node.GetNode(subnode.name, idx);
+                if(base_subnode != null)
+                    merge_nodes(base_subnode, subnode);
+                else
+                    base_node.AddNode(subnode);
+                value_indexes[subnode.name] = idx + 1;
             }
         }
 
-        public ConfigNode Diff(ConfigNode other)
+        public void SavePartial(ConfigNode node, params string[] paths)
         {
-            var node = new ConfigNode(NodeName);
-            Save(node);
-            Utils.Log("Saved CNO: {}", node);
-            diff(node, other);
-            Utils.Log("Diff CNO: {}", node);
-            return node;
-        }
-
-        virtual public ConfigNode Diff<CNO>(CNO other)
-            where CNO : ConfigNodeObject, new()
-        {
-            var other_node = new ConfigNode(other.NodeName);
-            other.Save(other_node);
-            return Diff(other_node);
+            var full_node = new ConfigNode(node.name);
+            Save(full_node);
+            for(int i = 0, pathsLength = paths.Length; i < pathsLength; i++)
+            {
+                var partial = extract_path(full_node, paths[i].Split('/').ToList());
+                merge_nodes(node, partial);
+            }
         }
     }
 
