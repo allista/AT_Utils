@@ -138,6 +138,9 @@ namespace AT_Utils.UI
         public string Tag(string msg) =>
         string.Format("<color={0}>{1}</color>", _html, msg);
 
+        public string Tag(string msg, params object[] args) =>
+        Tag(string.Format(msg, args));
+
         void parse()
         {
             if(!ColorUtility.TryParseHtmlString(_html, out _color))
