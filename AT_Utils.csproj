@@ -92,7 +92,6 @@
     <Compile Include="Math\OscillationDetector.cs" />
     <Compile Include="Math\VectorCurve.cs" />
     <Compile Include="Modules\SimpleTextureSwitcher.cs" />
-    <Compile Include="ToolbarWrapper.cs" />
     <Compile Include="GUI\Markers.cs" />
     <Compile Include="Coordinates.cs" />
     <Compile Include="Debugging\DebugUtils.cs" />
@@ -148,6 +147,7 @@
     <Compile Include="Addons\GlobalsEditor.cs" />
     <Compile Include="Addons\LineRenderers.cs" />
     <Compile Include="GUI\UIBundle.cs" />
+    <Compile Include="GUI\ToolbarWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
