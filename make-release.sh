@@ -3,7 +3,7 @@
 cd $(dirname "$0")
 
 ../../PyKSPutils/make_mod_release \
--e '*.user' '*.orig' '*.mdb' '*.pdb' \
+-e '*/config.xml' '*.user' '*.orig' '*.mdb' '*.pdb' \
 'GameData/ConfigurableContainers/Parts/*' \
 'GameData/000_AT_Utils/ResourceHack.cfg' \
 '*/AnimatedConverters.dll' \
