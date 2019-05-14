@@ -1,6 +1,21 @@
 #AT Utils ChangeLog
 
-* **v1.6.3**
+* **v1.7.0**
+    * Added Styles.onSkinInit callback
+    * Added Styles.ToggleStylesUI MonoBehaviour extension method
+    * Added Styles.MakeButton(Color) method to unify button creation.
+    * Added AppToolbar addon to generalize handling of AppLaucher/Toolbar buttons
+    * Moved ToolbarWrapper to GUI
+    * Added ConfigNodeObject.SavePartial to programmatically manage .user override files
+    * GC49 added dmFlexoTube parts to BadParts list
+    * Removed ResourceHack config
+    * Added AT_Utils.UI - new UI framework based on uGUI
+    * Using AT_Utils.UI.Colors framework to change UI colors at runtime
+    * Moved static CurrentCamera prop from Markers to GraphicsUtils
+    * Added VectorsityLineRenderer and UnityLineRenderer to simplify 3D-spline usage
+    * Removed Draw methods using dynamic Meshes
+
+* v1.6.3
     * Added ShipConstruct.SelectPart(flagURL)
     * Added PartMaker to make a part from the name and a ShipConstruct from the part
         * Added PartSelector: like SubassemblySelector, but selects AvailableParts

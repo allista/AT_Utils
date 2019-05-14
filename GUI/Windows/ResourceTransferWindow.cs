@@ -43,7 +43,7 @@ namespace AT_Utils
             var lhs = res.pool-rhs;
             // lhs amount/capacity
             GUILayout.Box(Utils.formatBigValue((float)res.host_capacity, "u"),
-                          Styles.yellow, GUILayout.Width(60), GUILayout.Height(res_line_height));
+                          Styles.active, GUILayout.Width(60), GUILayout.Height(res_line_height));
             GUILayout.Box(Utils.formatBigValue((float)lhs, "u"),
                           Styles.fracStyle((float)(lhs/res.host_capacity)), 
                           GUILayout.Width(60), GUILayout.Height(res_line_height));
@@ -64,7 +64,7 @@ namespace AT_Utils
                           Styles.fracStyle((float)(rhs/res.capacity)), 
                           GUILayout.Width(60), GUILayout.Height(res_line_height));
             GUILayout.Box(Utils.formatBigValue((float)res.capacity, "u"),
-                          Styles.yellow, GUILayout.Width(60), GUILayout.Height(res_line_height));
+                          Styles.active, GUILayout.Width(60), GUILayout.Height(res_line_height));
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
             return frac;
