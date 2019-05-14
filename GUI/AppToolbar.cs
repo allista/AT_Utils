@@ -20,7 +20,7 @@ namespace AT_Utils
     /// </summary>
     public abstract class AppToolbar<T> : MonoBehaviour where T : AppToolbar<T>
     {
-        static AppToolbar<T> Instance;
+        public static T Instance { get; protected set; }
         //AppLauncher
         protected ApplicationLauncherButton ALButton;
         protected abstract string AL_ICON { get; }
@@ -40,7 +40,7 @@ namespace AT_Utils
                 return;
             }
             DontDestroyOnLoad(this);
-            Instance = this;
+            Instance = (T)this;
             init();
         }
 
