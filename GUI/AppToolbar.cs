@@ -118,18 +118,15 @@ namespace AT_Utils
         }
 
         protected abstract void onLeftClick();
+        protected virtual void onRightClick() { this.ToggleStylesUI(); }
+
         protected virtual void onALTrue() { onLeftClick(); }
         protected virtual void onALFalse() { onLeftClick(); }
+
         protected virtual void onALHover() { }
         protected virtual void onALHoverOut() { }
+
         protected virtual void onALEnable() { }
         protected virtual void onALDisable() { }
-        protected virtual void onRightClick()
-        {
-            if(Styles.IsUiShown())
-                Styles.HideUI();
-            else
-                StartCoroutine(Styles.ShowUI());
-        }
     }
 }
