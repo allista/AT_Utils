@@ -84,7 +84,9 @@ namespace AT_Utils.UI
     public class ColorSetting : IColored
     {
         Color _color = Color.white;
-        public string _html = "#FFFFFFFF";
+        string _html = "#FFFFFFFF";
+        string _tag = "<color=#FFFFFFFF>{0}</color>";
+
         public ColorChangedEvent onColorChanged = new ColorChangedEvent();
 
         public static ColorSetting white => new ColorSetting();
@@ -119,6 +121,7 @@ namespace AT_Utils.UI
                     return;
                 _color = value;
                 _html = "#" + ColorUtility.ToHtmlStringRGBA(_color);
+                update_tag();
                 onColorChanged.Invoke(_color);
             }
         }
@@ -136,7 +139,7 @@ namespace AT_Utils.UI
         }
 
         public string Tag(string msg) =>
-        string.Format("<color={0}>{1}</color>", _html, msg);
+        string.Format(_tag, msg);
 
         public string Tag(string msg, params object[] args) =>
         Tag(string.Format(msg, args));
@@ -150,7 +153,10 @@ namespace AT_Utils.UI
                 _color = Color.white;
             }
             onColorChanged.Invoke(_color);
+            update_tag();
         }
+
+        void update_tag()=> _tag = "<color=" + _html + ">{0}</color>";
 
         public void addOnColorChangeListner(UnityAction<Color> action) =>
         onColorChanged.AddListener(action);
