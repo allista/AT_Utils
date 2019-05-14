@@ -73,7 +73,9 @@ namespace AT_Utils
                     TBButton = null;
                 }
             }
+            on_init();
         }
+        protected virtual void on_init() { }
         public static void Init() { if(Instance != null) Instance.init(); }
 
         //need to be instance method for Event.Add to work
@@ -89,8 +91,10 @@ namespace AT_Utils
                     AL_SCENES,
                     TextureCache.GetTexture(AL_ICON));
                 ALButton.onRightClick = onRightClick;
+                on_app_launcher_init();
             }
         }
+        protected virtual void on_app_launcher_init() { }
 
         void AddToolbarButton()
         {
@@ -101,7 +105,9 @@ namespace AT_Utils
             TBButton.Visibility = new GameScenesVisibility(TB_SCENES);
             TBButton.Visible = true;
             TBButton.OnClick += onToolbarToggle;
+            on_toolbar_init();
         }
+        protected virtual void on_toolbar_init() { }
 
         protected virtual void onToolbarToggle(ClickEvent e)
         {
@@ -110,6 +116,7 @@ namespace AT_Utils
             else
                 onLeftClick();
         }
+
         protected abstract void onLeftClick();
         protected virtual void onALTrue() { onLeftClick(); }
         protected virtual void onALFalse() { onLeftClick(); }
