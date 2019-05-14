@@ -24,7 +24,7 @@ namespace AT_Utils
         //AppLauncher
         protected ApplicationLauncherButton ALButton;
         protected abstract string AL_ICON { get; }
-        protected abstract ApplicationLauncher.AppScenes AP_SCENES { get; }
+        protected abstract ApplicationLauncher.AppScenes AL_SCENES { get; }
         protected abstract bool ForceAppLauncher { get; }
         //Toolbar
         protected IButton TBButton;
@@ -66,7 +66,7 @@ namespace AT_Utils
                         GameEvents.onGUIApplicationLauncherReady.Add(AddAppLauncherButton);
                 }
                 else
-                    ALButton.VisibleInScenes = AP_SCENES;
+                    ALButton.VisibleInScenes = AL_SCENES;
                 if(TBButton != null)
                 {
                     TBButton.Destroy();
@@ -86,7 +86,7 @@ namespace AT_Utils
                     onALTrue, onALFalse,
                     onALHover, onALHoverOut,
                     onALEnable, onALDisable,
-                    AP_SCENES,
+                    AL_SCENES,
                     TextureCache.GetTexture(AL_ICON));
                 ALButton.onRightClick = onRightClick;
             }
