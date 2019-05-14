@@ -38,7 +38,7 @@ namespace AT_Utils
 
         /// <summary>
         /// Start this timer if it is not running.
-        /// <returns><c>true</c> if the timer was not running; <c><false/c> otherwise.</returns>
+        /// <returns><c>true</c> if the timer was not running; <c><false</c> otherwise.</returns>
         /// </summary>
         public bool Start() 
         { 

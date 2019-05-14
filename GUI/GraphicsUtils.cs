@@ -100,114 +100,20 @@ namespace AT_Utils
         }
     }
 
-    [KSPAddon(KSPAddon.Startup.Instantly, false)]
-    class MeshCleaner : MonoBehaviour
-    {
-        void OnPostRender()
-        {
-            Utils.CleanMeshes();
-        }
-    }
-
     public static partial class Utils
     {
+        public static Camera CurrentCamera
+        {
+            get
+            {
+                if(HighLogic.LoadedSceneIsEditor) return EditorCamera.Instance.cam;
+                return MapView.MapIsEnabled ? PlanetariumCamera.Camera : FlightCamera.fetch.mainCamera;
+            }
+        }
+
         public static MaterialWrapper gl_material = new MaterialWrapper("Particles/Additive");
         public static MaterialWrapper no_z_material = new MaterialWrapper("GUI/Text Shader");
         public static MaterialWrapper diffuse_material = new MaterialWrapper("Diffuse");
-
-        static List<Mesh> meshes = new List<Mesh>();
-
-        public static void CleanMeshes()
-        {
-            if(meshes.Count > 0)
-            {
-                Log("Cleaning {} meshes.", meshes.Count);//debug
-                meshes.ForEach(Object.Destroy);
-                meshes.Clear();
-            }
-        }
-
-        public static void DrawMesh(Mesh m, Transform t, Color c = default(Color), Material mat = null)
-        {
-            //make own material
-            if(mat == null) mat = no_z_material.New;
-            mat.color = (c == default(Color)) ? Color.white : c;
-            //draw mesh in the world space
-            mat.SetPass(0);
-            Graphics.DrawMeshNow(m, t.localToWorldMatrix);
-        }
-
-        public static void DrawMesh(Vector3[] edges, IEnumerable<int> tris, Transform t, Color c = default(Color), Material mat = null)
-        {
-            //make a mesh
-            var m = new Mesh();
-            m.vertices = edges;
-            m.triangles = tris.ToArray();
-            //recalculate normals and bounds
-            m.RecalculateBounds();
-            m.RecalculateNormals();
-            //make own material
-            if(mat == null) mat = no_z_material.New;
-            mat.color = (c == default(Color)) ? Color.white : c;
-            //draw mesh in the world space
-            mat.SetPass(0);
-            Graphics.DrawMeshNow(m, t.localToWorldMatrix);
-            meshes.Add(m);
-        }
-
-        public static void DrawMeshArrow(Vector3 ori, Vector3 dir, Transform T, Color c = default(Color))
-        {
-            float l = dir.magnitude;
-            float w = l * 0.02f;
-            w = w > 0.05f ? 0.05f : (w < 0.01f ? 0.01f : w);
-            Vector3 x = Mathf.Abs(Vector3.Dot(dir.normalized, Vector3.up)) < 0.9f ? 
-                Vector3.Cross(dir, Vector3.up).normalized : Vector3.Cross(Vector3.forward, dir).normalized;
-            Vector3 y = Vector3.Cross(x, dir).normalized * w;
-            x *= w;
-            var edges = new Vector3[5];
-            edges[0] = ori + dir; 
-            edges[1] = ori - x - y;
-            edges[2] = ori - x + y;
-            edges[3] = ori + x + y;
-            edges[4] = ori + x - y;
-            var tris = new List<int>();
-            tris.AddRange(new Quad(1, 2, 3, 4));
-            tris.AddRange(new Triangle(0, 1, 2));
-            tris.AddRange(new Triangle(0, 2, 3));
-            tris.AddRange(new Triangle(0, 3, 4));
-            tris.AddRange(new Triangle(0, 4, 1));
-            DrawMesh(edges, tris, T, c);
-        }
-
-        public static void DrawBounds(Bounds b, Transform T, Color c)
-        {
-            Vector3[] edges = Utils.BoundCorners(b);
-            var tris = new List<int>();
-            tris.AddRange(new Quad(0, 1, 3, 2));
-            tris.AddRange(new Quad(0, 2, 6, 4));
-            tris.AddRange(new Quad(0, 1, 5, 4));
-            tris.AddRange(new Quad(1, 3, 7, 5));
-            tris.AddRange(new Quad(2, 3, 7, 6));
-            tris.AddRange(new Quad(6, 7, 5, 4));
-            DrawMesh(edges, tris, T, c);
-        }
-
-        public static void DrawPoint(Vector3 point, Transform T, Color c)
-        {
-            DrawBounds(new Bounds(point, Vector3.one * 0.1f), T, c);
-        }
-
-        public static void DrawHull(ConvexHull3D h, Transform T, Color c = default(Color), Material mat = null)
-        {
-            var verts = new List<Vector3>(h.Faces.Count * 3);
-            var tris = new List<int>(h.Faces.Count * 3);
-            foreach(Face f in h.Faces)
-            {
-                verts.AddRange(f);
-                tris.AddRange(new []{ 0 + tris.Count, 1 + tris.Count, 2 + tris.Count });
-            }
-            DrawMesh(verts.ToArray(), tris, T, c, mat ?? diffuse_material.New);
-        }
 
         static Camera GLBeginWorld(out float far, MaterialWrapper mat = null)
         {

@@ -75,6 +75,11 @@ namespace AT_Utils
             for(int i = 0, count = conditions.Count; i < count; i++)
             {
                 var c = conditions[i];
+                //Utils.Log("Cond. {}, isGood.x {}, isGood.y {}, isBetter.x-y {}",
+                          //i, 
+                          //c.isGood != null? c.isGood(x).ToString() : "N/A", 
+                          //c.isGood != null? c.isGood(y).ToString() : "N/A",
+                          //c.isBetter(x, y));//debug
                 if(c.isGood == null)
                     return c.isBetter(x, y);
                 if(c.isGood(x))

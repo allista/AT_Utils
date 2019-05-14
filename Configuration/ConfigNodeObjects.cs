@@ -8,12 +8,11 @@
 // or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization;
 using System.IO;
-using System.Text;
 
 namespace AT_Utils
 {
@@ -55,7 +54,7 @@ namespace AT_Utils
             }
             catch(Exception e)
             {
-                Utils.Log("Exception while loading {}\n{}\n{}\n{}", 
+                Utils.Log("Exception while loading {}\n{}\n{}\n{}",
                           this, e.Message, e.StackTrace, node);
             }
             foreach(var fi in get_fields())
@@ -120,7 +119,7 @@ namespace AT_Utils
             }
             catch(Exception e)
             {
-                Utils.Log("Exception while saving {}\n{}\n{}\n{}", 
+                Utils.Log("Exception while saving {}\n{}\n{}\n{}",
                           GetType().Name, e.Message, e.StackTrace, node);
             }
             foreach(var fi in get_fields())
@@ -207,6 +206,82 @@ namespace AT_Utils
             return (T)binaryFormatter.Deserialize(memoryStream);
         }
         #endregion
+
+        ConfigNode extract_path(ConfigNode node, List<string> path)
+        {
+            var new_node = new ConfigNode(node.name) { id = node.id };
+            if(path.Count > 1)
+            {
+                foreach(var subnode in node.GetNodes(path[0]))
+                    new_node.AddNode(extract_path(subnode, path.GetRange(1, path.Count - 1)));
+            }
+            else
+            {
+                var leaf_spec = path[0].Split(new[] { ':' }, 2);
+                var leaf_node = leaf_spec[0];
+                var leaf_value = leaf_spec.Length > 1 ? leaf_spec[1] : null;
+                if(string.IsNullOrEmpty(leaf_node))
+                {
+                    if(string.IsNullOrEmpty(leaf_value))
+                        node.CopyTo(new_node);
+                    else
+                        foreach(var val in node.GetValues(leaf_value))
+                            new_node.AddValue(leaf_value, val);
+                }
+                else
+                {
+                    foreach(var subnode in node.GetNodes(leaf_node))
+                    {
+                        if(string.IsNullOrEmpty(leaf_value))
+                            new_node.AddNode(subnode.CreateCopy());
+                        else
+                        {
+                            var new_subnode = new ConfigNode(subnode.name) { id = subnode.id };
+                            foreach(var val in subnode.GetValues(leaf_value))
+                                new_subnode.AddValue(leaf_value, val);
+                            new_node.AddNode(new_subnode);
+                        }
+                    }
+                }
+            }
+            return new_node;
+        }
+
+        void merge_nodes(ConfigNode base_node, ConfigNode node)
+        {
+            int idx = 0;
+            var value_indexes = new Dictionary<string, int>();
+            foreach(ConfigNode.Value value in node.values)
+            {
+                if(!value_indexes.TryGetValue(value.name, out idx))
+                    idx = 0;
+                base_node.SetValue(value.name, value.value, idx, true);
+                value_indexes[value.name] = idx + 1;
+            }
+            var node_indexes = new Dictionary<string, int>();
+            foreach(ConfigNode subnode in node.nodes)
+            {
+                if(!node_indexes.TryGetValue(subnode.name, out idx))
+                    idx = 0;
+                var base_subnode = base_node.GetNode(subnode.name, idx);
+                if(base_subnode != null)
+                    merge_nodes(base_subnode, subnode);
+                else
+                    base_node.AddNode(subnode);
+                value_indexes[subnode.name] = idx + 1;
+            }
+        }
+
+        public void SavePartial(ConfigNode node, params string[] paths)
+        {
+            var full_node = new ConfigNode(node.name);
+            Save(full_node);
+            for(int i = 0, pathsLength = paths.Length; i < pathsLength; i++)
+            {
+                var partial = extract_path(full_node, paths[i].Split('/').ToList());
+                merge_nodes(node, partial);
+            }
+        }
     }
 
     public class TypedConfigNodeObject : ConfigNodeObject
@@ -258,13 +333,13 @@ namespace AT_Utils
         public PersistentList() { }
         public PersistentList(IEnumerable<T> content) : base(content) { }
 
-        public void Save(ConfigNode node)
+        public virtual void Save(ConfigNode node)
         {
             for(int i = 0, count = Count; i < count; i++)
                 this[i].Save(node.AddNode("Item"));
         }
 
-        public void Load(ConfigNode node)
+        public virtual void Load(ConfigNode node)
         {
             Clear();
             var nodes = node.GetNodes();

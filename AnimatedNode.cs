@@ -91,13 +91,13 @@ namespace AT_Utils
             if(joint == null) return;
             if(update_anchor)
             {
-                Utils.DrawPoint(joint.anchor, part.partTransform, Color.red);
-                Utils.DrawPoint(joint.connectedAnchor, a_part.transform, Color.green);
+                Utils.GLDrawPoint(joint.anchor, part.partTransform, Color.red);
+                Utils.GLDrawPoint(joint.connectedAnchor, a_part.transform, Color.green);
             }
             else
             {
-                Utils.DrawPoint(joint.connectedAnchor, part.partTransform, Color.red);
-                Utils.DrawPoint(joint.anchor, a_part.transform, Color.green);
+                Utils.GLDrawPoint(joint.connectedAnchor, part.partTransform, Color.red);
+                Utils.GLDrawPoint(joint.anchor, a_part.transform, Color.green);
             }
         }
         #endif

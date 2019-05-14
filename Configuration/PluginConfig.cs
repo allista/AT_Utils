@@ -39,7 +39,7 @@ namespace AT_Utils
         public static ConfigNode LoadNode(string filepath, bool with_message = false)
         {
             var node = ConfigNode.Load(filepath);
-            if(node == null && with_message) 
+            if(node == null && with_message)
                 Utils.Log("Unable to read {}", filepath);
             return node;
         }
@@ -52,9 +52,9 @@ namespace AT_Utils
                 node.Save(filepath);
                 return true;
             }
-            catch(Exception ex) 
-            { 
-                Utils.Log("Error writing {} file:\n{}", filepath, ex); 
+            catch(Exception ex)
+            {
+                Utils.Log("Error writing {} file:\n{}", filepath, ex);
                 return false;
             }
         }
@@ -69,12 +69,14 @@ namespace AT_Utils
 
     public abstract class PluginConfig : CustomConfig
     {
-        public string DefaultFile { get { return PluginData(AssemblyName+".glob"); } }
-        public string DefaultOverride { get { return PluginFolder(AssemblyName+".user"); } }
-        public bool   DefaultFileExists { get { return File.Exists(DefaultFile); } }
-        public virtual List<string> AllConfigFiles { get { return new List<string>{DefaultFile, DefaultOverride}; } }
+        ConfigNode current_config;
 
-        public virtual void Init() {}
+        public string DefaultFile { get { return PluginData(AssemblyName + ".glob"); } }
+        public string DefaultOverride { get { return PluginFolder(AssemblyName + ".user"); } }
+        public bool DefaultFileExists { get { return File.Exists(DefaultFile); } }
+        public virtual List<string> AllConfigFiles { get { return new List<string> { DefaultFile, DefaultOverride }; } }
+
+        public virtual void Init() { }
 
         public void Load(params string[] files)
         {
@@ -85,17 +87,47 @@ namespace AT_Utils
                 if(gnode != null) Load(gnode);
             }
             Init();
+            current_config = new ConfigNode(NodeName);
+            Save(current_config);
         }
         public void LoadDefaultFile() { Load(DefaultFile); }
         public void CreateDefaultFile() { Create(DefaultFile); }
         public void CreateDefaultOverride() { Create(DefaultOverride); }
+
+        public void SaveOverride(params string[] paths)
+        {
+            if(paths.Length == 0) return;
+            ConfigNode node = null;
+            if(File.Exists(DefaultOverride))
+                node = LoadNode(DefaultOverride);
+            else
+                node = new ConfigNode(NodeName);
+            SavePartial(node, paths);
+            SaveNode(node, DefaultOverride);
+        }
+
+        public void RestoreCurrentConfig()
+        {
+            if(current_config != null)
+            {
+                Load(current_config);
+                Init();
+            }
+        }
     }
 
 
     public abstract class PluginGlobals<T> : PluginConfig where T : PluginConfig, new()
     {
         static T instance { get; set; }
-        public static T Instance 
+        static void init_instance()
+        {
+            instance = new T();
+            if(!instance.DefaultFileExists)
+                instance.CreateDefaultFile();
+        }
+
+        public static T Instance
         {
             get
             {
@@ -106,11 +138,17 @@ namespace AT_Utils
 
         public static void Load()
         {
-            instance = new T();
-            if(!instance.DefaultFileExists)
-                instance.CreateDefaultFile();
+            init_instance();
             instance.Load(instance.AllConfigFiles.ToArray());
         }
+
+        public static void LoadDefault()
+        {
+            init_instance();
+            instance.LoadDefaultFile();
+        }
+
+        public static void Save(params string[] paths) => instance.SaveOverride(paths);
+        public static void Restore() => instance.RestoreCurrentConfig();
     }
 }
-

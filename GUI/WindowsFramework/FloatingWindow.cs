@@ -21,7 +21,7 @@ namespace AT_Utils
         static GUIContent anchor_content = new GUIContent("●", "Press to move the window");
         void draw_anchor()
         {
-            GUILayout.Label(anchor_content, Styles.green, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
+            GUILayout.Label(anchor_content, Styles.enabled, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
             if(Event.current.type == EventType.Repaint) 
                 moving = Utils.MouseInLastElement();
         }
