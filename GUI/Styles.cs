@@ -7,6 +7,7 @@
 // To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ 
 // or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
+using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Reflection;
@@ -26,6 +27,7 @@ namespace AT_Utils
 
         //This code is based on Styles class from Extraplanetary Launchpad plugin.
         public static GUISkin skin;
+        public static Action onSkinInit = () => { };
 
         public static GUIStyle normal_button;
         public static GUIStyle inactive_button;
@@ -82,7 +84,7 @@ namespace AT_Utils
             if(skin != null) return;
 
             GUI.skin = null;
-            skin = Object.Instantiate(GUI.skin);
+            skin = UnityEngine.Object.Instantiate(GUI.skin);
 
             //new styles
             var tooltip_texture = new Texture2D(1, 1);
@@ -187,6 +189,8 @@ namespace AT_Utils
             skin.horizontalScrollbarThumb.fixedHeight = 8;
 
             ConfigureButtons();
+
+            onSkinInit();
         }
 
         static Color g = Color.gray;
@@ -261,14 +265,14 @@ namespace AT_Utils
                     goto end;
                 first_start = true;
             }
-            var listObj = Object.Instantiate(colorListPrefab);
+            var listObj = UnityEngine.Object.Instantiate(colorListPrefab);
             colorList = listObj.GetComponent<ColorList>();
             listObj.SetActive(false);
             if(colorList == null)
             {
                 Utils.Log("{} does not have ColorList component: {}",
                           listObj, listObj.GetComponents<MonoBehaviour>());
-                Object.Destroy(listObj);
+                UnityEngine.Object.Destroy(listObj);
                 goto end;
             }
             colorList.SetTitle("Color Scheme of AT Mods");
@@ -325,7 +329,7 @@ namespace AT_Utils
             {
                 listPos = colorList.transform.localPosition;
                 colorList.gameObject.SetActive(false);
-                Object.Destroy(colorList.gameObject);
+                UnityEngine.Object.Destroy(colorList.gameObject);
                 colorList = null;
             }
         }
