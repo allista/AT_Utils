@@ -332,5 +332,13 @@ namespace AT_Utils
 
         static public bool IsUiShown() =>
         !in_progress && colorList != null;
+
+        public static void ToggleStylesUI(this MonoBehaviour monoBehaviour)
+        {
+            if(IsUiShown())
+                HideUI();
+            else
+                monoBehaviour.StartCoroutine(ShowUI());
+        }
     }
 }
