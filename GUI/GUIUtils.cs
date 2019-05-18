@@ -87,9 +87,12 @@ namespace AT_Utils
         public static bool ButtonSwitch(string name_on, string name_off, ref bool current_value, 
                                         string tooltip = "", params GUILayoutOption[] options)
         {
-            var ret = ButtonSwitch(name_on, name_off, current_value, tooltip, options);
-            if(ret) current_value = !current_value;
-            return ret;
+            if(ButtonSwitch(name_on, name_off, current_value, tooltip, options))
+            {
+                current_value = !current_value;
+                return true;
+            }
+            return false;
         }
 
         public static int LeftRightChooser(string text, string tooltip = "", int width = 0)
