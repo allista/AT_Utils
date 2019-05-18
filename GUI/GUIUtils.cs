@@ -60,19 +60,24 @@ namespace AT_Utils
             return value;
         }
 
-        public static bool ButtonSwitch(string name, bool current_value, string tooltip = "", params GUILayoutOption[] options)
+        public static bool ButtonSwitch(GUIContent content, bool current_value, params GUILayoutOption[] options) =>
+        GUILayout.Button(content, current_value ? Styles.enabled_button : Styles.active_button, options);
+
+        public static bool ButtonSwitch(GUIContent content, ref bool current_value, params GUILayoutOption[] options)
         {
-            return string.IsNullOrEmpty(tooltip)? 
-                GUILayout.Button(name, current_value ? Styles.enabled_button : Styles.active_button, options) : 
-                GUILayout.Button(new GUIContent(name, tooltip), current_value ? Styles.enabled_button : Styles.active_button, options);
+            if(ButtonSwitch(content, current_value, options))
+            {
+                current_value = !current_value;
+                return true;
+            }
+            return false;
         }
 
-        public static bool ButtonSwitch(string name, ref bool current_value, string tooltip = "", params GUILayoutOption[] options)
-        {
-            var ret = ButtonSwitch(name, current_value, tooltip, options);
-            if(ret) current_value = !current_value;
-            return ret;
-        }
+        public static bool ButtonSwitch(string name, bool current_value, string tooltip = "", params GUILayoutOption[] options) =>
+        ButtonSwitch(new GUIContent(name, tooltip), current_value, options);
+
+        public static bool ButtonSwitch(string name, ref bool current_value, string tooltip = "", params GUILayoutOption[] options) =>
+        ButtonSwitch(new GUIContent(name, tooltip), ref current_value, options);
 
         public static bool ButtonSwitch(string name_on, string name_off, bool current_value, 
                                         string tooltip = "", params GUILayoutOption[] options)
