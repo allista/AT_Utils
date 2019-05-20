@@ -4,18 +4,12 @@ namespace AT_Utils
 {
     public class SimpleWarning : SimpleDialog
     {
-
-        string message;
+        public string Message;
 
         protected override void DrawContent()
         {
-            GUILayout.Label(message, Styles.rich_label, GUILayout.Width(width));
-        }
-
-        public Answer Draw(string message)
-        {
-            this.message = message;
-            return draw("Warning");
+            Title = "Warning";
+            GUILayout.Label(Message, Styles.rich_label, GUILayout.Width(width));
         }
     }
 }

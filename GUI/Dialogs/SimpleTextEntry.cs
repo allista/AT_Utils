@@ -4,6 +4,8 @@ namespace AT_Utils
 {
     public class SimpleTextEntry : SimpleDialog
     {
+        public string Text = "";
+
         public SimpleTextEntry()
         { 
             Yes_text = "Accept";
@@ -14,9 +16,5 @@ namespace AT_Utils
         {
             Text = GUILayout.TextField(Text, 50); 
         }
-
-        public string Text = "";
-
-        public Answer Draw(string title) { return draw(title); }
     }
 }

@@ -8,6 +8,10 @@ namespace AT_Utils
         protected string Yes_text = "Yes";
         protected string No_text = "No";
 
+        public string Title = "Dialog";
+        public Callback yesCallback;
+        public Callback noCallback;
+
         protected SimpleDialog()
         { 
             width = 400;
@@ -38,20 +42,25 @@ namespace AT_Utils
             TooltipsAndDragWindow();
         }
 
-        protected Answer draw(string title)
+        protected void OnGUI()
         {
             if(doShow)
             {
                 LockControls();
-                WindowPos = GUILayout.Window(GetInstanceID(), 
+                WindowPos = GUILayout.Window(GetInstanceID(),
                                              WindowPos, DialogWindow,
-                                             title,
+                                             Title,
                                              GUILayout.Width(width)).clampToScreen();
-                if(Result != Answer.None) Show(false);
-                return Result;
+                if(Result != Answer.None)
+                {
+                    Show(false);
+                    if(Result == Answer.Yes)
+                        yesCallback?.Invoke();
+                    else
+                        noCallback?.Invoke();
+                }
             }
             UnlockControls();
-            return Answer.None;
         }
     }
 }
