@@ -15,7 +15,7 @@ namespace AT_Utils
         protected SimpleDialog()
         { 
             width = 400;
-            WindowPos = new Rect(Screen.width/2-width/2, 100, width, 50); 
+            WindowPos = new Rect(Screen.width/2-width/2, 100, width, 50);
         }
 
         public override void Awake()
@@ -34,9 +34,11 @@ namespace AT_Utils
             DrawContent();
             GUILayout.BeginHorizontal();
             Result = Answer.None;
-            if(GUILayout.Button(No_text, Styles.close_button, GUILayout.ExpandWidth(false))) Result = Answer.No;
+            if(GUILayout.Button(No_text, Styles.close_button, GUILayout.ExpandWidth(false))) 
+                Result = Answer.No;
             GUILayout.FlexibleSpace();
-            if(GUILayout.Button(Yes_text, Styles.open_button, GUILayout.ExpandWidth(false))) Result = Answer.Yes;
+            if(GUILayout.Button(Yes_text, Styles.open_button, GUILayout.ExpandWidth(false))) 
+                Result = Answer.Yes;
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
             TooltipsAndDragWindow();
