@@ -22,6 +22,12 @@ namespace AT_Utils
             WindowPos = new Rect(Screen.width / 2 - width / 2, 100, width, height);
         }
 
+        public override void Awake()
+        {
+            base.Awake();
+            Show(false);
+        }
+
         void DialogWindow(int windowId)
         {
             GUILayout.BeginVertical();
