@@ -4,13 +4,17 @@ namespace AT_Utils
 {
     public abstract class SimpleDialog : GUIWindowBase
     {
+        public string Title = "Dialog";
+
         public enum Answer { None, Yes, No }
         protected string Yes_text = "Yes";
         protected string No_text = "No";
 
-        public string Title = "Dialog";
         public Callback yesCallback;
+        Callback tmpYesCallback;
+
         public Callback noCallback;
+        Callback tmpNoCallback;
 
         protected SimpleDialog()
         { 
@@ -27,6 +31,18 @@ namespace AT_Utils
         public Answer Result { get; private set; }
 
         protected abstract void DrawContent();
+
+        protected void set_tmp_callback(Callback yes, Callback no = null)
+        {
+            tmpYesCallback = yes;
+            tmpNoCallback = no;
+        }
+
+        protected virtual void clear_tmp_state()
+        {
+            tmpYesCallback = null;
+            tmpNoCallback = null;
+        }
 
         void DialogWindow(int windowId)
         {
@@ -56,10 +72,13 @@ namespace AT_Utils
                 if(Result != Answer.None)
                 {
                     Show(false);
+                    Callback callback;
                     if(Result == Answer.Yes)
-                        yesCallback?.Invoke();
+                        callback = tmpYesCallback ?? yesCallback;
                     else
-                        noCallback?.Invoke();
+                        callback = tmpNoCallback ?? noCallback;
+                    callback?.Invoke();
+                    clear_tmp_state();
                 }
             }
             UnlockControls();
