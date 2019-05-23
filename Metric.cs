@@ -501,7 +501,7 @@ namespace AT_Utils
             var ntris = triangles.Length / 3;
             if(ntris > verts.Length)
             {
-                for(int i = 0; i < verts.Length; i++)
+                for(int i = 0, len = verts.Length; i < len; i++)
                     verts[i] = container_T.InverseTransformPoint(this_T.position + this_T.TransformDirection(verts[i] + offset));
                 for(int i = 0; i < ntris; i++)
                 {
@@ -510,9 +510,9 @@ namespace AT_Utils
                     var V2 = c_verts[triangles[j + 1]];
                     var V3 = c_verts[triangles[j + 2]];
                     var P = new Plane(V1, V2, V3);
-                    foreach(var v in verts)
+                    for(int k = 0, vertsLength = verts.Length; k < vertsLength; k++)
                     {
-                        if(!P.GetSide(v))
+                        if(!P.GetSide(verts[k]))
                             return false;
                     }
                 }
@@ -528,12 +528,12 @@ namespace AT_Utils
                     var V3 = c_verts[triangles[j + 2]];
                     planes[i] = new Plane(V1, V2, V3);
                 }
-                for(int i = 0; i < verts.Length; i++)
+                for(int i = 0, len = verts.Length; i < len; i++)
                 {
                     var v = container_T.InverseTransformPoint(this_T.position + this_T.TransformDirection(verts[i] + offset));
-                    foreach(var P in planes)
+                    for(int j = 0, planesLength = planes.Length; j < planesLength; j++)
                     {
-                        if(!P.GetSide(v))
+                        if(!planes[j].GetSide(v))
                             return false;
                     }
                 }
