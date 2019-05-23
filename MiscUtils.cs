@@ -350,6 +350,18 @@ namespace AT_Utils
             return corners;
         }
 
+        public static int[] BoundTriangles()
+        {
+            return new[] {
+                0, 1, 2, 2, 1, 3, //left
+                3, 1, 7, 7, 1, 5, //front
+                5, 4, 7, 7, 4, 6, //right
+                6, 4, 2, 2, 4, 0, //back
+                2, 6, 3, 3, 6, 7, //top
+                0, 4, 1, 1, 4, 5, //bottom
+            };
+        }
+
         public static Vector3[] BoundCorners(Vector3 center, Vector3 size)
         {
             var b = new Bounds(center, size);
