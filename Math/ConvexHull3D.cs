@@ -245,18 +245,20 @@ namespace AT_Utils
             //find min-max points of a set
             Vector3 min_xv, max_xv, min_yv, max_yv, min_zv, max_zv;
             float   min_x,  max_x,  min_y,  max_y,  min_z,  max_z;
-            min_xv = max_xv = min_yv = max_yv = min_zv = max_zv = Vector3.zero;
-            min_x = max_x = min_y = max_y = min_z = max_z = -1;
-            for(int i = 0, pointsCount = points.Count; i < pointsCount; i++)
+            min_xv = max_xv = min_yv = max_yv = min_zv = max_zv = points[0];
+            min_x = max_x = min_xv.x;
+            min_y = max_y = min_xv.y;
+            min_z = max_z = min_xv.z;
+            for(int i = 1, pointsCount = points.Count; i < pointsCount; i++)
             {
                 Vector3 p = points[i];
-                if(p.x < min_x || min_x < 0) { min_x = p.x; min_xv = p; }
+                if(p.x < min_x) { min_x = p.x; min_xv = p; }
                 else if(p.x > max_x) { max_x = p.x; max_xv = p; }
 
-                if(p.y < min_y || min_y < 0) { min_y = p.y; min_yv = p; }
+                if(p.y < min_y) { min_y = p.y; min_yv = p; }
                 else if(p.y > max_y) { max_y = p.y; max_yv = p; }
 
-                if(p.z < min_z || min_z < 0) { min_z = p.z; min_zv = p; }
+                if(p.z < min_z) { min_z = p.z; min_zv = p; }
                 else if(p.z > max_z) { max_z = p.z; max_zv = p; }
             }
             //find the longest line segment between the extremums of each dimension
