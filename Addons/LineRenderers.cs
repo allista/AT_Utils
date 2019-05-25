@@ -408,7 +408,7 @@ namespace AT_Utils
                         colors = null;
                     }
                 }
-                Utils.Log("points {}, colors {}", points.Length, colors.Length);//debug
+                //Utils.Log("points {}, colors {}", points.Length, colors.Length);//debug
                 line.SetColors(new List<Color32>(colors));
             }
             else
