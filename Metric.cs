@@ -21,7 +21,7 @@ namespace AT_Utils
         public MeshTransform(MeshFilter mesh_filter)
         {
             t = mesh_filter.transform;
-            m = mesh_filter.sharedMesh; 
+            m = mesh_filter.sharedMesh;
             r = mesh_filter.GetComponent<MeshRenderer>();
         }
 
@@ -40,11 +40,11 @@ namespace AT_Utils
         public ConvexHull3D hull { get; private set; }
 
         Mesh _hull_mesh;
-        public Mesh hull_mesh 
-        { 
-            get 
-            { 
-                if(_hull_mesh == null && hull != null) 
+        public Mesh hull_mesh
+        {
+            get
+            {
+                if(_hull_mesh == null && hull != null)
                     _hull_mesh = hull.MakeMesh();
                 return _hull_mesh;
             }
@@ -54,7 +54,7 @@ namespace AT_Utils
 
         public float area => hull == null ? bounds_area : hull.Area;
         //bounds
-        public Bounds  bounds { get; private set; }
+        public Bounds bounds { get; private set; }
 
         public Vector3 center => bounds.center;
 
@@ -92,7 +92,7 @@ namespace AT_Utils
         static Vector3[] world2local(Transform _to, Vector3[] points)
         {
             for(int p = 0; p < points.Length; p++)
-                points[p]  = _to.InverseTransformPoint(points[p]);
+                points[p] = _to.InverseTransformPoint(points[p]);
             return points;
         }
 
@@ -148,19 +148,22 @@ namespace AT_Utils
                 //EditorLogic.SortedShipList returns List<Part>{null} when all parts are deleted
                 //check for weels; if it's a wheel, get all meshes under the wheel collider
                 var wheel = p.Modules.GetModule<ModuleWheelBase>();
-                var wheel_transform = wheel != null && wheel.Wheel != null && wheel.Wheel.wheelCollider != null ? wheel.Wheel.wheelCollider.wheelTransform : null;
+                var wheel_transform = wheel != null
+                                      && wheel.Wheel != null
+                                      && wheel.Wheel.wheelCollider != null
+                                          ? wheel.Wheel.wheelCollider.wheelTransform : null;
                 //check for asteroids
                 var is_asteroid = p.Modules.GetModule<ModuleAsteroid>() != null;
                 //check for bad parts
-                var pname = p.partInfo != null? p.partInfo.name : p.name;
+                var pname = p.partInfo != null ? p.partInfo.name : p.name;
                 var bad_part = Utils.NameMatches(pname, AT_UtilsGlobals.Instance.BadPartsList);
                 var part_rot = p.partTransform.rotation;
-                if(bad_part) 
+                if(bad_part)
                     p.partTransform.rotation = Quaternion.identity;
                 foreach(var mesh in p.AllModelMeshes())
                 {
                     //skip disabled objects
-                    if(!mesh.Valid || exclude_disabled 
+                    if(!mesh.Valid || exclude_disabled
                        && (!mesh.r.enabled || !mesh.t.gameObject.activeInHierarchy))
                         continue;
                     //skip meshes from the blacklist
@@ -172,21 +175,21 @@ namespace AT_Utils
                         verts = Utils.BoundCorners(mesh.r.bounds);
                         for(int j = 0, len = verts.Length; j < len; j++)
                         {
-                            var v = p.partTransform.position + part_rot * (verts[j]-p.partTransform.position);
+                            var v = p.partTransform.position + part_rot * (verts[j] - p.partTransform.position);
                             if(refT != null)
                                 v = refT.InverseTransformPoint(v);
                             verts[j] = v;
                         }
                     }
-                    else 
+                    else
                     {
                         if(is_asteroid || wheel_transform != null && mesh.t.IsChildOf(wheel_transform)
-                           || (compute_hull 
+                           || (compute_hull
                                && Vector3.Scale(mesh.m.bounds.size, mesh.t.lossyScale).sqrMagnitude > b_size / 10))
                             verts = mesh.m.uniqueVertices();
                         else
                             verts = Utils.BoundCorners(mesh.m.bounds);
-                        verts = refT != null? local2local(mesh.t, refT, verts) : local2world(mesh.t, verts);
+                        verts = refT != null ? local2local(mesh.t, refT, verts) : local2world(mesh.t, verts);
                     }
                     updateBounds(ref b, verts);
                     if(compute_hull)
@@ -198,7 +201,7 @@ namespace AT_Utils
                 CrewCapacity += p.CrewCapacity;
                 mass += p.TotalMass();
                 cost += p.TotalCost();
-                if(bad_part) 
+                if(bad_part)
                     p.partTransform.rotation = part_rot;
             }
             if(compute_hull && hull_points.Count >= 4)
@@ -237,7 +240,7 @@ namespace AT_Utils
         {
             init_with_bounds(b, m, crew_capacity);
         }
-        
+
         //metric from size
         public Metric(Vector3 center, Vector3 size, float m = 0f, int crew_capacity = 0)
             : this(new Bounds(center, size), m, crew_capacity)
@@ -256,7 +259,7 @@ namespace AT_Utils
             var a = Mathf.Pow(V, 1 / 3f);
             init_with_bounds(new Bounds(Vector3.zero, new Vector3(a, a, a)), m, crew_capacity);
         }
-        
+
         //metric form vertices
         public Metric(Vector3[] verts, float m = 0f, int crew_capacity = 0, bool compute_hull = false)
             : this()
@@ -269,14 +272,14 @@ namespace AT_Utils
             mass = m;
             CrewCapacity = crew_capacity;
         }
-        
+
         //metric from config node
         public Metric(ConfigNode node)
             : this()
         {
             Load(node);
         }
-        
+
         //mesh metric
         void init_with_mesh(MeshFilter mesh, Transform refT, bool compute_hull)
         {
@@ -287,8 +290,8 @@ namespace AT_Utils
                 local2world(mesh.transform, verts);
             if(compute_hull)
             {
-                hull = refT != null ? 
-                    new ConvexHull3D(local2local(mesh.transform, refT, mesh.sharedMesh.uniqueVertices())) : 
+                hull = refT != null ?
+                    new ConvexHull3D(local2local(mesh.transform, refT, mesh.sharedMesh.uniqueVertices())) :
                     new ConvexHull3D(local2world(mesh.transform, mesh.sharedMesh.uniqueVertices()));
             }
             bounds = initBounds(verts);
@@ -312,7 +315,7 @@ namespace AT_Utils
                 Utils.Log("[Metric] {} does not have MeshFilter component", transform.gameObject);
                 return;
             }
-            init_with_mesh(m, world_space? null : transform, compute_hull);
+            init_with_mesh(m, world_space ? null : transform, compute_hull);
         }
 
         public Metric(Part part, string mesh_name, bool compute_hull = false, bool world_space = false)
@@ -324,33 +327,33 @@ namespace AT_Utils
                 Utils.Log("[Metric] {} does not have '{}' mesh", part.name, mesh_name);
                 return;
             }
-            init_with_mesh(m, world_space? null : part.transform, compute_hull);
+            init_with_mesh(m, world_space ? null : part.transform, compute_hull);
         }
-        
+
         //part metric
         public Metric(Part part, bool compute_hull = false, bool world_space = false)
             : this()
         {
             var exclude_disabled = part.partInfo != null && part != part.partInfo.partPrefab;
-            bounds = partsBounds(new List<Part>{ part }, world_space? null : part.partTransform, compute_hull, exclude_disabled);
+            bounds = partsBounds(new List<Part> { part }, world_space ? null : part.partTransform, compute_hull, exclude_disabled);
             bounds_volume = boundsVolume(bounds);
             bounds_area = boundsArea(bounds);
         }
-        
+
         //vessel metric
         public Metric(Vessel vessel, bool compute_hull = false, bool world_space = false)
             : this()
         {
-            bounds = partsBounds(vessel.parts, world_space? null : vessel.vesselTransform, compute_hull);
+            bounds = partsBounds(vessel.parts, world_space ? null : vessel.vesselTransform, compute_hull);
             bounds_volume = boundsVolume(bounds);
             bounds_area = boundsArea(bounds);
         }
-        
+
         //in-editor vessel metric
         public Metric(List<Part> vessel, bool compute_hull = false, bool world_space = false)
             : this()
         {
-            bounds = partsBounds(vessel, world_space? null : vessel[0].partTransform, compute_hull);
+            bounds = partsBounds(vessel, world_space ? null : vessel[0].partTransform, compute_hull);
             bounds_volume = boundsVolume(bounds);
             bounds_area = boundsArea(bounds);
         }
@@ -358,7 +361,7 @@ namespace AT_Utils
         public Metric(IShipconstruct vessel, bool compute_hull = false, bool world_space = false)
             : this()
         {
-            bounds = partsBounds(vessel.Parts, world_space? null : vessel.Parts[0].partTransform, compute_hull);
+            bounds = partsBounds(vessel.Parts, world_space ? null : vessel.Parts[0].partTransform, compute_hull);
             bounds_volume = boundsVolume(bounds);
             bounds_area = boundsArea(bounds);
         }
@@ -366,7 +369,7 @@ namespace AT_Utils
 
         //public methods
         public void Clear()
-        { 
+        {
             bounds = default(Bounds);
             bounds_volume = bounds_area = mass = cost = 0;
             CrewCapacity = 0;
@@ -421,7 +424,7 @@ namespace AT_Utils
         #region Fitting
         bool fits_somehow(List<float> _D)
         {
-            var D = new List<float>{ size.x, size.y, size.z };
+            var D = new List<float> { size.x, size.y, size.z };
             D.Sort();
             _D.Sort();
             foreach(float d in D)
@@ -430,12 +433,12 @@ namespace AT_Utils
                     break;
                 int ud = -1;
                 for(int i = 0; i < _D.Count; i++)
-                { 
+                {
                     if(d <= _D[i])
                     {
                         ud = i;
                         break;
-                    } 
+                    }
                 }
                 if(ud < 0)
                     return false;
@@ -446,13 +449,13 @@ namespace AT_Utils
 
         public bool FitsSomehow(Metric other)
         {
-            var _D = new List<float>{ other.size.x, other.size.y, other.size.z };
+            var _D = new List<float> { other.size.x, other.size.y, other.size.z };
             return fits_somehow(_D);
         }
 
         public bool FitsSomehow(Vector2 node)
         {
-            var _D = new List<float>{ node.x, node.y };
+            var _D = new List<float> { node.x, node.y };
             return fits_somehow(_D);
         }
 
@@ -501,7 +504,7 @@ namespace AT_Utils
             var ntris = triangles.Length / 3;
             if(ntris > verts.Length)
             {
-                for(int i = 0; i < verts.Length; i++)
+                for(int i = 0, len = verts.Length; i < len; i++)
                     verts[i] = container_T.InverseTransformPoint(this_T.position + this_T.TransformDirection(verts[i] + offset));
                 for(int i = 0; i < ntris; i++)
                 {
@@ -510,9 +513,9 @@ namespace AT_Utils
                     var V2 = c_verts[triangles[j + 1]];
                     var V3 = c_verts[triangles[j + 2]];
                     var P = new Plane(V1, V2, V3);
-                    foreach(var v in verts)
+                    for(int k = 0, vertsLength = verts.Length; k < vertsLength; k++)
                     {
-                        if(!P.GetSide(v))
+                        if(!P.GetSide(verts[k]))
                             return false;
                     }
                 }
@@ -528,12 +531,12 @@ namespace AT_Utils
                     var V3 = c_verts[triangles[j + 2]];
                     planes[i] = new Plane(V1, V2, V3);
                 }
-                for(int i = 0; i < verts.Length; i++)
+                for(int i = 0, len = verts.Length; i < len; i++)
                 {
                     var v = container_T.InverseTransformPoint(this_T.position + this_T.TransformDirection(verts[i] + offset));
-                    foreach(var P in planes)
+                    for(int j = 0, planesLength = planes.Length; j < planesLength; j++)
                     {
-                        if(!P.GetSide(v))
+                        if(!planes[j].GetSide(v))
                             return false;
                     }
                 }
@@ -543,7 +546,7 @@ namespace AT_Utils
         #endregion
 
         #region Operators
-        public static Metric operator*(Metric m, float scale)
+        public static Metric operator *(Metric m, float scale)
         {
             var _new = new Metric(m);
             _new.Scale(scale);
@@ -562,7 +565,7 @@ namespace AT_Utils
         public static float Volume(Vessel vessel) => (new Metric(vessel, true)).volume;
         #endregion
 
-        #if DEBUG
+#if DEBUG
         public void DrawBox(Transform vT) => Utils.GLDrawBounds(bounds, vT, Color.white);
 
         public void DrawCenter(Transform vT) => Utils.GLDrawPoint(vT.position + vT.TransformDirection(center), Color.white);
@@ -579,10 +582,10 @@ namespace AT_Utils
                                 "mass:    {}\n" +
                                 "cost:    {}\n" +
                                 "CrewCapacity: {}\n" +
-                                "Empty:   {}\n", 
+                                "Empty:   {}\n",
                                 hull, bounds, center, extents, size, volume, area, mass, cost, CrewCapacity, Empty);
         }
-        #endif
+#endif
     }
 }
 

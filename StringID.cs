@@ -4,7 +4,10 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2018 Allis Tauri
+
 using UnityEngine;
+using KSP.Localization;
+
 namespace AT_Utils
 {
     public static class StringID
@@ -44,7 +47,7 @@ namespace AT_Utils
         "_vessel" :
         string.Format("{0}[{1:X}]",
                       string.IsNullOrEmpty(vessel.vesselName) ?
-                      vessel.id.ToString() : vessel.vesselName,
+                      vessel.id.ToString() : Localizer.Format(vessel.vesselName),
                       vessel.persistentId);
 
         public static string GetID(this Part part) =>

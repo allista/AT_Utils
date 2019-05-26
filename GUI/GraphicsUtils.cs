@@ -114,6 +114,17 @@ namespace AT_Utils
         public static MaterialWrapper gl_material = new MaterialWrapper("Particles/Additive");
         public static MaterialWrapper no_z_material = new MaterialWrapper("GUI/Text Shader");
         public static MaterialWrapper diffuse_material = new MaterialWrapper("Diffuse");
+        public static MaterialWrapper standard_material = new MaterialWrapper("Standard");
+        //how to set the Standard shader up to be transparent, glossy, shaded and emitting
+        //renderer.material.SetColor("_Color", color);
+        //renderer.material.SetColor("_EmissionColor", color_emission);
+        //renderer.material.SetFloat("_GlossMapScale", 1f);
+        //renderer.material.SetFloat("_Metallic", 0f);
+        //renderer.material.SetFloat("_Mode", 3f);
+        //renderer.material.SetFloat("_ZWrite", 1f);
+        //renderer.material.EnableKeyword("_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A");
+        //renderer.material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+        //renderer.material.EnableKeyword("_EMISSION");
 
         static Camera GLBeginWorld(out float far, MaterialWrapper mat = null)
         {
