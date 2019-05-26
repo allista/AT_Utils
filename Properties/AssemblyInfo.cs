@@ -27,9 +27,9 @@ using System.Reflection;
 #if NIGHTBUILD
 [assembly: AssemblyVersion("1.7.*")]
 #else
-[assembly: AssemblyVersion("1.7.0")]
+[assembly: AssemblyVersion("1.8.0")]
 #endif
-[assembly: KSPAssembly("AT_Utils", 1, 7)]
+[assembly: KSPAssembly("AT_Utils", 1, 8)]
 
 // The following attributes are used to specify the signing key for the assembly,
 // if desired. See the Mono documentation for more information about signing.
