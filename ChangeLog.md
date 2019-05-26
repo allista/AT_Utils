@@ -1,6 +1,19 @@
 #AT Utils ChangeLog
 
-* **v1.7.0**
+* **v1.8.0**
+    * **APR: Updating AttachNodes with the model OnLoad**
+    * Added DebugUtils.SetupHullMeshes Vessel extension method.
+    * **Fixed ConvexHull3D calculation** that added zero vector to the hull in some cases
+    * SimpleDialog and subclasses accept one-time callbacks
+    * Added WorldSpaceTrace script to add temporary markers to WorldSpace
+    * Added BoundTriangles to easily create meshes from BoundCorners output.
+    * Added Utils.standard_material and comments on how to set up the Standard Unity shader
+    * **Reimplemented SimpleDialog and its subclasses to use callbacks and OnGUI**
+    * SimpleScrollView is hidden by default.
+    * **SimpleScrollView is drawn in its own OnGUI method.**
+    * Added ButtonSwitch(GUIContent) methods
+
+* v1.7.0
     * Added Styles.onSkinInit callback
     * Added Styles.ToggleStylesUI MonoBehaviour extension method
     * Added Styles.MakeButton(Color) method to unify button creation.
