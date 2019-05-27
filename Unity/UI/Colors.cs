@@ -43,7 +43,7 @@ namespace AT_Utils.UI
         public static ColorSetting Selected1 = ColorSetting.cyan;
         public static ColorSetting Selected2 = ColorSetting.magenta;
 
-        public static SimpleGradient FractionGradient = new SimpleGradient{};
+        public static SimpleGradient FractionGradient = new SimpleGradient();
 
         public static SortedList<string, ColorSetting> All { get; } 
 
@@ -53,7 +53,7 @@ namespace AT_Utils.UI
             foreach(var fi in typeof(Colors).GetFields(BindingFlags.Static|BindingFlags.Public)
                     .Where(fi => fi.FieldType == typeof(ColorSetting)))
                 All.Add(fi.Name, fi.GetValue(null) as ColorSetting);
-            FractionGradient = new SimpleGradient { Danger, Warning, Good };
+            FractionGradient = new SimpleGradient(new [] { Danger, Warning, Good });
         }
 
         public static void SetDefaults()
