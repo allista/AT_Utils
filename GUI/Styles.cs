@@ -189,7 +189,7 @@ namespace AT_Utils
             skin.horizontalScrollbarThumb.fixedHeight = 8;
 
             ConfigureButtons();
-
+            frac_styles.Clear();
             onSkinInit();
         }
 
