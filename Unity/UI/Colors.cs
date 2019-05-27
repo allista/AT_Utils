@@ -167,35 +167,48 @@ namespace AT_Utils.UI
         public static implicit operator Color(ColorSetting c) => c.color;
     }
 
-    public class SimpleGradient : List<ColorSetting>
+    public class SimpleGradient
     {
         Gradient gradient;
+        ColorSetting[] colors;
+        int len, last;
+
+        static readonly GradientAlphaKey[] alpha_keys = {
+            new GradientAlphaKey{alpha=1, time=0},
+            new GradientAlphaKey{alpha=1, time=1}
+        };
 
         public static implicit operator Gradient(SimpleGradient g) => g.gradient;
 
         public SimpleGradient() { }
 
         public SimpleGradient(IEnumerable<ColorSetting> content)
-            : base(content)
-        { 
-            update(); 
-            ForEach(cs => cs.onColorChanged.AddListener(c => update()));
+        {
+            colors = content.ToArray();
+            len = colors.Length;
+            last = len - 1;
+            update();
+            for(int i = 0; i < len; i++)
+                colors[i].onColorChanged.AddListener(update);
         }
 
-        void update()
+        ~SimpleGradient()
         {
-            if(Count > 1)
+            for(int i = 0; i < len; i++)
+                colors[i].onColorChanged.RemoveListener(update);
+        }
+
+        void update(Color _ = default(Color))
+        {
+            if(len > 1)
             {
-                gradient = new Gradient();
-                gradient.mode = GradientMode.Blend;
-                GradientColorKey[] colors = new GradientColorKey[Count];
-                for(int i = 0, count = Count; i < count; i++)
-                    colors[i] = new GradientColorKey { color = this[i], time = (float)i / count };
-                gradient.colorKeys = colors;
-                gradient.alphaKeys = new[]{
-                    new GradientAlphaKey{alpha=1, time=0},
-                    new GradientAlphaKey{alpha=1, time=1}
-                };
+                gradient = new Gradient{ mode = GradientMode.Blend };
+                GradientColorKey[] keys = new GradientColorKey[len];
+                for(int i = 0; i < last; i++)
+                    keys[i] = new GradientColorKey { color = colors[i], time = (float)i / len };
+                keys[last] = new GradientColorKey { color = colors[last], time = 1 };
+                gradient.colorKeys = keys;
+                gradient.alphaKeys = alpha_keys;
             }
             else
                 gradient = null;
@@ -205,8 +218,8 @@ namespace AT_Utils.UI
         {
             if(gradient != null)
                 return gradient.Evaluate(frac);
-            if(Count > 0)
-                return this[0];
+            if(len > 0)
+                return colors[0];
             return Color.black;
         }
     }
