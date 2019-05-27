@@ -239,7 +239,7 @@ namespace AT_Utils
             var bin = Mathf.FloorToInt(frac * 10);
             if(!frac_styles.TryGetValue(bin, out s))
             {
-                s = white.OtherColor(Colors.FractionGradient.Evaluate((bin + 0.5f) / 10f));
+                s = white.OtherColor(Colors.FractionGradient.Evaluate(Mathf.Min((bin + 0.5f) / 10f, 1)));
                 frac_styles.Add(bin, s);
             }
             return s;
