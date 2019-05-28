@@ -4,8 +4,8 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2018 Allis Tauri
+
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace AT_Utils
 {
@@ -28,6 +28,12 @@ namespace AT_Utils
         {
             base.OnAwake();
             name_editor = gameObject.AddComponent<SimpleTextEntry>();
+            name_editor.Title = "Rename Docking Port";
+            name_editor.yesCallback = () =>
+            {
+                PortName = name_editor.Text;
+                update_event_names();
+            };
             foreach(var evt in Events)
                 event_names.Add(evt, evt.guiName);
         }
@@ -53,17 +59,6 @@ namespace AT_Utils
         {
             name_editor.Text = PortName;
             name_editor.Toggle();
-        }
-
-        void OnGUI()
-        {
-            if(Event.current.type != EventType.Layout &&
-               Event.current.type != EventType.Repaint) return;
-            if(name_editor.Draw("Rename Docking Port") == SimpleDialog.Answer.Yes)
-            {
-                PortName = name_editor.Text;
-                update_event_names();
-            }
         }
     }
 }

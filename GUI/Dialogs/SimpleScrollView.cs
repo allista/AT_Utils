@@ -12,6 +12,7 @@ namespace AT_Utils
     public class SimpleScrollView : GUIWindowBase
     {
         public Action DrawContent = () => { };
+        public string Title = "Scroll View";
         Vector2 scroll = Vector2.zero;
 
         public SimpleScrollView()
@@ -19,6 +20,12 @@ namespace AT_Utils
             width = 400;
             height = 300;
             WindowPos = new Rect(Screen.width / 2 - width / 2, 100, width, height);
+        }
+
+        public override void Awake()
+        {
+            base.Awake();
+            Show(false);
         }
 
         void DialogWindow(int windowId)
@@ -33,14 +40,14 @@ namespace AT_Utils
             TooltipsAndDragWindow();
         }
 
-        public void Draw(string title)
+        void OnGUI()
         {
             if(doShow)
             {
                 LockControls();
                 WindowPos = GUILayout.Window(GetInstanceID(),
                                              WindowPos, DialogWindow,
-                                             title,
+                                             Title,
                                              GUILayout.Width(width),
                                              GUILayout.Height(height))
                                      .clampToScreen();

@@ -240,6 +240,27 @@ namespace AT_Utils
 //                          st.ToString());
 //            }
 //        }
+
+        public static void SetupHullMeshes(this Vessel vessel, Color color)
+        {
+            if(vessel == null) return;
+            foreach(var p in vessel.Parts)
+            {
+                var hull_obj_T = p.partTransform.Find("__HULL_MESH");
+                if(hull_obj_T != null) continue;
+                var hull_obj = new GameObject("__HULL_MESH", typeof(MeshFilter), typeof(MeshRenderer));
+                hull_obj.transform.SetParent(p.partTransform, false);
+                var renderer = hull_obj.GetComponent<MeshRenderer>();
+                renderer.material = Utils.no_z_material;
+                renderer.material.color = color;
+                renderer.enabled = true;
+                var hull_mesh = hull_obj.GetComponent<MeshFilter>();
+                var pM = new Metric(p, true);
+                hull_mesh.mesh = pM.hull_mesh;
+                hull_obj.transform.rotation = p.partTransform.rotation;
+                hull_obj.SetActive(true);
+            }
+        }
     }
 
     class NamedStopwatch

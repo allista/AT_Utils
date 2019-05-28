@@ -9,6 +9,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using KSP.Localization;
 using KSP.UI.Screens;
 using UnityEngine;
 
@@ -177,7 +178,7 @@ namespace AT_Utils
             if(vessel == null)
                 vessel = localRoot.gameObject.AddComponent<Vessel>();
             vessel.id = Guid.NewGuid();
-            vessel.vesselName = ship.shipName;
+            vessel.vesselName = Localizer.Format(ship.shipName);
             vessel.persistentId = ship.persistentId;
             if(orbit != null)
             {
@@ -216,7 +217,7 @@ namespace AT_Utils
             }
             else
                 vessel.SetReferenceTransform(localRoot, true);
-            Utils.Log("Vessel assembled for launch: " + vessel.vesselName);
+            Utils.Log("Vessel assembled for launch: " + vessel.GetDisplayName());
             return vessel;
         }
 
