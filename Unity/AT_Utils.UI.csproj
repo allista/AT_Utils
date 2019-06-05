@@ -92,7 +92,9 @@
      <Compile Include="UI\TooltipTrigger.cs" />
      <Compile Include="UI\TooltipView.cs" />
      <Compile Include="UI\CommonEvents.cs" />
+     <Compile Include="UI\FloatController.cs" />
      <Compile Include="UI\FormatUtils.cs" />
+     <Compile Include="UI\FloatValueUI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
