@@ -97,7 +97,7 @@ namespace AT_Utils
             if(units >= 1e-3f)
                 return (units * 1e3f).ToString("n1") + "mu";
             if(units >= 1e-6f)
-                return (units * 1e6f).ToString("n1") + "mku";
+                return (units * 1e6f).ToString("n1") + "μu";
             if(units >= 1e-9f)
                 return (units * 1e9f).ToString("n1") + "nu";
             if(units >= 1e-13f) //to fully use the last digit 
