@@ -58,9 +58,11 @@
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
