@@ -89,6 +89,7 @@
      <Compile Include="UI\Colorizers\GenericColorizer.cs" />
      <Compile Include="UI\Colorizers\ToggleColorizer.cs" />
      <Compile Include="UI\Colorizers\ColorizerBase.cs" />
+     <Compile Include="UI\CommonEvents.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
