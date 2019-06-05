@@ -49,34 +49,41 @@ namespace AT_Utils.UI
         public override void OnPointerDown(PointerEventData data)
         {
             base.OnPointerDown(data);
-            if(parentTransform != null && canvas == null)
+            if(canvas == null)
             {
-                canvas = parentTransform.GetComponent<Canvas>();
+                canvas = GetComponentInParent<Canvas>();
                 if(canvas != null)
                     screen_space = canvas.renderMode != RenderMode.WorldSpace;
             }
+        }
+
+        public static void ClampToScreen(RectTransform rectTransform, Canvas canvas)
+        {
+            var screen_pos = RectTransformUtility.WorldToScreenPoint(canvas.worldCamera, rectTransform.position);
+            Vector3[] corners = new Vector3[4];
+            rectTransform.GetWorldCorners(corners);
+            var top_left = RectTransformUtility.WorldToScreenPoint(canvas.worldCamera, corners[1]);
+            var bottom_right = RectTransformUtility.WorldToScreenPoint(canvas.worldCamera, corners[3]);
+            var w = Screen.width;
+            var h = Screen.height;
+            if(top_left.x < 0)
+                screen_pos.x -= top_left.x;
+            else if(bottom_right.x > w)
+                screen_pos.x -= bottom_right.x - w;
+            if(top_left.y > h)
+                screen_pos.y -= top_left.y - h;
+            else if(bottom_right.y < 0)
+                screen_pos.y -= bottom_right.y;
+            Vector3 new_pos;
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvas.transform as RectTransform, screen_pos, canvas.worldCamera, out new_pos);
+            rectTransform.position = new_pos;
         }
 
         public override void OnDrag(PointerEventData data)
         {
             base.OnDrag(data);
             if(screen_space)
-            {
-                var new_pos = rectTransform.position;
-                Vector3[] corners = new Vector3[4];
-                rectTransform.GetWorldCorners(corners);
-                var top_left = corners[1];
-                var bottom_right = corners[3];
-                if(top_left.x < -Screen.width / 2)
-                    new_pos.x -= top_left.x + Screen.width / 2;
-                else if(bottom_right.x > Screen.width / 2)
-                    new_pos.x -= bottom_right.x - Screen.width / 2;
-                if(top_left.y > Screen.height / 2)
-                    new_pos.y -= top_left.y - Screen.height / 2;
-                else if(bottom_right.y < -Screen.height / 2)
-                    new_pos.y -= bottom_right.y + Screen.height / 2;
-                rectTransform.position = new_pos;
-            }
+                ClampToScreen(rectTransform, canvas);
         }
     }
 }
