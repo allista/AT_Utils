@@ -24,6 +24,8 @@ namespace AT_Utils
         public List<string> MeshesToSkipList = new List<string>();
         public List<string> BadPartsList = new List<string>();
 
+        public UIBundle AssetBundle = new UIBundle("000_AT_Utils/at_utils_ui");
+
         public override void Save(ConfigNode node)
         {
             base.Save(node);
