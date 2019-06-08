@@ -71,6 +71,12 @@ namespace AT_Utils
             in_progress = false;
         }
 
+        public void Show(MonoBehaviour monoBehaviour)
+        {
+            if(!in_progress)
+                monoBehaviour.StartCoroutine(Show());
+        }
+
         public void Close()
         {
             if(Controller != null)
@@ -90,7 +96,7 @@ namespace AT_Utils
             if(IsShown)
                 Close();
             else
-                monoBehaviour.StartCoroutine(Show());
+                Show(monoBehaviour);
         }
     }
 }
