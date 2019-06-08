@@ -59,7 +59,10 @@ namespace AT_Utils
         {
             base.Awake();
             if(Instance != null)
-            { Destroy(gameObject); return; }
+            { 
+                Destroy(this);
+                return; 
+            }
             Instance = (T)this;
             Instance.LoadState();
             var assembly = Assembly.GetAssembly(typeof(T)).GetName();
