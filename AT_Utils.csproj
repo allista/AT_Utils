@@ -152,6 +152,7 @@
     <Compile Include="UI\UIBundle.cs" />
     <Compile Include="UI\UIWindowBase.cs" />
     <Compile Include="UI\ColorListWindow.cs" />
+    <Compile Include="Configuration\PluginState.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

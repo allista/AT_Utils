@@ -9,6 +9,7 @@ using System.Collections;
 
 namespace AT_Utils
 {
+    [PersistState]
     public abstract class UIWindowBase<T> where T : MonoBehaviour
     {
         readonly UIBundle bundle;
@@ -17,7 +18,9 @@ namespace AT_Utils
         GameObject prefab;
 
         public T Controller { get; private set; }
-        Vector3 pos = Vector3.zero;
+
+        [ConfigOption]
+        protected Vector3 pos = Vector3.zero;
 
         protected UIWindowBase(UIBundle bundle)
         {

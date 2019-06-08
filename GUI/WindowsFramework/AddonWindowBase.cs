@@ -61,22 +61,23 @@ namespace AT_Utils
             if(Instance != null)
             { Destroy(gameObject); return; }
             Instance = (T)this;
-            LoadConfig();
+            Instance.LoadState();
             var assembly = Assembly.GetAssembly(typeof(T)).GetName();
             Title = string.Concat(assembly.Name, " - ", assembly.Version);
             GameEvents.onGameStateSave.Add(onGameStateSave);
-            save_timer.action = SaveConfig;
+            save_timer.action = () => Instance.SaveState();
         }
 
         public override void OnDestroy()
         {
-            SaveConfig();
             GameEvents.onGameStateSave.Remove(onGameStateSave);
-            if(this == Instance) Instance = null;
+            Instance.SaveState();
+            if(this == Instance) 
+                Instance = null;
             base.OnDestroy();
         }
 
-        void onGameStateSave(ConfigNode node) { SaveConfig(); }
+        void onGameStateSave(ConfigNode node) { Instance.SaveState(); }
 
         protected abstract void draw_gui();
 
