@@ -87,11 +87,12 @@ namespace AT_Utils
             GUI.Label(rect, tooltip, Styles.tooltip);
         }
 
-        void Update() { tooltip = ""; }
         void Awake()
         {
             tooltipWindow.Show(this);
         }
+
+        void LateUpdate() { tooltip = ""; }
 
         void OnGUI()
         {
