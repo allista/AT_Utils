@@ -29,8 +29,12 @@ namespace AT_Utils.UI
                 return;
             }
             Instance = this;
+        }
+
+        void Start()
+        {
             canvas = GetComponentInParent<Canvas>();
-            HideTooltip();
+            gameObject.SetActive(false);
         }
 
 
