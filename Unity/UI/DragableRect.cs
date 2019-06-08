@@ -5,7 +5,6 @@ namespace AT_Utils.UI
 {
     public class DragableRect : MonoBehaviour, IPointerDownHandler, IDragHandler
     {
-        protected RectTransform parentTransform;
         protected RectTransform rectTransform;
         protected Vector2 pointerOffset;
 
@@ -19,15 +18,6 @@ namespace AT_Utils.UI
         //this event fires when a drag event begins
         public virtual void OnPointerDown(PointerEventData data)
         {
-            if(parentTransform == null)
-            {
-                parentTransform = rectTransform.parent as RectTransform;
-                if(parentTransform == null)
-                {
-                    enabled = false;
-                    return;
-                }
-            }
             rectTransform.SetAsLastSibling();
             RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, data.position, data.pressEventCamera, out pointerOffset);
         }
@@ -36,7 +26,7 @@ namespace AT_Utils.UI
         public virtual void OnDrag(PointerEventData data)
         {
             Vector2 pointer;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(parentTransform, data.position, data.pressEventCamera, out pointer);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(transform.parent as RectTransform, data.position, data.pressEventCamera, out pointer);
             rectTransform.localPosition = pointer - pointerOffset;
         }
     }
@@ -44,17 +34,25 @@ namespace AT_Utils.UI
     public class ScreenBoundRect : DragableRect
     {
         bool screen_space;
-        protected Canvas canvas;
-
-        public override void OnPointerDown(PointerEventData data)
+        Canvas _canvas;
+        protected Canvas canvas
         {
-            base.OnPointerDown(data);
-            if(canvas == null)
+            get
             {
-                canvas = GetComponentInParent<Canvas>();
-                if(canvas != null)
-                    screen_space = canvas.renderMode != RenderMode.WorldSpace;
+                if(_canvas == null)
+                {
+                    _canvas = GetComponentInParent<Canvas>();
+                    if(_canvas != null)
+                        screen_space = _canvas.renderMode != RenderMode.WorldSpace;
+                }
+                return _canvas;
             }
+        }
+
+        protected virtual void Start()
+        {
+            if(canvas != null && screen_space)
+                ClampToScreen(rectTransform, canvas);
         }
 
         public static void ClampToScreen(RectTransform rectTransform, Canvas canvas)
@@ -82,7 +80,7 @@ namespace AT_Utils.UI
         public override void OnDrag(PointerEventData data)
         {
             base.OnDrag(data);
-            if(screen_space)
+            if(canvas != null && screen_space)
                 ClampToScreen(rectTransform, canvas);
         }
     }
