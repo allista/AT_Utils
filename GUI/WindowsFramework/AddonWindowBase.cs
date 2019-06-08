@@ -81,6 +81,11 @@ namespace AT_Utils
 
         protected abstract void draw_gui();
 
+        protected virtual void LateUpdate()
+        {
+            save_timer.Run();
+        }
+
         public virtual void OnGUI()
         {
             if(Event.current.type != EventType.Layout && Event.current.type != EventType.Repaint) return;
@@ -88,7 +93,6 @@ namespace AT_Utils
             {
                 Styles.Init();
                 draw_gui();
-                save_timer.Run();
             }
             else UnlockControls();
         }
