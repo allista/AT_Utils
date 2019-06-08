@@ -9,11 +9,15 @@ using UnityEngine;
 
 namespace AT_Utils.UI
 {
-    public abstract class FloatValueUI : MonoBehaviour
+    public class PanelledUI : MonoBehaviour
     {
         public RectTransform panel;
-        public void SetActive(bool enable) => panel.gameObject.SetActive(enable);
+        public void SetActive(bool active) => panel.gameObject.SetActive(active);
+        public void Toggle() => SetActive(!panel.gameObject.activeSelf);
+    }
 
+    public abstract class FloatValueUI : PanelledUI
+    {
         public abstract bool SetValueWithoutNotify(float newValue);
         public abstract FloatEvent onValueChanged { get; }
 
