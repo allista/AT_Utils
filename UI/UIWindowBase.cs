@@ -5,12 +5,11 @@
 //
 //  Copyright (c) 2019 Allis Tauri
 using UnityEngine;
-using AT_Utils.UI;
 using System.Collections;
 
 namespace AT_Utils
 {
-    public abstract class UIWindowBase<T> where T : ScreenBoundRect
+    public abstract class UIWindowBase<T> where T : MonoBehaviour
     {
         readonly UIBundle bundle;
 
