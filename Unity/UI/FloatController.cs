@@ -33,11 +33,11 @@ namespace AT_Utils.UI
         {
             input.contentType = InputField.ContentType.DecimalNumber;
             input.onEndEdit.AddListener(parse);
-            input.text = "0";
             if(decimals >= 0)
                 format = string.Format("F{0}", decimals);
             else
                 format = "R";
+            input.text = value.ToString(format);
             if(step.Equals(0))
             {
                 incrementButton.gameObject.SetActive(false);
