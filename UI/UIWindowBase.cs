@@ -22,6 +22,9 @@ namespace AT_Utils
         [ConfigOption]
         protected Vector3 pos = Vector3.zero;
 
+        [ConfigOption]
+        protected bool initialized;
+
         protected UIWindowBase(UIBundle bundle)
         {
             this.bundle = bundle;
@@ -35,7 +38,6 @@ namespace AT_Utils
             if(in_progress || Controller != null)
                 yield break;
             in_progress = true;
-            bool first_start = false;
             if(prefab == null)
             {
                 foreach(var _ in bundle.LoadAsset(prefab_name))
@@ -43,7 +45,6 @@ namespace AT_Utils
                 prefab = bundle.GetAsset(prefab_name);
                 if(prefab == null)
                     goto end;
-                first_start = true;
             }
             var obj = Object.Instantiate(prefab);
             Controller = obj.GetComponent<T>();
@@ -55,10 +56,10 @@ namespace AT_Utils
                 Object.Destroy(obj);
                 goto end;
             }
-            init_controller();
             obj.transform.SetParent(DialogCanvasUtil.DialogCanvasRect);
+            init_controller();
             obj.SetActive(true);
-            if(first_start)
+            if(!initialized)
             {
                 obj.transform.localPosition = new Vector3(-Screen.width, 0);
                 Rect rect = new Rect();
@@ -68,6 +69,7 @@ namespace AT_Utils
                     yield return null;
                 }
                 pos = new Vector3(-rect.width / 2, rect.height / 2);
+                initialized = true;
             }
             obj.transform.localPosition = pos;
         end:
