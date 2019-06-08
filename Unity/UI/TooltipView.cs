@@ -15,17 +15,7 @@ namespace AT_Utils.UI
     public class TooltipView : MonoBehaviour, IPointerExitHandler
     {
         public enum TooltipPosition { BOTTOM, TOP };
-
-        static TooltipView instance;
-        public static TooltipView Instance
-        {
-            get
-            {
-                if(instance == null)
-                    Debug.LogWarning("No TooltipView component found");
-                return instance;
-            }
-        }
+        public static TooltipView Instance { get; private set; }
 
         Canvas canvas;
         public Text tooltipText;
@@ -33,12 +23,12 @@ namespace AT_Utils.UI
 
         void Awake()
         {
-            if(instance != null)
+            if(Instance != null)
             {
                 Destroy(this);
                 return;
             }
-            instance = this;
+            Instance = this;
             canvas = GetComponentInParent<Canvas>();
             HideTooltip();
         }
