@@ -21,10 +21,10 @@ namespace AT_Utils.UI
             toggle = gameObject.GetComponent<Toggle>();
             if(toggle != null)
             {
-                toggle.onValueChanged.AddListener(isOn => updateColor());
-                Colors.Enabled.onColorChanged.AddListener(c => updateColor());
-                Colors.Active.onColorChanged.AddListener(c => updateColor());
-                updateColor();
+                toggle.onValueChanged.AddListener(isOn => UpdateColor());
+                Colors.Enabled.onColorChanged.AddListener(c => UpdateColor());
+                Colors.Active.onColorChanged.AddListener(c => UpdateColor());
+                UpdateColor();
             }
             else
                 enabled = false;
@@ -33,7 +33,7 @@ namespace AT_Utils.UI
         public void SetInteractable(bool interactable)
         {
             toggle.interactable = interactable;
-            updateColor();
+            UpdateColor();
         }
 
         void changeColor(Color color)
@@ -44,7 +44,7 @@ namespace AT_Utils.UI
             toggle.colors = colors;
         }
 
-        void updateColor()
+        public void UpdateColor()
         {
             changeColor(toggle.isOn
                         ? Colors.Enabled
