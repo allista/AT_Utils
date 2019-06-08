@@ -153,6 +153,7 @@
     <Compile Include="UI\UIWindowBase.cs" />
     <Compile Include="UI\ColorListWindow.cs" />
     <Compile Include="Configuration\PluginState.cs" />
+    <Compile Include="UI\TooltipWindow.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
