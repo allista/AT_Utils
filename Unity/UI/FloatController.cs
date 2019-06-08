@@ -61,26 +61,27 @@ namespace AT_Utils.UI
             decrementButton.onClick.RemoveListener(decrement);
         }
 
-        protected override void changeValue(float newValue)
+        public override bool SetValueWithoutNotify(float newValue)
         {
             var val = (float)Math.Round(clampValue(newValue), decimals);
             if(!value.Equals(val))
             {
                 value = val;
                 input.text = value.ToString(format);
-                onValueChanged.Invoke(value);
+                return true;
             }
+            return false;
         }
 
-        void increment() => changeValue(value + step);
+        void increment() => changeValueAndNotify(value + step);
 
-        void decrement() => changeValue(value - step);
+        void decrement() => changeValueAndNotify(value - step);
 
         void parse(string str_value)
         {
             float val;
             if(float.TryParse(str_value, out val))
-                changeValue(val);
+                changeValueAndNotify(val);
         }
     }
 }

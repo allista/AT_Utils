@@ -14,15 +14,17 @@ namespace AT_Utils.UI
         public RectTransform panel;
         public void SetActive(bool enable) => panel.gameObject.SetActive(enable);
 
-        protected abstract void changeValue(float newValue);
+        public abstract bool SetValueWithoutNotify(float newValue);
         public abstract FloatEvent onValueChanged { get; }
 
-        protected float value;
-        public float Value
+        protected void changeValueAndNotify(float newValue)
         {
-            get { return value; }
-            set { changeValue(value); }
+            if(SetValueWithoutNotify(newValue))
+                onValueChanged.Invoke(value);
         }
+
+        protected float value;
+        public float Value { get => value; set => changeValueAndNotify(value); }
     }
 
     public abstract class BoundedFloatValueUI : FloatValueUI
