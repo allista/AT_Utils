@@ -21,8 +21,6 @@ namespace AT_Utils
             }
         }
 
-        protected override string prefab_name => "ColorList";
-
         protected override void init_controller()
         {
             Controller.SetTitle("Color Scheme of AT Mods");

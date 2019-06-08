@@ -14,7 +14,7 @@ namespace AT_Utils
     {
         readonly UIBundle bundle;
 
-        protected abstract string prefab_name { get; }
+        protected virtual string prefab_name => typeof(T).Name;
         GameObject prefab;
 
         public T Controller { get; private set; }
