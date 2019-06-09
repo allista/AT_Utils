@@ -12,6 +12,7 @@ namespace AT_Utils.UI
     public class PanelledUI : MonoBehaviour
     {
         public RectTransform panel;
+        public bool IsActive => panel.gameObject.activeSelf;
         public void SetActive(bool active) => panel.gameObject.SetActive(active);
         public void Toggle() => SetActive(!panel.gameObject.activeSelf);
     }
