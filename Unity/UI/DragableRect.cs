@@ -3,10 +3,11 @@ using UnityEngine.EventSystems;
 
 namespace AT_Utils.UI
 {
-    public class DragableRect : MonoBehaviour, IPointerDownHandler, IDragHandler
+    public class DragableRect : MonoBehaviour, IBeginDragHandler, IDragHandler
     {
         protected RectTransform rectTransform;
-        protected Vector2 pointerOffset;
+        protected Vector3 pointerOffset;
+        protected Vector3 positionOffset;
 
         protected virtual void Awake()
         {
@@ -16,18 +17,19 @@ namespace AT_Utils.UI
         }
 
         //this event fires when a drag event begins
-        public virtual void OnPointerDown(PointerEventData data)
+        public virtual void OnBeginDrag(PointerEventData data)
         {
             rectTransform.SetAsLastSibling();
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, data.position, data.pressEventCamera, out pointerOffset);
+            positionOffset = rectTransform.position;
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTransform, data.position, data.pressEventCamera, out pointerOffset);
         }
 
         //this event fires while we're dragging. It's constantly moving the UI to a new position
         public virtual void OnDrag(PointerEventData data)
         {
-            Vector2 pointer;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(transform.parent as RectTransform, data.position, data.pressEventCamera, out pointer);
-            rectTransform.localPosition = pointer - pointerOffset;
+            Vector3 pointer;
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTransform, data.position, data.pressEventCamera, out pointer);
+            rectTransform.position = positionOffset + pointer - pointerOffset;
         }
     }
 
