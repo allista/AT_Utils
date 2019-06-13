@@ -10,7 +10,7 @@ using System.Collections;
 namespace AT_Utils
 {
     [PersistState]
-    public abstract class UIWindowBase<T> where T : MonoBehaviour
+    public abstract class UIWindowBase<T> : ICachedState where T : MonoBehaviour
     {
         readonly UIBundle bundle;
 
@@ -80,6 +80,12 @@ namespace AT_Utils
         {
             if(!in_progress)
                 monoBehaviour.StartCoroutine(Show());
+        }
+
+        public void SyncState()
+        {
+            if(Controller != null)
+                pos = Controller.transform.localPosition;
         }
 
         public void Close()
