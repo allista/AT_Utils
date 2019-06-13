@@ -24,6 +24,11 @@ namespace AT_Utils
         void InitState();
     }
 
+    public interface ICachedState
+    {
+        void SyncState();
+    }
+
     public static class PluginState
     {
         static Dictionary<string, PluginConfiguration> configs = new Dictionary<string, PluginConfiguration>();
@@ -49,6 +54,8 @@ namespace AT_Utils
 
         public static void LoadState(this object obj, string basename = "")
         {
+            if(obj is ICachedState cached_state_obj)
+                cached_state_obj.SyncState();
             var T = obj.GetType();
             var cfg = get_config(T);
             if(string.IsNullOrEmpty(basename))
