@@ -87,10 +87,16 @@ namespace AT_Utils
                 spawn_transform = part.FindModelTransform(SpawnTransform);
             if(spawn_transform == null)
             {
-                var launch_empty = new GameObject("auto_spawn_empty");
+                var launch_empty = new GameObject("__SPAWN_TRANSFORM");
                 var parent = Space != null ? Space.transform : part.transform;
                 launch_empty.transform.SetParent(parent, false);
                 spawn_transform = launch_empty.transform;
+            }
+            if(AutoPositionVessel)
+            {
+                var rot_empty = new GameObject("__AUTO_POS_SPAWN_TRANSFORM");
+                rot_empty.transform.SetParent(spawn_transform, false);
+                spawn_transform = rot_empty.transform;
             }
         }
 
