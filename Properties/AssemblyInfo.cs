@@ -46,8 +46,8 @@ namespace AT_Utils
             MinKSPVersion = new Version(1, 6, 1);
             MaxKSPVersion = new Version(1, 7, 2);
 
-            VersionURL   = "https://raw.githubusercontent.com/allista/AT_Utils/master/GameData/000_AT_Utils/000_AT_Utils.version";
-            UpgradeURL   = "https://github.com/allista/AT_Utils/releases";
+            VersionURL = "https://raw.githubusercontent.com/allista/AT_Utils/master/GameData/000_AT_Utils/000_AT_Utils.version";
+            UpgradeURL = "https://github.com/allista/AT_Utils/releases";
         }
     }
 }
