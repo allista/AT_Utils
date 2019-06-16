@@ -54,8 +54,6 @@ namespace AT_Utils
 
         public static void LoadState(this object obj, string basename = "")
         {
-            if(obj is ICachedState cached_state_obj)
-                cached_state_obj.SyncState();
             var T = obj.GetType();
             var cfg = get_config(T);
             if(string.IsNullOrEmpty(basename))
@@ -85,6 +83,8 @@ namespace AT_Utils
 
         public static void SaveState(this object obj, string basename = "")
         {
+            if(obj is ICachedState cached_state_obj)
+                cached_state_obj.SyncState();
             var T = obj.GetType();
             var cfg = get_config(T);
             if(string.IsNullOrEmpty(basename))
