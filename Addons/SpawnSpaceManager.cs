@@ -37,10 +37,12 @@ namespace AT_Utils
 
         static List<KeyValuePair<float, int>> sort_vector(Vector3 v)
         {
-            var s = new List<KeyValuePair<float, int>>(3);
-            s.Add(new KeyValuePair<float, int>(v[0], 0));
-            s.Add(new KeyValuePair<float, int>(v[1], 1));
-            s.Add(new KeyValuePair<float, int>(v[2], 2));
+            var s = new List<KeyValuePair<float, int>>(3)
+            {
+                new KeyValuePair<float, int>(v[0], 0),
+                new KeyValuePair<float, int>(v[1], 1),
+                new KeyValuePair<float, int>(v[2], 2)
+            };
             s.Sort((x, y) => x.Key.CompareTo(y.Key));
             return s;
         }
