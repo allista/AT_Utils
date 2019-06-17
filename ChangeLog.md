@@ -1,6 +1,34 @@
 #AT Utils ChangeLog
 
-* **v1.8.0**
+* **v1.8.1**
+    * Made UIBundle reusable for different bundles. Extracted UIWindowBase code from Styles
+        * Derived ColorListWindow from UIWindowBase, both being extracted from Styles; UIWindowBase will be the base for the new UI framework on uGUI.
+        * Added UI folder for the new framework
+    * Fixed ScreenBoundRect, extracted static ClampToScreen method from OnDrag
+    * Changed mku to μu in formatUnits
+    * Fixed references to UnityEngine+.UI; should not make lockal copies of them
+    * Added PanelledUI and FloatValueUI base classes and FloatController UI prefab
+    * Added TooltipView+TooltipTrigger framework
+    * Added AT_Utils.UI.FormatUtils.cs with the code from MiscUtils for formatting
+    * Added CommonEvents.cs with UnityEvents subclasses for common use
+    * Added Extensions class and backported Toggle.SetIsOnWithoutNotify
+    * Added PluginState static class that handles persistent configs
+        * The code was extracted from GUIWindowBase. Now everything that needs to persist its configs have to use PluginState.
+        * For that there are two attributes: ConfigOption for fields and PersistState for classes. The former marks fields that should be saved and restored, the later is used to recursively save/load state of a tree of objects.
+        * Added ICachedState interface to PluginState framework to allow classes to sync their runtime state before saving it to config.xml
+    * Made ToggleColorizer.UpdateColor public
+        * To change toggle color when isOn is set without calling the callback
+    * Added TooltipView via TooltipWindow to TooltipManager addon
+    * Added Label prefab that is a Panel->Text composite
+    * Fixed DragableRect in case of parents changing midflight
+    * Fixed DragableRect position calculation; using IBeginDragHandler to catch the start
+    * Added PanelledUI.IsActive property
+    * Added EmptyPanel prefab
+    * Added Panel prefab
+    * Added ColorSetting.Alpha method to return the Color with changed alpha value
+    * SpawnSpaceManager adds separate GO for AutoPosition transform
+
+* v1.8.0
     * **APR: Updating AttachNodes with the model OnLoad**
     * Added DebugUtils.SetupHullMeshes Vessel extension method.
     * **Fixed ConvexHull3D calculation** that added zero vector to the hull in some cases
