@@ -59,26 +59,35 @@ namespace AT_Utils
         {
             base.Awake();
             if(Instance != null)
-            { Destroy(gameObject); return; }
+            { 
+                Destroy(this);
+                return; 
+            }
             Instance = (T)this;
-            LoadConfig();
+            Instance.LoadState();
             var assembly = Assembly.GetAssembly(typeof(T)).GetName();
             Title = string.Concat(assembly.Name, " - ", assembly.Version);
             GameEvents.onGameStateSave.Add(onGameStateSave);
-            save_timer.action = SaveConfig;
+            save_timer.action = () => Instance.SaveState();
         }
 
         public override void OnDestroy()
         {
-            SaveConfig();
             GameEvents.onGameStateSave.Remove(onGameStateSave);
-            if(this == Instance) Instance = null;
+            Instance.SaveState();
+            if(this == Instance) 
+                Instance = null;
             base.OnDestroy();
         }
 
-        void onGameStateSave(ConfigNode node) { SaveConfig(); }
+        void onGameStateSave(ConfigNode node) { Instance.SaveState(); }
 
         protected abstract void draw_gui();
+
+        protected virtual void LateUpdate()
+        {
+            save_timer.Run();
+        }
 
         public virtual void OnGUI()
         {
@@ -87,7 +96,6 @@ namespace AT_Utils
             {
                 Styles.Init();
                 draw_gui();
-                save_timer.Run();
             }
             else UnlockControls();
         }

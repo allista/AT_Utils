@@ -12,13 +12,18 @@ using UnityEngine;
 
 namespace AT_Utils
 {
-    public static class UIBundle
+    public class UIBundle
     {
-        const string BUNDLE = "000_AT_Utils/at_utils_ui";
-        static BundleDefinition bundle_def;
-        static Dictionary<string,GameObject> loaded_assets = new Dictionary<string, GameObject>();
+        readonly string BUNDLE = "";
+        BundleDefinition bundle_def;
+        Dictionary<string,GameObject> loaded_assets = new Dictionary<string, GameObject>();
 
-        static IEnumerable load(AssetDefinition asset)
+        public UIBundle(string bundle_path)
+        {
+            BUNDLE = bundle_path;
+        }
+
+        IEnumerable load(AssetDefinition asset)
         {
             AssetLoader.Loader loader = null;
             if(!AssetLoader.LoadAssets(l => { loader = l; }, asset))
@@ -42,7 +47,7 @@ namespace AT_Utils
             loaded_assets[asset.name] = obj;
         }
 
-        public static IEnumerable LoadAsset(string name)
+        public IEnumerable LoadAsset(string name)
         {
             if(loaded_assets.ContainsKey(name))
                 yield break;
@@ -59,7 +64,7 @@ namespace AT_Utils
             }
         }
 
-        public static GameObject GetAsset(string name)
+        public GameObject GetAsset(string name)
         {
             GameObject obj;
             return loaded_assets.TryGetValue(name, out obj) ? obj : null;

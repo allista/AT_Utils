@@ -9,7 +9,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections;
 using System.Reflection;
 using System.Linq;
 using UnityEngine;
@@ -232,6 +231,8 @@ namespace AT_Utils
             GUI.skin = skin;
         }
 
+        public static void Reset() => skin = null;
+
         static Dictionary<int, GUIStyle> frac_styles = new Dictionary<int, GUIStyle>();
         public static GUIStyle fracStyle(float frac)
         {
@@ -245,104 +246,7 @@ namespace AT_Utils
             return s;
         }
 
-        static GameObject colorListPrefab;
-        static ColorList colorList;
-        static Vector3 listPos = Vector3.zero;
-
-        static bool in_progress;
-        static public IEnumerator ShowUI()
-        {
-            if(in_progress || colorList != null)
-                yield break;
-            in_progress = true;
-            bool first_start = false;
-            if(colorListPrefab == null)
-            {
-                foreach(var _ in UIBundle.LoadAsset("ColorList"))
-                    yield return null;
-                colorListPrefab = UIBundle.GetAsset("ColorList");
-                if(colorListPrefab == null)
-                    goto end;
-                first_start = true;
-            }
-            var listObj = UnityEngine.Object.Instantiate(colorListPrefab);
-            colorList = listObj.GetComponent<ColorList>();
-            listObj.SetActive(false);
-            if(colorList == null)
-            {
-                Utils.Log("{} does not have ColorList component: {}",
-                          listObj, listObj.GetComponents<MonoBehaviour>());
-                UnityEngine.Object.Destroy(listObj);
-                goto end;
-            }
-            colorList.SetTitle("Color Scheme of AT Mods");
-            colorList.closeButton.onClick.AddListener(Close);
-            colorList.saveButton.onClick.AddListener(Save);
-            colorList.resetButton.onClick.AddListener(Reset);
-            colorList.restoreButton.onClick.AddListener(Restore);
-            listObj.transform.SetParent(DialogCanvasUtil.DialogCanvasRect);
-            listObj.SetActive(true);
-            if(first_start)
-            {
-                listObj.transform.localPosition = new Vector3(-Screen.width, 0);
-                Rect rect = new Rect();
-                while(rect.width.Equals(0))
-                {
-                    rect = (listObj.transform as RectTransform).rect;
-                    yield return null;
-                }
-                listPos = new Vector3(-rect.width / 2, rect.height / 2);
-            }
-            listObj.transform.localPosition = listPos;
-        end:
-            in_progress = false;
-        }
-
-        static void Close()
-        {
-            HideUI();
-            AT_UtilsGlobals.Load();
-            skin = null;
-        }
-
-        static void Reset()
-        {
-            Colors.SetDefaults();
-            skin = null;
-        }
-
-        static void Restore()
-        {
-            AT_UtilsGlobals.Restore();
-            skin = null;
-        }
-
-        static void Save()
-        {
-            AT_UtilsGlobals.Save("Colors");
-            skin = null;
-        }
-
-        static public void HideUI()
-        {
-            if(colorList != null)
-            {
-                listPos = colorList.transform.localPosition;
-                colorList.gameObject.SetActive(false);
-                UnityEngine.Object.Destroy(colorList.gameObject);
-                colorList = null;
-            }
-        }
-
-        static public bool IsUiShown() =>
-        !in_progress && colorList != null;
-
-        public static void ToggleStylesUI(this MonoBehaviour monoBehaviour)
-        {
-            if(IsUiShown())
-                HideUI();
-            else
-                monoBehaviour.StartCoroutine(ShowUI());
-        }
+        public static void ToggleStylesUI(this MonoBehaviour monoBehaviour) =>
+        ColorListWindow.Instance.Toggle(monoBehaviour);
     }
 }

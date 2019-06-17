@@ -3,11 +3,11 @@ using UnityEngine.EventSystems;
 
 namespace AT_Utils.UI
 {
-    public class DragableRect : MonoBehaviour, IPointerDownHandler, IDragHandler
+    public class DragableRect : MonoBehaviour, IBeginDragHandler, IDragHandler
     {
-        protected RectTransform parentTransform;
         protected RectTransform rectTransform;
-        protected Vector2 pointerOffset;
+        protected Vector3 pointerOffset;
+        protected Vector3 positionOffset;
 
         protected virtual void Awake()
         {
@@ -17,66 +17,73 @@ namespace AT_Utils.UI
         }
 
         //this event fires when a drag event begins
-        public virtual void OnPointerDown(PointerEventData data)
+        public virtual void OnBeginDrag(PointerEventData data)
         {
-            if(parentTransform == null)
-            {
-                parentTransform = rectTransform.parent as RectTransform;
-                if(parentTransform == null)
-                {
-                    enabled = false;
-                    return;
-                }
-            }
             rectTransform.SetAsLastSibling();
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, data.position, data.pressEventCamera, out pointerOffset);
+            positionOffset = rectTransform.position;
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTransform, data.position, data.pressEventCamera, out pointerOffset);
         }
 
         //this event fires while we're dragging. It's constantly moving the UI to a new position
         public virtual void OnDrag(PointerEventData data)
         {
-            Vector2 pointer;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(parentTransform, data.position, data.pressEventCamera, out pointer);
-            rectTransform.localPosition = pointer - pointerOffset;
+            Vector3 pointer;
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTransform, data.position, data.pressEventCamera, out pointer);
+            rectTransform.position = positionOffset + pointer - pointerOffset;
         }
     }
 
     public class ScreenBoundRect : DragableRect
     {
         bool screen_space;
-        protected Canvas canvas;
-
-        public override void OnPointerDown(PointerEventData data)
+        Canvas _canvas;
+        protected Canvas canvas
         {
-            base.OnPointerDown(data);
-            if(parentTransform != null && canvas == null)
+            get
             {
-                canvas = parentTransform.GetComponent<Canvas>();
-                if(canvas != null)
-                    screen_space = canvas.renderMode != RenderMode.WorldSpace;
+                if(_canvas == null)
+                {
+                    _canvas = GetComponentInParent<Canvas>();
+                    if(_canvas != null)
+                        screen_space = _canvas.renderMode != RenderMode.WorldSpace;
+                }
+                return _canvas;
             }
+        }
+
+        protected virtual void Start()
+        {
+            if(canvas != null && screen_space)
+                ClampToScreen(rectTransform, canvas);
+        }
+
+        public static void ClampToScreen(RectTransform rectTransform, Canvas canvas)
+        {
+            var screen_pos = RectTransformUtility.WorldToScreenPoint(canvas.worldCamera, rectTransform.position);
+            Vector3[] corners = new Vector3[4];
+            rectTransform.GetWorldCorners(corners);
+            var top_left = RectTransformUtility.WorldToScreenPoint(canvas.worldCamera, corners[1]);
+            var bottom_right = RectTransformUtility.WorldToScreenPoint(canvas.worldCamera, corners[3]);
+            var w = Screen.width;
+            var h = Screen.height;
+            if(top_left.x < 0)
+                screen_pos.x -= top_left.x;
+            else if(bottom_right.x > w)
+                screen_pos.x -= bottom_right.x - w;
+            if(top_left.y > h)
+                screen_pos.y -= top_left.y - h;
+            else if(bottom_right.y < 0)
+                screen_pos.y -= bottom_right.y;
+            Vector3 new_pos;
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvas.transform as RectTransform, screen_pos, canvas.worldCamera, out new_pos);
+            rectTransform.position = new_pos;
         }
 
         public override void OnDrag(PointerEventData data)
         {
             base.OnDrag(data);
-            if(screen_space)
-            {
-                var new_pos = rectTransform.position;
-                Vector3[] corners = new Vector3[4];
-                rectTransform.GetWorldCorners(corners);
-                var top_left = corners[1];
-                var bottom_right = corners[3];
-                if(top_left.x < -Screen.width / 2)
-                    new_pos.x -= top_left.x + Screen.width / 2;
-                else if(bottom_right.x > Screen.width / 2)
-                    new_pos.x -= bottom_right.x - Screen.width / 2;
-                if(top_left.y > Screen.height / 2)
-                    new_pos.y -= top_left.y - Screen.height / 2;
-                else if(bottom_right.y < -Screen.height / 2)
-                    new_pos.y -= bottom_right.y + Screen.height / 2;
-                rectTransform.position = new_pos;
-            }
+            if(canvas != null && screen_space)
+                ClampToScreen(rectTransform, canvas);
         }
     }
 }

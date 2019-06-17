@@ -146,10 +146,14 @@
     <Compile Include="GUI\Windows\PartSelector.cs" />
     <Compile Include="Addons\GlobalsEditor.cs" />
     <Compile Include="Addons\LineRenderers.cs" />
-    <Compile Include="GUI\UIBundle.cs" />
     <Compile Include="GUI\ToolbarWrapper.cs" />
     <Compile Include="GUI\AppToolbar.cs" />
     <Compile Include="Debugging\WorldSpaceTrace.cs" />
+    <Compile Include="UI\UIBundle.cs" />
+    <Compile Include="UI\UIWindowBase.cs" />
+    <Compile Include="UI\ColorListWindow.cs" />
+    <Compile Include="Configuration\PluginState.cs" />
+    <Compile Include="UI\TooltipWindow.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -165,6 +169,7 @@
     <Folder Include="GUI\Elements\" />
     <Folder Include="GUI\WindowsFramework\" />
     <Folder Include="Addons\" />
+    <Folder Include="UI\" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

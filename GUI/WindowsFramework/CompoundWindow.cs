@@ -62,7 +62,7 @@ namespace AT_Utils
     /// A compound window has a main anchored window and a list of anchored subwidnows 
     /// whose position is fixed relative to the anchor position of the main window.
     /// </summary>
-    public abstract class CompoundWindow : AnchoredWindow
+    public abstract class CompoundWindow : AnchoredWindow, IInitializable
     {
         protected List<AnchoredWindow> components = new List<AnchoredWindow>();
         protected Dictionary<AnchoredWindow, SubwindowSpec> specs = new Dictionary<AnchoredWindow, SubwindowSpec>();
@@ -111,9 +111,8 @@ namespace AT_Utils
                                    Mathf.Max(a.yMax, b.yMax));
         }
 
-        public override void LoadConfig()
+        public void InitState()
         {
-            base.LoadConfig();
             place_components();
         }
 

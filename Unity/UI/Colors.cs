@@ -138,6 +138,8 @@ namespace AT_Utils.UI
             }
         }
 
+        public Color Alpha(float a) => new Color(_color.r, _color.g, _color.b, a);
+
         public string Tag(string msg) =>
         string.Format(_tag, msg);
 

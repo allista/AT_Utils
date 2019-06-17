@@ -58,9 +58,11 @@
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -89,6 +91,13 @@
      <Compile Include="UI\Colorizers\GenericColorizer.cs" />
      <Compile Include="UI\Colorizers\ToggleColorizer.cs" />
      <Compile Include="UI\Colorizers\ColorizerBase.cs" />
+     <Compile Include="UI\TooltipTrigger.cs" />
+     <Compile Include="UI\TooltipView.cs" />
+     <Compile Include="UI\CommonEvents.cs" />
+     <Compile Include="UI\FloatController.cs" />
+     <Compile Include="UI\FormatUtils.cs" />
+     <Compile Include="UI\FloatValueUI.cs" />
+     <Compile Include="UI\Extensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
