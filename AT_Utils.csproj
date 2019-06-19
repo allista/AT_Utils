@@ -154,6 +154,7 @@
     <Compile Include="UI\ColorListWindow.cs" />
     <Compile Include="Configuration\PluginState.cs" />
     <Compile Include="UI\TooltipWindow.cs" />
+    <Compile Include="Addons\SpatialSensor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
