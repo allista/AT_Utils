@@ -114,6 +114,7 @@ namespace AT_Utils
                                                               Vector3 spawn_offset,
                                                               Vector3 dV,
                                                               Callback<ProtoVessel> on_proto_vessel_positioned = null,
+                                                              Callback<Vessel> on_vessel_positioned = null,
                                                               Callback<Vessel> on_vessel_loaded = null,
                                                               Callback<Vessel> on_vessel_off_rails = null,
                                                               Callback<Vessel> on_vessel_launched = null)
@@ -125,6 +126,7 @@ namespace AT_Utils
             launched_vessel = proto_vessel.vesselRef;
             launched_vessel.orbitDriver.updateMode = OrbitDriver.UpdateMode.TRACK_Phys;
             launched_vessel.skipGroundPositioning = true;
+            on_vessel_positioned?.Invoke(launched_vessel);
             foreach(var i in launch_moving_vessel(spawn_transform, 
                                                   spawn_offset, 
                                                   Quaternion.identity, 
