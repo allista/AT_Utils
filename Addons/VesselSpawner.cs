@@ -338,6 +338,7 @@ namespace AT_Utils
         {
             var vsl_colliders = new List<Collider>();
             disable_vsl_colliders(launched_vessel, vsl_colliders);
+            launched_vessel.IgnoreGForces(10);
             FlightCameraOverride.UpdateDurationSeconds(1);
             if(vessel.LandedOrSplashed)
             {
@@ -354,6 +355,7 @@ namespace AT_Utils
                     }
                     catch(Exception e)
                     { Utils.Log("Exception occured during launched_vessel.SetPosition/Rotation call. Ignoring it:\n{}", e.StackTrace); }
+                    launched_vessel.IgnoreGForces(10);
                     launched_vessel.GoOffRails();
                     yield return new WaitForFixedUpdate();
                 }
@@ -376,6 +378,7 @@ namespace AT_Utils
                     }
                     catch(Exception e)
                     { Utils.Log("Exception occured during launched_vessel.SetPosition/Rotation call. Ignoring it:\n{}", e.StackTrace); }
+                    launched_vessel.IgnoreGForces(10);
                     yield return new WaitForFixedUpdate();
                 }
                 if(launched_vessel == null) goto end;
