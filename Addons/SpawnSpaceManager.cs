@@ -5,7 +5,6 @@
 //
 //  Copyright (c) 2016 Allis Tauri
 
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace AT_Utils
@@ -19,37 +18,76 @@ namespace AT_Utils
         [Persistent] public bool AutoPositionVessel;
         [Persistent] public Vector3 SpawnOffset = Vector3.zero;
         [Persistent] public string SpawnTransform = string.Empty;
-        protected Transform spawn_transform;
+        protected Transform spawn_transform, spawn_transform_rotated;
 
         SpatialSensor Sensor;
         public bool SpawnSpaceEmpty => Sensor == null || Sensor.Empty;
 
         #region AutoRotation
-        static readonly Quaternion xyrot = Quaternion.Euler(0, 0, 90);
-        static readonly Quaternion xzrot = Quaternion.Euler(0, 90, 0);
-        static readonly Quaternion yzrot = Quaternion.Euler(90, 0, 0);
+        static readonly Quaternion xrot = Quaternion.Euler(90, 0, 0);
+        static readonly Quaternion yrot = Quaternion.Euler(0, 90, 0);
+        static readonly Quaternion zrot = Quaternion.Euler(0, 0, 90);
         static readonly Quaternion[,] swaps =
         {
-            {Quaternion.identity,     xyrot,                     xzrot},
-            {xyrot.Inverse(),         Quaternion.identity,     yzrot},
-            {xzrot.Inverse(),         yzrot.Inverse(),         Quaternion.identity}
+            {Quaternion.identity,     zrot,                     yrot},
+            {zrot.Inverse(),         Quaternion.identity,     xrot},
+            {yrot.Inverse(),         xrot.Inverse(),         Quaternion.identity}
         };
 
-        static List<KeyValuePair<float, int>> sort_vector(Vector3 v)
+        class SortedVector3
         {
-            var s = new List<KeyValuePair<float, int>>(3)
+            public float a, b, c;
+            public uint i0, i1, i2;
+
+            public uint this[int idx]
             {
-                new KeyValuePair<float, int>(v[0], 0),
-                new KeyValuePair<float, int>(v[1], 1),
-                new KeyValuePair<float, int>(v[2], 2)
-            };
-            s.Sort((x, y) => x.Key.CompareTo(y.Key));
-            return s;
+                get
+                {
+                    if(idx == 0) return i0;
+                    if(idx == 1) return i1;
+                    if(idx == 2) return i2;
+                    throw new System.ArgumentOutOfRangeException(nameof(idx));
+                }
+            }
+
+            void add(float d, uint i)
+            {
+                if(d > a)
+                {
+                    b = a;
+                    c = b;
+                    a = d;
+                    i2 = i1;
+                    i1 = i0;
+                    i0 = i;
+                }
+                else if(d > b)
+                {
+                    c = b;
+                    b = d;
+                    i2 = i1;
+                    i1 = i;
+                }
+                else
+                {
+                    c = d;
+                    i2 = i;
+                }
+            }
+
+            public SortedVector3(Vector3 vec)
+            {
+                a = vec.x;
+                b = c = float.NegativeInfinity;
+                add(vec.y, 1);
+                add(vec.z, 2);
+            }
         }
         #endregion
 
         public MeshFilter Space { get; protected set; }
         public Metric SpaceMetric { get; protected set; }
+        SortedVector3 spawn_space_sorted_size;
         public virtual bool Valid => !SpaceMetric.Empty && spawn_transform != null;
 
         public override void Load(ConfigNode node)
@@ -58,8 +96,6 @@ namespace AT_Utils
             //deprecated config conversion
             if(string.IsNullOrEmpty(SpawnSpace))
                 node.TryGetValue("HangarSpace", ref SpawnSpace);
-            if(AutoPositionVessel)
-                SpawnOffset = Vector3.zero;
         }
 
         public void SetMetric(Metric metric) => SpaceMetric = metric;
@@ -67,7 +103,10 @@ namespace AT_Utils
         public void UpdateMetric()
         {
             if(!string.IsNullOrEmpty(SpawnSpace))
+            {
                 SpaceMetric = new Metric(part, SpawnSpace, true);
+                spawn_space_sorted_size = new SortedVector3(SpaceMetric.size);
+            }
         }
 
         public void Init(Part part)
@@ -76,7 +115,7 @@ namespace AT_Utils
             if(!string.IsNullOrEmpty(SpawnSpace))
             {
                 Space = part.FindModelComponent<MeshFilter>(SpawnSpace);
-                if(Space != null) 
+                if(Space != null)
                 {
                     flip_mesh_if_needed(Space);
                     Space.gameObject.layer = 2; // IgnoreRaycast
@@ -88,21 +127,25 @@ namespace AT_Utils
             if(spawn_transform == null)
             {
                 var launch_empty = new GameObject("__SPAWN_TRANSFORM");
-                var parent = Space != null ? Space.transform : part.transform;
+                var parent = Space != null ? Space.transform : part.FindModelTransform("model");
                 launch_empty.transform.SetParent(parent, false);
                 spawn_transform = launch_empty.transform;
+                spawn_transform.localPosition = Vector3.zero;
+                spawn_transform.localRotation = Quaternion.identity;
             }
             if(AutoPositionVessel)
             {
-                var rot_empty = new GameObject("__AUTO_POS_SPAWN_TRANSFORM");
+                var rot_empty = new GameObject("__SPAWN_TRANSFORM_ROTATED");
                 rot_empty.transform.SetParent(spawn_transform, false);
-                spawn_transform = rot_empty.transform;
+                spawn_transform_rotated = rot_empty.transform;
+                spawn_transform_rotated.localPosition = Vector3.zero;
+                spawn_transform_rotated.localRotation = Quaternion.identity;
             }
         }
 
         public void SetupSensor()
         {
-            if(Space != null && Sensor == null) 
+            if(Space != null && Sensor == null)
                 Sensor = SpatialSensor.AddToMesh(Space, vessel);
         }
 
@@ -142,43 +185,50 @@ namespace AT_Utils
                 metric.FitsAligned(position, part.partTransform, SpaceMetric, offset);
         }
 
-        public Vector3 GetSpawnOffset(Metric metric) =>
-        GetSpawnOffset(metric.bounds);
-
-        public Vector3 GetSpawnOffset(Bounds local_bounds) =>
-        SpawnOffset.IsZero() ? 
-                   SpawnOffset :
-                   Vector3.Scale(local_bounds.extents, SpawnOffset);
-
-        public Vector3 GetSpawnOffset(Vector3 local_bounds_extents) =>
-        SpawnOffset.IsZero() ? 
-                   SpawnOffset :
-                   Vector3.Scale(local_bounds_extents, SpawnOffset);
-
-        public Transform GetSpawnTransform(Bounds bounds = default(Bounds)) =>
-        GetSpawnTransform(bounds.size);
-
-        public Transform GetSpawnTransform(Metric metric) =>
-        GetSpawnTransform(metric.size);
-
-        public Transform GetSpawnTransform(Vector3 size)
+        public Transform GetSpawnTransform()
         {
-            if(AutoPositionVessel && !size.IsZero())
+            Vector3 spawn_offset;
+            return GetSpawnTransform(Vector3.zero, out spawn_offset);
+        }
+
+        public Transform GetSpawnTransform(Bounds bounds, out Vector3 spawn_offset) =>
+        GetSpawnTransform(bounds.size, out spawn_offset);
+
+        public Transform GetSpawnTransform(Metric metric, out Vector3 spawn_offset) =>
+        GetSpawnTransform(metric.size, out spawn_offset);
+
+        public Transform GetSpawnTransform(Vector3 size, out Vector3 spawn_offset)
+        {
+            spawn_offset = Vector3.zero;
+            if(!size.IsZero())
             {
-                var s_size = sort_vector(SpaceMetric.size);
-                var v_size = sort_vector(size);
-                var r1 = swaps[s_size[0].Value, v_size[0].Value];
-                var i2 = s_size[0].Value == v_size[1].Value ? 2 : 1;
-                var r2 = swaps[s_size[i2].Value, v_size[i2].Value];
-                spawn_transform.localPosition = Vector3.zero;
-                spawn_transform.localRotation = Quaternion.identity;
-                spawn_transform.rotation = part.transform.rotation * r2 * r1;
+                if(AutoPositionVessel)
+                {
+                    var v_size = new SortedVector3(size);
+                    var r1 = swaps[spawn_space_sorted_size.i0, v_size.i0];
+                    var i2 = spawn_space_sorted_size.i0 == v_size.i1 ? 2 : 1;
+                    var r2 = swaps[spawn_space_sorted_size[i2], v_size[i2]];
+                    spawn_transform_rotated.localPosition = Vector3.zero;
+                    spawn_transform_rotated.rotation = part.partTransform.rotation * r2 * r1;
+                    if(!SpawnOffset.IsZero())
+                    {
+                        var sizeRot = (spawn_transform_rotated.localRotation * size).AbsComponents();
+                        spawn_offset = spawn_transform_rotated.localRotation.Inverse() * Vector3.Scale(sizeRot / 2, SpawnOffset);
+                    }
+                    return spawn_transform_rotated;
+                }
+                if(!SpawnOffset.IsZero())
+                    spawn_offset = Vector3.Scale(size / 2, SpawnOffset);
             }
             return spawn_transform;
         }
 
-        public bool MetricFits(Metric metric) =>
-        MetricFits(metric, GetSpawnTransform(metric), GetSpawnOffset(metric));
+        public bool MetricFits(Metric metric)
+        {
+            Vector3 spawn_offset;
+            var T = GetSpawnTransform(metric, out spawn_offset);
+            return MetricFits(metric, T, spawn_offset);
+        }
     }
 }
 
