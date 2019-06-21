@@ -386,10 +386,10 @@ namespace AT_Utils
                 launched_vessel.SetRotation(spawn_transform.rotation*spawn_rot_offset);
             }
             launched_vessel.situation = vessel.situation;
-            FlightGlobals.ForceSetActiveVessel(launched_vessel);
             on_vessel_off_rails?.Invoke(launched_vessel);
-            enable_vsl_colliders(vsl_colliders);
             launched_vessel.IgnoreGForces(10);
+            enable_vsl_colliders(vsl_colliders);
+            FlightGlobals.ForceSetActiveVessel(launched_vessel);
             foreach(var _ in push_and_spin_launched_vessel(spawn_transform.TransformDirection(dV)))
             {
                 yield return null;
