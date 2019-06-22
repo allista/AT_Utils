@@ -15,10 +15,11 @@ namespace AT_Utils
         protected Vessel vessel => part.vessel;
 
         [Persistent] public string SpawnSpace = string.Empty;
-        [Persistent] public bool AutoPositionVessel;
         [Persistent] public Vector3 SpawnOffset = Vector3.zero;
         [Persistent] public string SpawnTransform = string.Empty;
         protected Transform spawn_transform, spawn_transform_rotated;
+
+        [Persistent] public bool AutoPositionVessel;
 
         SpatialSensor Sensor;
         public bool SpawnSpaceEmpty => Sensor == null || Sensor.Empty;
@@ -133,14 +134,11 @@ namespace AT_Utils
                 spawn_transform.localPosition = Vector3.zero;
                 spawn_transform.localRotation = Quaternion.identity;
             }
-            if(AutoPositionVessel)
-            {
-                var rot_empty = new GameObject("__SPAWN_TRANSFORM_ROTATED");
-                rot_empty.transform.SetParent(spawn_transform, false);
-                spawn_transform_rotated = rot_empty.transform;
-                spawn_transform_rotated.localPosition = Vector3.zero;
-                spawn_transform_rotated.localRotation = Quaternion.identity;
-            }
+            var rot_empty = new GameObject("__SPAWN_TRANSFORM_ROTATED");
+            rot_empty.transform.SetParent(spawn_transform, false);
+            spawn_transform_rotated = rot_empty.transform;
+            spawn_transform_rotated.localPosition = Vector3.zero;
+            spawn_transform_rotated.localRotation = Quaternion.identity;
         }
 
         public void SetupSensor()
@@ -185,31 +183,43 @@ namespace AT_Utils
                 metric.FitsAligned(position, part.partTransform, SpaceMetric, offset);
         }
 
-        public Transform GetSpawnTransform()
+        public Transform GetSpawnTransform(Quaternion? additional_rotation = null)
         {
             Vector3 spawn_offset;
-            return GetSpawnTransform(Vector3.zero, out spawn_offset);
+            return GetSpawnTransform(Vector3.zero, out spawn_offset, additional_rotation);
         }
 
-        public Transform GetSpawnTransform(Bounds bounds, out Vector3 spawn_offset) =>
-        GetSpawnTransform(bounds.size, out spawn_offset);
+        public Transform GetSpawnTransform(Bounds bounds, out Vector3 spawn_offset, Quaternion? additional_rotation = null) =>
+        GetSpawnTransform(bounds.size, out spawn_offset, additional_rotation);
 
-        public Transform GetSpawnTransform(Metric metric, out Vector3 spawn_offset) =>
-        GetSpawnTransform(metric.size, out spawn_offset);
+        public Transform GetSpawnTransform(Metric metric, out Vector3 spawn_offset, Quaternion? additional_rotation = null) =>
+        GetSpawnTransform(metric.size, out spawn_offset, additional_rotation);
 
-        public Transform GetSpawnTransform(Vector3 size, out Vector3 spawn_offset)
+        public Transform GetSpawnTransform(Vector3 size, out Vector3 spawn_offset, Quaternion? additional_rotation = null)
         {
             spawn_offset = Vector3.zero;
             if(!size.IsZero())
             {
+                Quaternion? rotation = null;
                 if(AutoPositionVessel)
                 {
                     var v_size = new SortedVector3(size);
                     var r1 = swaps[spawn_space_sorted_size.i0, v_size.i0];
                     var i2 = spawn_space_sorted_size.i0 == v_size.i1 ? 2 : 1;
                     var r2 = swaps[spawn_space_sorted_size[i2], v_size[i2]];
+                    rotation = r2 * r1;
+                }
+                if(additional_rotation != null)
+                {
+                    if(rotation != null)
+                        rotation = additional_rotation * rotation;
+                    else
+                        rotation = additional_rotation;
+                }
+                if(rotation != null)
+                {
                     spawn_transform_rotated.localPosition = Vector3.zero;
-                    spawn_transform_rotated.rotation = part.partTransform.rotation * r2 * r1;
+                    spawn_transform_rotated.rotation = part.partTransform.rotation * (Quaternion)rotation;
                     if(!SpawnOffset.IsZero())
                     {
                         var sizeRot = (spawn_transform_rotated.localRotation * size).AbsComponents();
@@ -223,10 +233,10 @@ namespace AT_Utils
             return spawn_transform;
         }
 
-        public bool MetricFits(Metric metric)
+        public bool MetricFits(Metric metric, Quaternion? additional_rotation = null)
         {
             Vector3 spawn_offset;
-            var T = GetSpawnTransform(metric, out spawn_offset);
+            var T = GetSpawnTransform(metric, out spawn_offset, additional_rotation);
             return MetricFits(metric, T, spawn_offset);
         }
     }
