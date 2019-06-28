@@ -200,12 +200,13 @@ namespace AT_Utils
             {
                 if(rotation != null)
                 {
+                    var localRotation = (Quaternion)rotation;
                     spawn_transform_rotated.localPosition = Vector3.zero;
-                    spawn_transform_rotated.localRotation = (Quaternion)rotation;
+                    spawn_transform_rotated.localRotation = localRotation;
                     if(!SpawnOffset.IsZero())
                     {
-                        var sizeRot = (spawn_transform_rotated.localRotation * size).AbsComponents();
-                        spawn_offset = spawn_transform_rotated.localRotation.Inverse() * Vector3.Scale(sizeRot / 2, SpawnOffset);
+                        var sizeRot = (localRotation * size).AbsComponents();
+                        spawn_offset = localRotation.Inverse() * Vector3.Scale(sizeRot / 2, SpawnOffset);
                     }
                     return spawn_transform_rotated;
                 }
