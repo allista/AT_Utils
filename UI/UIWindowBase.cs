@@ -46,7 +46,7 @@ namespace AT_Utils
                 if(prefab == null)
                     goto end;
             }
-            var obj = Object.Instantiate(prefab);
+            var obj = Object.Instantiate(prefab, DialogCanvasUtil.DialogCanvasRect);
             Controller = obj.GetComponent<T>();
             obj.SetActive(false);
             if(Controller == null)
@@ -56,7 +56,6 @@ namespace AT_Utils
                 Object.Destroy(obj);
                 goto end;
             }
-            obj.transform.SetParent(DialogCanvasUtil.DialogCanvasRect);
             init_controller();
             obj.SetActive(true);
             if(!initialized)
@@ -96,8 +95,9 @@ namespace AT_Utils
             if(Controller != null)
             {
                 pos = Controller.transform.localPosition;
-                Controller.gameObject.SetActive(false);
-                Object.Destroy(Controller.gameObject);
+                GameObject gameObject;
+                (gameObject = Controller.gameObject).SetActive(false);
+                Object.Destroy(gameObject);
                 Controller = null;
             }
         }
