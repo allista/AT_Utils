@@ -46,6 +46,8 @@ namespace AT_Utils.UI
 
         public void UpdateColor()
         {
+            if(toggle == null)
+                return;
             changeColor(toggle.isOn
                         ? Colors.Enabled
                         : (toggle.interactable
