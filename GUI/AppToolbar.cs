@@ -11,9 +11,9 @@ using KSP.UI.Screens;
 namespace AT_Utils
 {
     /// <summary>
-    /// Toolbar manager is needed becaus in KSP-1.0+ the ApplicationLauncher
+    /// Toolbar manager is needed because in KSP-1.0+ the ApplicationLauncher
     /// works differently: it only fires OnReady event at MainMenu and the first
-    /// time the Spacecenter is loaded. Thus we need to register the AppButton only
+    /// time the Space Сenter is loaded. Thus we need to register the AppButton only
     /// once and then just hide and show it using VisibleScenes, not removing it.
     /// IMHO, this is a bug in the RemoveModApplication method, cause if you use
     /// Add/RemoveModApp repeatedly, the buttons are duplicated each time.
