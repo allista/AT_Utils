@@ -342,9 +342,8 @@ namespace AT_Utils
             FlightCameraOverride.UpdateDurationSeconds(1);
             if(vessel.LandedOrSplashed)
             {
-                while(launched_vessel.packed)
+                while(launched_vessel != null && launched_vessel.packed)
                 {
-                    if(launched_vessel == null) goto end;
                     launched_vessel.situation = Vessel.Situations.PRELAUNCH;
                     run_on_vessel_loaded(on_vessel_loaded);
                     FlightCameraOverride.UpdateDurationSeconds(1);
@@ -365,10 +364,8 @@ namespace AT_Utils
             }
             else
             {
-                //hold the vessel inside the hangar until unpacked
-                while(launched_vessel.packed)
+                while(launched_vessel != null && launched_vessel.packed)
                 {
-                    if(launched_vessel == null) goto end;
                     run_on_vessel_loaded(on_vessel_loaded);
                     FlightCameraOverride.UpdateDurationSeconds(1);
                     try
