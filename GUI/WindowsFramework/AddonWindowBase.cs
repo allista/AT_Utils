@@ -80,7 +80,7 @@ namespace AT_Utils
             base.OnDestroy();
         }
 
-        void onGameStateSave(ConfigNode node) { Instance.SaveState(); }
+        void onGameStateSave(ConfigNode node) { if(Instance != null) Instance.SaveState(); }
 
         protected abstract void draw_gui();
 
