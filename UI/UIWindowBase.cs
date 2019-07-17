@@ -87,6 +87,7 @@ namespace AT_Utils
         {
             if(Controller != null)
             {
+                this.SaveState();
                 pos = Controller.transform.localPosition;
                 GameObject gameObject;
                 (gameObject = Controller.gameObject).SetActive(false);
