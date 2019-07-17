@@ -49,7 +49,7 @@ namespace AT_Utils
             //setup toolbar/applauncher button
             if(!ForceAppLauncher && ToolbarManager.ToolbarAvailable)
             {
-                Utils.Log("Using Blizzy's toolbar");
+                Utils.Log("[{}] Using Blizzy's toolbar", GetType().Name);
                 if(TBButton == null)
                     AddToolbarButton();
                 if(ALButton != null)
@@ -57,7 +57,7 @@ namespace AT_Utils
             }
             else
             {
-                Utils.Log("Using stock AppLauncher");
+                Utils.Log("[{}] Using stock AppLauncher", GetType().Name);
                 if(ALButton == null)
                 {
                     if(HighLogic.CurrentGame != null && ApplicationLauncher.Ready)
@@ -83,7 +83,7 @@ namespace AT_Utils
         {
             if(ALButton == null && ApplicationLauncher.Ready)
             {
-                Utils.Log("Adding AppLauncher button");
+                Utils.Log("[{}] Adding AppLauncher button", GetType().Name);
                 ALButton = ApplicationLauncher.Instance.AddModApplication(
                     onALTrue, onALFalse,
                     onALHover, onALHoverOut,
