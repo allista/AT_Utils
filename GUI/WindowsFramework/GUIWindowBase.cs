@@ -42,6 +42,8 @@ namespace AT_Utils
             foreach(var sw in subwindow_fields)
             {
                 var obj = gameObject.AddComponent(sw.FieldType) as GUIWindowBase;
+                if(obj == null)
+                    continue;
                 sw.SetValue(this, obj);
                 subwindows.Add(obj);
                 obj.parent_window = this;
