@@ -60,17 +60,10 @@ namespace AT_Utils
             obj.SetActive(true);
             if(!initialized)
             {
-                obj.transform.localPosition = new Vector3(-Screen.width, 0);
-                Rect rect;
-                while(true)
-                {
-                    rect = ((RectTransform)obj.transform).rect;
-                    if(rect.width.Equals(0))
-                        yield return null;
-                    else
-                        break;
-                }
-                pos = new Vector3(-rect.width / 2, rect.height / 2);
+                var rectT = (RectTransform)obj.transform;
+                var rect = rectT.rect;
+                var pivot = rectT.pivot;
+                pos = new Vector3(-rect.width * pivot.x, rect.height * pivot.y);
                 initialized = true;
             }
             obj.transform.localPosition = pos;
