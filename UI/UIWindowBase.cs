@@ -80,7 +80,7 @@ namespace AT_Utils
 
         public void Show(MonoBehaviour monoBehaviour)
         {
-            if(!in_progress)
+            if(!in_progress && monoBehaviour != null)
                 monoBehaviour.StartCoroutine(Show());
         }
 
