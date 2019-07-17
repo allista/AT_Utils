@@ -14,9 +14,9 @@ namespace AT_Utils
 {
     public class UIBundle
     {
-        readonly string BUNDLE = "";
+        readonly string BUNDLE;
         BundleDefinition bundle_def;
-        Dictionary<string,GameObject> loaded_assets = new Dictionary<string, GameObject>();
+        readonly Dictionary<string,GameObject> loaded_assets = new Dictionary<string, GameObject>();
 
         public UIBundle(string bundle_path)
         {
@@ -64,10 +64,7 @@ namespace AT_Utils
             }
         }
 
-        public GameObject GetAsset(string name)
-        {
-            GameObject obj;
-            return loaded_assets.TryGetValue(name, out obj) ? obj : null;
-        }
+        public GameObject GetAsset(string name) => 
+            loaded_assets.TryGetValue(name, out var obj) ? obj : null;
     }
 }

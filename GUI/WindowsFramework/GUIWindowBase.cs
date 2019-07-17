@@ -29,7 +29,7 @@ namespace AT_Utils
         }
 
         #region Subwindows
-        protected List<FieldInfo> subwindow_fields;
+        private List<FieldInfo> subwindow_fields;
         protected List<GUIWindowBase> subwindows;
         private GUIWindowBase parent_window;
 

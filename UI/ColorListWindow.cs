@@ -22,7 +22,7 @@ namespace AT_Utils
             Controller.restoreButton.onClick.AddListener(OnRestore);
         }
 
-        public ColorListWindow(): base(AT_UtilsGlobals.Instance.AssetBundle) { }
+        private ColorListWindow(): base(AT_UtilsGlobals.Instance.AssetBundle) { }
 
         void OnClose()
         {

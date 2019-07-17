@@ -4,6 +4,7 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2019 Allis Tauri
+
 using UnityEngine;
 using System.Collections;
 
@@ -19,11 +20,9 @@ namespace AT_Utils
 
         public T Controller { get; private set; }
 
-        [ConfigOption]
-        protected Vector3 pos = Vector3.zero;
+        [ConfigOption] protected Vector3 pos = Vector3.zero;
 
-        [ConfigOption]
-        protected bool initialized;
+        [ConfigOption] protected bool initialized;
 
         protected UIWindowBase(UIBundle bundle)
         {
@@ -33,6 +32,7 @@ namespace AT_Utils
         protected abstract void init_controller();
 
         bool in_progress;
+
         public IEnumerator Show()
         {
             if(in_progress || Controller != null)
@@ -52,7 +52,9 @@ namespace AT_Utils
             if(Controller == null)
             {
                 Utils.Log("{} does not have {} component: {}",
-                          obj, typeof(T).Name, obj.GetComponents<MonoBehaviour>());
+                    obj,
+                    typeof(T).Name,
+                    obj.GetComponents<MonoBehaviour>());
                 Object.Destroy(obj);
                 goto end;
             }
@@ -67,7 +69,7 @@ namespace AT_Utils
                 initialized = true;
             }
             obj.transform.localPosition = pos;
-        end:
+            end:
             in_progress = false;
         }
 
@@ -96,8 +98,7 @@ namespace AT_Utils
             }
         }
 
-        public bool IsShown =>
-        !in_progress && Controller != null;
+        public bool IsShown => !in_progress && Controller != null;
 
         public void Toggle(MonoBehaviour monoBehaviour)
         {

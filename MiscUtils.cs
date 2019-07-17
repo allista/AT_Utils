@@ -283,7 +283,7 @@ namespace AT_Utils
 #if DEBUG
             UnityEngine.Debug.Log(stack);
 #endif
-            return string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", mod_name, DateTime.Now, msg);
+            return $"[{mod_name}: {DateTime.Now:HH:mm:ss.fff}] {msg}";
         }
 
         static readonly Regex log_re = new Regex("[Ll]og");

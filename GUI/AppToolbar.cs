@@ -90,7 +90,7 @@ namespace AT_Utils
                     onALEnable, onALDisable,
                     AL_SCENES,
                     TextureCache.GetTexture(AL_ICON));
-                ALButton.onRightClick = onRightClick;
+                ALButton.onRightClick += onRightClick;
                 on_app_launcher_init();
             }
         }
