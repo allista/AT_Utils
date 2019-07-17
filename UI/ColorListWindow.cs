@@ -10,16 +10,8 @@ namespace AT_Utils
 {
     public class ColorListWindow : UIWindowBase<ColorList>
     {
-        static ColorListWindow instance;
-        public static ColorListWindow Instance
-        {
-            get
-            {
-                if(instance == null) 
-                    instance = new ColorListWindow();
-                return Instance;
-            }
-        }
+        private static ColorListWindow instance;
+        public static ColorListWindow Instance => instance ?? (instance = new ColorListWindow());
 
         protected override void init_controller()
         {
