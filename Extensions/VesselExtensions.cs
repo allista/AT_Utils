@@ -3,44 +3,39 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace AT_Utils {
+namespace AT_Utils
+{
     public static class VesselExtensions
     {
         public static void Log(this Vessel v, string msg, params object[] args) =>
-            Utils.Log(string.Format("{0}: {1}", v.GetID(), msg), args);
+            Utils.Log($"{v.GetID()}: {msg}", args);
 
-        public static Part GetPart<T>(this Vessel v) where T : PartModule
-        { return v.parts.FirstOrDefault(p => PartExtensions.HasModule<T>(p)); }
+        public static bool InOrbit(this Vessel v) =>
+            !v.LandedOrSplashed
+            && (v.situation == Vessel.Situations.ORBITING
+                || v.situation == Vessel.Situations.SUB_ORBITAL
+                || v.situation == Vessel.Situations.ESCAPING);
 
-        public static bool PartsStarted(this Vessel v)
-        { return v.parts.TrueForAll(p => p.started); }
-
-        public static bool InOrbit(this Vessel v)
-        {
-            return !v.LandedOrSplashed &&
-                   (v.situation == Vessel.Situations.ORBITING ||
-                    v.situation == Vessel.Situations.SUB_ORBITAL ||
-                    v.situation == Vessel.Situations.ESCAPING);
-        }
-
-        public static bool OnPlanet(this Vessel v)
-        {
-            return v.LandedOrSplashed ||
-                   v.situation != Vessel.Situations.ORBITING &&
-                   v.situation != Vessel.Situations.ESCAPING ||
-                   v.orbit.PeR < v.orbit.MinPeR();
-        }
+        public static bool OnPlanet(this Vessel v) =>
+            v.LandedOrSplashed
+            || v.situation != Vessel.Situations.ORBITING
+            && v.situation != Vessel.Situations.ESCAPING
+            || v.orbit.PeR < v.orbit.MinPeR();
 
         public static bool HasLaunchClamp(this IShipconstruct ship)
         {
             foreach(Part p in ship.Parts)
-            { if(p.HasModule<LaunchClamp>()) return true; }
+            {
+                if(p.HasModule<LaunchClamp>())
+                    return true;
+            }
             return false;
         }
 
         public static void Unload(this ShipConstruct construct)
         {
-            if(construct == null) return;
+            if(construct == null)
+                return;
             for(int i = 0, count = construct.Parts.Count; i < count; i++)
             {
                 Part p = construct.Parts[i];
@@ -74,7 +69,8 @@ namespace AT_Utils {
                 var verts = Utils.BoundCorners(rend.bounds);
                 for(int j = 0, len = verts.Length; j < len; j++)
                 {
-                    var v = p.partTransform.position + part_rot * (verts[j] - p.partTransform.position);
+                    var v = p.partTransform.position
+                            + part_rot * (verts[j] - p.partTransform.position);
                     if(refT != null)
                         v = refT.InverseTransformPoint(v);
                     if(inited)
@@ -124,13 +120,21 @@ namespace AT_Utils {
                 for(int j = 0, enginesCount = engines.Count; j < enginesCount; j++)
                 {
                     var e = engines[j];
-                    if(!e.exhaustDamage) continue;
+                    if(!e.exhaustDamage)
+                        continue;
                     for(int k = 0, tCount = e.thrustTransforms.Count; k < tCount; k++)
                     {
                         var t = e.thrustTransforms[k];
-                        var term = refT.InverseTransformDirection(t.position + t.forward * e.exhaustDamageMaxRange - CoM);
-                        if(inited) b.Encapsulate(term);
-                        else { b = new Bounds(term, Vector3.zero); inited = true; }
+                        var term =
+                            refT.InverseTransformDirection(
+                                t.position + t.forward * e.exhaustDamageMaxRange - CoM);
+                        if(inited)
+                            b.Encapsulate(term);
+                        else
+                        {
+                            b = new Bounds(term, Vector3.zero);
+                            inited = true;
+                        }
                     }
                 }
             }

@@ -1,6 +1,7 @@
 using UnityEngine;
 
-namespace AT_Utils {
+namespace AT_Utils
+{
     public static class MiscExtensions
     {
         public static Color Normalized(this Color c)
@@ -37,8 +38,9 @@ namespace AT_Utils {
         #endregion
 
         #region ConfigNode
-        public static void AddRect(this ConfigNode n, string name, Rect r)
-        { n.AddValue(name, ConfigNode.WriteQuaternion(new Quaternion(r.x, r.y, r.width, r.height))); }
+        public static void AddRect(this ConfigNode n, string name, Rect r) =>
+            n.AddValue(name,
+                ConfigNode.WriteQuaternion(new Quaternion(r.x, r.y, r.width, r.height)));
 
         public static Rect GetRect(this ConfigNode n, string name)
         {
@@ -47,7 +49,10 @@ namespace AT_Utils {
                 var q = ConfigNode.ParseQuaternion(n.GetValue(name));
                 return new Rect(q.x, q.y, q.z, q.w);
             }
-            catch { return default(Rect); }
+            catch
+            {
+                return default(Rect);
+            }
         }
         #endregion
     }

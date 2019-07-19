@@ -3,20 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace AT_Utils {
+namespace AT_Utils
+{
     public static class PartExtensions
     {
         #region from MechJeb2 PartExtensions
-        public static bool HasModule<T>(this Part p) where T : PartModule
-        { return p.Modules.GetModule<T>() != null; }
+        public static bool HasModule<T>(this Part p) where T : PartModule =>
+            p.Modules.GetModule<T>() != null;
 
-        public static float TotalMass(this Part p) { return p.mass + p.GetResourceMass(); }
+        public static float TotalMass(this Part p) => p.mass + p.GetResourceMass();
         #endregion
 
         #region Find Modules or Parts
-        public static Part RootPart(this Part p)
-        { return p.parent == null ? p : p.parent.RootPart(); }
-
         public static List<Part> AllChildren(this Part p)
         {
             var all_children = new List<Part> { };
@@ -30,7 +28,8 @@ namespace AT_Utils {
 
         public static List<Part> AllConnectedParts(this Part p)
         {
-            if(p.parent != null) return p.parent.AllConnectedParts();
+            if(p.parent != null)
+                return p.parent.AllConnectedParts();
             var all_parts = new List<Part> { p };
             all_parts.AddRange(p.AllChildren());
             return all_parts;
@@ -38,35 +37,55 @@ namespace AT_Utils {
 
         public static Part AttachedPartWithModule<T>(this Part p) where T : PartModule
         {
-            if(p.parent != null && p.parent.HasModule<T>()) return p.parent;
-            foreach(var c in p.children) { if(c.HasModule<T>()) return c; }
+            if(p.parent != null && p.parent.HasModule<T>())
+                return p.parent;
+            foreach(var c in p.children)
+            {
+                if(c.HasModule<T>())
+                    return c;
+            }
             return null;
         }
 
         public static T GetModuleInAttachedPart<T>(this Part p) where T : PartModule
         {
-            if(p.parent != null) { var m = p.parent.Modules.GetModule<T>(); if(m != null) return m; }
-            foreach(var c in p.children) { var m = c.Modules.GetModule<T>(); if(m != null) return m; }
+            if(p.parent != null)
+            {
+                var m = p.parent.Modules.GetModule<T>();
+                if(m != null)
+                    return m;
+            }
+            foreach(var c in p.children)
+            {
+                var m = c.Modules.GetModule<T>();
+                if(m != null)
+                    return m;
+            }
             return null;
         }
 
-        public static List<ModuleT> AllModulesOfType<ModuleT>(this Part part, ModuleT exception = null)
+        public static List<ModuleT> AllModulesOfType<ModuleT>(
+            this Part part,
+            ModuleT exception = null
+        )
             where ModuleT : PartModule
         {
             var passages = new List<ModuleT>();
             foreach(Part p in part.AllConnectedParts())
-                passages.AddRange(from m in p.Modules.OfType<ModuleT>()
+                passages.AddRange(
+                    from m in p.Modules.OfType<ModuleT>()
                     where exception == null || m != exception
                     select m);
             return passages;
         }
 
-        public static ResourcePump CreateSocket(this Part p)
-        { return new ResourcePump(p, Utils.ElectricCharge.id); }
+        public static ResourcePump CreateSocket(this Part p) =>
+            new ResourcePump(p, Utils.ElectricCharge.id);
         #endregion
 
         #region Resources and Phys-Props
-        public static float TotalCost(this Part p) { return p.partInfo != null ? p.partInfo.cost + p.GetModuleCosts(p.partInfo.cost) : 0; }
+        public static float TotalCost(this Part p) =>
+            p.partInfo != null ? p.partInfo.cost + p.GetModuleCosts(p.partInfo.cost) : 0;
 
         public static float ResourcesCost(this Part p)
         {
@@ -82,7 +101,7 @@ namespace AT_Utils {
             return (float)cost;
         }
 
-        public static float DryCost(this Part p) { return p.TotalCost() - p.MaxResourcesCost(); }
+        public static float DryCost(this Part p) => p.TotalCost() - p.MaxResourcesCost();
 
         public static float MassWithChildren(this Part p)
         {
@@ -99,9 +118,11 @@ namespace AT_Utils {
             foreach(Part part in p.AllConnectedParts())
             {
                 var cp = part as CompoundPart;
-                if(cp == null) continue;
+                if(cp == null)
+                    continue;
                 var cpm = cp.Modules.GetModule<CompoundParts.CompoundPartModule>();
-                if(cpm == null) continue;
+                if(cpm == null)
+                    continue;
                 cpm.OnTargetLost();
             }
         }
@@ -112,8 +133,9 @@ namespace AT_Utils {
         public static Vector3 AttachNodeDeltaPos(this Part part, AttachNode node)
         {
             var an = node.attachedPart.FindAttachNodeByPart(part);
-            return an != null ? (part.partTransform.TransformPoint(node.position)
-                                 - node.attachedPart.partTransform.TransformPoint(an.position))
+            return an != null
+                ? (part.partTransform.TransformPoint(node.position)
+                   - node.attachedPart.partTransform.TransformPoint(an.position))
                 : Vector3.zero;
         }
 
@@ -135,7 +157,11 @@ namespace AT_Utils {
                 part.UpdateAttachedPartPosEditor(attached_part, delta);
         }
 
-        public static void UpdateAttachedPartPosEditor(this Part part, Part attached_part, Vector3 delta)
+        public static void UpdateAttachedPartPosEditor(
+            this Part part,
+            Part attached_part,
+            Vector3 delta
+        )
         {
             if(attached_part == part.parent)
             {
@@ -155,6 +181,7 @@ namespace AT_Utils {
         {
             public readonly Part part;
             public readonly bool has_part_joint;
+
             public PartJoinRecreate(Part part)
             {
                 this.part = part;
@@ -173,7 +200,11 @@ namespace AT_Utils {
             }
         }
 
-        public static void UpdateAttachedPartPosFlight(this Part part, Part attached_part, Vector3 delta)
+        public static void UpdateAttachedPartPosFlight(
+            this Part part,
+            Part attached_part,
+            Vector3 delta
+        )
         {
             if(part.vessel != null && attached_part.vessel == part.vessel)
             {
@@ -183,7 +214,8 @@ namespace AT_Utils {
                     {
                         part.partTransform.position -= delta;
                         part.UpdateOrgPos(part.vessel.rootPart);
-                        part.partTransform.rotation = part.vessel.vesselTransform.rotation * part.orgRot;
+                        part.partTransform.rotation =
+                            part.vessel.vesselTransform.rotation * part.orgRot;
                     }
                 }
                 else if(attached_part.parent == part)
@@ -221,8 +253,8 @@ namespace AT_Utils {
                 }
                 if(part.vessel.situation == Vessel.Situations.DOCKED)
                     _state |= PartModule.StartState.Docked;
-                if(part.vessel.situation == Vessel.Situations.ORBITING ||
-                   part.vessel.situation == Vessel.Situations.ESCAPING)
+                if(part.vessel.situation == Vessel.Situations.ORBITING
+                   || part.vessel.situation == Vessel.Situations.ESCAPING)
                     _state |= PartModule.StartState.Orbital;
                 if(part.vessel.situation == Vessel.Situations.SUB_ORBITAL)
                     _state |= PartModule.StartState.SubOrbital;

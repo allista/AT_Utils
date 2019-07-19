@@ -1,64 +1,63 @@
 using System;
 using UnityEngine;
 
-namespace AT_Utils {
+namespace AT_Utils
+{
     public static class VectorExtensions
     {
-        public static bool IsNaN(this Vector3d v)
-        { return double.IsNaN(v.x) || double.IsNaN(v.y) || double.IsNaN(v.z); }
+        public static bool IsNaN(this Vector3d v) =>
+            double.IsNaN(v.x) || double.IsNaN(v.y) || double.IsNaN(v.z);
 
-        public static bool IsNaN(this Vector3 v)
-        { return float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z); }
+        public static bool IsNaN(this Vector3 v) =>
+            float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 
-        public static bool IsInf(this Vector3d v)
-        { return double.IsInfinity(v.x) || double.IsInfinity(v.y) || double.IsInfinity(v.z); }
+        public static bool IsInf(this Vector3d v) =>
+            double.IsInfinity(v.x) || double.IsInfinity(v.y) || double.IsInfinity(v.z);
 
-        public static bool IsInf(this Vector3 v)
-        { return float.IsInfinity(v.x) || float.IsInfinity(v.y) || float.IsInfinity(v.z); }
+        public static bool IsInf(this Vector3 v) =>
+            float.IsInfinity(v.x) || float.IsInfinity(v.y) || float.IsInfinity(v.z);
 
-        public static bool Invalid(this Vector3d v) { return v.IsNaN() || v.IsInf(); }
+        public static bool Invalid(this Vector3d v) => v.IsNaN() || v.IsInf();
 
-        public static bool Invalid(this Vector3 v) { return v.IsNaN() || v.IsInf(); }
+        public static bool Invalid(this Vector3 v) => v.IsNaN() || v.IsInf();
 
         public static Vector3 CubeNorm(this Vector3 v)
         {
-            if(v.IsZero()) return v;
+            if(v.IsZero())
+                return v;
             var max = -1f;
             for(int i = 0; i < 3; i++)
             {
                 var ai = Mathf.Abs(v[i]);
-                if(max < ai) max = ai;
+                if(max < ai)
+                    max = ai;
             }
             return v / max;
         }
 
         public static Vector3d CubeNorm(this Vector3d v)
         {
-            if(v.IsZero()) return v;
+            if(v.IsZero())
+                return v;
             var max = -1.0;
             for(int i = 0; i < 3; i++)
             {
                 var ai = Math.Abs(v[i]);
-                if(max < ai) max = ai;
+                if(max < ai)
+                    max = ai;
             }
             return v / max;
         }
 
-        public static Vector3 Inverse(this Vector3 v, float inf = float.MaxValue)
-        {
-            return new Vector3(
-                v.x.Equals(0) ? inf : 1 / v.x,
+        public static Vector3 Inverse(this Vector3 v, float inf = float.MaxValue) =>
+            new Vector3(v.x.Equals(0) ? inf : 1 / v.x,
                 v.y.Equals(0) ? inf : 1 / v.y,
                 v.z.Equals(0) ? inf : 1 / v.z);
-        }
 
-        public static Vector3d Inverse(this Vector3d v, double inf = double.MaxValue)
-        {
-            return new Vector3d(
-                v.x.Equals(0) ? inf : 1 / v.x,
+        public static Vector3d Inverse(this Vector3d v, double inf = double.MaxValue) =>
+            new Vector3d(v.x.Equals(0) ? inf : 1 / v.x,
                 v.y.Equals(0) ? inf : 1 / v.y,
                 v.z.Equals(0) ? inf : 1 / v.z);
-        }
 
         public static Vector3 ScaleChain(this Vector3 vec, params Vector3[] vectors)
         {
@@ -86,114 +85,89 @@ namespace AT_Utils {
             return result;
         }
 
-        public static Vector3 SquaredComponents(this Vector3 v)
-        { return new Vector3(v.x * v.x, v.y * v.y, v.z * v.z); }
+        public static Vector3 SquaredComponents(this Vector3 v) =>
+            new Vector3(v.x * v.x, v.y * v.y, v.z * v.z);
 
-        public static Vector3d SquaredComponents(this Vector3d v)
-        { return new Vector3d(v.x * v.x, v.y * v.y, v.z * v.z); }
+        public static Vector3d SquaredComponents(this Vector3d v) =>
+            new Vector3d(v.x * v.x, v.y * v.y, v.z * v.z);
 
-        public static Vector3 SqrtComponents(this Vector3 v)
-        { return new Vector3(Mathf.Sqrt(v.x), Mathf.Sqrt(v.y), Mathf.Sqrt(v.z)); }
+        public static Vector3 SqrtComponents(this Vector3 v) =>
+            new Vector3(Mathf.Sqrt(v.x), Mathf.Sqrt(v.y), Mathf.Sqrt(v.z));
 
-        public static Vector3d SqrtComponents(this Vector3d v)
-        { return new Vector3d(Math.Sqrt(v.x), Math.Sqrt(v.y), Math.Sqrt(v.z)); }
+        public static Vector3d SqrtComponents(this Vector3d v) =>
+            new Vector3d(Math.Sqrt(v.x), Math.Sqrt(v.y), Math.Sqrt(v.z));
 
-        public static Vector3 PowComponents(this Vector3 v, float pow)
-        { return new Vector3(Mathf.Pow(v.x, pow), Mathf.Pow(v.y, pow), Mathf.Pow(v.z, pow)); }
+        public static Vector3 PowComponents(this Vector3 v, float pow) =>
+            new Vector3(Mathf.Pow(v.x, pow), Mathf.Pow(v.y, pow), Mathf.Pow(v.z, pow));
 
-        public static Vector3d PowComponents(this Vector3d v, double pow)
-        { return new Vector3d(Math.Pow(v.x, pow), Math.Pow(v.y, pow), Math.Pow(v.z, pow)); }
+        public static Vector3d PowComponents(this Vector3d v, double pow) =>
+            new Vector3d(Math.Pow(v.x, pow), Math.Pow(v.y, pow), Math.Pow(v.z, pow));
 
-        public static Vector3 ClampComponents(this Vector3 v, float min, float max)
-        {
-            return new Vector3(Mathf.Clamp(v.x, min, max),
+        public static Vector3 ClampComponents(this Vector3 v, float min, float max) =>
+            new Vector3(Mathf.Clamp(v.x, min, max),
                 Mathf.Clamp(v.y, min, max),
                 Mathf.Clamp(v.z, min, max));
-        }
 
-        public static Vector3 ClampComponents(this Vector3 v, Vector3 min, Vector3 max)
-        {
-            return new Vector3(Mathf.Clamp(v.x, min.x, max.x),
+        public static Vector3 ClampComponents(this Vector3 v, Vector3 min, Vector3 max) =>
+            new Vector3(Mathf.Clamp(v.x, min.x, max.x),
                 Mathf.Clamp(v.y, min.y, max.y),
                 Mathf.Clamp(v.z, min.z, max.z));
-        }
 
-        public static Vector3 ClampComponentsL(this Vector3 v, Vector3 min)
-        {
-            return new Vector3(Utils.ClampL(v.x, min.x),
+        public static Vector3 ClampComponentsL(this Vector3 v, Vector3 min) =>
+            new Vector3(Utils.ClampL(v.x, min.x),
                 Utils.ClampL(v.y, min.y),
                 Utils.ClampL(v.z, min.z));
-        }
 
-        public static Vector3 ClampComponentsH(this Vector3 v, Vector3 max)
-        {
-            return new Vector3(Utils.ClampH(v.x, max.x),
+        public static Vector3 ClampComponentsH(this Vector3 v, Vector3 max) =>
+            new Vector3(Utils.ClampH(v.x, max.x),
                 Utils.ClampH(v.y, max.y),
                 Utils.ClampH(v.z, max.z));
-        }
 
-        public static Vector3d ClampComponents(this Vector3d v, double min, double max)
-        {
-            return new Vector3d(Utils.Clamp(v.x, min, max),
+        public static Vector3d ClampComponents(this Vector3d v, double min, double max) =>
+            new Vector3d(Utils.Clamp(v.x, min, max),
                 Utils.Clamp(v.y, min, max),
                 Utils.Clamp(v.z, min, max));
-        }
 
-        public static Vector3d ClampComponents(this Vector3d v, Vector3d min, Vector3d max)
-        {
-            return new Vector3d(Utils.Clamp(v.x, min.x, max.x),
+        public static Vector3d ClampComponents(this Vector3d v, Vector3d min, Vector3d max) =>
+            new Vector3d(Utils.Clamp(v.x, min.x, max.x),
                 Utils.Clamp(v.y, min.y, max.y),
                 Utils.Clamp(v.z, min.z, max.z));
-        }
 
-        public static Vector3d ClampComponentsH(this Vector3d v, Vector3d max)
-        {
-            return new Vector3d(Utils.ClampH(v.x, max.x),
+        public static Vector3d ClampComponentsH(this Vector3d v, Vector3d max) =>
+            new Vector3d(Utils.ClampH(v.x, max.x),
                 Utils.ClampH(v.y, max.y),
                 Utils.ClampH(v.z, max.z));
-        }
 
-        public static Vector3d ClampComponentsL(this Vector3d v, Vector3d min)
-        {
-            return new Vector3d(Utils.ClampL(v.x, min.x),
+        public static Vector3d ClampComponentsL(this Vector3d v, Vector3d min) =>
+            new Vector3d(Utils.ClampL(v.x, min.x),
                 Utils.ClampL(v.y, min.y),
                 Utils.ClampL(v.z, min.z));
-        }
 
-        public static Vector3 ClampComponentsH(this Vector3 v, float max)
-        {
-            return new Vector3(Utils.ClampH(v.x, max),
+        public static Vector3 ClampComponentsH(this Vector3 v, float max) =>
+            new Vector3(Utils.ClampH(v.x, max),
                 Utils.ClampH(v.y, max),
                 Utils.ClampH(v.z, max));
-        }
 
-        public static Vector3 ClampComponentsL(this Vector3 v, float min)
-        {
-            return new Vector3(Utils.ClampL(v.x, min),
+        public static Vector3 ClampComponentsL(this Vector3 v, float min) =>
+            new Vector3(Utils.ClampL(v.x, min),
                 Utils.ClampL(v.y, min),
                 Utils.ClampL(v.z, min));
-        }
 
-        public static Vector3d ClampComponentsH(this Vector3d v, double max)
-        {
-            return new Vector3d(Utils.ClampH(v.x, max),
+        public static Vector3d ClampComponentsH(this Vector3d v, double max) =>
+            new Vector3d(Utils.ClampH(v.x, max),
                 Utils.ClampH(v.y, max),
                 Utils.ClampH(v.z, max));
-        }
 
-        public static Vector3d ClampComponentsL(this Vector3d v, double min)
-        {
-            return new Vector3d(Utils.ClampL(v.x, min),
+        public static Vector3d ClampComponentsL(this Vector3d v, double min) =>
+            new Vector3d(Utils.ClampL(v.x, min),
                 Utils.ClampL(v.y, min),
                 Utils.ClampL(v.z, min));
-        }
 
 
         public static Vector3 ClampMagnitudeH(this Vector3 v, float max)
         {
             var vm = v.magnitude;
             return vm > max ? v / vm * max : v;
-
         }
 
         public static Vector3d ClampMagnitudeH(this Vector3d v, double max)
@@ -208,11 +182,11 @@ namespace AT_Utils {
             return vm < min ? v / vm * min : v;
         }
 
-        public static Vector3 Sign(this Vector3 v)
-        { return new Vector3(Mathf.Sign(v.x), Mathf.Sign(v.y), Mathf.Sign(v.z)); }
+        public static Vector3 Sign(this Vector3 v) =>
+            new Vector3(Mathf.Sign(v.x), Mathf.Sign(v.y), Mathf.Sign(v.z));
 
-        public static Vector3 AbsComponents(this Vector3 v)
-        { return new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z)); }
+        public static Vector3 AbsComponents(this Vector3 v) =>
+            new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
 
         public static int MaxI(this Vector3 v)
         {
@@ -221,7 +195,10 @@ namespace AT_Utils {
             for(int i = 0; i < 3; i++)
             {
                 if(Mathf.Abs(v[i]) > Mathf.Abs(max))
-                { max = v[i]; maxi = i; }
+                {
+                    max = v[i];
+                    maxi = i;
+                }
             }
             return maxi;
         }
@@ -233,7 +210,10 @@ namespace AT_Utils {
             for(int i = 0; i < 3; i++)
             {
                 if(Mathf.Abs(v[i]) < Mathf.Abs(min))
-                { min = v[i]; mini = i; }
+                {
+                    min = v[i];
+                    mini = i;
+                }
             }
             return mini;
         }
@@ -245,7 +225,10 @@ namespace AT_Utils {
             for(int i = 0; i < 3; i++)
             {
                 if(Math.Abs(v[i]) > Math.Abs(max))
-                { max = v[i]; maxi = i; }
+                {
+                    max = v[i];
+                    maxi = i;
+                }
             }
             return maxi;
         }
@@ -257,7 +240,10 @@ namespace AT_Utils {
             for(int i = 0; i < 3; i++)
             {
                 if(Math.Abs(v[i]) < Math.Abs(min))
-                { min = v[i]; mini = i; }
+                {
+                    min = v[i];
+                    mini = i;
+                }
             }
             return mini;
         }
@@ -290,29 +276,21 @@ namespace AT_Utils {
             return ret;
         }
 
-        public static Vector3 MaxComponentV(this Vector3 v)
-        { return v.Component(v.MaxI()); }
+        public static Vector3 MaxComponentV(this Vector3 v) => v.Component(v.MaxI());
 
-        public static Vector3 MinComponentV(this Vector3 v)
-        { return v.Component(v.MinI()); }
+        public static Vector3 MinComponentV(this Vector3 v) => v.Component(v.MinI());
 
-        public static Vector3d MaxComponentV(this Vector3d v)
-        { return v.Component(v.MaxI()); }
+        public static Vector3d MaxComponentV(this Vector3d v) => v.Component(v.MaxI());
 
-        public static Vector3d MinComponentV(this Vector3d v)
-        { return v.Component(v.MinI()); }
+        public static Vector3d MinComponentV(this Vector3d v) => v.Component(v.MinI());
 
-        public static float MaxComponentF(this Vector3 v)
-        { return v[v.MaxI()]; }
+        public static float MaxComponentF(this Vector3 v) => v[v.MaxI()];
 
-        public static float MinComponentF(this Vector3 v)
-        { return v[v.MinI()]; }
+        public static float MinComponentF(this Vector3 v) => v[v.MinI()];
 
-        public static double MaxComponentD(this Vector3d v)
-        { return v[v.MaxI()]; }
+        public static double MaxComponentD(this Vector3d v) => v[v.MaxI()];
 
-        public static double MinComponentD(this Vector3d v)
-        { return v[v.MinI()]; }
+        public static double MinComponentD(this Vector3d v) => v[v.MinI()];
 
         public static Vector3 xzy(this Vector3 v) => new Vector3(v.x, v.z, v.y);
 
