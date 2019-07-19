@@ -394,10 +394,7 @@ namespace AT_Utils
             }
             on_vessel_launched?.Invoke(launched_vessel);
             end:
-            {
                 enable_vsl_colliders(vsl_colliders);
-                yield break;
-            }
         }
 
         void position_proto_vessel(ProtoVessel proto_vessel, Transform spawn_transform, Vector3 spawn_offset)
