@@ -109,6 +109,20 @@ namespace AT_Utils
             p.children.ForEach(ch => mass += ch.MassWithChildren());
             return mass;
         }
+
+        public static bool TryUseResource(this Part part, int resource_id, double amount)
+        {
+            if(!amount.Equals(0))
+            {
+                var got = part.RequestResource(resource_id, amount);
+                if(Math.Abs(1 - got / amount) > 1e-5)
+                {
+                    part.RequestResource(resource_id, -got);
+                    return false;
+                }
+            }
+            return true;
+        }
         #endregion
 
         #region Actions
