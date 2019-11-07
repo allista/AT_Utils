@@ -108,7 +108,7 @@ namespace AT_Utils
                 blnReturn = true;
             }
             //get the drawn button rectangle
-            if (Event.current.type == EventType.repaint)
+            if (Event.current.type == EventType.Repaint)
                 rectButton = GUILayoutUtility.GetLastRect();
 
             //draw a dropdown symbol on the right edge
@@ -161,7 +161,7 @@ namespace AT_Utils
 
         public bool CloseOnOutsideClick()
         {
-            if(ListVisible && Event.current.type == EventType.mouseDown && !rectScrollView.Contains(Event.current.mousePosition))
+            if(ListVisible && Event.current.type == EventType.MouseDown && !rectScrollView.Contains(Event.current.mousePosition))
             {
                 ListVisible = false;
                 return true;
