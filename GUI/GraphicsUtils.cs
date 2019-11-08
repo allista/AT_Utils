@@ -77,10 +77,7 @@ namespace AT_Utils
         readonly string material_name;
         Material material;
 
-        public MaterialWrapper(string material)
-        { 
-            material_name = material;
-        }
+        public MaterialWrapper(string material) => material_name = material;
 
         public Material This
         { 
@@ -100,10 +97,7 @@ namespace AT_Utils
 
         public Material New => This != null? new Material(This) : null;
 
-        public static implicit operator Material(MaterialWrapper mw)
-        {
-            return mw.This;
-        }
+        public static implicit operator Material(MaterialWrapper mw) => mw.This;
     }
 
     public static partial class Utils
@@ -149,8 +143,7 @@ namespace AT_Utils
 
         public static void GLLine(Vector3 ori, Vector3 end, Color c, MaterialWrapper mat = null)
         {
-            float far;
-            var camera = GLBeginWorld(out far, mat);
+            var camera = GLBeginWorld(out var far, mat);
             if(MapView.MapIsEnabled)
             {
                 ori = ScaledSpace.LocalToScaledSpace(ori);
@@ -168,8 +161,7 @@ namespace AT_Utils
         public static void GLLines(Vector3[] points, Color c, MaterialWrapper mat = null)
         {
             if(points.Length < 2) return;
-            float far;
-            var camera = GLBeginWorld(out far, mat);
+            var camera = GLBeginWorld(out var far, mat);
             if(MapView.MapIsEnabled)
             {
                 for(int i = 0, len = points.Length; i < len; i++)
@@ -187,15 +179,12 @@ namespace AT_Utils
             camera.farClipPlane = far;
         }
 
-        public static void GLVec(Vector3 ori, Vector3 vec, Color c, MaterialWrapper mat = null)
-        {
-            GLLine(ori, ori + vec, c, mat);
-        }
+        public static void GLVec(Vector3 ori, Vector3 vec, Color c, MaterialWrapper mat = null) 
+            => GLLine(ori, ori + vec, c, mat);
 
         public static void GLTriangle(Vector3 j, Vector3 k, Vector3 l, Color c, MaterialWrapper mat = null)
         {
-            float far;
-            var camera = GLBeginWorld(out far, mat);
+            var camera = GLBeginWorld(out var far, mat);
             if(MapView.MapIsEnabled)
             {
                 j = ScaledSpace.LocalToScaledSpace(j);
@@ -214,8 +203,7 @@ namespace AT_Utils
 
         public static void GLTriangles(Vector3[] worldVertices, Color c, MaterialWrapper mat = null)
         {
-            float far;
-            var camera = GLBeginWorld(out far, mat);
+            var camera = GLBeginWorld(out var far, mat);
             if(MapView.MapIsEnabled)
             {
                 for(int i = 0, len = worldVertices.Length; i < len; i++)
@@ -237,8 +225,7 @@ namespace AT_Utils
 
         public static void GLTriangles(Vector3[] worldVertices, int[] tris, Color c, MaterialWrapper mat = null)
         {
-            float far;
-            var camera = GLBeginWorld(out far, mat);
+            var camera = GLBeginWorld(out var far, mat);
             if(MapView.MapIsEnabled)
             {
                 for(int i = 0, len = worldVertices.Length; i < len; i++)
@@ -274,7 +261,7 @@ namespace AT_Utils
             //edges[5] = new Vector3(max.x, min.y, max.z); //right-bottom-front
             //edges[6] = new Vector3(max.x, max.y, min.z); //right-top-back
             //edges[7] = new Vector3(max.x, max.y, max.z); //right-top-front
-            var c = Utils.BoundCorners(b);
+            var c = BoundCorners(b);
             for(int i = 0; i < 8; i++)
             {
                 if(T != null)
@@ -307,7 +294,6 @@ namespace AT_Utils
 
         public static void GLDrawPoint(Vector3 ori, Color c, MaterialWrapper mat = null, float r = 0.1f)
         {
-            float far;
             var i = new Vector3(r, 0, 0);
             var j = new Vector3(0, r, 0);
             var k = new Vector3(0, 0, r);
@@ -318,7 +304,7 @@ namespace AT_Utils
                 k = ScaledSpace.LocalToScaledSpace(k);
                 ori = ScaledSpace.LocalToScaledSpace(ori);
             }
-            var camera = GLBeginWorld(out far, mat);
+            var camera = GLBeginWorld(out var far, mat);
             GL.Begin(GL.LINES);
             GL.Color(c);
             gl_line(ori - i, ori + i);
@@ -329,10 +315,8 @@ namespace AT_Utils
             camera.farClipPlane = far;
         }
 
-        public static void GLDrawPoint(Vector3 point, Transform T, Color c, MaterialWrapper mat = null)
-        {
-            GLDrawBounds(new Bounds(point, Vector3.one * 0.1f), T, c, mat);
-        }
+        public static void GLDrawPoint(Vector3 point, Transform T, Color c, MaterialWrapper mat = null) 
+            => GLDrawBounds(new Bounds(point, Vector3.one * 0.1f), T, c, mat);
 
         public static void GLDrawHull(ConvexHull3D h, Transform T, Color c, MaterialWrapper mat = null, Vector3 offset = default(Vector3))
         { 
@@ -346,9 +330,8 @@ namespace AT_Utils
         }
 
         public static void GLDrawHull2(ConvexHull3D h, Transform T, Color c, MaterialWrapper mat = null, Vector3 offset = default(Vector3))
-        { 
-            float far;
-            var camera = GLBeginWorld(out far, mat);
+        {
+            var camera = GLBeginWorld(out var far, mat);
             GL.Begin(GL.TRIANGLES);
             GL.Color(c);
             for(int i = 0, hFacesCount = h.Faces.Count; i < hFacesCount; i++)
