@@ -87,12 +87,18 @@ namespace AT_Utils
             get
             { 
                 if(material == null)
-                    material = new Material(Shader.Find(material_name));
+                {
+                    var mat = Shader.Find(material_name);
+                    if(mat != null)
+                        material = new Material(mat);
+                    else
+                        Utils.Log($"ERROR: Material '{material_name}' not found.");
+                }
                 return material;
             }
         }
 
-        public Material New { get { return new Material(this); } }
+        public Material New => This != null? new Material(This) : null;
 
         public static implicit operator Material(MaterialWrapper mw)
         {
@@ -135,7 +141,7 @@ namespace AT_Utils
             far = camera.farClipPlane;
             camera.farClipPlane = far * 100;
             GL.PushMatrix();
-            (mat ?? gl_material).This.SetPass(0);
+            (mat ?? gl_material)?.This.SetPass(0);
             GL.LoadProjectionMatrix(camera.projectionMatrix);
             GL.modelview = camera.worldToCameraMatrix;
             return camera;
