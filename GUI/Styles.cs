@@ -74,9 +74,21 @@ namespace AT_Utils
 
         public static GUIStyle no_window;
 
+        static Texture2D tooltip_texture = new Texture2D(1, 1);
+        static Texture2D black_texture = new Texture2D(1, 1);
+        static Texture2D alpha_texture = new Texture2D(1, 1);
+
         public static FieldInfo[] StyleFields = typeof(Styles)
             .GetFields(BindingFlags.Public | BindingFlags.Static)
             .Where(fi => fi.FieldType == typeof(GUIStyle)).ToArray();
+
+        static void set_background(GUIStyle style, Texture2D texture)
+        {
+            style.normal.background = style.onNormal.background = texture;
+            style.active.background = style.onActive.background = texture;
+            style.hover.background = style.onHover.background = texture;
+            style.focused.background = style.onFocused.background = texture;
+        }
 
         public static void InitSkin()
         {
@@ -86,15 +98,12 @@ namespace AT_Utils
             skin = UnityEngine.Object.Instantiate(GUI.skin);
 
             //new styles
-            var tooltip_texture = new Texture2D(1, 1);
             tooltip_texture.SetPixel(0, 0, new Color(0.82f, 0.85f, 0.88f, 1f));
             tooltip_texture.Apply();
 
-            var black_texture = new Texture2D(1, 1);
             black_texture.SetPixel(0, 0, new Color(0.15f, 0.15f, 0.15f, 1f));
             black_texture.Apply();
 
-            var alpha_texture = new Texture2D(1, 1);
             alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0));
             //            alpha_texture.SetPixel(0, 0, new Color(0, 0, 0, 0.3f));//debug
             alpha_texture.Apply();
@@ -108,7 +117,7 @@ namespace AT_Utils
             white.padding = new RectOffset(4, 4, 4, 4);
 
             white_on_black = new GUIStyle(white);
-            white_on_black.normal.background = white_on_black.onNormal.background = white_on_black.hover.background = white_on_black.onHover.background = black_texture;
+            set_background(white_on_black, black_texture);
 
             inactive = white.OtherColor(Colors.Inactive);
             active = white.OtherColor(Colors.Active);
@@ -127,7 +136,7 @@ namespace AT_Utils
             tooltip.wordWrap = true;
             tooltip.richText = true;
             tooltip.alignment = TextAnchor.MiddleCenter;
-            tooltip.normal.background = tooltip.onNormal.background = tooltip.hover.background = tooltip.onHover.background = tooltip_texture;
+            set_background(tooltip, tooltip_texture);
 
             //lable
             label = GUI.skin.label.OtherColor(Color.white);
@@ -153,11 +162,11 @@ namespace AT_Utils
 
             //list box
             list_item = new GUIStyle(GUI.skin.box);
-            list_item.normal.background = list_item.onNormal.background = list_item.hover.background = list_item.onHover.background = black_texture;
             list_item.normal.textColor = list_item.focused.textColor = Color.white;
             list_item.hover.textColor = list_item.active.textColor = Color.yellow;
             list_item.onNormal.textColor = list_item.onFocused.textColor = list_item.onHover.textColor = list_item.onActive.textColor = Color.yellow;
             list_item.padding = new RectOffset(4, 4, 4, 4);
+            set_background(list_item, black_texture);
 
             list_box = new GUIStyle(GUI.skin.button);
             list_box.normal.textColor = list_box.focused.textColor = Color.yellow;
@@ -167,10 +176,10 @@ namespace AT_Utils
 
             //borderless window
             no_window = new GUIStyle(GUI.skin.window);
-            no_window.normal.background = no_window.onNormal.background = no_window.hover.background = no_window.onHover.background = alpha_texture;
             no_window.border = new RectOffset(0, 0, 0, 0);
             no_window.contentOffset = Vector2.zero;
             no_window.padding = new RectOffset(4, 4, 4, 4);
+            set_background(no_window, alpha_texture);
 
             //customization
             //vertical scrollbar texture
@@ -181,8 +190,7 @@ namespace AT_Utils
             skin.verticalScrollbar.fixedWidth = 5;
             skin.verticalScrollbarThumb.fixedWidth = 5;
             skin.verticalScrollbarThumb.border = new RectOffset(0, 0, 0, 0);
-            skin.verticalScrollbarThumb.normal.background = skin.verticalScrollbarThumb.onNormal.background =
-                skin.verticalScrollbarThumb.hover.background = skin.verticalScrollbarThumb.onHover.background = scrollbar_texture;
+            set_background(skin.verticalScrollbarThumb, scrollbar_texture);
             //horizontal scrollbar
             skin.horizontalScrollbar.fixedHeight = 10;
             skin.horizontalScrollbarThumb.fixedHeight = 8;
