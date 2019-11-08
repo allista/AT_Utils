@@ -18,9 +18,7 @@ namespace AT_Utils
 {
     public static class Styles
     {
-        public class Config : ConfigNodeObject
-        {
-        }
+        public class Config : ConfigNodeObject { }
 
         public static Config CFG => AT_UtilsGlobals.Instance.StylesConfig;
 
@@ -80,7 +78,8 @@ namespace AT_Utils
 
         public static FieldInfo[] StyleFields = typeof(Styles)
             .GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Where(fi => fi.FieldType == typeof(GUIStyle)).ToArray();
+            .Where(fi => fi.FieldType == typeof(GUIStyle))
+            .ToArray();
 
         static void set_background(GUIStyle style, Texture2D texture)
         {
@@ -92,7 +91,8 @@ namespace AT_Utils
 
         public static void InitSkin()
         {
-            if(skin != null) return;
+            if(skin != null)
+                return;
 
             GUI.skin = null;
             skin = UnityEngine.Object.Instantiate(GUI.skin);
@@ -164,14 +164,16 @@ namespace AT_Utils
             list_item = new GUIStyle(GUI.skin.box);
             list_item.normal.textColor = list_item.focused.textColor = Color.white;
             list_item.hover.textColor = list_item.active.textColor = Color.yellow;
-            list_item.onNormal.textColor = list_item.onFocused.textColor = list_item.onHover.textColor = list_item.onActive.textColor = Color.yellow;
+            list_item.onNormal.textColor = list_item.onFocused.textColor =
+                list_item.onHover.textColor = list_item.onActive.textColor = Color.yellow;
             list_item.padding = new RectOffset(4, 4, 4, 4);
             set_background(list_item, black_texture);
 
             list_box = new GUIStyle(GUI.skin.button);
             list_box.normal.textColor = list_box.focused.textColor = Color.yellow;
             list_box.hover.textColor = list_box.active.textColor = Color.green;
-            list_box.onNormal.textColor = list_box.onFocused.textColor = list_box.onHover.textColor = list_box.onActive.textColor = Color.green;
+            list_box.onNormal.textColor = list_box.onFocused.textColor =
+                list_box.onHover.textColor = list_box.onActive.textColor = Color.green;
             list_box.padding = new RectOffset(4, 4, 4, 4);
 
             //borderless window
@@ -201,8 +203,7 @@ namespace AT_Utils
         }
 
         static Color g = Color.gray;
-        static GUIStyle MakeButton(Color c) =>
-        normal_button.OtherColor(c, c + g);
+        static GUIStyle MakeButton(Color c) => normal_button.OtherColor(c, c + g);
 
         public static void ConfigureButtons()
         {
@@ -229,7 +230,8 @@ namespace AT_Utils
         {
             var s = style.OtherColor(normal);
             s.hover.textColor = s.active.textColor = hover;
-            s.onNormal.textColor = s.onFocused.textColor = s.onHover.textColor = s.onActive.textColor = hover;
+            s.onNormal.textColor = s.onFocused.textColor =
+                s.onHover.textColor = s.onActive.textColor = hover;
             return s;
         }
 
@@ -242,6 +244,7 @@ namespace AT_Utils
         public static void Reset() => skin = null;
 
         static Dictionary<int, GUIStyle> frac_styles = new Dictionary<int, GUIStyle>();
+
         public static GUIStyle fracStyle(float frac)
         {
             GUIStyle s;
@@ -255,6 +258,6 @@ namespace AT_Utils
         }
 
         public static void ToggleStylesUI(this MonoBehaviour monoBehaviour) =>
-        ColorListWindow.Instance.Toggle(monoBehaviour);
+            ColorListWindow.Instance.Toggle(monoBehaviour);
     }
 }
