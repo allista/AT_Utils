@@ -117,7 +117,7 @@ namespace AT_Utils
             }
         }
 
-        public static MaterialWrapper gl_material = new MaterialWrapper("Particles/Additive");
+        public static MaterialWrapper gl_material = new MaterialWrapper("Legacy Shaders/Particles/Additive");
         public static MaterialWrapper no_z_material = new MaterialWrapper("GUI/Text Shader");
         public static MaterialWrapper diffuse_material = new MaterialWrapper("Diffuse");
         public static MaterialWrapper standard_material = new MaterialWrapper("Standard");
