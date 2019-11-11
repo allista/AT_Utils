@@ -1,6 +1,53 @@
 #AT Utils ChangeLog
 
-* **v1.8.1**
+* **v1.8.2**
+    * Extracted SpatialSensor from SpawnSpaceManager.SpawnSpaceSensor.
+        Added several factories to add the sensor to GO starting from 
+        different components like MeshFilter or Collider.
+    * Added on_vessel_positioned callback to VesselSpawner.SpawnProtoVessel
+    * Ignoring GForces while vessel goes off rails in VesselSpawner
+    * VesselSpawner calls on_vessel_off_rails before switching to it
+    * SpawnSpaceManager supports SpawnOffset AND AutoPositionVessel at the same 
+        time.
+    * Braking change: removed GetSpawnOffset methods. Instead, GetSpawnTransform
+        returns out spawn_offset parameter.
+    * Added additional_rotation argument to GetSpawnTransform methods
+    * Removed AutoPositionVessel option from SpawnSpaceManager
+        * Instead, added GetSpawnRotation and GetOptimalRotation methods that 
+            allow calculation of the rotation that was used when AutoPositionVessel was used.
+        * Renamed additional_rotation argument of GetSpawnTransform to just 
+            rotation.
+    * Fixed NRE in ToggleColorizer
+    * Optimized initial positioning of the panel; still doesn't work though)
+    * Fixed NRE during spawning of a vessel that is quickly destroyed
+    * Corrected some typos
+    * Fixed the crash on right click on toolbar buttons
+    * Fixed NRE when calling SaveState on an Instance that's no longer there
+    * Hiding subwindows if a parent window is not shown
+    * Checking for null return value when adding component to a GO
+    * Better logging from AppToolbar
+    * Checking for null value when running Show coro of UIWindowBase on a MB
+    * Initialize UIWindow Controller position without waiting for it to resize 
+        itself, because sometimes it doesn't do this and the waiting is infinite.
+    * Saving state of a UIWindow when it is closed.
+    * Added NIGHTBUILD build configuration
+    * Separated extension classes to their own files under Extensions directory
+    * Added Part.TryUseResource extension method
+    * Added Utils.GetLayer/GetLayers method to resolve layer masks from layer 
+        names and cache the results.
+    * Changed target framework to .NET-4.5
+    * Added required Unity-2019 Module dlls
+    * Using new EventType constants
+    * Using MonoUtilities.RefreshPartContextWindow per SQUAD request
+    * Fixed ArgumentException and NREs caused by not-found material
+    * Fixed Additive material path
+    * Storing background textures for styles in Styles class.
+        * Background textures in Unity 2019 should be persisted outside of the 
+            GUISyleState.background
+    * Moving GUIContent instances to static members for performance.
+    * Added Toggle.SetIsOnAndColorWithoutNotify extension.
+
+* v1.8.1
     * Made UIBundle reusable for different bundles. Extracted UIWindowBase code from Styles
         * Derived ColorListWindow from UIWindowBase, both being extracted from Styles; UIWindowBase will be the base for the new UI framework on uGUI.
         * Added UI folder for the new framework
