@@ -230,4 +230,10 @@
             <Private>True</Private>
         </ProjectReference>
     </ItemGroup>
+    <ItemGroup>
+      <Content Include="AT-Utils.netkan" />
+      <Content Include="ChangeLog.md" />
+      <Content Include="LICENSE" />
+      <Content Include="make-release.sh" />
+    </ItemGroup>
 </Project>
