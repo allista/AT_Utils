@@ -43,8 +43,8 @@ namespace AT_Utils
     {
         public ModInfo()
         {
-            MinKSPVersion = new Version(1, 6, 1);
-            MaxKSPVersion = new Version(1, 7, 3);
+            MinKSPVersion = new Version(1, 8, 1);
+            MaxKSPVersion = new Version(1, 8, 1);
 
             VersionURL = "https://raw.githubusercontent.com/allista/AT_Utils/master/GameData/000_AT_Utils/000_AT_Utils.version";
             UpgradeURL = "https://github.com/allista/AT_Utils/releases";
