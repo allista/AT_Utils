@@ -11,9 +11,9 @@ using KSP.UI.Screens;
 namespace AT_Utils
 {
     /// <summary>
-    /// Toolbar manager is needed becaus in KSP-1.0+ the ApplicationLauncher
+    /// Toolbar manager is needed because in KSP-1.0+ the ApplicationLauncher
     /// works differently: it only fires OnReady event at MainMenu and the first
-    /// time the Spacecenter is loaded. Thus we need to register the AppButton only
+    /// time the Space Center is loaded. Thus we need to register the AppButton only
     /// once and then just hide and show it using VisibleScenes, not removing it.
     /// IMHO, this is a bug in the RemoveModApplication method, cause if you use
     /// Add/RemoveModApp repeatedly, the buttons are duplicated each time.
@@ -49,7 +49,7 @@ namespace AT_Utils
             //setup toolbar/applauncher button
             if(!ForceAppLauncher && ToolbarManager.ToolbarAvailable)
             {
-                Utils.Log("Using Blizzy's toolbar");
+                Utils.Log("[{}] Using Blizzy's toolbar", GetType().Name);
                 if(TBButton == null)
                     AddToolbarButton();
                 if(ALButton != null)
@@ -57,7 +57,7 @@ namespace AT_Utils
             }
             else
             {
-                Utils.Log("Using stock AppLauncher");
+                Utils.Log("[{}] Using stock AppLauncher", GetType().Name);
                 if(ALButton == null)
                 {
                     if(HighLogic.CurrentGame != null && ApplicationLauncher.Ready)
@@ -83,14 +83,14 @@ namespace AT_Utils
         {
             if(ALButton == null && ApplicationLauncher.Ready)
             {
-                Utils.Log("Adding AppLauncher button");
+                Utils.Log("[{}] Adding AppLauncher button", GetType().Name);
                 ALButton = ApplicationLauncher.Instance.AddModApplication(
                     onALTrue, onALFalse,
                     onALHover, onALHoverOut,
                     onALEnable, onALDisable,
                     AL_SCENES,
                     TextureCache.GetTexture(AL_ICON));
-                ALButton.onRightClick = onRightClick;
+                ALButton.onRightClick += onRightClick;
                 on_app_launcher_init();
             }
         }

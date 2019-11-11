@@ -1,185 +1,233 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{64CC36A2-0610-4F74-9F31-3D4E22866B7E}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>AT_Utils</RootNamespace>
-    <AssemblyName>000_AT_Utils</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>GameData\000_AT_Utils\Plugins</OutputPath>
-    <DefineConstants>DEBUG;ENABLE_PROFILER;</DefineConstants>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>GameData\000_AT_Utils\Plugins</OutputPath>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Nightbuild|AnyCPU' ">
-    <Optimize>true</Optimize>
-    <OutputPath>GameData\000_AT_Utils\Plugins</OutputPath>
-    <WarningLevel>4</WarningLevel>
-    <DefineConstants>NIGHTBUILD</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System">
-      <HintPath>..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\System.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Core">
-      <HintPath>..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\System.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\Mono.Cecil.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="KSPAssets">
-      <HintPath>..\KSP-test\KSP_test_1.7.0\KSP_Data\Managed\KSPAssets.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="KSP_AVC_Updater.cs" />
-    <Compile Include="Math\Vector6.cs" />
-    <Compile Include="Math\PID_Controllers.cs" />
-    <Compile Include="GUI\GUIUtils.cs" />
-    <Compile Include="GUI\MD2Unity.cs" />
-    <Compile Include="GUI\Styles.cs" />
-    <Compile Include="Math\Matrix3.cs" />
-    <Compile Include="Math\MathUtils.cs" />
-    <Compile Include="MiscUtils.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Math\ConvexHull3D.cs" />
-    <Compile Include="GUI\GraphicsUtils.cs" />
-    <Compile Include="Metric.cs" />
-    <Compile Include="Resources\ResourceLine.cs" />
-    <Compile Include="Resources\ResourcePump.cs" />
-    <Compile Include="Resources\ResourceWrapper.cs" />
-    <Compile Include="Configuration\ConfigNodeObjects.cs" />
-    <Compile Include="Configuration\ConfigNodeWrapper.cs" />
-    <Compile Include="Configuration\PluginConfig.cs" />
-    <Compile Include="Math\Filters.cs" />
-    <Compile Include="ControlFlow\Multiplexer.cs" />
-    <Compile Include="ControlFlow\Triggers.cs" />
-    <Compile Include="Math\OscillationDetector.cs" />
-    <Compile Include="Math\VectorCurve.cs" />
-    <Compile Include="Modules\SimpleTextureSwitcher.cs" />
-    <Compile Include="GUI\Markers.cs" />
-    <Compile Include="Coordinates.cs" />
-    <Compile Include="Debugging\DebugUtils.cs" />
-    <Compile Include="Debugging\ResourceHack.cs" />
-    <Compile Include="GUI\TooltipManager.cs" />
-    <Compile Include="GUI\Dialogs\SimpleDialog.cs" />
-    <Compile Include="GUI\Dialogs\SimpleTextEntry.cs" />
-    <Compile Include="GUI\Dialogs\SimpleWarning.cs" />
-    <Compile Include="GUI\Windows\CrewTransferWindow.cs" />
-    <Compile Include="GUI\Windows\ResourceTransferWindow.cs" />
-    <Compile Include="GUI\Elements\FloatField.cs" />
-    <Compile Include="GUI\Elements\Vector3Field.cs" />
-    <Compile Include="GUI\Elements\DropDownList.cs" />
-    <Compile Include="GUI\WindowsFramework\AddonWindowBase.cs" />
-    <Compile Include="GUI\WindowsFramework\AnchoredWindow.cs" />
-    <Compile Include="GUI\WindowsFramework\CompoundWindow.cs" />
-    <Compile Include="GUI\WindowsFramework\FloatingWindow.cs" />
-    <Compile Include="GUI\WindowsFramework\GUIWindowBase.cs" />
-    <Compile Include="Debugging\Emailer.cs" />
-    <Compile Include="Debugging\ScenarioTester.cs" />
-    <Compile Include="GUI\ConfigNodeObjectGUI.cs" />
-    <Compile Include="GUI\Elements\IntField.cs" />
-    <Compile Include="GUI\Elements\SimpleFields.cs" />
-    <Compile Include="GUI\Elements\ITypeUI.cs" />
-    <Compile Include="Math\CDOS_Optimizer2D.cs" />
-    <Compile Include="Debugging\BackupLogger.cs" />
-    <Compile Include="GUI\Elements\ValueFieldBase.cs" />
-    <Compile Include="ControlFlow\HierarchicalComparer.cs" />
-    <Compile Include="GUI\Windows\SubassemblySelector.cs" />
-    <Compile Include="Modules\SerializableFiledsPartModule.cs" />
-    <Compile Include="Addons\CrewTransferBatch.cs" />
-    <Compile Include="Addons\FlightCameraOverride.cs" />
-    <Compile Include="Addons\ResourceTransfer.cs" />
-    <Compile Include="Addons\SimplePartFilter.cs" />
-    <Compile Include="Addons\SpawnSpaceManager.cs" />
-    <Compile Include="ResourceInfo.cs" />
-    <Compile Include="GUI\TextureCache.cs" />
-    <Compile Include="GUI\ProgressIndicator.cs" />
-    <Compile Include="Math\StallDetector.cs" />
-    <Compile Include="ComputationBalancer.cs" />
-    <Compile Include="Addons\VesselSpawner.cs" />
-    <Compile Include="Modules\ATGroundAnchor.cs" />
-    <Compile Include="Modules\ATMagneticDamper.cs" />
-    <Compile Include="Configuration\Globals.cs" />
-    <Compile Include="Addons\ShipConstructLoader.cs" />
-    <Compile Include="Debugging\MetricDebug.cs" />
-    <Compile Include="AnimatedNode.cs" />
-    <Compile Include="StringID.cs" />
-    <Compile Include="Modules\NamedDockingNode.cs" />
-    <Compile Include="GUI\Dialogs\SimpleScrollView.cs" />
-    <Compile Include="Addons\PartMaker.cs" />
-    <Compile Include="GUI\Windows\PartSelector.cs" />
-    <Compile Include="Addons\GlobalsEditor.cs" />
-    <Compile Include="Addons\LineRenderers.cs" />
-    <Compile Include="GUI\ToolbarWrapper.cs" />
-    <Compile Include="GUI\AppToolbar.cs" />
-    <Compile Include="Debugging\WorldSpaceTrace.cs" />
-    <Compile Include="UI\UIBundle.cs" />
-    <Compile Include="UI\UIWindowBase.cs" />
-    <Compile Include="UI\ColorListWindow.cs" />
-    <Compile Include="Configuration\PluginState.cs" />
-    <Compile Include="UI\TooltipWindow.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <Folder Include="Math\" />
-    <Folder Include="GUI\" />
-    <Folder Include="Resources\" />
-    <Folder Include="Configuration\" />
-    <Folder Include="ControlFlow\" />
-    <Folder Include="Modules\" />
-    <Folder Include="Debugging\" />
-    <Folder Include="GUI\Dialogs\" />
-    <Folder Include="GUI\Windows\" />
-    <Folder Include="GUI\Elements\" />
-    <Folder Include="GUI\WindowsFramework\" />
-    <Folder Include="Addons\" />
-    <Folder Include="UI\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include=".gitignore" />
-    <None Include="README.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="Unity\AT_Utils.UI.csproj">
-      <Project>{0B711E55-8312-144F-53AD-EDA5A8CEE04A}</Project>
-      <Name>AT_Utils.UI</Name>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{64CC36A2-0610-4F74-9F31-3D4E22866B7E}</ProjectGuid>
+        <OutputType>Library</OutputType>
+        <RootNamespace>AT_Utils</RootNamespace>
+        <AssemblyName>000_AT_Utils</AssemblyName>
+        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>GameData\000_AT_Utils\Plugins</OutputPath>
+        <DefineConstants>DEBUG;ENABLE_PROFILER;</DefineConstants>
+        <WarningLevel>4</WarningLevel>
+        <ConsolePause>false</ConsolePause>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <DebugType>full</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>GameData\000_AT_Utils\Plugins</OutputPath>
+        <WarningLevel>4</WarningLevel>
+        <ConsolePause>false</ConsolePause>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Nightbuild|AnyCPU' ">
+        <Optimize>true</Optimize>
+        <OutputPath>GameData\000_AT_Utils\Plugins</OutputPath>
+        <WarningLevel>4</WarningLevel>
+        <DefineConstants>NIGHTBUILD</DefineConstants>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="System">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\System.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Core">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\System.Core.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\Mono.Cecil.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="KSPAssets">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\KSPAssets.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Extensions\CollectionsExtensions.cs"/>
+        <Compile Include="Extensions\MiscExtensions.cs"/>
+        <Compile Include="Extensions\OrbitalExtensions.cs"/>
+        <Compile Include="Extensions\PartExtensions.cs"/>
+        <Compile Include="Extensions\PartModuleExtensions.cs"/>
+        <Compile Include="Extensions\VectorExtensions.cs"/>
+        <Compile Include="Extensions\VesselExtensions.cs"/>
+        <Compile Include="Properties\AssemblyInfo.cs"/>
+        <Compile Include="KSP_AVC_Updater.cs"/>
+        <Compile Include="Math\Vector6.cs"/>
+        <Compile Include="Math\PID_Controllers.cs"/>
+        <Compile Include="GUI\GUIUtils.cs"/>
+        <Compile Include="GUI\MD2Unity.cs"/>
+        <Compile Include="GUI\Styles.cs"/>
+        <Compile Include="Math\Matrix3.cs"/>
+        <Compile Include="Math\MathUtils.cs"/>
+        <Compile Include="MiscUtils.cs"/>
+        <Compile Include="AtmosphereParams.cs"/>
+        <Compile Include="Math\ConvexHull3D.cs"/>
+        <Compile Include="GUI\GraphicsUtils.cs"/>
+        <Compile Include="Metric.cs"/>
+        <Compile Include="Resources\ResourceLine.cs"/>
+        <Compile Include="Resources\ResourcePump.cs"/>
+        <Compile Include="Resources\ResourceWrapper.cs"/>
+        <Compile Include="Configuration\ConfigNodeObjects.cs"/>
+        <Compile Include="Configuration\ConfigNodeWrapper.cs"/>
+        <Compile Include="Configuration\PluginConfig.cs"/>
+        <Compile Include="Math\Filters.cs"/>
+        <Compile Include="ControlFlow\Multiplexer.cs"/>
+        <Compile Include="ControlFlow\Triggers.cs"/>
+        <Compile Include="Math\OscillationDetector.cs"/>
+        <Compile Include="Math\VectorCurve.cs"/>
+        <Compile Include="Modules\SimpleTextureSwitcher.cs"/>
+        <Compile Include="GUI\Markers.cs"/>
+        <Compile Include="Coordinates.cs"/>
+        <Compile Include="Debugging\DebugUtils.cs"/>
+        <Compile Include="Debugging\ResourceHack.cs"/>
+        <Compile Include="GUI\TooltipManager.cs"/>
+        <Compile Include="GUI\Dialogs\SimpleDialog.cs"/>
+        <Compile Include="GUI\Dialogs\SimpleTextEntry.cs"/>
+        <Compile Include="GUI\Dialogs\SimpleWarning.cs"/>
+        <Compile Include="GUI\Windows\CrewTransferWindow.cs"/>
+        <Compile Include="GUI\Windows\ResourceTransferWindow.cs"/>
+        <Compile Include="GUI\Elements\FloatField.cs"/>
+        <Compile Include="GUI\Elements\Vector3Field.cs"/>
+        <Compile Include="GUI\Elements\DropDownList.cs"/>
+        <Compile Include="GUI\WindowsFramework\AddonWindowBase.cs"/>
+        <Compile Include="GUI\WindowsFramework\AnchoredWindow.cs"/>
+        <Compile Include="GUI\WindowsFramework\CompoundWindow.cs"/>
+        <Compile Include="GUI\WindowsFramework\FloatingWindow.cs"/>
+        <Compile Include="GUI\WindowsFramework\GUIWindowBase.cs"/>
+        <Compile Include="Debugging\Emailer.cs"/>
+        <Compile Include="Debugging\ScenarioTester.cs"/>
+        <Compile Include="GUI\ConfigNodeObjectGUI.cs"/>
+        <Compile Include="GUI\Elements\IntField.cs"/>
+        <Compile Include="GUI\Elements\SimpleFields.cs"/>
+        <Compile Include="GUI\Elements\ITypeUI.cs"/>
+        <Compile Include="Math\CDOS_Optimizer2D.cs"/>
+        <Compile Include="Debugging\BackupLogger.cs"/>
+        <Compile Include="GUI\Elements\ValueFieldBase.cs"/>
+        <Compile Include="ControlFlow\HierarchicalComparer.cs"/>
+        <Compile Include="GUI\Windows\SubassemblySelector.cs"/>
+        <Compile Include="Modules\SerializableFiledsPartModule.cs"/>
+        <Compile Include="Addons\CrewTransferBatch.cs"/>
+        <Compile Include="Addons\FlightCameraOverride.cs"/>
+        <Compile Include="Addons\ResourceTransfer.cs"/>
+        <Compile Include="Addons\SimplePartFilter.cs"/>
+        <Compile Include="Addons\SpawnSpaceManager.cs"/>
+        <Compile Include="ResourceInfo.cs"/>
+        <Compile Include="GUI\TextureCache.cs"/>
+        <Compile Include="GUI\ProgressIndicator.cs"/>
+        <Compile Include="Math\StallDetector.cs"/>
+        <Compile Include="ComputationBalancer.cs"/>
+        <Compile Include="Addons\VesselSpawner.cs"/>
+        <Compile Include="Modules\ATGroundAnchor.cs"/>
+        <Compile Include="Modules\ATMagneticDamper.cs"/>
+        <Compile Include="Configuration\Globals.cs"/>
+        <Compile Include="Addons\ShipConstructLoader.cs"/>
+        <Compile Include="Debugging\MetricDebug.cs"/>
+        <Compile Include="AnimatedNode.cs"/>
+        <Compile Include="StringID.cs"/>
+        <Compile Include="Modules\NamedDockingNode.cs"/>
+        <Compile Include="GUI\Dialogs\SimpleScrollView.cs"/>
+        <Compile Include="Addons\PartMaker.cs"/>
+        <Compile Include="GUI\Windows\PartSelector.cs"/>
+        <Compile Include="Addons\GlobalsEditor.cs"/>
+        <Compile Include="Addons\LineRenderers.cs"/>
+        <Compile Include="GUI\ToolbarWrapper.cs"/>
+        <Compile Include="GUI\AppToolbar.cs"/>
+        <Compile Include="Debugging\WorldSpaceTrace.cs"/>
+        <Compile Include="UI\UIBundle.cs"/>
+        <Compile Include="UI\UIWindowBase.cs"/>
+        <Compile Include="UI\ColorListWindow.cs"/>
+        <Compile Include="Configuration\PluginState.cs"/>
+        <Compile Include="UI\TooltipWindow.cs"/>
+        <Compile Include="Addons\SpatialSensor.cs"/>
+    </ItemGroup>
+    <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets"/>
+    <ItemGroup>
+        <Folder Include="Math\"/>
+        <Folder Include="GUI\"/>
+        <Folder Include="Resources\"/>
+        <Folder Include="Configuration\"/>
+        <Folder Include="ControlFlow\"/>
+        <Folder Include="Modules\"/>
+        <Folder Include="Debugging\"/>
+        <Folder Include="GUI\Dialogs\"/>
+        <Folder Include="GUI\Windows\"/>
+        <Folder Include="GUI\Elements\"/>
+        <Folder Include="GUI\WindowsFramework\"/>
+        <Folder Include="Addons\"/>
+        <Folder Include="UI\"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include=".gitignore"/>
+        <None Include="README.md"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="Unity\AT_Utils.UI.csproj">
+            <Project>{0B711E55-8312-144F-53AD-EDA5A8CEE04A}</Project>
+            <Name>AT_Utils.UI</Name>
+            <Private>True</Private>
+        </ProjectReference>
+    </ItemGroup>
 </Project>

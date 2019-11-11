@@ -74,8 +74,7 @@ namespace AT_Utils.UI
                 screen_pos.y -= top_left.y - h;
             else if(bottom_right.y < 0)
                 screen_pos.y -= bottom_right.y;
-            Vector3 new_pos;
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvas.transform as RectTransform, screen_pos, canvas.worldCamera, out new_pos);
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvas.transform as RectTransform, screen_pos, canvas.worldCamera, out var new_pos);
             rectTransform.position = new_pos;
         }
 

@@ -186,7 +186,7 @@ namespace AT_Utils
 
         public static void UpdatePartMenu(this Part part)
         {
-            MonoUtilities.RefreshContextWindows(part);
+            MonoUtilities.RefreshPartContextWindow(part);
             UpdateEditorGUI();
         }
 

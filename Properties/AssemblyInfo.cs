@@ -27,7 +27,7 @@ using System.Reflection;
 #if NIGHTBUILD
 [assembly: AssemblyVersion("1.8.*")]
 #else
-[assembly: AssemblyVersion("1.8.1")]
+[assembly: AssemblyVersion("1.8.2")]
 #endif
 [assembly: KSPAssembly("AT_Utils", 1, 8)]
 
@@ -44,7 +44,7 @@ namespace AT_Utils
         public ModInfo()
         {
             MinKSPVersion = new Version(1, 6, 1);
-            MaxKSPVersion = new Version(1, 7, 2);
+            MaxKSPVersion = new Version(1, 7, 3);
 
             VersionURL = "https://raw.githubusercontent.com/allista/AT_Utils/master/GameData/000_AT_Utils/000_AT_Utils.version";
             UpgradeURL = "https://github.com/allista/AT_Utils/releases";
