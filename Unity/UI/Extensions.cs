@@ -11,18 +11,11 @@ namespace AT_Utils.UI
 {
     public static class Extensions
     {
-        static readonly MethodInfo toggleSet = typeof(Toggle)
-            .GetMethod("Set",
-                       BindingFlags.NonPublic | BindingFlags.Instance,
-                       null,
-                       new[] { typeof(bool), typeof(bool) },
-                       null);
-
-        public static void SetIsOnWithoutNotify(this Toggle toggle, bool isOn)
+        public static void SetIsOnAndColorWithoutNotify(this Toggle toggle, bool isOn)
         {
             if(toggle.isOn != isOn)
             {
-                toggleSet.Invoke(toggle, new object[] { isOn, false });
+                toggle.SetIsOnWithoutNotify(isOn);
                 toggle.GetComponent<ToggleColorizer>()?.UpdateColor();
             }
         }
