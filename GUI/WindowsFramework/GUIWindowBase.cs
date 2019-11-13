@@ -29,20 +29,24 @@ namespace AT_Utils
         }
 
         #region Subwindows
-        protected List<FieldInfo> subwindow_fields;
+        private List<FieldInfo> subwindow_fields;
         protected List<GUIWindowBase> subwindows;
+        private GUIWindowBase parent_window;
 
         void init_subwindows()
         {
             subwindow_fields = GetType()
                 .GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.FlattenHierarchy)
-                .Where(fi => typeof(GUIWindowBase).IsAssignableFrom(fi.FieldType)).ToList();
+                .Where(fi => !fi.FieldType.IsAbstract && typeof(GUIWindowBase).IsAssignableFrom(fi.FieldType)).ToList();
             subwindows = new List<GUIWindowBase>();
             foreach(var sw in subwindow_fields)
             {
                 var obj = gameObject.AddComponent(sw.FieldType) as GUIWindowBase;
+                if(obj == null)
+                    continue;
                 sw.SetValue(this, obj);
                 subwindows.Add(obj);
+                obj.parent_window = this;
             }
         }
         #endregion
@@ -52,7 +56,7 @@ namespace AT_Utils
         [ConfigOption] protected bool window_enabled = true;
         public bool WindowEnabled => window_enabled;
         public static bool HUD_enabled => hud_enabled && level_loaded;
-        public bool doShow => level_loaded && window_enabled && hud_enabled && can_draw();
+        public bool doShow => level_loaded && window_enabled && hud_enabled && can_draw() && (parent_window == null || parent_window.doShow);
 
         protected virtual bool can_draw() { return true; }
 

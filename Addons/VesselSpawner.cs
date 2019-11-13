@@ -114,6 +114,7 @@ namespace AT_Utils
                                                               Vector3 spawn_offset,
                                                               Vector3 dV,
                                                               Callback<ProtoVessel> on_proto_vessel_positioned = null,
+                                                              Callback<Vessel> on_vessel_positioned = null,
                                                               Callback<Vessel> on_vessel_loaded = null,
                                                               Callback<Vessel> on_vessel_off_rails = null,
                                                               Callback<Vessel> on_vessel_launched = null)
@@ -125,6 +126,7 @@ namespace AT_Utils
             launched_vessel = proto_vessel.vesselRef;
             launched_vessel.orbitDriver.updateMode = OrbitDriver.UpdateMode.TRACK_Phys;
             launched_vessel.skipGroundPositioning = true;
+            on_vessel_positioned?.Invoke(launched_vessel);
             foreach(var i in launch_moving_vessel(spawn_transform, 
                                                   spawn_offset, 
                                                   Quaternion.identity, 
@@ -336,12 +338,12 @@ namespace AT_Utils
         {
             var vsl_colliders = new List<Collider>();
             disable_vsl_colliders(launched_vessel, vsl_colliders);
+            launched_vessel.IgnoreGForces(10);
             FlightCameraOverride.UpdateDurationSeconds(1);
             if(vessel.LandedOrSplashed)
             {
-                while(launched_vessel.packed)
+                while(launched_vessel != null && launched_vessel.packed)
                 {
-                    if(launched_vessel == null) goto end;
                     launched_vessel.situation = Vessel.Situations.PRELAUNCH;
                     run_on_vessel_loaded(on_vessel_loaded);
                     FlightCameraOverride.UpdateDurationSeconds(1);
@@ -352,6 +354,7 @@ namespace AT_Utils
                     }
                     catch(Exception e)
                     { Utils.Log("Exception occured during launched_vessel.SetPosition/Rotation call. Ignoring it:\n{}", e.StackTrace); }
+                    launched_vessel.IgnoreGForces(10);
                     launched_vessel.GoOffRails();
                     yield return new WaitForFixedUpdate();
                 }
@@ -361,10 +364,8 @@ namespace AT_Utils
             }
             else
             {
-                //hold the vessel inside the hangar until unpacked
-                while(launched_vessel.packed)
+                while(launched_vessel != null && launched_vessel.packed)
                 {
-                    if(launched_vessel == null) goto end;
                     run_on_vessel_loaded(on_vessel_loaded);
                     FlightCameraOverride.UpdateDurationSeconds(1);
                     try
@@ -374,6 +375,7 @@ namespace AT_Utils
                     }
                     catch(Exception e)
                     { Utils.Log("Exception occured during launched_vessel.SetPosition/Rotation call. Ignoring it:\n{}", e.StackTrace); }
+                    launched_vessel.IgnoreGForces(10);
                     yield return new WaitForFixedUpdate();
                 }
                 if(launched_vessel == null) goto end;
@@ -381,10 +383,10 @@ namespace AT_Utils
                 launched_vessel.SetRotation(spawn_transform.rotation*spawn_rot_offset);
             }
             launched_vessel.situation = vessel.situation;
-            FlightGlobals.ForceSetActiveVessel(launched_vessel);
             on_vessel_off_rails?.Invoke(launched_vessel);
-            enable_vsl_colliders(vsl_colliders);
             launched_vessel.IgnoreGForces(10);
+            enable_vsl_colliders(vsl_colliders);
+            FlightGlobals.ForceSetActiveVessel(launched_vessel);
             foreach(var _ in push_and_spin_launched_vessel(spawn_transform.TransformDirection(dV)))
             {
                 yield return null;
@@ -392,10 +394,7 @@ namespace AT_Utils
             }
             on_vessel_launched?.Invoke(launched_vessel);
             end:
-            {
                 enable_vsl_colliders(vsl_colliders);
-                yield break;
-            }
         }
 
         void position_proto_vessel(ProtoVessel proto_vessel, Transform spawn_transform, Vector3 spawn_offset)

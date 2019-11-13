@@ -4,6 +4,7 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2019 Allis Tauri
+
 using UnityEngine;
 using System.Collections;
 
@@ -19,11 +20,9 @@ namespace AT_Utils
 
         public T Controller { get; private set; }
 
-        [ConfigOption]
-        protected Vector3 pos = Vector3.zero;
+        [ConfigOption] protected Vector3 pos = Vector3.zero;
 
-        [ConfigOption]
-        protected bool initialized;
+        [ConfigOption] protected bool initialized;
 
         protected UIWindowBase(UIBundle bundle)
         {
@@ -33,6 +32,7 @@ namespace AT_Utils
         protected abstract void init_controller();
 
         bool in_progress;
+
         public IEnumerator Show()
         {
             if(in_progress || Controller != null)
@@ -46,39 +46,36 @@ namespace AT_Utils
                 if(prefab == null)
                     goto end;
             }
-            var obj = Object.Instantiate(prefab);
+            var obj = Object.Instantiate(prefab, DialogCanvasUtil.DialogCanvasRect);
             Controller = obj.GetComponent<T>();
             obj.SetActive(false);
             if(Controller == null)
             {
                 Utils.Log("{} does not have {} component: {}",
-                          obj, typeof(T).Name, obj.GetComponents<MonoBehaviour>());
+                    obj,
+                    typeof(T).Name,
+                    obj.GetComponents<MonoBehaviour>());
                 Object.Destroy(obj);
                 goto end;
             }
-            obj.transform.SetParent(DialogCanvasUtil.DialogCanvasRect);
             init_controller();
             obj.SetActive(true);
             if(!initialized)
             {
-                obj.transform.localPosition = new Vector3(-Screen.width, 0);
-                Rect rect = new Rect();
-                while(rect.width.Equals(0))
-                {
-                    rect = (obj.transform as RectTransform).rect;
-                    yield return null;
-                }
-                pos = new Vector3(-rect.width / 2, rect.height / 2);
+                var rectT = (RectTransform)obj.transform;
+                var rect = rectT.rect;
+                var pivot = rectT.pivot;
+                pos = new Vector3(-rect.width * pivot.x, rect.height * pivot.y);
                 initialized = true;
             }
             obj.transform.localPosition = pos;
-        end:
+            end:
             in_progress = false;
         }
 
         public void Show(MonoBehaviour monoBehaviour)
         {
-            if(!in_progress)
+            if(!in_progress && monoBehaviour != null)
                 monoBehaviour.StartCoroutine(Show());
         }
 
@@ -92,15 +89,16 @@ namespace AT_Utils
         {
             if(Controller != null)
             {
+                this.SaveState();
                 pos = Controller.transform.localPosition;
-                Controller.gameObject.SetActive(false);
-                Object.Destroy(Controller.gameObject);
+                GameObject gameObject;
+                (gameObject = Controller.gameObject).SetActive(false);
+                Object.Destroy(gameObject);
                 Controller = null;
             }
         }
 
-        public bool IsShown =>
-        !in_progress && Controller != null;
+        public bool IsShown => !in_progress && Controller != null;
 
         public void Toggle(MonoBehaviour monoBehaviour)
         {

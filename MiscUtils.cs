@@ -17,6 +17,27 @@ namespace AT_Utils
     public static partial class Utils
     {
         public static ResourceInfo ElectricCharge = new ResourceInfo("ElectricCharge");
+        
+        static Dictionary<string,int> _layers = new Dictionary<string, int>();
+
+        public static int GetLayer(string name)
+        {
+            int layer;
+            if(!_layers.TryGetValue(name, out layer))
+            {
+                layer = 1 << LayerMask.NameToLayer(name);
+                _layers[name] = layer;
+            }
+            return layer;
+        }
+
+        public static int GetLayers(params string[] names)
+        {
+            var layers = 0;
+            for(int i = 0, len = names.Length; i < len; i++)
+                layers |= GetLayer(names[i]);
+            return layers;
+        }
 
         /// <summary>
         /// The camel case components matching regexp.
@@ -283,7 +304,7 @@ namespace AT_Utils
 #if DEBUG
             UnityEngine.Debug.Log(stack);
 #endif
-            return string.Format("[{0}: {1:HH:mm:ss.fff}] {2}", mod_name, DateTime.Now, msg);
+            return $"[{mod_name}: {DateTime.Now:HH:mm:ss.fff}] {msg}";
         }
 
         static readonly Regex log_re = new Regex("[Ll]og");
