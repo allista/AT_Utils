@@ -16,6 +16,7 @@
     <Asset Name="button-pressed" Path="Assets/UI/Textures/button-pressed.png" Type="Texture2D" Url="UI/Textures/button-pressed" AutoLoad="false" />
     <Asset Name="button" Path="Assets/UI/Textures/button.png" Type="Texture2D" Url="UI/Textures/button" AutoLoad="false" />
     <Asset Name="panel" Path="Assets/UI/Textures/panel.png" Type="Texture2D" Url="UI/Textures/panel" AutoLoad="false" />
+    <Asset Name="trashcan" Path="Assets/UI/Textures/trashcan.png" Type="Texture2D" Url="UI/Textures/trashcan" AutoLoad="false" />
   </Assets>
   <Dependencies />
 </KSPBundleDefinition>
