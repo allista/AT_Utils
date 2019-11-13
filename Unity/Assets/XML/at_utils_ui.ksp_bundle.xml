@@ -8,6 +8,7 @@
     <Asset Name="ColorList" Path="Assets/UI/Prefabs/ColorList.prefab" Type="GameObject" Url="UI/Prefabs/ColorList" AutoLoad="false" />
     <Asset Name="FloatControl" Path="Assets/UI/Prefabs/FloatControl.prefab" Type="GameObject" Url="UI/Prefabs/FloatControl" AutoLoad="false" />
     <Asset Name="Label" Path="Assets/UI/Prefabs/Label.prefab" Type="GameObject" Url="UI/Prefabs/Label" AutoLoad="false" />
+    <Asset Name="Panel" Path="Assets/UI/Prefabs/Panel.prefab" Type="GameObject" Url="UI/Prefabs/Panel" AutoLoad="false" />
     <Asset Name="TextField" Path="Assets/UI/Prefabs/TextField.prefab" Type="GameObject" Url="UI/Prefabs/TextField" AutoLoad="false" />
     <Asset Name="Toggle" Path="Assets/UI/Prefabs/Toggle.prefab" Type="GameObject" Url="UI/Prefabs/Toggle" AutoLoad="false" />
     <Asset Name="TooltipView" Path="Assets/UI/Prefabs/TooltipView.prefab" Type="GameObject" Url="UI/Prefabs/TooltipView" AutoLoad="false" />
