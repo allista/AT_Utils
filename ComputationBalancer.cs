@@ -18,6 +18,7 @@ namespace AT_Utils
         public class Task
         {
             public IEnumerator iter;
+            public bool canceled;
             public bool finished;
             public bool error;
             public static implicit operator bool(Task t) => t.finished;
@@ -107,25 +108,32 @@ namespace AT_Utils
                 while(now < next && tasks.Count > 0)
                 {
                     var task = tasks[current];
-                    try
+                    if(task.canceled)
+                        tasks.RemoveAt(current);
+                    else
                     {
-                        if(!task.iter.MoveNext())
+                        try
+                        {
+                            if(!task.iter.MoveNext())
+                            {
+                                task.finished = true;
+                                tasks.RemoveAt(current);
+                            }
+                            else
+                            {
+                                current += 1;
+                                if(current >= tasks.Count)
+                                    current = 0;
+                            }
+                        }
+                        catch(Exception e)
                         {
                             task.finished = true;
+                            task.error = true;
                             tasks.RemoveAt(current);
-                        }
-                        else 
-                            current += 1;
+                            Debug.Log(e);
+                        }                        
                     }
-                    catch(Exception e)
-                    {
-                        task.finished = true;
-                        task.error = true;
-                        tasks.RemoveAt(current);
-                        Debug.Log(e);
-                    }
-                    if(current >= tasks.Count)
-                        current = 0;
                     now = DateTime.Now;
                     //i++;
                 }
