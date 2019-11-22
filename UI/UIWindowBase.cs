@@ -84,7 +84,7 @@ namespace AT_Utils
                 monoBehaviour.StartCoroutine(Show());
         }
 
-        public void SyncState()
+        public virtual void SyncState()
         {
             if(Controller != null)
                 pos = Controller.transform.localPosition;
