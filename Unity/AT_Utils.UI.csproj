@@ -50,6 +50,9 @@
             <HintPath>..\..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.dll</HintPath>
             <Private>False</Private>
         </Reference>
+        <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+          <HintPath>..\..\KSP-test\KSP_1.8.1\KSP_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+        </Reference>
         <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>..\..\KSP-test\KSP_test_1.8.1\KSP_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
             <Private>False</Private>
@@ -85,6 +88,7 @@
         <None Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Resources\Shaders\Compute\GenerateSVTexture.compute" />
         <Compile Include="UI\ColorList.cs" />
         <Compile Include="UI\ColorItem.cs" />
+        <Compile Include="UI\Indicator.cs" />
         <Compile Include="UI\Interfaces.cs" />
         <Compile Include="UI\DragableRect.cs" />
         <Compile Include="UI\AssemblyInfo.cs" />
