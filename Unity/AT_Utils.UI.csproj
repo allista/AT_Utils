@@ -68,41 +68,41 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Enums\ColorValues.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Events\ColorChangedEvent.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Events\HSVChangedEvent.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorImage.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorLabel.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorPicker.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorPresets.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorSlider.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorSliderImage.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\HexColorField.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\SVBoxSlider.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UtilityScripts\BoxSlider.cs"/>
-        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UtilityScripts\HSVUtil.cs"/>
-        <None Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Resources\Shaders\Compute\GenerateSVTexture.compute"/>
-        <Compile Include="UI\ColorList.cs"/>
-        <Compile Include="UI\ColorItem.cs"/>
-        <Compile Include="UI\Interfaces.cs"/>
-        <Compile Include="UI\DragableRect.cs"/>
-        <Compile Include="UI\AssemblyInfo.cs"/>
-        <Folder Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\"/>
-        <Compile Include="UI\Colors.cs"/>
-        <Folder Include="UI\Colorizers\"/>
-        <Compile Include="UI\Colorizers\GenericColorizer.cs"/>
-        <Compile Include="UI\Colorizers\ToggleColorizer.cs"/>
-        <Compile Include="UI\Colorizers\ColorizerBase.cs"/>
-        <Compile Include="UI\TooltipTrigger.cs"/>
-        <Compile Include="UI\TooltipView.cs"/>
-        <Compile Include="UI\CommonEvents.cs"/>
-        <Compile Include="UI\FloatController.cs"/>
-        <Compile Include="UI\FormatUtils.cs"/>
-        <Compile Include="UI\FloatValueUI.cs"/>
-        <Compile Include="UI\Extensions.cs"/>
         <Compile Include="UI\ClickableLabel.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Enums\ColorValues.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Events\ColorChangedEvent.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Events\HSVChangedEvent.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorImage.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorLabel.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorPicker.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorPresets.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorSlider.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\ColorSliderImage.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\HexColorField.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\SVBoxSlider.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UtilityScripts\BoxSlider.cs" />
+        <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UtilityScripts\HSVUtil.cs" />
+        <None Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Resources\Shaders\Compute\GenerateSVTexture.compute" />
+        <Compile Include="UI\ColorList.cs" />
+        <Compile Include="UI\ColorItem.cs" />
+        <Compile Include="UI\Interfaces.cs" />
+        <Compile Include="UI\DragableRect.cs" />
+        <Compile Include="UI\AssemblyInfo.cs" />
+        <Folder Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\" />
+        <Compile Include="UI\Colors.cs" />
+        <Folder Include="UI\Colorizers\" />
+        <Compile Include="UI\Colorizers\GenericColorizer.cs" />
+        <Compile Include="UI\Colorizers\ToggleColorizer.cs" />
+        <Compile Include="UI\Colorizers\ColorizerBase.cs" />
+        <Compile Include="UI\TooltipTrigger.cs" />
+        <Compile Include="UI\TooltipView.cs" />
+        <Compile Include="UI\CommonEvents.cs" />
+        <Compile Include="UI\FloatController.cs" />
+        <Compile Include="UI\FormatUtils.cs" />
+        <Compile Include="UI\FloatValueUI.cs" />
+        <Compile Include="UI\Extensions.cs" />
     </ItemGroup>
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.
     <Target Name="BeforeBuild">
