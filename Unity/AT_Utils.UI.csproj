@@ -100,6 +100,7 @@
         <Compile Include="UI\FormatUtils.cs"/>
         <Compile Include="UI\FloatValueUI.cs"/>
         <Compile Include="UI\Extensions.cs"/>
+        <Compile Include="UI\ClickableLabel.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
