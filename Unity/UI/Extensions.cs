@@ -4,7 +4,6 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2019 Allis Tauri
-using System.Reflection;
 using UnityEngine.UI;
 
 namespace AT_Utils.UI

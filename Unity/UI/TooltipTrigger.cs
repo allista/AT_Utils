@@ -21,7 +21,8 @@ namespace AT_Utils.UI
             if(enterTime > 0 && Time.realtimeSinceStartup - enterTime > delay)
             {
                 enterTime = -1;
-                TooltipView.Instance?.ShowTooltip(text, position);
+                if(TooltipView.Instance != null)
+                    TooltipView.Instance.ShowTooltip(text, position);
             }
         }
 
@@ -34,7 +35,8 @@ namespace AT_Utils.UI
         public void OnPointerExit(PointerEventData eventData)
         {
             enterTime = -1;
-            TooltipView.Instance?.HideTooltip();
+            if(TooltipView.Instance != null)
+                TooltipView.Instance.HideTooltip();
         }
     }
 }
