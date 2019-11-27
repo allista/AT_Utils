@@ -98,6 +98,7 @@
         <Compile Include="UI\Colorizers\GenericColorizer.cs" />
         <Compile Include="UI\Colorizers\ToggleColorizer.cs" />
         <Compile Include="UI\Colorizers\ColorizerBase.cs" />
+        <Compile Include="UI\OnHoverTrigger.cs" />
         <Compile Include="UI\TooltipTrigger.cs" />
         <Compile Include="UI\TooltipView.cs" />
         <Compile Include="UI\CommonEvents.cs" />
