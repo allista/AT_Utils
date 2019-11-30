@@ -27,7 +27,7 @@ using System.Reflection;
 #if NIGHTBUILD
 [assembly: AssemblyVersion("1.8.*")]
 #else
-[assembly: AssemblyVersion("1.8.2")]
+[assembly: AssemblyVersion("1.8.3")]
 #endif
 [assembly: KSPAssembly("AT_Utils", 1, 8)]
 

@@ -233,6 +233,9 @@
     <ItemGroup>
       <Content Include="AT-Utils.netkan" />
       <Content Include="ChangeLog.md" />
+      <Content Include="GameData\000_AT_Utils\AT_Utils_FilterExtension.cfg" />
+      <Content Include="GameData\000_AT_Utils\Plugins\PluginData\000_AT_Utils\000_AT_Utils.glob" />
+      <Content Include="GameData\000_AT_Utils\Plugins\PluginData\001_AnisotropicPartResizer\001_AnisotropicPartResizer.glob" />
       <Content Include="LICENSE" />
       <Content Include="make-release.sh" />
     </ItemGroup>

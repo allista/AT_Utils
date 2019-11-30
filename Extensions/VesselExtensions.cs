@@ -20,7 +20,7 @@ namespace AT_Utils
             v.LandedOrSplashed
             || v.situation != Vessel.Situations.ORBITING
             && v.situation != Vessel.Situations.ESCAPING
-            || v.orbit.PeR < v.orbit.MinPeR();
+            || v.orbit.radius < v.orbit.MinPeR();
 
         public static bool HasLaunchClamp(this IShipconstruct ship)
         {

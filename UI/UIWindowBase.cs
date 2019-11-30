@@ -31,6 +31,9 @@ namespace AT_Utils
 
         protected abstract void init_controller();
 
+        protected virtual void onGamePause() {}
+        protected virtual void onGameUnpause() {}
+
         bool in_progress;
 
         public IEnumerator Show()
@@ -59,6 +62,8 @@ namespace AT_Utils
                 goto end;
             }
             init_controller();
+            GameEvents.onGamePause.Add(onGamePause);
+            GameEvents.onGameUnpause.Add(onGameUnpause);
             obj.SetActive(true);
             if(!initialized)
             {
@@ -79,7 +84,7 @@ namespace AT_Utils
                 monoBehaviour.StartCoroutine(Show());
         }
 
-        public void SyncState()
+        public virtual void SyncState()
         {
             if(Controller != null)
                 pos = Controller.transform.localPosition;
@@ -90,6 +95,8 @@ namespace AT_Utils
             if(Controller != null)
             {
                 this.SaveState();
+                GameEvents.onGamePause.Remove(onGamePause);
+                GameEvents.onGamePause.Remove(onGameUnpause);
                 pos = Controller.transform.localPosition;
                 GameObject gameObject;
                 (gameObject = Controller.gameObject).SetActive(false);
