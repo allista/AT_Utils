@@ -10,7 +10,8 @@
     * Added Indicator UI component
     * Added ClickableLabel UI component
     * Made UIWindowBase.SyncState virtual
-    * UI windows should know when the game is paused
+    * Added UIWindowBase.onGamePause/Unpause virtual methods that are called
+      when corresponding GameEvents are fired
     * Considering a vessel to be OnPlanet only when its orbit radius is less
       than MinPeR
     * Allow for cancellation of a ComputationBalancer.Task
