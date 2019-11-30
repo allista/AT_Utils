@@ -1,6 +1,21 @@
 #AT Utils ChangeLog
 
-* **v1.8.2**
+* **v1.8.3**
+    * Changed default Min/Max Size/Aspect of APR to [0.1, 1000]
+    * ToggleAction of MultiAnimators syncs with its action group if it's set
+    * In MultiGeometryAnimator made drag cube names configurable
+      to be able to use predefined cubes.
+    * Added OnHoverTrigger UI component
+    * Add the trash icon to at_utils_ui asset bundle
+    * Added Indicator UI component
+    * Added ClickableLabel UI component
+    * Made UIWindowBase.SyncState virtual
+    * UI windows should know when the game is paused
+    * Considering a vessel to be OnPlanet only when its orbit radius is less
+      than MinPeR
+    * Allow for cancellation of a ComputationBalancer.Task
+
+* v1.8.2
     * Extracted SpatialSensor from SpawnSpaceManager.SpawnSpaceSensor.
         Added several factories to add the sensor to GO starting from 
         different components like MeshFilter or Collider.
