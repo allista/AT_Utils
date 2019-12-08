@@ -218,7 +218,10 @@ namespace AT_Utils
                 if(!col.CompareTag("Untagged"))
                     return;
                 var p = col.attachedRigidbody.GetComponent<Part>();
-                if(p == null || p.vessel == null || !p.vessel.loaded)
+                if(p == null
+                   || p.vessel == null
+                   || p.vessel == controller.vessel
+                   || !p.vessel.loaded)
                     return;
                 if(p.vessel.isEVA && !controller.AffectKerbals)
                     return;
