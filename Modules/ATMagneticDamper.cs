@@ -51,6 +51,22 @@ namespace AT_Utils
                     .FirstOrDefault(d =>
                         !string.IsNullOrEmpty(d.DamperID) && d.DamperID.Equals(id));
 
+        public override string GetInfo()
+        {
+            var info = StringBuilderCache.Acquire();
+            info.AppendLine($"Attenuation: {Attenuation:F1} %");
+            info.AppendLine($"Max.Force: {MaxForce:F1} kN");
+            info.AppendLine($"Max.Energy Consumption: {MaxEnergyConsumption:F1} ec/s");
+            if(string.IsNullOrEmpty(MagnetLocation))
+                info.AppendLine("Has attractor");
+            info.AppendLine(string.IsNullOrEmpty(AffectedPartTags)
+                ? "Affects all parts"
+                : $"Affects only: {AffectedPartTags}");
+            if(AffectKerbals)
+                info.AppendLine("WARNING: Affects kerbals!");
+            return info.ToStringAndRelease();
+        }
+
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
