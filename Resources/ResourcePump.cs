@@ -14,11 +14,10 @@ namespace AT_Utils
     {
         const float eps = 1e-7f;
         const float min_request = 1e-5f;
-        double request;
-
         readonly Part part;
 
         public readonly PartResourceDefinition Resource;
+        public double Request { get; private set; }
         public float Requested { get; private set; }
         public float Result    { get; private set; }
         public float Ratio     { get { return Mathf.Abs(Result/Requested); } }
@@ -39,25 +38,32 @@ namespace AT_Utils
             else Utils.Log("WARNING: Cannot find '{}' in the resource library.", res_name);
         }
 
-        public void RequestTransfer(float dR) { request += dR; }
+        public void RequestTransfer(float dR)
+        {
+            Request += dR;
+        }
 
         public bool TransferResource()
         {
-            if(Math.Abs(request) <= min_request) return false;
-            Result    = (float)part.RequestResource(Resource.id, request);
-            Requested = (float)request;
-            request   = 0;
+            if(Math.Abs(Request) <= min_request)
+                return false;
+            Result = (float)part.RequestResource(Resource.id, Request);
+            Requested = (float)Request;
+            Request = 0;
             return true;
         }
 
         public void Clear()
-        { request = Requested = Result = 0; }
+        {
+            Request = Requested = Result = 0;
+        }
 
         public void Revert()
         {
             if(Result.Equals(0)) return;
             part.RequestResource(Resource.id, -(double)Result);
-            request = Result; Requested = Result = 0;
+            Request = Result;
+            Requested = Result = 0;
         }
     }
 }
