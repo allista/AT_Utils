@@ -13,15 +13,26 @@ namespace AT_Utils
 {
     public class ATMagneticDamper : PartModule
     {
+        [KSPField(isPersistant = true, guiActive = true, guiName = "Attenuation")]
+        [UI_FloatEdit(scene = UI_Scene.All,
+            minValue = 0f,
+            maxValue = 99.9f,
+            incrementLarge = 10f,
+            incrementSmall = 1f,
+            incrementSlide = 0.1f,
+            sigFigs = 1,
+            unit = "%")]
+        public float Attenuation = 50f;
+
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensor = string.Empty;
         [KSPField] public string MagnetLocation = string.Empty;
         [KSPField] public string AffectedPartTags = string.Empty;
         [KSPField] public bool AffectKerbals;
         [KSPField] public bool EnableControls = true;
-        [KSPField] public float Attenuation = 0.5f;
         [KSPField] public float MaxForce = 100f;
-        [KSPField] public float EnergyConsumptionK = 1f;
+        [KSPField] public float MaxEnergyConsumption = 50f;
+        [KSPField] public float EnergyConsumptionK = 0.1f;
         [KSPField] public float ReactivateAfterSeconds = 5f;
         private double reactivateAtUT = -1;
 
@@ -44,7 +55,6 @@ namespace AT_Utils
         {
             base.OnStart(state);
             HasDamper = false;
-            Attenuation = Utils.Clamp(Attenuation, 0, 0.999f);
             EnergyConsumptionK = Utils.ClampL(EnergyConsumptionK, 1e-6f);
             if(!string.IsNullOrEmpty(Sensor))
             {
@@ -59,6 +69,8 @@ namespace AT_Utils
                     HasDamper = true;
                 }
             }
+            Fields[nameof(Attenuation)].guiActive =
+                HasDamper && EnableControls;
             Events[nameof(ToggleEvent)].active =
                 HasDamper && EnableControls;
             Actions[nameof(ToggleAction)].active =
@@ -76,8 +88,8 @@ namespace AT_Utils
                 Destroy(damper);
         }
 
-        private void onDamperWorking(float energy_spent) =>
-            socket.RequestTransfer(energy_spent * EnergyConsumptionK * TimeWarp.fixedDeltaTime);
+        private void drainEnergy(float rate) =>
+            socket.RequestTransfer(rate * TimeWarp.fixedDeltaTime);
 
         private void FixedUpdate()
         {
@@ -172,8 +184,25 @@ namespace AT_Utils
                 public float energy_consumption;
             }
 
+            private struct RBInfo
+            {
+                public Rigidbody rb;
+                public Vector3 relV;
+                public Vector3 dP;
+                public Vector3 dAv;
+            }
+
+            /// <summary>
+            /// For holding damped packed vessels in place. 
+            /// </summary>
             private readonly Dictionary<uint, VesselInfo> dampedVessels =
                 new Dictionary<uint, VesselInfo>();
+
+            /// <summary>
+            /// For damping unpacked vessels, per Rigidbody
+            /// </summary>
+            private readonly List<RBInfo> dampedBodies =
+                new List<RBInfo>();
 
             public void Init(ATMagneticDamper damper_module)
             {
@@ -187,31 +216,88 @@ namespace AT_Utils
 
             private void FixedUpdate()
             {
-                if(FlightDriver.Pause)
+                if(FlightDriver.Pause || controller == null)
                     return;
-                if(dampedVessels.Count == 0)
-                    return;
-                var remove_vessels = new List<uint>();
-                foreach(var vsl_info in dampedVessels.Values)
+                if(dampedBodies.Count > 0
+                   && controller.part.Rigidbody != null)
                 {
-                    if(vsl_info.vessel != null && vsl_info.vessel.packed)
+                    var A = controller.Attenuation / 100f;
+                    var total_energy = 0f;
+                    var magnetEnabled = controller.magnetEnabled && magnet != null;
+                    var magnetPosition = magnetEnabled ? magnet.position : Vector3.zero;
+                    var h = controller.part.Rigidbody;
+                    var nBodies = dampedBodies.Count;
+                    for(var i = 0; i < nBodies; i++)
                     {
-                        vsl_info.vessel.SetPosition(transform.TransformPoint(vsl_info.position));
-                        if(vsl_info.energy_consumption > 0)
-                            controller.onDamperWorking(vsl_info.energy_consumption);
+                        var b = dampedBodies[i];
+                        if(b.rb == null)
+                            continue;
+                        b.relV = b.rb.velocity - h.velocity;
+                        b.dAv = A * (h.angularVelocity - b.rb.angularVelocity);
+                        b.dP = (A * b.rb.mass * b.relV)
+                            .ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
+                        if(magnetEnabled)
+                        {
+                            var d = b.rb.worldCenterOfMass - magnetPosition;
+                            b.dP += TimeWarp.fixedDeltaTime
+                                    * b.rb.mass
+                                    * (d.sqrMagnitude > 1 ? d.normalized : d);
+                        }
+                        var dL = Vector3.Dot(b.dAv.AbsComponents(), b.rb.inertiaTensor);
+                        total_energy += b.dP.sqrMagnitude + dL * dL;
+                        dampedBodies[i] = b;
                     }
-                    else
-                        remove_vessels.Add(vsl_info.id);
+                    if(total_energy > 0)
+                    {
+                        var energy_consumption = total_energy
+                                                 / TimeWarp.fixedDeltaTime
+                                                 * controller.EnergyConsumptionK;
+                        var K = 1f;
+                        if(energy_consumption > controller.MaxEnergyConsumption)
+                        {
+                            K = Mathf.Sqrt(controller.MaxEnergyConsumption / energy_consumption);
+                            energy_consumption = controller.MaxEnergyConsumption;
+                        }
+                        for(var i = 0; i < nBodies; i++)
+                        {
+                            var b = dampedBodies[i];
+                            if(b.rb == null)
+                                continue;
+                            if(K < 1)
+                            {
+                                b.dP *= K;
+                                b.dAv *= K;
+                            }
+                            b.rb.AddTorque(b.dAv, ForceMode.VelocityChange);
+                            b.rb.AddForce(-b.dP, ForceMode.Impulse);
+                            h.AddForce(b.dP, ForceMode.Impulse);
+                        }
+                        controller.drainEnergy(energy_consumption);
+                    }
+                    dampedBodies.Clear();
                 }
-                remove_vessels.ForEach(vsl_id => dampedVessels.Remove(vsl_id));
+                if(dampedVessels.Count > 0)
+                {
+                    var remove_vessels = new List<uint>();
+                    foreach(var vsl_info in dampedVessels.Values)
+                    {
+                        if(vsl_info.vessel != null && vsl_info.vessel.packed)
+                        {
+                            vsl_info.vessel.SetPosition(
+                                transform.TransformPoint(vsl_info.position));
+                            if(vsl_info.energy_consumption > 0)
+                                controller.drainEnergy(vsl_info.energy_consumption);
+                        }
+                        else
+                            remove_vessels.Add(vsl_info.id);
+                    }
+                    remove_vessels.ForEach(vsl_id => dampedVessels.Remove(vsl_id));
+                }
             }
 
             private void OnTriggerStay(Collider col)
             {
                 if(!enabled
-                   || controller == null
-                   || controller.part == null
-                   || controller.part.Rigidbody == null
                    || col == null
                    || col.attachedRigidbody == null)
                     return;
@@ -230,37 +316,7 @@ namespace AT_Utils
                 if(!p.vessel.packed)
                 {
                     var r = col.attachedRigidbody;
-                    var h = controller.part.Rigidbody;
-                    if(r == null || h == null)
-                        return;
-                    var total_energy = 0f;
-                    // damp angular and linear velocity
-                    if(controller.Attenuation > 0)
-                    {
-                        var dI = (controller.Attenuation * r.mass * (r.velocity - h.velocity))
-                            .ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
-                        var dAv = controller.Attenuation * (h.angularVelocity - r.angularVelocity);
-                        r.AddTorque(dAv, ForceMode.VelocityChange);
-                        r.AddForce(-dI, ForceMode.Impulse);
-                        h.AddForce(dI, ForceMode.Impulse);
-                        if(controller.EnergyConsumptionK > 0)
-                        {
-                            total_energy += dI.magnitude;
-                            total_energy += Vector3.Dot(dAv.AbsComponents(), r.inertiaTensor);
-                        }
-                    }
-                    // add force to attract the part to magnet's center
-                    if(controller.magnetEnabled && magnet != null)
-                    {
-                        var d = magnet.position - r.worldCenterOfMass;
-                        var attraction = (d.sqrMagnitude > 1 ? d.normalized : d) * r.mass;
-                        r.AddForce(attraction, ForceMode.Force);
-                        h.AddForce(-attraction, ForceMode.Force);
-                        if(controller.EnergyConsumptionK > 0)
-                            total_energy += attraction.magnitude * TimeWarp.fixedDeltaTime;
-                    }
-                    if(total_energy > 0)
-                        controller.onDamperWorking(total_energy);
+                    dampedBodies.Add(new RBInfo { rb = r });
                 }
                 else
                 {
@@ -272,7 +328,9 @@ namespace AT_Utils
                             vessel = p.vessel,
                             position = transform
                                 .InverseTransformPoint(p.vessel.vesselTransform.position),
-                            energy_consumption = p.TotalMass() * 0.01f
+                            energy_consumption = p.TotalMass()
+                                                 * controller.EnergyConsumptionK
+                                                 * 0.01f
                         };
                     }
                 }
