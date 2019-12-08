@@ -142,8 +142,8 @@ namespace AT_Utils
                 ? "Disable Damper"
                 : "Enable Damper";
             Events[nameof(ToggleMagnetEvent)].guiName = magnetEnabled
-                ? "Disable Magnet"
-                : "Enable Magnet";
+                ? "Disable Attractor"
+                : "Enable Attractor";
         }
 
         public void Enable(bool enable = true)
@@ -173,7 +173,7 @@ namespace AT_Utils
         [KSPAction(guiName = "Toggle Damper")]
         public void ToggleAction(KSPActionParam data) => Enable(!damperEnabled);
 
-        [KSPEvent(guiName = "Disable Magnet",
+        [KSPEvent(guiName = "Disable Attractor",
             guiActive = true,
             active = true,
             guiActiveUnfocused = true,
@@ -181,7 +181,7 @@ namespace AT_Utils
             unfocusedRange = 50)]
         public void ToggleMagnetEvent(BaseEventDetails data) => EnableMagnet(!magnetEnabled);
 
-        [KSPAction(guiName = "Toggle Magnet")]
+        [KSPAction(guiName = "Toggle Attractor")]
         public void ToggleMagnetAction(KSPActionParam data) => EnableMagnet(!magnetEnabled);
 
         protected class Damper : MonoBehaviour
