@@ -45,6 +45,7 @@ namespace AT_Utils
             base.OnStart(state);
             HasDamper = false;
             Attenuation = Utils.Clamp(Attenuation, 0, 0.999f);
+            EnergyConsumptionK = Utils.ClampL(EnergyConsumptionK, 1e-6f);
             if(!string.IsNullOrEmpty(Sensor))
             {
                 var sensor = part.FindModelComponent<MeshFilter>(Sensor);
@@ -54,9 +55,8 @@ namespace AT_Utils
                     damper = sensor.gameObject.AddComponent<Damper>();
                     damper.Init(this);
                     damper.enabled = damperEnabled;
+                    socket = part.CreateSocket();
                     HasDamper = true;
-                    if(EnergyConsumptionK > 0)
-                        socket = part.CreateSocket();
                 }
             }
             Events[nameof(ToggleEvent)].active =
