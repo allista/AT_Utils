@@ -128,6 +128,7 @@
         <Compile Include="Math\ConvexHull3D.cs" />
         <Compile Include="GUI\GraphicsUtils.cs" />
         <Compile Include="Metric.cs" />
+        <Compile Include="Resources\ResourceInfo.cs" />
         <Compile Include="Resources\ResourceLine.cs" />
         <Compile Include="Resources\ResourcePump.cs" />
         <Compile Include="Resources\ResourceWrapper.cs" />
@@ -175,7 +176,6 @@
         <Compile Include="Addons\ResourceTransfer.cs" />
         <Compile Include="Addons\SimplePartFilter.cs" />
         <Compile Include="Addons\SpawnSpaceManager.cs" />
-        <Compile Include="ResourceInfo.cs" />
         <Compile Include="GUI\TextureCache.cs" />
         <Compile Include="GUI\ProgressIndicator.cs" />
         <Compile Include="Math\StallDetector.cs" />
