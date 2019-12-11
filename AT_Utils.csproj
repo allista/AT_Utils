@@ -106,6 +106,7 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="Addons\ComputationBalancer.cs" />
         <Compile Include="Extensions\CollectionsExtensions.cs" />
         <Compile Include="Extensions\MiscExtensions.cs" />
         <Compile Include="Extensions\OrbitalExtensions.cs" />
@@ -178,7 +179,6 @@
         <Compile Include="GUI\TextureCache.cs" />
         <Compile Include="GUI\ProgressIndicator.cs" />
         <Compile Include="Math\StallDetector.cs" />
-        <Compile Include="ComputationBalancer.cs" />
         <Compile Include="Addons\VesselSpawner.cs" />
         <Compile Include="Modules\ATGroundAnchor.cs" />
         <Compile Include="Modules\ATMagneticDamper.cs" />
