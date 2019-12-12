@@ -11,6 +11,9 @@ namespace AT_Utils
 {
     public class ATGroundAnchor : PartModule
     {
+        [KSPField] public string AnimatorID = string.Empty;
+        IAnimator animator;
+
         [KSPField] public bool Controllable = true;
         [KSPField (isPersistant = true)] protected bool isAttached;
 
@@ -21,6 +24,7 @@ namespace AT_Utils
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
+            animator = part.GetAnimator(AnimatorID);
             if(!string.IsNullOrEmpty(attachSndPath))
                 Utils.createFXSound(part, fxSndAttach, attachSndPath, false);
             if(!string.IsNullOrEmpty(detachSndPath))
@@ -63,12 +67,16 @@ namespace AT_Utils
         {
             if(fxSndAttach.audio != null)
                 fxSndAttach.audio.Play();
+            if(animator != null)
+                animator.Open();
         }
 
         protected virtual void on_anchor_detached()
         {
             if(fxSndDetach.audio != null) 
                 fxSndDetach.audio.Play();
+            if(animator != null)
+                animator.Close();
         }
 
         protected virtual void detatch_anchor() {}
