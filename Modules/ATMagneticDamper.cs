@@ -271,8 +271,7 @@ namespace AT_Utils
                                  - h.velocity
                                  - Vector3.Cross(h.angularVelocity, dist);
                         b.dAv = A * (h.angularVelocity - b.rb.angularVelocity);
-                        b.dP = (A * b.rb.mass * b.relV)
-                            .ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
+                        b.dP = A * b.rb.mass * b.relV;
                         if(attractorEnabled)
                         {
                             var d = b.rb.worldCenterOfMass - attractorPosition;
@@ -280,6 +279,7 @@ namespace AT_Utils
                                     * b.rb.mass
                                     * (d.sqrMagnitude > 1 ? d.normalized : d);
                         }
+                        b.dP = b.dP.ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
                         var dL = Vector3.Dot(b.dAv.AbsComponents(), b.rb.inertiaTensor);
                         total_energy += b.dP.sqrMagnitude + dL * dL;
                         dampedBodies[i] = b;
