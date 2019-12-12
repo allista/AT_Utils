@@ -14,6 +14,15 @@ namespace AT_Utils
     public class ATMagneticDamper : PartModule
     {
         [KSPField(isPersistant = true,
+            guiName = "Damper Field",
+            guiActive = true,
+            guiActiveEditor = true,
+            guiActiveUnfocused = true,
+            unfocusedRange = 50)]
+        [UI_Toggle(scene = UI_Scene.All)]
+        public bool DamperEnabled;
+
+        [KSPField(isPersistant = true,
             guiActive = true,
             guiActiveEditor = true,
             guiName = "Attenuation")]
@@ -42,6 +51,15 @@ namespace AT_Utils
 
         [KSPField] public bool VariableAttractorForce;
 
+        [KSPField(isPersistant = true,
+            guiName = "Attractor",
+            guiActive = true,
+            guiActiveEditor = true,
+            guiActiveUnfocused = true,
+            unfocusedRange = 50)]
+        [UI_Toggle(scene = UI_Scene.All)]
+        public bool AttractorEnabled = true;
+
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensor = string.Empty;
         [KSPField] public string AttractorLocation = string.Empty;
@@ -57,9 +75,6 @@ namespace AT_Utils
 
         [KSPField] public string AnimatorID = string.Empty;
         private IAnimator animator;
-
-        [KSPField(isPersistant = true)] public bool damperEnabled = false;
-        [KSPField(isPersistant = true)] public bool attractorEnabled = true;
         protected Damper damper;
         protected ResourcePump socket;
 
@@ -102,10 +117,10 @@ namespace AT_Utils
                     sensor.AddCollider(true);
                     damper = sensor.gameObject.AddComponent<Damper>();
                     damper.Init(this);
-                    damper.enabled = damperEnabled;
+                    damper.enabled = DamperEnabled;
                     socket = part.CreateSocket();
                     animator = part.GetAnimator(AnimatorID);
-                    if(damperEnabled)
+                    if(DamperEnabled)
                         animator?.Open();
                     else
                         animator?.Close();
@@ -114,14 +129,14 @@ namespace AT_Utils
             }
             var damper_controllable = HasDamper && EnableControls;
             var attractor_controllable = damper_controllable && damper.HasAttractor;
+            Fields[nameof(DamperEnabled)].uiControlFlight.onFieldChanged = onDamperToggle;
+            Utils.EnableField(Fields[nameof(DamperEnabled)], damper_controllable);
             Utils.EnableField(Fields[nameof(Attenuation)], damper_controllable);
-            Events[nameof(ToggleEvent)].active = damper_controllable;
             Actions[nameof(ToggleAction)].active = damper_controllable;
+            Utils.EnableField(Fields[nameof(AttractorEnabled)], attractor_controllable);
             Utils.EnableField(Fields[nameof(AttractorPower)],
                 attractor_controllable && VariableAttractorForce);
-            Events[nameof(ToggleAttractorEvent)].active = attractor_controllable;
             Actions[nameof(ToggleAttractorAction)].active = attractor_controllable;
-            updatePAW();
         }
 
         private void OnDestroy()
@@ -156,71 +171,43 @@ namespace AT_Utils
             base.OnUpdate();
             if(!HasDamper)
                 return;
-            if(damperEnabled
+            if(reactivateAtUT > 0
+               && DamperEnabled
                && !damper.enabled
                && Planetarium.GetUniversalTime() > reactivateAtUT)
             {
                 animator?.Open();
                 damper.enabled = true;
+                reactivateAtUT = -1;
                 Utils.Message($"[{part.Title()}] Damper reactivated"); //debug
             }
         }
 
-        private void updatePAW()
+        private void onDamperToggle(BaseField field, object value)
         {
-            Events[nameof(ToggleEvent)].guiName = damperEnabled
-                ? "Disable Damper"
-                : "Enable Damper";
-            Events[nameof(ToggleAttractorEvent)].guiName = attractorEnabled
-                ? "Disable Attractor"
-                : "Enable Attractor";
-        }
-
-        public void Enable(bool enable = true)
-        {
-            if(!HasDamper || enable == damperEnabled)
+            if(!HasDamper)
                 return;
-            damper.enabled = damperEnabled = enable;
-            if(damperEnabled)
+            damper.enabled = DamperEnabled;
+            if(DamperEnabled)
                 animator?.Open();
             else
                 animator?.Close();
-            updatePAW();
         }
 
-        public void EnableAttractor(bool enable = true)
+        public void EnableDamper(bool enable)
         {
-            if(!HasDamper || enable == attractorEnabled)
-                return;
-            attractorEnabled = enable;
-            updatePAW();
+            var old = DamperEnabled;
+            DamperEnabled = enable;
+            onDamperToggle(Fields[nameof(DamperEnabled)], old);
         }
-
-        [KSPEvent(guiName = "Disable Damper",
-            active = true,
-            guiActive = true,
-            guiActiveEditor = true,
-            guiActiveUnfocused = true,
-            externalToEVAOnly = false,
-            unfocusedRange = 50)]
-        public void ToggleEvent(BaseEventDetails data) => Enable(!damperEnabled);
 
         [KSPAction(guiName = "Toggle Damper")]
-        public void ToggleAction(KSPActionParam data) => Enable(!damperEnabled);
-
-        [KSPEvent(guiName = "Disable Attractor",
-            active = true,
-            guiActive = true,
-            guiActiveEditor = true,
-            guiActiveUnfocused = true,
-            externalToEVAOnly = false,
-            unfocusedRange = 50)]
-        public void ToggleAttractorEvent(BaseEventDetails data) =>
-            EnableAttractor(!attractorEnabled);
+        public void ToggleAction(KSPActionParam data) => 
+            EnableDamper(!DamperEnabled);
 
         [KSPAction(guiName = "Toggle Attractor")]
         public void ToggleAttractorAction(KSPActionParam data) =>
-            EnableAttractor(!attractorEnabled);
+            AttractorEnabled = !AttractorEnabled;
 
         protected class Damper : MonoBehaviour
         {
@@ -265,7 +252,7 @@ namespace AT_Utils
                     attractor = controller.part.FindModelTransform(controller.AttractorLocation);
                 if(!string.IsNullOrEmpty(controller.AffectedPartTags))
                     tags = Utils.ParseLine(controller.AffectedPartTags, Utils.Comma);
-                controller.attractorEnabled = attractor != null;
+                controller.AttractorEnabled = attractor != null;
             }
 
             private void FixedUpdate()
@@ -277,7 +264,7 @@ namespace AT_Utils
                 {
                     var A = controller.Attenuation / 100f;
                     var total_energy = 0f;
-                    var attractorEnabled = controller.attractorEnabled && attractor != null;
+                    var attractorEnabled = controller.AttractorEnabled && attractor != null;
                     var attractorPosition = attractorEnabled ? attractor.position : Vector3.zero;
                     var h = controller.part.Rigidbody;
                     var nBodies = dampedBodies.Count;
