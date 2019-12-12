@@ -69,6 +69,7 @@ namespace AT_Utils
         [UI_Toggle(scene = UI_Scene.All, enabledText = "Inverted", disabledText = "Direct")]
         public bool InvertAttractor;
 
+        private const float RelativeVelocityThreshold = 0.05f;
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensor = string.Empty;
         [KSPField] public string AttractorLocation = string.Empty;
@@ -312,8 +313,10 @@ namespace AT_Utils
                             }
                         }
                         b.dP = b.dP.ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
-                        var dL = Vector3.Dot(b.dAv.AbsComponents(), b.rb.inertiaTensor);
-                        total_energy += b.dP.sqrMagnitude + dL * dL;
+                        var dL2 = Vector3.Dot(b.dAv.SquaredComponents(), b.rb.inertiaTensor);
+                        var dP2 = b.dP.sqrMagnitude
+                                  * Utils.ClampH(b.relV.magnitude / RelativeVelocityThreshold, 1);
+                        total_energy += dP2 / b.rb.mass + dP2 / h.mass + dL2;
                         dampedBodies[i] = b;
                     }
                     if(total_energy > 0)
