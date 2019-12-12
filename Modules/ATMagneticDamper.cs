@@ -27,6 +27,21 @@ namespace AT_Utils
             unit = "%")]
         public float Attenuation = 50f;
 
+        [KSPField(isPersistant = true,
+            guiActive = true,
+            guiActiveEditor = true,
+            guiName = "Attractor Power")]
+        [UI_FloatEdit(scene = UI_Scene.All,
+            minValue = 0f,
+            incrementLarge = 10f,
+            incrementSmall = 1f,
+            incrementSlide = 0.1f,
+            sigFigs = 1,
+            unit = "kN/t")]
+        public float AttractorPower = 1f;
+
+        [KSPField] public bool VariableAttractorForce;
+
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensor = string.Empty;
         [KSPField] public string AttractorLocation = string.Empty;
@@ -101,6 +116,8 @@ namespace AT_Utils
             Utils.EnableField(Fields[nameof(Attenuation)], damper_controllable);
             Events[nameof(ToggleEvent)].active = damper_controllable;
             Actions[nameof(ToggleAction)].active = damper_controllable;
+            Utils.EnableField(Fields[nameof(AttractorPower)],
+                attractor_controllable && VariableAttractorForce);
             Events[nameof(ToggleAttractorEvent)].active = attractor_controllable;
             Actions[nameof(ToggleAttractorAction)].active = attractor_controllable;
             updatePAW();
@@ -275,9 +292,16 @@ namespace AT_Utils
                         if(attractorEnabled)
                         {
                             var d = b.rb.worldCenterOfMass - attractorPosition;
-                            b.dP += TimeWarp.fixedDeltaTime
-                                    * b.rb.mass
-                                    * (d.sqrMagnitude > 1 ? d.normalized : d);
+                            var dm = d.magnitude;
+                            if(dm > 0)
+                            {
+                                var rVel2attractor = -Vector3.Dot(b.relV, d) / dm;
+                                var dV = Mathf.Min(
+                                    controller.part.crashTolerance * 0.9f - rVel2attractor,
+                                    TimeWarp.fixedDeltaTime * controller.AttractorPower);
+                                if(dV > 0)
+                                    b.dP += b.rb.mass * dV * (dm > 1 ? d / dm : d);
+                            }
                         }
                         b.dP = b.dP.ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
                         var dL = Vector3.Dot(b.dAv.AbsComponents(), b.rb.inertiaTensor);
