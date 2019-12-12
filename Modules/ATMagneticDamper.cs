@@ -266,7 +266,10 @@ namespace AT_Utils
                         var b = dampedBodies[i];
                         if(b.rb == null)
                             continue;
-                        b.relV = b.rb.velocity - h.velocity;
+                        var dist = b.rb.position - h.position;
+                        b.relV = b.rb.velocity
+                                 - h.velocity
+                                 - Vector3.Cross(h.angularVelocity, dist);
                         b.dAv = A * (h.angularVelocity - b.rb.angularVelocity);
                         b.dP = (A * b.rb.mass * b.relV)
                             .ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
