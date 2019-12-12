@@ -50,7 +50,7 @@ namespace AT_Utils
         [KSPField] public bool EnableControls = true;
         [KSPField] public float MaxForce = 100f;
         [KSPField] public float MaxEnergyConsumption = 50f;
-        [KSPField] public float EnergyConsumptionK = 0.1f;
+        [KSPField] public float EnergyConsumptionK = 1f;
         [KSPField] public float ReactivateAfterSeconds = 5f;
         private double reactivateAtUT = -1;
 
