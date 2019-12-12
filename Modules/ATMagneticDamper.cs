@@ -13,7 +13,10 @@ namespace AT_Utils
 {
     public class ATMagneticDamper : PartModule
     {
-        [KSPField(isPersistant = true, guiActive = true, guiName = "Attenuation")]
+        [KSPField(isPersistant = true,
+            guiActive = true,
+            guiActiveEditor = true,
+            guiName = "Attenuation")]
         [UI_FloatEdit(scene = UI_Scene.All,
             minValue = 0f,
             maxValue = 99.9f,
@@ -163,8 +166,9 @@ namespace AT_Utils
         }
 
         [KSPEvent(guiName = "Disable Damper",
-            guiActive = true,
             active = true,
+            guiActive = true,
+            guiActiveEditor = true,
             guiActiveUnfocused = true,
             externalToEVAOnly = false,
             unfocusedRange = 50)]
@@ -174,8 +178,9 @@ namespace AT_Utils
         public void ToggleAction(KSPActionParam data) => Enable(!damperEnabled);
 
         [KSPEvent(guiName = "Disable Attractor",
-            guiActive = true,
             active = true,
+            guiActive = true,
+            guiActiveEditor = true,
             guiActiveUnfocused = true,
             externalToEVAOnly = false,
             unfocusedRange = 50)]
