@@ -66,7 +66,7 @@ namespace AT_Utils
             guiActiveEditor = true,
             guiActiveUnfocused = true,
             unfocusedRange = 50)]
-        [UI_Toggle(scene = UI_Scene.All, enabledText = "Inverted", disabledText = "Direct")]
+        [UI_Toggle(scene = UI_Scene.All, enabledText = "Reverse", disabledText = "Direct")]
         public bool InvertAttractor;
 
         private const float RelativeVelocityThreshold = 0.05f;
