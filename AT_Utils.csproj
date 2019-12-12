@@ -114,6 +114,7 @@
         <Compile Include="Extensions\PartModuleExtensions.cs" />
         <Compile Include="Extensions\VectorExtensions.cs" />
         <Compile Include="Extensions\VesselExtensions.cs" />
+        <Compile Include="Interfaces\IAnimator.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="KSP_AVC_Updater.cs" />
         <Compile Include="Math\Vector6.cs" />
