@@ -77,7 +77,7 @@ namespace AT_Utils
             var info = StringBuilderCache.Acquire();
             info.AppendLine($"Attenuation: {Attenuation:F1} %");
             info.AppendLine($"Max.Force: {MaxForce:F1} kN");
-            info.AppendLine($"Max.Energy Consumption: {MaxEnergyConsumption:F1} ec/s");
+            info.AppendLine($"Max.EC Current: {MaxEnergyConsumption:F1} ec/s");
             if(string.IsNullOrEmpty(AttractorLocation))
                 info.AppendLine("Has attractor");
             info.AppendLine(string.IsNullOrEmpty(AffectedPartTags)
