@@ -41,6 +41,8 @@ namespace AT_Utils
 
         [KSPField(isPersistant = true)] public bool damperEnabled = true;
         [KSPField(isPersistant = true)] public bool magnetEnabled = true;
+        [KSPField] public string AnimatorID = string.Empty;
+        private IAnimator animator;
         protected Damper damper;
         protected ResourcePump socket;
 
@@ -85,6 +87,11 @@ namespace AT_Utils
                     damper.Init(this);
                     damper.enabled = damperEnabled;
                     socket = part.CreateSocket();
+                    animator = part.GetAnimator(AnimatorID);
+                    if(damperEnabled)
+                        animator?.Open();
+                    else
+                        animator?.Close();
                     HasDamper = true;
                 }
             }
@@ -118,6 +125,7 @@ namespace AT_Utils
                 return;
             if(socket.PartialTransfer)
             {
+                animator?.Close();
                 damper.enabled = false;
                 reactivateAtUT = Planetarium.GetUniversalTime() + ReactivateAfterSeconds;
                 Utils.Message(ReactivateAfterSeconds,
@@ -134,6 +142,7 @@ namespace AT_Utils
                && !damper.enabled
                && Planetarium.GetUniversalTime() > reactivateAtUT)
             {
+                animator?.Open();
                 damper.enabled = true;
                 Utils.Message($"[{part.Title()}] Damper reactivated"); //debug
             }
@@ -154,6 +163,10 @@ namespace AT_Utils
             if(!HasDamper || enable == damperEnabled)
                 return;
             damper.enabled = damperEnabled = enable;
+            if(damperEnabled)
+                animator?.Open();
+            else
+                animator?.Close();
             updatePAW();
         }
 
