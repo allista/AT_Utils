@@ -60,6 +60,15 @@ namespace AT_Utils
         [UI_Toggle(scene = UI_Scene.All)]
         public bool AttractorEnabled = true;
 
+        [KSPField(isPersistant = true,
+            guiName = "Attractor Mode",
+            guiActive = true,
+            guiActiveEditor = true,
+            guiActiveUnfocused = true,
+            unfocusedRange = 50)]
+        [UI_Toggle(scene = UI_Scene.All, enabledText = "Inverted", disabledText = "Direct")]
+        public bool InvertAttractor;
+
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensor = string.Empty;
         [KSPField] public string AttractorLocation = string.Empty;
@@ -136,6 +145,7 @@ namespace AT_Utils
             Utils.EnableField(Fields[nameof(AttractorEnabled)], attractor_controllable);
             Utils.EnableField(Fields[nameof(AttractorPower)],
                 attractor_controllable && VariableAttractorForce);
+            Utils.EnableField(Fields[nameof(InvertAttractor)], attractor_controllable);
             Actions[nameof(ToggleAttractorAction)].active = attractor_controllable;
         }
 
@@ -208,6 +218,10 @@ namespace AT_Utils
         [KSPAction(guiName = "Toggle Attractor")]
         public void ToggleAttractorAction(KSPActionParam data) =>
             AttractorEnabled = !AttractorEnabled;
+
+        [KSPAction(guiName = "Invert Attractor")]
+        public void InvertAttractorAction(KSPActionParam data) =>
+            InvertAttractor = !InvertAttractor;
 
         protected class Damper : MonoBehaviour
         {
@@ -290,7 +304,11 @@ namespace AT_Utils
                                     controller.part.crashTolerance * 0.9f - rVel2attractor,
                                     TimeWarp.fixedDeltaTime * controller.AttractorPower);
                                 if(dV > 0)
+                                {
+                                    if(controller.InvertAttractor)
+                                        dV = -dV;
                                     b.dP += b.rb.mass * dV * (dm > 1 ? d / dm : d);
+                                }
                             }
                         }
                         b.dP = b.dP.ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
