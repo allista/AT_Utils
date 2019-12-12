@@ -39,7 +39,7 @@ namespace AT_Utils
         [KSPField(isPersistant = true,
             guiActive = true,
             guiActiveEditor = true,
-            guiName = "Attractor Power")]
+            guiName = "Attr. Power")]
         [UI_FloatEdit(scene = UI_Scene.All,
             minValue = 0f,
             incrementLarge = 10f,
