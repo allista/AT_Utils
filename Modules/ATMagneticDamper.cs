@@ -29,7 +29,7 @@ namespace AT_Utils
 
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensor = string.Empty;
-        [KSPField] public string MagnetLocation = string.Empty;
+        [KSPField] public string AttractorLocation = string.Empty;
         [KSPField] public string AffectedPartTags = string.Empty;
         [KSPField] public bool AffectKerbals;
         [KSPField] public bool EnableControls = true;
@@ -39,15 +39,16 @@ namespace AT_Utils
         [KSPField] public float ReactivateAfterSeconds = 5f;
         private double reactivateAtUT = -1;
 
-        [KSPField(isPersistant = true)] public bool damperEnabled = true;
-        [KSPField(isPersistant = true)] public bool magnetEnabled = true;
         [KSPField] public string AnimatorID = string.Empty;
         private IAnimator animator;
+
+        [KSPField(isPersistant = true)] public bool damperEnabled = false;
+        [KSPField(isPersistant = true)] public bool attractorEnabled = true;
         protected Damper damper;
         protected ResourcePump socket;
 
         public bool HasDamper { get; private set; }
-        public bool HasMagnet => HasDamper && damper.HasMagnet;
+        public bool HasAttractor => HasDamper && damper.HasAttractor;
 
         public static ATMagneticDamper GetDamper(Part p, string id) =>
             string.IsNullOrEmpty(id)
@@ -62,7 +63,7 @@ namespace AT_Utils
             info.AppendLine($"Attenuation: {Attenuation:F1} %");
             info.AppendLine($"Max.Force: {MaxForce:F1} kN");
             info.AppendLine($"Max.Energy Consumption: {MaxEnergyConsumption:F1} ec/s");
-            if(string.IsNullOrEmpty(MagnetLocation))
+            if(string.IsNullOrEmpty(AttractorLocation))
                 info.AppendLine("Has attractor");
             info.AppendLine(string.IsNullOrEmpty(AffectedPartTags)
                 ? "Affects all parts"
@@ -95,16 +96,13 @@ namespace AT_Utils
                     HasDamper = true;
                 }
             }
-            Fields[nameof(Attenuation)].guiActive =
-                HasDamper && EnableControls;
-            Events[nameof(ToggleEvent)].active =
-                HasDamper && EnableControls;
-            Actions[nameof(ToggleAction)].active =
-                HasDamper && EnableControls;
-            Events[nameof(ToggleMagnetEvent)].active =
-                HasDamper && EnableControls && damper.HasMagnet;
-            Actions[nameof(ToggleMagnetAction)].active =
-                HasDamper && EnableControls && damper.HasMagnet;
+            var damper_controllable = HasDamper && EnableControls;
+            var attractor_controllable = damper_controllable && damper.HasAttractor;
+            Utils.EnableField(Fields[nameof(Attenuation)], damper_controllable);
+            Events[nameof(ToggleEvent)].active = damper_controllable;
+            Actions[nameof(ToggleAction)].active = damper_controllable;
+            Events[nameof(ToggleAttractorEvent)].active = attractor_controllable;
+            Actions[nameof(ToggleAttractorAction)].active = attractor_controllable;
             updatePAW();
         }
 
@@ -153,7 +151,7 @@ namespace AT_Utils
             Events[nameof(ToggleEvent)].guiName = damperEnabled
                 ? "Disable Damper"
                 : "Enable Damper";
-            Events[nameof(ToggleMagnetEvent)].guiName = magnetEnabled
+            Events[nameof(ToggleAttractorEvent)].guiName = attractorEnabled
                 ? "Disable Attractor"
                 : "Enable Attractor";
         }
@@ -170,11 +168,11 @@ namespace AT_Utils
             updatePAW();
         }
 
-        public void EnableMagnet(bool enable = true)
+        public void EnableAttractor(bool enable = true)
         {
-            if(!HasDamper || enable == magnetEnabled)
+            if(!HasDamper || enable == attractorEnabled)
                 return;
-            magnetEnabled = enable;
+            attractorEnabled = enable;
             updatePAW();
         }
 
@@ -197,18 +195,20 @@ namespace AT_Utils
             guiActiveUnfocused = true,
             externalToEVAOnly = false,
             unfocusedRange = 50)]
-        public void ToggleMagnetEvent(BaseEventDetails data) => EnableMagnet(!magnetEnabled);
+        public void ToggleAttractorEvent(BaseEventDetails data) =>
+            EnableAttractor(!attractorEnabled);
 
         [KSPAction(guiName = "Toggle Attractor")]
-        public void ToggleMagnetAction(KSPActionParam data) => EnableMagnet(!magnetEnabled);
+        public void ToggleAttractorAction(KSPActionParam data) =>
+            EnableAttractor(!attractorEnabled);
 
         protected class Damper : MonoBehaviour
         {
             private ATMagneticDamper controller;
-            private Transform magnet;
+            private Transform attractor;
             private string[] tags;
 
-            public bool HasMagnet => magnet != null;
+            public bool HasAttractor => attractor != null;
 
             private struct VesselInfo
             {
@@ -241,11 +241,11 @@ namespace AT_Utils
             public void Init(ATMagneticDamper damper_module)
             {
                 controller = damper_module;
-                if(!string.IsNullOrEmpty(controller.MagnetLocation))
-                    magnet = controller.part.FindModelTransform(controller.MagnetLocation);
+                if(!string.IsNullOrEmpty(controller.AttractorLocation))
+                    attractor = controller.part.FindModelTransform(controller.AttractorLocation);
                 if(!string.IsNullOrEmpty(controller.AffectedPartTags))
                     tags = Utils.ParseLine(controller.AffectedPartTags, Utils.Comma);
-                controller.magnetEnabled = magnet != null;
+                controller.attractorEnabled = attractor != null;
             }
 
             private void FixedUpdate()
@@ -257,8 +257,8 @@ namespace AT_Utils
                 {
                     var A = controller.Attenuation / 100f;
                     var total_energy = 0f;
-                    var magnetEnabled = controller.magnetEnabled && magnet != null;
-                    var magnetPosition = magnetEnabled ? magnet.position : Vector3.zero;
+                    var attractorEnabled = controller.attractorEnabled && attractor != null;
+                    var attractorPosition = attractorEnabled ? attractor.position : Vector3.zero;
                     var h = controller.part.Rigidbody;
                     var nBodies = dampedBodies.Count;
                     for(var i = 0; i < nBodies; i++)
@@ -270,9 +270,9 @@ namespace AT_Utils
                         b.dAv = A * (h.angularVelocity - b.rb.angularVelocity);
                         b.dP = (A * b.rb.mass * b.relV)
                             .ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
-                        if(magnetEnabled)
+                        if(attractorEnabled)
                         {
-                            var d = b.rb.worldCenterOfMass - magnetPosition;
+                            var d = b.rb.worldCenterOfMass - attractorPosition;
                             b.dP += TimeWarp.fixedDeltaTime
                                     * b.rb.mass
                                     * (d.sqrMagnitude > 1 ? d.normalized : d);
