@@ -17,15 +17,15 @@ namespace AT_Utils
 {
     public class VesselSpawner
     {
-        Part part;
-        Vessel vessel => part.vessel;
+        private Part part;
+        private Vessel vessel => part.vessel;
 
         public bool LaunchInProgress { get; private set; }
-        Vessel launched_vessel;
         bool vessel_loaded;
 
         public VesselSpawner() { }
         public VesselSpawner(Part part) { this.part = part; }
+        private Vessel launched_vessel;
 
         public void BeginLaunch() => LaunchInProgress = true;
         public void AbortLaunch() => LaunchInProgress = false;
@@ -42,9 +42,11 @@ namespace AT_Utils
             begin_launch(spawn_transform);
             PutShipToGround(construct, spawn_transform, spawn_offset);
             ShipConstruction.AssembleForLaunch(construct,
-                                               vessel.landedAt, vessel.displaylandedAt, part.flagURL,
-                                               FlightDriver.FlightStateCache,
-                                               new VesselCrewManifest());
+                vessel.landedAt,
+                vessel.displaylandedAt,
+                part.flagURL,
+                FlightDriver.FlightStateCache,
+                new VesselCrewManifest());
             launched_vessel = FlightGlobals.Vessels[FlightGlobals.Vessels.Count - 1];
             on_vessel_positioned?.Invoke(launched_vessel);
             while(!launched_vessel.loaded)
@@ -92,8 +94,10 @@ namespace AT_Utils
             root.Translate(spawn_transform.TransformPointUnscaled(spawn_offset), Space.World);
             root.RotateAround(spawn_transform.position, axis, angle);
             //initialize new vessel
-            AssembleForLaunchUnlanded(construct, new Orbit(vessel.orbit), 
-                                      part.flagURL, FlightDriver.FlightStateCache);
+            AssembleForLaunchUnlanded(construct,
+                new Orbit(vessel.orbit),
+                part.flagURL,
+                FlightDriver.FlightStateCache);
             launched_vessel = FlightGlobals.Vessels[FlightGlobals.Vessels.Count - 1];
             on_vessel_positioned?.Invoke(launched_vessel);
             //launch the vessel
@@ -153,14 +157,19 @@ namespace AT_Utils
                     Collider collider = componentsInChildren[j];
                     if(collider.enabled && collider.gameObject.layer != 21)
                     {
-                        partHeightQuery.lowestPoint = Mathf.Min(partHeightQuery.lowestPoint, collider.bounds.min.y);
-                        partHeightQuery.lowestOnParts[p] = Mathf.Min(partHeightQuery.lowestOnParts[p], collider.bounds.min.y);
+                        partHeightQuery.lowestPoint =
+                            Mathf.Min(partHeightQuery.lowestPoint, collider.bounds.min.y);
+                        partHeightQuery.lowestOnParts[p] =
+                            Mathf.Min(partHeightQuery.lowestOnParts[p], collider.bounds.min.y);
                     }
                 }
             }
             for(int k = 0; k < count; k++)
-                ship[k].SendMessage("OnPutToGround", partHeightQuery, SendMessageOptions.DontRequireReceiver);
-            Utils.Log("putting ship to ground: " + partHeightQuery.lowestPoint);
+                ship[k]
+                    .SendMessage("OnPutToGround",
+                        partHeightQuery,
+                        SendMessageOptions.DontRequireReceiver);
+            Utils.Log("Putting ship to ground: " + partHeightQuery.lowestPoint);
             float angle;
             Vector3 axis;
             spawnPoint.rotation.ToAngleAxis(out angle, out axis);
@@ -172,8 +181,12 @@ namespace AT_Utils
             root.RotateAround(spawnPoint.position, axis, angle);
         }
 
-        public static Vessel AssembleForLaunchUnlanded(ShipConstruct ship, Orbit orbit,
-                                                       string flagURL, Game sceneState)
+        public static Vessel AssembleForLaunchUnlanded(
+            ShipConstruct ship,
+            Orbit orbit,
+            string flagURL,
+            Game sceneState
+        )
         {
             var localRoot = ship.parts[0].localRoot;
             var vessel = localRoot.gameObject.GetComponent<Vessel>();
@@ -237,7 +250,8 @@ namespace AT_Utils
 
         IEnumerable stabilize_launched_vessel(int frames)
         {
-            if(launched_vessel == null) yield break;
+            if(launched_vessel == null)
+                yield break;
             var step = 1f / frames;
             for(int i = 0; i < frames; i++)
             {
@@ -260,26 +274,32 @@ namespace AT_Utils
                 //conserve momentum
                 var hM = vessel.GetTotalMass();
                 var lM = launched_vessel.GetTotalMass();
-                var lvel = dV * hM/(hM + lM);
+                var lvel = dV * hM / (hM + lM);
                 vel += lvel;
-                part.Rigidbody.AddForce(-lvel*lM, ForceMode.Impulse);
+                part.Rigidbody.AddForce(-lvel * lM, ForceMode.Impulse);
             }
             launched_vessel.SetWorldVelocity(vel);
             for(int i = 0; i < 10; i++)
             {
                 //this is a hack for incorrect VelocityChange mode (or whatever causing this);
                 //if the startAV is applied once, the resulting vessel.angularVelocity is 2-3 times bigger
-                var deltaAV = startAV - launched_vessel.transform.rotation * launched_vessel.angularVelocity;
+                var deltaAV = startAV
+                              - launched_vessel.transform.rotation
+                              * launched_vessel.angularVelocity;
                 var deltaAVm = deltaAV.sqrMagnitude;
-                if(deltaAVm < 1e-5) break;
-                var av = deltaAVm > startAVm ? deltaAV.ClampMagnitudeH(startAVm * Mathf.Sqrt(1 / deltaAVm)) : deltaAV / 3;
+                if(deltaAVm < 1e-5)
+                    break;
+                var av = deltaAVm > startAVm
+                    ? deltaAV.ClampMagnitudeH(startAVm * Mathf.Sqrt(1 / deltaAVm))
+                    : deltaAV / 3;
                 var CoM = launched_vessel.CoM;
                 foreach(Part p in launched_vessel.Parts)
                 {
                     if(p.Rigidbody != null)
                     {
                         p.Rigidbody.AddTorque(av, ForceMode.VelocityChange);
-                        p.Rigidbody.AddForce(Vector3.Cross(av, p.Rigidbody.worldCenterOfMass - CoM), ForceMode.VelocityChange);
+                        p.Rigidbody.AddForce(Vector3.Cross(av, p.Rigidbody.worldCenterOfMass - CoM),
+                            ForceMode.VelocityChange);
                     }
                 }
                 FlightCameraOverride.UpdateDurationSeconds(1);
@@ -397,35 +417,48 @@ namespace AT_Utils
                 enable_vsl_colliders(vsl_colliders);
         }
 
-        void position_proto_vessel(ProtoVessel proto_vessel, Transform spawn_transform, Vector3 spawn_offset)
+        private void position_proto_vessel(
+            ProtoVessel proto_vessel,
+            Transform spawn_transform,
+            Vector3 spawn_offset
+        )
         {
             //state
             proto_vessel.situation = vessel.situation;
-            proto_vessel.splashed  = vessel.Splashed;
-            proto_vessel.landed    = vessel.Landed;
-            proto_vessel.landedAt  = vessel.landedAt;
+            proto_vessel.splashed = vessel.Splashed;
+            proto_vessel.landed = vessel.Landed;
+            proto_vessel.landedAt = vessel.landedAt;
             //rotation
             spawn_offset = spawn_transform.TransformDirection(spawn_offset);
             //rotate spawn_transform.rotation to protovessel's reference frame
-            proto_vessel.rotation = vessel.mainBody.bodyTransform.rotation.Inverse() * spawn_transform.rotation;
+            proto_vessel.rotation = vessel.mainBody.bodyTransform.rotation.Inverse()
+                                    * spawn_transform.rotation;
             //set vessel's orbit
-            var UT    = Planetarium.GetUniversalTime();
-            var horb  = vessel.orbit;
-            var vorb  = new Orbit();
-            var d_pos = spawn_transform.position+spawn_offset - vessel.CurrentCoM;
-            var vpos  = horb.pos + new Vector3d(d_pos.x, d_pos.z, d_pos.y) 
-                            + (horb.vel+((Vector3d)vessel.rb_velocity).xzy-horb.GetRotFrameVel(horb.referenceBody))*TimeWarp.fixedDeltaTime;
-            var vvel  = horb.vel+((Vector3d)(vessel.rb_velocity + Vector3.Cross(vessel.transform.rotation*vessel.angularVelocity, d_pos))).xzy;
+            var UT = Planetarium.GetUniversalTime();
+            var horb = vessel.orbit;
+            var vorb = new Orbit();
+            var d_pos = spawn_transform.position + spawn_offset - vessel.CurrentCoM;
+            var vpos = horb.pos
+                       + new Vector3d(d_pos.x, d_pos.z, d_pos.y)
+                       + (horb.vel
+                          + ((Vector3d)vessel.rb_velocity).xzy
+                          - horb.GetRotFrameVel(horb.referenceBody))
+                       * TimeWarp.fixedDeltaTime;
+            var vvel = horb.vel
+                       + ((Vector3d)(vessel.rb_velocity
+                                     + Vector3.Cross(
+                                         vessel.transform.rotation * vessel.angularVelocity,
+                                         d_pos))).xzy;
             vorb.UpdateFromStateVectors(vpos, vvel, horb.referenceBody, UT);
             proto_vessel.orbitSnapShot = new OrbitSnapshot(vorb);
             //position on a surface
             if(vessel.LandedOrSplashed)
-                vpos = spawn_transform.position+spawn_offset;
-            else 
+                vpos = spawn_transform.position + spawn_offset;
+            else
                 vpos = vessel.mainBody.position + vpos.xzy;
             proto_vessel.longitude = vessel.mainBody.GetLongitude(vpos);
-            proto_vessel.latitude  = vessel.mainBody.GetLatitude(vpos);
-            proto_vessel.altitude  = vessel.mainBody.GetAltitude(vpos);
+            proto_vessel.latitude = vessel.mainBody.GetLatitude(vpos);
+            proto_vessel.altitude = vessel.mainBody.GetAltitude(vpos);
         }
     }
 }
