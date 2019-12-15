@@ -15,31 +15,142 @@ using UnityEngine;
 
 namespace AT_Utils
 {
-    public class VesselSpawner
+    public class VesselSpawner : MonoBehaviour
     {
+        public class WaitForLaunchInstruction : CustomYieldInstruction
+        {
+            private readonly VesselSpawner Spawner;
+            public WaitForLaunchInstruction(VesselSpawner spawner) => Spawner = spawner;
+            public override bool keepWaiting => Spawner != null && Spawner.LaunchInProgress;
+        }
+
         private Part part;
         private Vessel vessel => part.vessel;
 
         public bool LaunchInProgress { get; private set; }
-        bool vessel_loaded;
-
-        public VesselSpawner() { }
-        public VesselSpawner(Part part) { this.part = part; }
+        private Coroutine launch_program;
         private Vessel launched_vessel;
+        private readonly List<Collider> disabled_launched_colliders = new List<Collider>();
+        private Action onFixedUpdate;
+        private Callback<Vessel> onVesselLoaded, onVesselOffRails;
 
         public void BeginLaunch() => LaunchInProgress = true;
-        public void AbortLaunch() => LaunchInProgress = false;
+        public void AbortLaunch() => end_launch();
 
-        public IEnumerator<YieldInstruction> SpawnShipConstructToGround(ShipConstruct construct,
-                                                                        Transform spawn_transform,
-                                                                        Vector3 spawn_offset,
-                                                                        Callback<Vessel> on_vessel_positioned = null,
-                                                                        Callback<Vessel> on_vessel_loaded = null,
-                                                                        Callback<Vessel> on_vessel_off_rails = null,
-                                                                        Callback<Vessel> on_vessel_launched = null,
-                                                                        int easing_frames = 0)
+        public WaitForLaunchInstruction WaitForLaunch => new WaitForLaunchInstruction(this);
+
+        public void Init(Part p)
         {
-            begin_launch(spawn_transform);
+            part = p;
+        }
+
+        private void Awake()
+        {
+            GameEvents.onVesselLoaded.Add(onLaunchedVesselLoaded);
+            GameEvents.onVesselGoOffRails.Add(onLaunchedVesselOffRails);
+        }
+
+        private void OnDestroy()
+        {
+            GameEvents.onVesselLoaded.Remove(onLaunchedVesselLoaded);
+            GameEvents.onVesselGoOffRails.Remove(onLaunchedVesselOffRails);
+        }
+
+        private void onLaunchedVesselLoaded(Vessel vsl)
+        {
+            if(launched_vessel != vsl || launched_vessel == null)
+                return;
+            onVesselLoaded?.Invoke(launched_vessel);
+        }
+
+        private void onLoadedInFlight(Vessel vsl)
+        {
+            launched_vessel.Parts.ForEach(p => p.partTransform = p.transform);
+        }
+
+        private void onLaunchedVesselOffRails(Vessel vsl)
+        {
+            if(launched_vessel != vsl || launched_vessel == null)
+                return;
+            onVesselOffRails?.Invoke(launched_vessel);
+        }
+
+        private void FixedUpdate()
+        {
+            onFixedUpdate?.Invoke();
+        }
+
+        private IEnumerator<YieldInstruction> run_program(
+            IEnumerator program,
+            Callback<Vessel> on_vessel_launched
+        )
+        {
+            yield return StartCoroutine(program);
+            on_vessel_launched?.Invoke(launched_vessel);
+            end_launch();
+            Utils.Log("Launch Ended");
+        }
+
+        private void start_program(
+            IEnumerator program,
+            Callback<Vessel> on_vessel_loaded,
+            Callback<Vessel> on_vessel_off_rails,
+            Callback<Vessel> on_vessel_launched
+        )
+        {
+            Utils.Log("Begin Launch");
+            if(launch_program != null)
+                StopCoroutine(launch_program);
+            LaunchInProgress = true;
+            onVesselLoaded = on_vessel_loaded;
+            onVesselOffRails = on_vessel_off_rails;
+            disabled_launched_colliders.Clear();
+            FlightCameraOverride.AnchorForSeconds(FlightCameraOverride.Mode.Hold,
+                FlightGlobals.ActiveVessel.transform,
+                1);
+            launch_program = StartCoroutine(run_program(program, on_vessel_launched));
+        }
+
+        private void end_launch()
+        {
+            launched_vessel = null;
+            disabled_launched_colliders.Clear();
+            onVesselLoaded = null;
+            onVesselOffRails = null;
+            launch_program = null;
+            onFixedUpdate = null;
+            LaunchInProgress = false;
+        }
+
+        public void SpawnShipConstructToGround(
+            ShipConstruct construct,
+            Transform spawn_transform,
+            Vector3 spawn_offset,
+            Callback<Vessel> on_vessel_positioned = null,
+            Callback<Vessel> on_vessel_loaded = null,
+            Callback<Vessel> on_vessel_off_rails = null,
+            Callback<Vessel> on_vessel_launched = null,
+            int easing_frames = 0
+        )
+        {
+            start_program(SpawnShipConstructToGround_program(construct,
+                    spawn_transform,
+                    spawn_offset,
+                    on_vessel_positioned,
+                    easing_frames),
+                on_vessel_loaded,
+                on_vessel_off_rails,
+                on_vessel_launched);
+        }
+
+        private IEnumerator<YieldInstruction> SpawnShipConstructToGround_program(
+            ShipConstruct construct,
+            Transform spawn_transform,
+            Vector3 spawn_offset,
+            Callback<Vessel> on_vessel_positioned = null,
+            int easing_frames = 0
+        )
+        {
             PutShipToGround(construct, spawn_transform, spawn_offset);
             ShipConstruction.AssembleForLaunch(construct,
                 vessel.landedAt,
@@ -54,7 +165,6 @@ namespace AT_Utils
                 FlightCameraOverride.UpdateDurationSeconds(1);
                 yield return new WaitForFixedUpdate();
             }
-            on_vessel_loaded?.Invoke(launched_vessel);
             while(launched_vessel.packed)
             {
                 launched_vessel.precalc.isEasingGravity = true;
@@ -63,7 +173,6 @@ namespace AT_Utils
                 FlightCameraOverride.UpdateDurationSeconds(1);
                 yield return new WaitForFixedUpdate();
             }
-            on_vessel_off_rails?.Invoke(launched_vessel);
             if(easing_frames > 0)
             {
                 foreach(var n in stabilize_launched_vessel(easing_frames))
@@ -72,21 +181,38 @@ namespace AT_Utils
                     yield return new WaitForFixedUpdate();
                 }
             }
-            on_vessel_launched?.Invoke(launched_vessel);
             StageManager.BeginFlight();
-            end_launch();
         }
 
-        public IEnumerator<YieldInstruction> SpawnShipConstruct(ShipConstruct construct,
-                                                                Transform spawn_transform,
-                                                                Vector3 spawn_offset,
-                                                                Vector3 dV,
-                                                                Callback<Vessel> on_vessel_positioned = null,
-                                                                Callback<Vessel> on_vessel_loaded = null,
-                                                                Callback<Vessel> on_vessel_off_rails = null,
-                                                                Callback<Vessel> on_vessel_launched = null)
+        public void SpawnShipConstruct(
+            ShipConstruct construct,
+            Transform spawn_transform,
+            Vector3 spawn_offset,
+            Vector3 dV,
+            Callback<Vessel> on_vessel_positioned = null,
+            Callback<Vessel> on_vessel_loaded = null,
+            Callback<Vessel> on_vessel_off_rails = null,
+            Callback<Vessel> on_vessel_launched = null
+        )
         {
-            begin_launch(spawn_transform);
+            start_program(SpawnShipConstruct_program(construct,
+                    spawn_transform,
+                    spawn_offset,
+                    dV,
+                    on_vessel_positioned),
+                on_vessel_loaded,
+                on_vessel_off_rails,
+                on_vessel_launched);
+        }
+
+        private IEnumerator<YieldInstruction> SpawnShipConstruct_program(
+            ShipConstruct construct,
+            Transform spawn_transform,
+            Vector3 spawn_offset,
+            Vector3 dV,
+            Callback<Vessel> on_vessel_positioned = null
+        )
+        {
             float angle;
             Vector3 axis;
             spawn_transform.rotation.ToAngleAxis(out angle, out axis);
@@ -101,29 +227,45 @@ namespace AT_Utils
             launched_vessel = FlightGlobals.Vessels[FlightGlobals.Vessels.Count - 1];
             on_vessel_positioned?.Invoke(launched_vessel);
             //launch the vessel
-            foreach(var i in launch_moving_vessel(spawn_transform, 
-                                                  spawn_offset,
-                                                  spawn_transform.rotation.Inverse()*root.rotation,
-                                                  dV,
-                                                  on_vessel_loaded,
-                                                  on_vessel_off_rails,
-                                                  on_vessel_launched))
-                yield return i;
+            yield return StartCoroutine(launch_moving_vessel(spawn_transform,
+                spawn_offset,
+                spawn_transform.rotation.Inverse() * root.rotation,
+                dV));
             StageManager.BeginFlight();
-            end_launch();
         }
 
-        public IEnumerator<YieldInstruction> SpawnProtoVessel(ProtoVessel proto_vessel,
-                                                              Transform spawn_transform,
-                                                              Vector3 spawn_offset,
-                                                              Vector3 dV,
-                                                              Callback<ProtoVessel> on_proto_vessel_positioned = null,
-                                                              Callback<Vessel> on_vessel_positioned = null,
-                                                              Callback<Vessel> on_vessel_loaded = null,
-                                                              Callback<Vessel> on_vessel_off_rails = null,
-                                                              Callback<Vessel> on_vessel_launched = null)
+        public void SpawnProtoVessel(
+            ProtoVessel proto_vessel,
+            Transform spawn_transform,
+            Vector3 spawn_offset,
+            Vector3 dV,
+            Callback<ProtoVessel> on_proto_vessel_positioned = null,
+            Callback<Vessel> on_vessel_positioned = null,
+            Callback<Vessel> on_vessel_loaded = null,
+            Callback<Vessel> on_vessel_off_rails = null,
+            Callback<Vessel> on_vessel_launched = null
+        )
         {
-            begin_launch(spawn_transform);
+            start_program(SpawnProtoVessel_program(proto_vessel,
+                    spawn_transform,
+                    spawn_offset,
+                    dV,
+                    on_proto_vessel_positioned,
+                    on_vessel_positioned),
+                on_vessel_loaded,
+                on_vessel_off_rails,
+                on_vessel_launched);
+        }
+
+        private IEnumerator<YieldInstruction> SpawnProtoVessel_program(
+            ProtoVessel proto_vessel,
+            Transform spawn_transform,
+            Vector3 spawn_offset,
+            Vector3 dV,
+            Callback<ProtoVessel> on_proto_vessel_positioned = null,
+            Callback<Vessel> on_vessel_positioned = null
+        )
+        {
             position_proto_vessel(proto_vessel, spawn_transform, spawn_offset);
             on_proto_vessel_positioned?.Invoke(proto_vessel);
             proto_vessel.Load(HighLogic.CurrentGame.flightState);
@@ -131,15 +273,10 @@ namespace AT_Utils
             launched_vessel.orbitDriver.updateMode = OrbitDriver.UpdateMode.TRACK_Phys;
             launched_vessel.skipGroundPositioning = true;
             on_vessel_positioned?.Invoke(launched_vessel);
-            foreach(var i in launch_moving_vessel(spawn_transform, 
-                                                  spawn_offset, 
-                                                  Quaternion.identity, 
-                                                  dV,
-                                                  on_vessel_loaded,
-                                                  on_vessel_off_rails,
-                                                  on_vessel_launched))
-                yield return i;
-            end_launch();
+            yield return StartCoroutine(launch_moving_vessel(spawn_transform,
+                spawn_offset,
+                Quaternion.identity,
+                dV));
         }
 
         public static void PutShipToGround(ShipConstruct ship, Transform spawnPoint, Vector3 offset)
@@ -309,112 +446,106 @@ namespace AT_Utils
             }
         }
 
-        static void disable_vsl_colliders(Vessel vsl, List<Collider> colliders)
+        private static IEnumerable<Collider> all_vessel_colliders(
+            Vessel vsl,
+            bool only_active = true
+        )
         {
-            if(colliders.Count == 0)
+            var colliders = vsl.Parts
+                .SelectMany(p => p.partTransform.GetComponentsInChildren<Collider>(!only_active));
+            return only_active
+                ? colliders.Where(c => c.enabled && c.gameObject.activeInHierarchy)
+                : colliders;
+        }
+
+        private void ignore_launched_vessel_colliders(bool ignore)
+        {
+            if(part == null || part.vessel == null || launched_vessel == null)
+                return;
+            if(ignore)
             {
-                vsl.Parts.ForEach(p => colliders.AddRange(p.FindModelComponents<Collider>().Where(c => c.enabled)));
-                colliders.ForEach(c => c.enabled = false);
-            }
-        }
-
-        static void enable_vsl_colliders(List<Collider> colliders)
-        {
-            colliders.ForEach(c => { if(c != null) c.enabled = true; });
-            colliders.Clear();
-        }
-
-        void begin_launch(Transform spawn_transform)
-        {
-            LaunchInProgress = true;
-            vessel_loaded = false;
-            FlightCameraOverride.AnchorForSeconds(FlightCameraOverride.Mode.Hold,
-                                                  FlightGlobals.ActiveVessel.transform, 1);
-        }
-
-        void end_launch()
-        {
-            launched_vessel = null;
-            LaunchInProgress = false;
-        }
-
-        void run_on_vessel_loaded(Callback<Vessel> on_vessel_loaded)
-        {
-            if(!vessel_loaded && launched_vessel.loaded)
-            {
-                vessel_loaded = true;
-                launched_vessel.parts.ForEach(p => p.partTransform = p.transform);
-                on_vessel_loaded?.Invoke(launched_vessel);
-            }
-        }
-
-        IEnumerable<YieldInstruction> launch_moving_vessel(Transform spawn_transform,
-                                                           Vector3 spawn_offset,
-                                                           Quaternion spawn_rot_offset,
-                                                           Vector3 dV,
-                                                           Callback<Vessel> on_vessel_loaded,
-                                                           Callback<Vessel> on_vessel_off_rails,
-                                                           Callback<Vessel> on_vessel_launched)
-        {
-            var vsl_colliders = new List<Collider>();
-            disable_vsl_colliders(launched_vessel, vsl_colliders);
-            launched_vessel.IgnoreGForces(10);
-            FlightCameraOverride.UpdateDurationSeconds(1);
-            if(vessel.LandedOrSplashed)
-            {
-                while(launched_vessel != null && launched_vessel.packed)
-                {
-                    launched_vessel.situation = Vessel.Situations.PRELAUNCH;
-                    run_on_vessel_loaded(on_vessel_loaded);
-                    FlightCameraOverride.UpdateDurationSeconds(1);
-                    try
-                    {
-                        launched_vessel.SetPosition(spawn_transform.TransformPointUnscaled(spawn_offset));
-                        launched_vessel.SetRotation(spawn_transform.rotation*spawn_rot_offset);
-                    }
-                    catch(Exception e)
-                    { Utils.Log("Exception occured during launched_vessel.SetPosition/Rotation call. Ignoring it:\n{}", e.StackTrace); }
-                    launched_vessel.IgnoreGForces(10);
-                    launched_vessel.GoOffRails();
-                    yield return new WaitForFixedUpdate();
-                }
-                if(launched_vessel == null) goto end;
-                launched_vessel.SetPosition(spawn_transform.TransformPointUnscaled(spawn_offset));
-                launched_vessel.SetRotation(spawn_transform.rotation*spawn_rot_offset);
+                disabled_launched_colliders.AddRange(all_vessel_colliders(launched_vessel));
+                disabled_launched_colliders.ForEach(c => c.enabled = false);
             }
             else
             {
-                while(launched_vessel != null && launched_vessel.packed)
+                foreach(var collider in disabled_launched_colliders)
                 {
-                    run_on_vessel_loaded(on_vessel_loaded);
-                    FlightCameraOverride.UpdateDurationSeconds(1);
-                    try
-                    {
-                        launched_vessel.SetPosition(spawn_transform.TransformPointUnscaled(spawn_offset));
-                        launched_vessel.SetRotation(spawn_transform.rotation*spawn_rot_offset);
-                    }
-                    catch(Exception e)
-                    { Utils.Log("Exception occured during launched_vessel.SetPosition/Rotation call. Ignoring it:\n{}", e.StackTrace); }
-                    launched_vessel.IgnoreGForces(10);
-                    yield return new WaitForFixedUpdate();
+                    if(collider == null)
+                        continue;
+                    collider.enabled = true;
                 }
-                if(launched_vessel == null) goto end;
-                launched_vessel.SetPosition(spawn_transform.TransformPointUnscaled(spawn_offset));
-                launched_vessel.SetRotation(spawn_transform.rotation*spawn_rot_offset);
+                disabled_launched_colliders.Clear();
             }
-            launched_vessel.situation = vessel.situation;
-            on_vessel_off_rails?.Invoke(launched_vessel);
+        }
+
+        private void set_launched_parts_state(PartStates state) =>
+            launched_vessel.Parts.ForEach(p => p.State = state);
+
+        private void set_launched_vessel_pos_rot(
+            Transform spawn_transform,
+            Vector3 spawn_offset,
+            Quaternion spawn_rot_offset
+        )
+        {
+            try
+            {
+                launched_vessel
+                    .SetPosition(spawn_transform.TransformPointUnscaled(spawn_offset));
+                launched_vessel
+                    .SetRotation(spawn_transform.rotation * spawn_rot_offset);
+            }
+            catch(Exception e)
+            {
+                Utils.Log(
+                    $"Exception occured during launched_vessel.SetPosition/Rotation call. Ignoring it:\n{e.StackTrace}");
+            }
+        }
+
+        private void launch_moving_vessel_on_fixed()
+        {
+            if(launched_vessel == null)
+                return;
+            if(vessel.LandedOrSplashed)
+            {
+                launched_vessel.situation = Vessel.Situations.PRELAUNCH;
+                launched_vessel.precalc.isEasingGravity = true;
+            }
             launched_vessel.IgnoreGForces(10);
-            enable_vsl_colliders(vsl_colliders);
-            FlightGlobals.ForceSetActiveVessel(launched_vessel);
+            ignore_launched_vessel_colliders(true);
+            set_launched_parts_state(PartStates.PLACEMENT);
+            CollisionEnhancer.bypass = true;
+        }
+
+        IEnumerator<YieldInstruction> launch_moving_vessel(
+            Transform spawn_transform,
+            Vector3 spawn_offset,
+            Quaternion spawn_rot_offset,
+            Vector3 dV
+        )
+        {
+            onFixedUpdate = launch_moving_vessel_on_fixed;
+            while(launched_vessel != null && launched_vessel.packed)
+            {
+                FlightCameraOverride.UpdateDurationSeconds(1);
+                set_launched_vessel_pos_rot(spawn_transform, spawn_offset, spawn_rot_offset);
+                yield return new WaitForFixedUpdate();
+            }
+            onFixedUpdate = null;
+            if(launched_vessel == null)
+                yield break;
+            set_launched_vessel_pos_rot(spawn_transform, spawn_offset, spawn_rot_offset);
+            launched_vessel.situation = vessel.situation;
+            set_launched_parts_state(PartStates.IDLE);
+            ignore_launched_vessel_colliders(false);
             foreach(var _ in push_and_spin_launched_vessel(spawn_transform.TransformDirection(dV)))
             {
                 yield return null;
+                if(launched_vessel == null)
+                    yield break;
                 launched_vessel.IgnoreGForces(10);
             }
-            on_vessel_launched?.Invoke(launched_vessel);
-            end:
-                enable_vsl_colliders(vsl_colliders);
+            FlightGlobals.ForceSetActiveVessel(launched_vessel);
         }
 
         private void position_proto_vessel(
