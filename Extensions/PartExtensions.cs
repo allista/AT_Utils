@@ -242,7 +242,12 @@ namespace AT_Utils
         #endregion
 
         #region Logging
-        public static string Title(this Part p) => p.partInfo != null ? p.partInfo.title : p.name;
+        public static string Title(this Part p) =>
+            p != null
+                ? p.partInfo != null
+                    ? p.partInfo.title
+                    : p.name
+                : "";
 
         public static void Log(this MonoBehaviour mb, string msg, params object[] args) =>
             Utils.Log(string.Format("{0}: {1}", mb.GetID(), msg), args);

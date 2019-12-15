@@ -15,10 +15,10 @@ namespace AT_Utils
     {
         static readonly TooltipWindow tooltipWindow = new TooltipWindow();
 
-        static string tooltip = "";
-        static int max_width = Math.Max(Screen.width/6, 200);
+        private static string tooltip = "";
+        private static readonly int max_width = Math.Max(Screen.width / 6, 200);
 
-        static Rect get_tooltip_rect(Vector2 mousePos)
+        private static Rect get_tooltip_rect(Vector2 mousePos)
         {
             var content = new GUIContent(tooltip);
             var size = Styles.tooltip.CalcSize(content);
@@ -30,10 +30,10 @@ namespace AT_Utils
             return new Rect(mousePos.x, mousePos.y + 20, size.x, size.y);
         }
 
-        static Rect clamp_to_screen(Rect rect, Rect orig, Vector2 mousePos)
+        private static Rect clamp_to_screen(Rect rect, Rect orig, Vector2 mousePos)
         {
             //clamping moved the tooltip up -> reposition above mouse cursor
-            if(rect.y < orig.y) 
+            if(rect.y < orig.y)
             {
                 rect.y = mousePos.y - rect.height - 5;
                 rect = rect.clampToScreen();
@@ -52,22 +52,22 @@ namespace AT_Utils
         /// </summary>
         public static void GetTooltip()
         {
-            if(Event.current.type == EventType.Repaint)
-            { 
-                var tip = GUI.tooltip.Trim();
-                if(!string.IsNullOrEmpty(tip))
-                    tooltip = tip;
-            }
+            if(Event.current.type != EventType.Repaint)
+                return;
+            var tip = GUI.tooltip.Trim();
+            if(!string.IsNullOrEmpty(tip))
+                tooltip = tip;
         }
 
         /// <summary>
         /// Draws the tooltip inside the window Rect. Should be called inside WindowFunction.
         /// </summary>
         /// <param name="window">Window.</param>
-        public static void DrawToolTip(Rect window) 
+        public static void DrawToolTip(Rect window)
         {
             GetTooltip();
-            if(string.IsNullOrEmpty(tooltip)) return;
+            if(string.IsNullOrEmpty(tooltip))
+                return;
             var mousePos = Utils.GetMousePosition(window);
             var rect = get_tooltip_rect(mousePos);
             rect = clamp_to_screen(rect.clampToWindow(window), rect, mousePos);
@@ -80,8 +80,10 @@ namespace AT_Utils
         /// </summary>
         public static void DrawToolTipOnScreen()
         {
-            if(string.IsNullOrEmpty(tooltip)) return;
-            var mousePos = new Vector2(Input.mousePosition.x, Screen.height-Input.mousePosition.y);
+            if(string.IsNullOrEmpty(tooltip))
+                return;
+            var mousePos =
+                new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
             var rect = get_tooltip_rect(mousePos);
             rect = clamp_to_screen(rect.clampToScreen(), rect, mousePos);
             GUI.Label(rect, tooltip, Styles.tooltip);
@@ -92,14 +94,36 @@ namespace AT_Utils
             tooltipWindow.Show(this);
         }
 
-        void LateUpdate() { tooltip = ""; }
+        void LateUpdate()
+        {
+            tooltip = "";
+        }
 
         void OnGUI()
         {
+            if(!GUIWindowBase.HUD_enabled)
+                return;
             GUI.depth = -1000;
-            if(GUIWindowBase.HUD_enabled)
-                DrawToolTipOnScreen();
+            DrawToolTipOnScreen();
+#if DEBUG
+            if(HighLogic.LoadedScene == GameScenes.EDITOR
+               || HighLogic.LoadedScene == GameScenes.FLIGHT
+               || HighLogic.LoadedScene == GameScenes.SPACECENTER)
+                GUI.Label(debug_rect,
+                    string.Format("{0} {1:HH:mm:ss.fff} {4} FPS: {2:F0}:{3:F0}",
+                        FlightGlobals.ActiveVessel != null
+                            ? FlightGlobals.ActiveVessel.situation.ToString()
+                            : "",
+                        DateTime.Now,
+                        ComputationBalancer.FPS,
+                        ComputationBalancer.FPS_AVG,
+                        Time.frameCount),
+                    Styles.boxed_label);
+#endif
         }
+
+#if DEBUG
+        static readonly Rect debug_rect = new Rect(Screen.width * 0.75f, 0, 300, 25).clampToScreen();
+#endif
     }
 }
-

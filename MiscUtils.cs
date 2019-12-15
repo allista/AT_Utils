@@ -304,7 +304,7 @@ namespace AT_Utils
 #if DEBUG
             UnityEngine.Debug.Log(stack);
 #endif
-            return $"[{mod_name}: {DateTime.Now:HH:mm:ss.fff}] {msg}";
+            return $"[{mod_name}: {DateTime.Now:HH:mm:ss.fff} {Time.frameCount}] {msg}";
         }
 
         static readonly Regex log_re = new Regex("[Ll]og");
