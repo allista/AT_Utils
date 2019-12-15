@@ -162,7 +162,10 @@ namespace AT_Utils
 
         private void FixedUpdate()
         {
-            if(FlightDriver.Pause || !HasDamper || socket == null)
+            if(!HighLogic.LoadedSceneIsFlight
+               || FlightDriver.Pause
+               || !HasDamper
+               || socket == null)
                 return;
             if(DamperEnabled)
                 drainEnergy(IdleEnergyConsumption);
@@ -181,7 +184,9 @@ namespace AT_Utils
         public override void OnUpdate()
         {
             base.OnUpdate();
-            if(!HasDamper)
+            if(!HighLogic.LoadedSceneIsFlight
+               || FlightDriver.Pause
+               || !HasDamper)
                 return;
             if(reactivateAtUT > 0
                && DamperEnabled
