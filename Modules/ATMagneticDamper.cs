@@ -124,6 +124,7 @@ namespace AT_Utils
                 var sensor = part.FindModelComponent<MeshFilter>(Sensor);
                 if(sensor != null)
                 {
+                    sensor.gameObject.layer = state == StartState.Editor ? 21 : 2;
                     sensor.AddCollider(true);
                     damper = sensor.gameObject.AddComponent<Damper>();
                     damper.Init(this);
