@@ -59,7 +59,7 @@ namespace AT_Utils
             {
                 launched_vessel.precalc.isEasingGravity = true;
                 launched_vessel.situation = Vessel.Situations.PRELAUNCH;
-                stabilize_launched_vessel(0);
+                stabilize_launched_vessel(0f);
                 FlightCameraOverride.UpdateDurationSeconds(1);
                 yield return new WaitForFixedUpdate();
             }
