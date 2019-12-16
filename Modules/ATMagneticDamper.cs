@@ -195,12 +195,11 @@ namespace AT_Utils
         public override void OnUpdate()
         {
             base.OnUpdate();
-            if(!HighLogic.LoadedSceneIsFlight
-               || FlightDriver.Pause
-               || !HasDamper)
+            if(!HighLogic.LoadedSceneIsFlight || FlightDriver.Pause)
+                return;
+            if(!HasDamper || !DamperEnabled)
                 return;
             if(reactivateAtUT > 0
-               && DamperEnabled
                && !damper.enabled
                && Planetarium.GetUniversalTime() > reactivateAtUT)
             {
