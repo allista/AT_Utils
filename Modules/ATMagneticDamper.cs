@@ -173,13 +173,13 @@ namespace AT_Utils
 
         private void FixedUpdate()
         {
-            if(!HighLogic.LoadedSceneIsFlight
-               || FlightDriver.Pause
-               || !HasDamper
-               || socket == null)
+            if(!HighLogic.LoadedSceneIsFlight || FlightDriver.Pause)
                 return;
-            if(DamperEnabled)
-                drainEnergy(IdleEnergyConsumption);
+            if(!HasDamper || !DamperEnabled || !damper.enabled)
+                return;
+            if(socket == null)
+                return;
+            drainEnergy(IdleEnergyConsumption);
             if(!socket.TransferResource())
                 return;
             if(socket.PartialTransfer)
