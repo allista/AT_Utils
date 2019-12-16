@@ -76,10 +76,20 @@ namespace AT_Utils
         [KSPField] public string AffectedPartTags = string.Empty;
         [KSPField] public bool AffectKerbals;
         [KSPField] public bool EnableControls = true;
-        [KSPField] public float MaxForce = 100f;
-        [KSPField] public float MaxEnergyConsumption = 50f;
+
+        [KSPField(guiActive = true,
+            guiActiveEditor = true,
+            guiName = "Attractor Max. Force",
+            guiUnits = "kN")]
+        public float MaxForce = 100f;
+
+        [KSPField(guiActiveEditor = true, guiName = "Maximum EC Current", guiUnits = "ec/s")]
+        public float MaxEnergyConsumption = 50f;
+
+        [KSPField(guiActiveEditor = true, guiName = "Idle EC Current", guiUnits = "ec/s")]
+        public float IdleEnergyConsumption = 0.1f;
+
         [KSPField] public float EnergyConsumptionK = 1f;
-        [KSPField] public float IdleEnergyConsumption = 0.1f;
         [KSPField] public float ReactivateAfterSeconds = 5f;
         private double reactivateAtUT = -1;
 
