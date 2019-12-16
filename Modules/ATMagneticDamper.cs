@@ -298,6 +298,7 @@ namespace AT_Utils
                     var total_energy = 0f;
                     var attractorEnabled = controller.AttractorEnabled && attractor != null;
                     var attractorPosition = attractorEnabled ? attractor.position : Vector3.zero;
+                    var attractorForward = attractorEnabled ? attractor.forward : Vector3.zero;
                     var h = controller.part.Rigidbody;
                     var nBodies = dampedBodies.Count;
                     for(var i = 0; i < nBodies; i++)
@@ -316,19 +317,25 @@ namespace AT_Utils
                         }
                         if(attractorEnabled)
                         {
-                            var d = b.rb.worldCenterOfMass - attractorPosition;
-                            var dm = d.magnitude;
-                            if(dm > 0)
+                            var toAttractor = b.rb.worldCenterOfMass - attractorPosition;
+                            if(!toAttractor.IsZero())
                             {
-                                var rVel2attractor = -Vector3.Dot(b.relV, d) / dm;
+                                toAttractor.Normalize();
+                                var rVel2attractor = -Vector3.Dot(b.relV, toAttractor);
                                 var dV = Mathf.Min(
                                     controller.part.crashTolerance * 0.9f - rVel2attractor,
                                     TimeWarp.fixedDeltaTime * controller.AttractorPower);
                                 if(dV > 0)
                                 {
                                     if(controller.InvertAttractor)
-                                        dV = -dV;
-                                    b.dP += b.rb.mass * dV * (dm > 1 ? d / dm : d);
+                                    {
+                                        var toCenter = Vector3.ProjectOnPlane(
+                                            toAttractor,
+                                            attractorForward);
+                                        toAttractor = 2 * toCenter - toAttractor;
+                                        toAttractor.Normalize();
+                                    }
+                                    b.dP += b.rb.mass * dV * toAttractor;
                                 }
                             }
                         }
