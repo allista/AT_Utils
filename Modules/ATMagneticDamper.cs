@@ -309,8 +309,11 @@ namespace AT_Utils
                         b.relV = b.rb.velocity
                                  - h.velocity
                                  - Vector3.Cross(h.angularVelocity, dist);
-                        b.dAv = A * (h.angularVelocity - b.rb.angularVelocity);
-                        b.dP = A * b.rb.mass * b.relV;
+                        if(A > 0)
+                        {
+                            b.dAv = A * (h.angularVelocity - b.rb.angularVelocity);
+                            b.dP = A * b.rb.mass * b.relV;
+                        }
                         if(attractorEnabled)
                         {
                             var d = b.rb.worldCenterOfMass - attractorPosition;
