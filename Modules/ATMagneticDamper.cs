@@ -104,6 +104,7 @@ namespace AT_Utils
             info.AppendLine($"Attenuation: {Attenuation:F1} %");
             info.AppendLine($"Max.Force: {MaxForce:F1} kN");
             info.AppendLine($"Max.EC Current: {MaxEnergyConsumption:F1} ec/s");
+            info.AppendLine($"Idle EC Current: {IdleEnergyConsumption:F1} ec/s");
             if(string.IsNullOrEmpty(AttractorLocation))
                 info.AppendLine("Has attractor");
             info.AppendLine(string.IsNullOrEmpty(AffectedPartTags)
