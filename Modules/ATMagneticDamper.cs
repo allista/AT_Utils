@@ -206,7 +206,7 @@ namespace AT_Utils
                 animator?.Open();
                 damper.enabled = true;
                 reactivateAtUT = -1;
-                Utils.Message($"[{part.Title()}] Damper reactivated"); //debug
+                Utils.Message($"[{part.Title()}] Damper reactivated");
             }
         }
 
