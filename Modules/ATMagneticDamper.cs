@@ -182,14 +182,13 @@ namespace AT_Utils
             drainEnergy(IdleEnergyConsumption);
             if(!socket.TransferResource())
                 return;
-            if(socket.PartialTransfer)
-            {
-                animator?.Close();
-                damper.enabled = false;
-                reactivateAtUT = Planetarium.GetUniversalTime() + ReactivateAfterSeconds;
-                Utils.Message(ReactivateAfterSeconds,
-                    $"[{part.Title()}] Damper deactivated due to lack of EC. Activating in {ReactivateAfterSeconds}");
-            }
+            if(!socket.PartialTransfer)
+                return;
+            animator?.Close();
+            damper.enabled = false;
+            reactivateAtUT = Planetarium.GetUniversalTime() + ReactivateAfterSeconds;
+            Utils.Message(ReactivateAfterSeconds,
+                $"[{part.Title()}] Damper deactivated due to the lack of EC. Activating in {ReactivateAfterSeconds}");
         }
 
         public override void OnUpdate()
@@ -229,8 +228,7 @@ namespace AT_Utils
         }
 
         [KSPAction(guiName = "Toggle Damper")]
-        public void ToggleAction(KSPActionParam data) => 
-            EnableDamper(!DamperEnabled);
+        public void ToggleAction(KSPActionParam data) => EnableDamper(!DamperEnabled);
 
         [KSPAction(guiName = "Toggle Attractor")]
         public void ToggleAttractorAction(KSPActionParam data) =>
