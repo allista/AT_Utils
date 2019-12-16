@@ -69,7 +69,7 @@ namespace AT_Utils
         [UI_Toggle(scene = UI_Scene.All, enabledText = "Reverse", disabledText = "Direct")]
         public bool InvertAttractor;
 
-        private const float RelativeVelocityThreshold = 0.05f;
+        private const float RelativeVelocityThreshold = 0.1f;
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensor = string.Empty;
         [KSPField] public string AttractorLocation = string.Empty;
