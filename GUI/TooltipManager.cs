@@ -136,7 +136,8 @@ namespace AT_Utils
         }
 
 #if DEBUG
-        static readonly Rect debug_rect = new Rect(Screen.width * 0.75f, 0, 300, 25).clampToScreen();
+        static readonly Rect debug_rect =
+            new Rect(Screen.width * 0.75f, 0, 300, 25).clampToScreen();
 #endif
     }
 }
