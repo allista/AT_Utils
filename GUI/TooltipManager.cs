@@ -114,19 +114,24 @@ namespace AT_Utils
             GUI.depth = -1000;
             DrawToolTipOnScreen();
 #if DEBUG
-            if(HighLogic.LoadedScene == GameScenes.EDITOR
-               || HighLogic.LoadedScene == GameScenes.FLIGHT
-               || HighLogic.LoadedScene == GameScenes.SPACECENTER)
-                GUI.Label(debug_rect,
-                    string.Format("{0} {1:HH:mm:ss.fff} {4} FPS: {2:F0}:{3:F0}",
-                        FlightGlobals.ActiveVessel != null
+            if(HighLogic.LoadedScene != GameScenes.EDITOR
+               && HighLogic.LoadedScene != GameScenes.FLIGHT
+               && HighLogic.LoadedScene != GameScenes.SPACECENTER)
+                return;
+            if(!ComputationBalancer.Running)
+                return;
+            GUI.Label(debug_rect,
+                string.Format("{0} {1:HH:mm:ss.fff} {4} FPS: {2:F0}:{3:F0}",
+                    FlightGlobals.fetch != null
+                        ? FlightGlobals.ActiveVessel != null
                             ? FlightGlobals.ActiveVessel.situation.ToString()
-                            : "",
-                        DateTime.Now,
-                        ComputationBalancer.FPS,
-                        ComputationBalancer.FPS_AVG,
-                        Time.frameCount),
-                    Styles.boxed_label);
+                            : ""
+                        : "",
+                    DateTime.Now,
+                    ComputationBalancer.FPS,
+                    ComputationBalancer.FPS_AVG,
+                    Time.frameCount),
+                Styles.boxed_label);
 #endif
         }
 
