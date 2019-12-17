@@ -10,10 +10,11 @@ using UnityEngine;
 
 namespace AT_Utils
 {
-    [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
+    [KSPAddon(KSPAddon.Startup.AllGameScenes, true)]
     public class TooltipManager : MonoBehaviour
     {
-        static readonly TooltipWindow tooltipWindow = new TooltipWindow();
+        private static TooltipManager instance;
+        private static TooltipWindow tooltipWindow;
 
         private static string tooltip = "";
         private static readonly int max_width = Math.Max(Screen.width / 6, 200);
@@ -91,6 +92,13 @@ namespace AT_Utils
 
         void Awake()
         {
+            if(instance != null)
+            {
+                Destroy(this);
+                return;
+            }
+            instance = this;
+            tooltipWindow = new TooltipWindow();
             tooltipWindow.Show(this);
         }
 
