@@ -25,6 +25,7 @@ namespace AT_Utils
         }
 
         static ComputationBalancer Instance;
+        public static bool Running { get; private set; }
         static bool level_loaded;
 
         DateTime next_ts = DateTime.MinValue;
@@ -56,11 +57,13 @@ namespace AT_Utils
             base_fps.Tau = 2;
             tasks = new List<Task>();
             current = 0;
+            Running = true;
         }
 
         void OnDestroy() 
         { 
             Instance = null;
+            Running = false;
             GameEvents.onLevelWasLoadedGUIReady.Remove(onLevelLoaded);
             GameEvents.onGameSceneLoadRequested.Remove(onGameSceneLoad);
         }
