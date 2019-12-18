@@ -151,7 +151,7 @@ namespace AT_Utils
             }
             var damper_controllable = HasDamper && EnableControls;
             var attractor_controllable = damper_controllable && damper.HasAttractor;
-            Fields[nameof(DamperEnabled)].uiControlFlight.onFieldChanged = onDamperToggle;
+            Fields[nameof(DamperEnabled)].OnValueModified += onDamperToggle;
             Utils.EnableField(Fields[nameof(DamperEnabled)], damper_controllable);
             Utils.EnableField(Fields[nameof(Attenuation)], damper_controllable);
             Actions[nameof(ToggleAction)].active = damper_controllable;
@@ -166,6 +166,7 @@ namespace AT_Utils
         {
             if(HasDamper)
                 Destroy(damper);
+            Fields[nameof(DamperEnabled)].OnValueModified -= onDamperToggle;
         }
 
         private void drainEnergy(float rate) =>
@@ -209,7 +210,7 @@ namespace AT_Utils
             }
         }
 
-        private void onDamperToggle(BaseField field, object value)
+        private void onDamperToggle(object value)
         {
             if(!HasDamper)
                 return;
@@ -222,9 +223,8 @@ namespace AT_Utils
 
         public void EnableDamper(bool enable)
         {
-            var old = DamperEnabled;
             DamperEnabled = enable;
-            onDamperToggle(Fields[nameof(DamperEnabled)], old);
+            onDamperToggle(null);
         }
 
         [KSPAction(guiName = "Toggle Damper")]
