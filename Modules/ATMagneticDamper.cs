@@ -317,7 +317,8 @@ namespace AT_Utils
                             var toAttractor = b.rb.worldCenterOfMass - attractorPosition;
                             if(!toAttractor.IsZero())
                             {
-                                toAttractor.Normalize();
+                                var toAttractorDist = toAttractor.magnitude;
+                                toAttractor /= toAttractorDist;
                                 var rVel2attractor = -Vector3.Dot(b.relV, toAttractor);
                                 var dV = Mathf.Min(
                                     controller.part.crashTolerance * 0.9f - rVel2attractor,
@@ -332,6 +333,8 @@ namespace AT_Utils
                                         toAttractor = 2 * toCenter - toAttractor;
                                         toAttractor.Normalize();
                                     }
+                                    if(toAttractorDist < 1)
+                                        dV *= toAttractorDist;
                                     b.dP += b.rb.mass * dV * toAttractor;
                                 }
                             }
