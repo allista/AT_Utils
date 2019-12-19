@@ -98,8 +98,17 @@ namespace AT_Utils
                 return;
             }
             instance = this;
+            DontDestroyOnLoad(gameObject);
             tooltipWindow = new TooltipWindow();
             tooltipWindow.Show(this);
+        }
+
+        private void OnDestroy()
+        {
+            if(this != instance)
+                return;
+            instance = null;
+            tooltipWindow.Close();
         }
 
         void LateUpdate()
