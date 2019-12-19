@@ -49,8 +49,6 @@ namespace AT_Utils
             unit = "kN/t")]
         public float AttractorPower = 1f;
 
-        [KSPField] public bool VariableAttractorForce;
-
         [KSPField(isPersistant = true,
             guiName = "Attractor",
             guiActive = true,
@@ -89,14 +87,14 @@ namespace AT_Utils
         public float IdleEnergyConsumption = 0.1f;
 
         private const float RelativeVelocityThreshold = 0.1f;
+        [KSPField] public float EnergyConsumptionK = 1f;
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensor = string.Empty;
         [KSPField] public string AttractorLocation = string.Empty;
         [KSPField] public string AffectedPartTags = string.Empty;
         [KSPField] public bool AffectKerbals;
+        [KSPField] public bool VariableAttractorForce;
         [KSPField] public bool EnableControls = true;
-
-        [KSPField] public float EnergyConsumptionK = 1f;
         [KSPField] public float ReactivateAfterSeconds = 5f;
         private double reactivateAtUT = -1;
 
