@@ -69,6 +69,25 @@ namespace AT_Utils
         [UI_Toggle(scene = UI_Scene.All, enabledText = "Reverse", disabledText = "Direct")]
         public bool InvertAttractor;
 
+        [KSPField(guiActive = true,
+            guiActiveEditor = true,
+            guiName = "Attractor Max. Force",
+            guiUnits = "kN",
+            guiFormat = "F1")]
+        public float MaxForce = 100f;
+
+        [KSPField(guiActiveEditor = true,
+            guiName = "Maximum EC Current",
+            guiUnits = "ec/s",
+            guiFormat = "F1")]
+        public float MaxEnergyConsumption = 50f;
+
+        [KSPField(guiActiveEditor = true,
+            guiName = "Idle EC Current",
+            guiUnits = "ec/s",
+            guiFormat = "F1")]
+        public float IdleEnergyConsumption = 0.1f;
+
         private const float RelativeVelocityThreshold = 0.1f;
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensor = string.Empty;
@@ -76,18 +95,6 @@ namespace AT_Utils
         [KSPField] public string AffectedPartTags = string.Empty;
         [KSPField] public bool AffectKerbals;
         [KSPField] public bool EnableControls = true;
-
-        [KSPField(guiActive = true,
-            guiActiveEditor = true,
-            guiName = "Attractor Max. Force",
-            guiUnits = "kN")]
-        public float MaxForce = 100f;
-
-        [KSPField(guiActiveEditor = true, guiName = "Maximum EC Current", guiUnits = "ec/s")]
-        public float MaxEnergyConsumption = 50f;
-
-        [KSPField(guiActiveEditor = true, guiName = "Idle EC Current", guiUnits = "ec/s")]
-        public float IdleEnergyConsumption = 0.1f;
 
         [KSPField] public float EnergyConsumptionK = 1f;
         [KSPField] public float ReactivateAfterSeconds = 5f;
