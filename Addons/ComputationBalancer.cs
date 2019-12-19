@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace AT_Utils
 {
-    [KSPAddon(KSPAddon.Startup.FlightEditorAndKSC, false)]
+    [KSPAddon(KSPAddon.Startup.FlightEditorAndKSC, true)]
     public class ComputationBalancer : MonoBehaviour
     {
         public class Task
@@ -47,6 +47,7 @@ namespace AT_Utils
                 return;
             }
             Instance = this;
+            DontDestroyOnLoad(gameObject);
             GameEvents.onLevelWasLoadedGUIReady.Add(onLevelLoaded);
             GameEvents.onGameSceneLoadRequested.Add(onGameSceneLoad);
         }
@@ -60,8 +61,10 @@ namespace AT_Utils
             Running = true;
         }
 
-        void OnDestroy() 
-        { 
+        void OnDestroy()
+        {
+            if(this != Instance)
+                return;
             Instance = null;
             Running = false;
             GameEvents.onLevelWasLoadedGUIReady.Remove(onLevelLoaded);
