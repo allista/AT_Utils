@@ -13,6 +13,8 @@ namespace AT_Utils
 {
     public class ATMagneticDamper : PartModule
     {
+        public enum AttractorAxis { right, up, fwd }
+
         [KSPField(isPersistant = true,
             guiName = "Damper Field",
             guiActive = true,
@@ -91,6 +93,7 @@ namespace AT_Utils
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensor = string.Empty;
         [KSPField] public string AttractorLocation = string.Empty;
+        [KSPField] public AttractorAxis AttractorMainAxis = AttractorAxis.fwd;
         [KSPField] public string AffectedPartTags = string.Empty;
         [KSPField] public bool AffectKerbals;
         [KSPField] public bool VariableAttractorForce;
@@ -247,6 +250,7 @@ namespace AT_Utils
         {
             private ATMagneticDamper controller;
             private Transform attractor;
+            private Vector3 attractorAxis;
             private string[] tags;
 
             public bool HasAttractor => attractor != null;
@@ -294,7 +298,25 @@ namespace AT_Utils
                     attractor = controller.part.FindModelTransform(controller.AttractorLocation);
                 if(!string.IsNullOrEmpty(controller.AffectedPartTags))
                     tags = Utils.ParseLine(controller.AffectedPartTags, Utils.Comma);
-                controller.AttractorEnabled = attractor != null;
+                if(attractor != null)
+                {
+                    controller.AttractorEnabled = true;
+                    switch(controller.AttractorMainAxis)
+                    {
+                        case AttractorAxis.right:
+                            attractorAxis = Vector3.right;
+                            break;
+                        case AttractorAxis.up:
+                            attractorAxis = Vector3.up;
+                            break;
+                        case AttractorAxis.fwd:
+                            attractorAxis = Vector3.forward;
+                            break;
+                        default:
+                            attractorAxis = Vector3.forward;
+                            break;
+                    }
+                }
                 StartCoroutine(damp_packed_vessels());
             }
 
@@ -308,7 +330,8 @@ namespace AT_Utils
                 var total_energy = 0f;
                 var attractorEnabled = controller.AttractorEnabled && attractor != null;
                 var attractorPosition = attractorEnabled ? attractor.position : Vector3.zero;
-                var attractorForward = attractorEnabled ? attractor.forward : Vector3.zero;
+                var attractorAxisW =
+                    attractorEnabled ? attractor.rotation * attractorAxis : Vector3.zero;
                 var h = controller.part.Rigidbody;
                 var nBodies = dampedBodies.Count;
                 for(var i = 0; i < nBodies; i++)
@@ -347,7 +370,7 @@ namespace AT_Utils
                                 {
                                     var toCenter = Vector3.ProjectOnPlane(
                                         toAttractor,
-                                        attractorForward);
+                                        attractorAxisW);
                                     toAttractor = 2 * toCenter - toAttractor;
                                     toAttractor.Normalize();
                                 }
