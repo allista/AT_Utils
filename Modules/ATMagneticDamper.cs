@@ -256,11 +256,19 @@ namespace AT_Utils
                 public uint id;
                 public Vessel vessel;
                 public Vector3 position;
-                public float energy_consumption;
+                public float energyConsumption;
+                public bool positionSet;
+
+                public void SetPosition(Vector3 pos)
+                {
+                    position = pos;
+                    positionSet = true;
+                }
             }
 
             private struct RBInfo
             {
+                public Part part;
                 public Rigidbody rb;
                 public Vector3 relV;
                 public Vector3 dP;
@@ -287,116 +295,146 @@ namespace AT_Utils
                 if(!string.IsNullOrEmpty(controller.AffectedPartTags))
                     tags = Utils.ParseLine(controller.AffectedPartTags, Utils.Comma);
                 controller.AttractorEnabled = attractor != null;
+                StartCoroutine(damp_packed_vessels());
             }
 
             private void FixedUpdate()
             {
                 if(FlightDriver.Pause || controller == null)
                     return;
-                if(dampedBodies.Count > 0
-                   && controller.part.Rigidbody != null)
+                if(dampedBodies.Count <= 0 || controller.part.Rigidbody == null)
+                    return;
+                var A = controller.Attenuation / 100f;
+                var total_energy = 0f;
+                var attractorEnabled = controller.AttractorEnabled && attractor != null;
+                var attractorPosition = attractorEnabled ? attractor.position : Vector3.zero;
+                var attractorForward = attractorEnabled ? attractor.forward : Vector3.zero;
+                var h = controller.part.Rigidbody;
+                var nBodies = dampedBodies.Count;
+                for(var i = 0; i < nBodies; i++)
                 {
-                    var A = controller.Attenuation / 100f;
-                    var total_energy = 0f;
-                    var attractorEnabled = controller.AttractorEnabled && attractor != null;
-                    var attractorPosition = attractorEnabled ? attractor.position : Vector3.zero;
-                    var attractorForward = attractorEnabled ? attractor.forward : Vector3.zero;
-                    var h = controller.part.Rigidbody;
-                    var nBodies = dampedBodies.Count;
+                    var b = dampedBodies[i];
+                    if(b.rb == null || b.part == null)
+                        continue;
+                    if(b.part.packed)
+                    {
+                        track_packed_vessel(b.part);
+                        continue;
+                    }
+                    var dist = b.rb.position - h.position;
+                    b.relV = b.rb.velocity
+                             - h.velocity
+                             - Vector3.Cross(h.angularVelocity, dist);
+                    if(A > 0)
+                    {
+                        b.dAv = A * (h.angularVelocity - b.rb.angularVelocity);
+                        b.dP = A * b.rb.mass * b.relV;
+                    }
+                    if(attractorEnabled)
+                    {
+                        var toAttractor = b.rb.worldCenterOfMass - attractorPosition;
+                        if(!toAttractor.IsZero())
+                        {
+                            var toAttractorDist = toAttractor.magnitude;
+                            toAttractor /= toAttractorDist;
+                            var rVel2attractor = -Vector3.Dot(b.relV, toAttractor);
+                            var dV = Mathf.Min(
+                                controller.part.crashTolerance * 0.9f - rVel2attractor,
+                                TimeWarp.fixedDeltaTime * controller.AttractorPower);
+                            if(dV > 0)
+                            {
+                                if(controller.InvertAttractor)
+                                {
+                                    var toCenter = Vector3.ProjectOnPlane(
+                                        toAttractor,
+                                        attractorForward);
+                                    toAttractor = 2 * toCenter - toAttractor;
+                                    toAttractor.Normalize();
+                                }
+                                if(toAttractorDist < 1)
+                                    dV *= toAttractorDist;
+                                b.dP += b.rb.mass * dV * toAttractor;
+                            }
+                        }
+                    }
+                    b.dP = b.dP.ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
+                    var dL2 = Vector3.Dot(b.dAv.SquaredComponents(), b.rb.inertiaTensor);
+                    var dP2 = b.dP.sqrMagnitude
+                              * Utils.ClampH(b.relV.magnitude / RelativeVelocityThreshold, 1);
+                    total_energy += dP2 / b.rb.mass + dP2 / h.mass + dL2;
+                    dampedBodies[i] = b;
+                }
+                if(total_energy > 0)
+                {
+                    var energy_consumption = total_energy
+                                             / TimeWarp.fixedDeltaTime
+                                             * controller.EnergyConsumptionK;
+                    var K = 1f;
+                    if(energy_consumption > controller.MaxEnergyConsumption)
+                    {
+                        K = Mathf.Sqrt(controller.MaxEnergyConsumption / energy_consumption);
+                        energy_consumption = controller.MaxEnergyConsumption;
+                    }
                     for(var i = 0; i < nBodies; i++)
                     {
                         var b = dampedBodies[i];
                         if(b.rb == null)
                             continue;
-                        var dist = b.rb.position - h.position;
-                        b.relV = b.rb.velocity
-                                 - h.velocity
-                                 - Vector3.Cross(h.angularVelocity, dist);
-                        if(A > 0)
+                        if(K < 1)
                         {
-                            b.dAv = A * (h.angularVelocity - b.rb.angularVelocity);
-                            b.dP = A * b.rb.mass * b.relV;
+                            b.dP *= K;
+                            b.dAv *= K;
                         }
-                        if(attractorEnabled)
-                        {
-                            var toAttractor = b.rb.worldCenterOfMass - attractorPosition;
-                            if(!toAttractor.IsZero())
-                            {
-                                var toAttractorDist = toAttractor.magnitude;
-                                toAttractor /= toAttractorDist;
-                                var rVel2attractor = -Vector3.Dot(b.relV, toAttractor);
-                                var dV = Mathf.Min(
-                                    controller.part.crashTolerance * 0.9f - rVel2attractor,
-                                    TimeWarp.fixedDeltaTime * controller.AttractorPower);
-                                if(dV > 0)
-                                {
-                                    if(controller.InvertAttractor)
-                                    {
-                                        var toCenter = Vector3.ProjectOnPlane(
-                                            toAttractor,
-                                            attractorForward);
-                                        toAttractor = 2 * toCenter - toAttractor;
-                                        toAttractor.Normalize();
-                                    }
-                                    if(toAttractorDist < 1)
-                                        dV *= toAttractorDist;
-                                    b.dP += b.rb.mass * dV * toAttractor;
-                                }
-                            }
-                        }
-                        b.dP = b.dP.ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
-                        var dL2 = Vector3.Dot(b.dAv.SquaredComponents(), b.rb.inertiaTensor);
-                        var dP2 = b.dP.sqrMagnitude
-                                  * Utils.ClampH(b.relV.magnitude / RelativeVelocityThreshold, 1);
-                        total_energy += dP2 / b.rb.mass + dP2 / h.mass + dL2;
-                        dampedBodies[i] = b;
+                        b.rb.AddTorque(b.dAv, ForceMode.VelocityChange);
+                        b.rb.AddForce(-b.dP, ForceMode.Impulse);
+                        h.AddForceAtPosition(b.dP, b.rb.position, ForceMode.Impulse);
                     }
-                    if(total_energy > 0)
-                    {
-                        var energy_consumption = total_energy
-                                                 / TimeWarp.fixedDeltaTime
-                                                 * controller.EnergyConsumptionK;
-                        var K = 1f;
-                        if(energy_consumption > controller.MaxEnergyConsumption)
-                        {
-                            K = Mathf.Sqrt(controller.MaxEnergyConsumption / energy_consumption);
-                            energy_consumption = controller.MaxEnergyConsumption;
-                        }
-                        for(var i = 0; i < nBodies; i++)
-                        {
-                            var b = dampedBodies[i];
-                            if(b.rb == null)
-                                continue;
-                            if(K < 1)
-                            {
-                                b.dP *= K;
-                                b.dAv *= K;
-                            }
-                            b.rb.AddTorque(b.dAv, ForceMode.VelocityChange);
-                            b.rb.AddForce(-b.dP, ForceMode.Impulse);
-                            h.AddForce(b.dP, ForceMode.Impulse);
-                        }
-                        controller.drainEnergy(energy_consumption);
-                    }
-                    dampedBodies.Clear();
+                    controller.drainEnergy(energy_consumption);
                 }
-                if(dampedVessels.Count > 0)
+                dampedBodies.Clear();
+            }
+
+            private IEnumerator<YieldInstruction> damp_packed_vessels()
+            {
+                while(true)
                 {
-                    var remove_vessels = new List<uint>();
-                    foreach(var vsl_info in dampedVessels.Values)
+                    yield return new WaitForFixedUpdate();
+                    if(dampedVessels.Count <= 0)
+                        continue;
+                    foreach(var vsl_info in dampedVessels.Values.ToList())
                     {
                         if(vsl_info.vessel != null && vsl_info.vessel.packed)
                         {
+                            if(!vsl_info.positionSet)
+                            {
+                                vsl_info.SetPosition(transform
+                                    .InverseTransformPoint(vsl_info.vessel.vesselTransform
+                                        .position));
+                                dampedVessels[vsl_info.id] = vsl_info;
+                            }
                             vsl_info.vessel.SetPosition(
                                 transform.TransformPoint(vsl_info.position));
-                            if(vsl_info.energy_consumption > 0)
-                                controller.drainEnergy(vsl_info.energy_consumption);
+                            if(vsl_info.energyConsumption > 0)
+                                controller.drainEnergy(vsl_info.energyConsumption);
                         }
                         else
-                            remove_vessels.Add(vsl_info.id);
+                            dampedVessels.Remove(vsl_info.id);
                     }
-                    remove_vessels.ForEach(vsl_id => dampedVessels.Remove(vsl_id));
                 }
+            }
+
+            private void track_packed_vessel(Part p)
+            {
+                if(dampedVessels.ContainsKey(p.vessel.persistentId))
+                    return;
+                dampedVessels[p.vessel.persistentId] = new VesselInfo
+                {
+                    id = p.vessel.persistentId,
+                    vessel = p.vessel,
+                    energyConsumption = p.TotalMass()
+                                        * controller.EnergyConsumptionK
+                                        * 0.01f
+                };
             }
 
             private void OnTriggerStay(Collider col)
@@ -417,27 +455,14 @@ namespace AT_Utils
                     return;
                 if(tags != null && !tags.Any(t => p.partInfo.tags.Contains(t)))
                     return;
-                if(!p.vessel.packed)
+                if(!p.packed && !controller.part.packed)
                 {
                     var r = col.attachedRigidbody;
-                    dampedBodies.Add(new RBInfo { rb = r });
+                    dampedBodies.Add(new RBInfo { rb = r, part = p });
+                    dampedVessels.Remove(p.vessel.persistentId);
                 }
                 else
-                {
-                    if(!dampedVessels.ContainsKey(p.vessel.persistentId))
-                    {
-                        dampedVessels[p.vessel.persistentId] = new VesselInfo
-                        {
-                            id = p.vessel.persistentId,
-                            vessel = p.vessel,
-                            position = transform
-                                .InverseTransformPoint(p.vessel.vesselTransform.position),
-                            energy_consumption = p.TotalMass()
-                                                 * controller.EnergyConsumptionK
-                                                 * 0.01f
-                        };
-                    }
-                }
+                    track_packed_vessel(p);
             }
         }
     }
