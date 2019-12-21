@@ -57,12 +57,12 @@ namespace AT_Utils
 
         public override void Awake()
         {
-            base.Awake();
             if(Instance != null)
             { 
                 Destroy(this);
                 return; 
             }
+            base.Awake();
             Instance = (T)this;
             Instance.LoadState();
             var assembly = Assembly.GetAssembly(typeof(T)).GetName();
@@ -73,10 +73,11 @@ namespace AT_Utils
 
         public override void OnDestroy()
         {
+            if(this != Instance)
+                return;
             GameEvents.onGameStateSave.Remove(onGameStateSave);
             Instance.SaveState();
-            if(this == Instance) 
-                Instance = null;
+            Instance = null;
             base.OnDestroy();
         }
 

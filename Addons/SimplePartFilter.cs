@@ -39,6 +39,11 @@ namespace AT_Utils
             GameEvents.onGUIEditorToolbarReady.Add(add_filter);
         }
 
+        private void OnDestroy()
+        {
+            GameEvents.onGUIEditorToolbarReady.Remove(add_filter);
+        }
+
         protected void SetMODULES(IEnumerable<Type> types)
         {
             modules = types.Select(t => KSPUtil.PrintModuleName(t.Name)).ToList();

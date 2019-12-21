@@ -85,8 +85,18 @@ namespace AT_Utils
         #endregion
 
         public MeshFilter Space { get; protected set; }
-        public Metric SpaceMetric { get; protected set; }
+        private Metric spaceMetric;
         SortedVector3 spawn_space_sorted_size;
+        public Metric SpaceMetric
+        {
+            get => spaceMetric;
+            set
+            {
+                spaceMetric = value;
+                spawn_space_sorted_size = new SortedVector3(spaceMetric.size);
+            }
+        }
+
         public virtual bool Valid => !SpaceMetric.Empty && spawn_transform != null;
 
         public override void Load(ConfigNode node)
@@ -97,15 +107,11 @@ namespace AT_Utils
                 node.TryGetValue("HangarSpace", ref SpawnSpace);
         }
 
-        public void SetMetric(Metric metric) => SpaceMetric = metric;
-
         public void UpdateMetric()
         {
-            if(!string.IsNullOrEmpty(SpawnSpace))
-            {
-                SpaceMetric = new Metric(part, SpawnSpace, true);
-                spawn_space_sorted_size = new SortedVector3(SpaceMetric.size);
-            }
+            if(string.IsNullOrEmpty(SpawnSpace))
+                return;
+            SpaceMetric = new Metric(part, SpawnSpace, true);
         }
 
         public void Init(Part part)

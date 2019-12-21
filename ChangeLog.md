@@ -1,6 +1,70 @@
 #AT Utils ChangeLog
 
-* **v1.8.3**
+* **v1.9.0**
+    * Core:
+        * Added UniversalDrill to BadParts as per @pmborg finding
+        * Fixed singleton implementation of BackupLogger
+        * Fixed singleton implementation of AddonWindowBase
+        * Fixed singleton implementation of ScenarioTester
+        * Fixed singleton implementation of ScenarioTester
+        * Fixed singleton implementation of ComputationBalancer
+        * Added static bool property ComputationBalancer.Running
+        * Moved ComputationBalancer to Addons
+        * Instantiating ToolbarWindow in Awake of the ToolbarManager. Fixed #18
+        * Added IAnimator interface that describes minimal MultiAnimator protocol
+        * ATGroundAnchor uses onPartPack/Unpack GameEvents instead of obsolete methods
+        * Added ability to animate ATGroundAnchor via IAnimator module
+        * Moved ResourceInfo to Resources
+        * ResourcePump.Request is now a public ro property
+        * Part.Title extension method works with part == null
+        * ATMagneticDamper:
+            * Damper holds damped vessels still in TimeWarp
+            * Damper consumes EC when damping something: EnergyConsumptionK
+            * Damper consumes EC when enabled and idle: IdleEnergyConsumption
+            * Renamed magnet to attractor
+            * Attractor power is configurable in flight: AttractorPower
+            * Attractor may be inverted to become repulsive: InvertAttractor
+            * Total force that is applied to a rigid body is capped: MaxForce + MaxEnergyConsumption   
+            * Added module info to part tooltip
+            * The layer of the sensor object is set OnStart: 21 in editor, 2 in flight
+            * Added ATMagneticDamperUpdater to APR
+            * When computing relative RB velocity, take angular velocity of the host into account
+            * Added ability to animate working MagneticDamper with an IAnimator module
+            * Does not affect Rigidbodies of the same vessel
+        * VesselSpawner + SpawnSpaceManager:
+            * When setting external SpaceMetric need to update spawn_space_sorted_size
+            * Fixed inability of the VesselSpawner to disable launched vessel colliders on time
+            * Fixed vessel stabilization when spawning to ground
+        * Added frameCount to log message header
+        * DebugUtils.formatTransformTree also prints activeSelf and activeInHierarchy
+        * Moved DEBUG info panel (clock,frameCount,situation) from TCA to TooltipManager
+    * Anisotropic Part Resizer:
+        * Fixed PAW freezing when resized part was in symmetry group
+        * **BREAKING**: using BaseField.OnValueModified instead 
+          of UI_Control.onFiledChanged to change size/aspect
+        * Added ATMagneticDamperUpdater
+        * Removed static AnisotropicResizable.unequal
+        * Set caps for breakingForce/Torque to 50k to be closer 
+          to current stock values
+        * Fixed AnizotropicResizable.GetModuleMass/Cost calculations
+        * **BREAKING**: ResourcesUpdater is IPartCostModifier and only 
+          handles resources present in prefab
+        * **BREAKING**: In Scale treating aspect like size -- with respect 
+          to original aspect
+        * Fixed NRE in JettisonUpdater
+        * Various small fixes and refactoring
+    * Multi Animators:
+        * Forward/ReverseSpeed is changed on rescale
+        * In editor slow animations are played in 3s despite their duration
+        * Calculating hasSound and hasEmitter in OnStart once to avoid expencive null check
+        * Renamed ntime to n_time for clarity
+        * Removed redundant override of FixedUpdate in MultiLights
+        * Changed enable/disable light labels in PAW
+        * Corrected typos
+        * Deprecated AnimatedGroundAnchor
+        * Using AT_Utils.IAnimator interface
+
+* v1.8.3
     * Changed default Min/Max Size/Aspect of APR to [0.1, 1000]
     * ToggleAction of MultiAnimators syncs with its action group if it's set
     * In MultiGeometryAnimator made drag cube names configurable

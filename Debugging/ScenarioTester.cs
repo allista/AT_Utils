@@ -24,7 +24,7 @@ namespace AT_Utils
         void Draw();
     }
 
-    [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
+    [KSPAddon(KSPAddon.Startup.AllGameScenes, true)]
     public class ScenarioTester : AddonWindowBase<ScenarioTester>
     {
         static SortedList<string, SortedList<string, ITestScenario>> scenarios;
@@ -37,7 +37,11 @@ namespace AT_Utils
         public override void Awake()
         {
             base.Awake();
-            if(Instance != this) return;
+            if(Instance != null)
+            {
+                Destroy(gameObject);
+                return;
+            }
             if(scenarios == null)
             {
                 scenarios = new SortedList<string, SortedList<string, ITestScenario>>();

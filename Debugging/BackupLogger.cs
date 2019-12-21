@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace AT_Utils
 {
-    [KSPAddon(KSPAddon.Startup.Instantly, false)]
+    [KSPAddon(KSPAddon.Startup.Instantly, true)]
     public class BackupLogger : MonoBehaviour
     {
         static BackupLogger instance;
@@ -56,6 +56,13 @@ namespace AT_Utils
                 StartCoroutine(backup_log());
             else
                 Log("Unity log is not here:\n{}", unity_log);
+        }
+
+        private void OnDestroy()
+        {
+            if(instance != this)
+                return;
+            instance = null;
         }
 
         IEnumerator<YieldInstruction> backup_log()

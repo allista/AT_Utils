@@ -17,6 +17,11 @@ namespace AT_Utils
             GameEvents.onLevelWasLoadedGUIReady.Add(onLevelWasLoaded);
         }
 
+        private void OnDestroy()
+        {
+            GameEvents.onLevelWasLoadedGUIReady.Remove(onLevelWasLoaded);
+        }
+
         void onLevelWasLoaded(GameScenes scene)
         {
             if(scene != GameScenes.FLIGHT) return;
