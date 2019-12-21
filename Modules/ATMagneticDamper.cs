@@ -260,13 +260,15 @@ namespace AT_Utils
                 public uint id;
                 public Vessel vessel;
                 public Vector3 position;
+                public Quaternion rotation;
                 public float energyConsumption;
-                public bool positionSet;
+                public bool inited;
 
-                public void SetPosition(Vector3 pos)
+                public void SetPosRot(Vector3 pos, Quaternion rot)
                 {
                     position = pos;
-                    positionSet = true;
+                    rotation = rot;
+                    inited = true;
                 }
             }
 
@@ -424,19 +426,23 @@ namespace AT_Utils
                     yield return new WaitForFixedUpdate();
                     if(dampedVessels.Count <= 0)
                         continue;
+                    var T = transform;
                     foreach(var vsl_info in dampedVessels.Values.ToList())
                     {
                         if(vsl_info.vessel != null && vsl_info.vessel.packed)
                         {
-                            if(!vsl_info.positionSet)
+                            if(!vsl_info.inited)
                             {
-                                vsl_info.SetPosition(transform
-                                    .InverseTransformPoint(vsl_info.vessel.vesselTransform
-                                        .position));
+                                vsl_info.SetPosRot(
+                                    T.InverseTransformPoint(
+                                        vsl_info.vessel.vesselTransform.position),
+                                    Quaternion.Inverse(T.rotation)
+                                    * vsl_info.vessel.vesselTransform.rotation);
                                 dampedVessels[vsl_info.id] = vsl_info;
                             }
                             vsl_info.vessel.SetPosition(
                                 transform.TransformPoint(vsl_info.position));
+                            vsl_info.vessel.SetRotation(T.rotation * vsl_info.rotation, false);
                             if(vsl_info.energyConsumption > 0)
                                 controller.drainEnergy(vsl_info.energyConsumption);
                         }
@@ -444,6 +450,7 @@ namespace AT_Utils
                             dampedVessels.Remove(vsl_info.id);
                     }
                 }
+                // ReSharper disable once IteratorNeverReturns
             }
 
             private void track_packed_vessel(Part p)
