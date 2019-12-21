@@ -374,7 +374,7 @@ namespace AT_Utils
                                     toAttractor = 2 * toCenter - toAttractor;
                                     toAttractor.Normalize();
                                 }
-                                if(toAttractorDist < 1)
+                                if(!controller.InvertAttractor && toAttractorDist < 1)
                                     dV *= toAttractorDist;
                                 b.dP += b.rb.mass * dV * toAttractor;
                             }
