@@ -180,12 +180,7 @@ namespace AT_Utils
                         this.Log($"Unable to find {sensorName} MeshFilter in {part.name}");
                         continue;
                     }
-                    sensor.gameObject.layer = state == StartState.Editor ? 21 : 2;
-                    sensor.AddCollider(true);
-                    var damper = sensor.gameObject.AddComponent<Damper>();
-                    damper.Init(this);
-                    damper.enabled = DamperEnabled;
-                    dampers.Add(damper);
+                    addDamper(sensor);
                     HasDamper = true;
                 }
                 if(HasDamper)
@@ -242,6 +237,16 @@ namespace AT_Utils
             if(HasDamper)
                 dampers.ForEach(Destroy);
             Fields[nameof(DamperEnabled)].OnValueModified -= onDamperToggle;
+        }
+
+        protected void addDamper(MeshFilter sensor)
+        {
+            sensor.gameObject.layer = HighLogic.LoadedSceneIsEditor ? 21 : 2;
+            sensor.AddCollider(true);
+            var damper = sensor.gameObject.AddComponent<Damper>();
+            damper.Init(this);
+            damper.enabled = DamperEnabled;
+            dampers.Add(damper);
         }
 
         private void drainEnergy(float rate) =>
