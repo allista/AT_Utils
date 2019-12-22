@@ -91,7 +91,7 @@ namespace AT_Utils
         private const float RelativeVelocityThreshold = 0.1f;
         [KSPField] public float EnergyConsumptionK = 1f;
         [KSPField] public string DamperID = string.Empty;
-        [KSPField] public string Sensor = string.Empty;
+        [KSPField] public string Sensors = string.Empty;
         [KSPField] public string AttractorLocation = string.Empty;
         [KSPField] public AttractorAxis AttractorMainAxis = AttractorAxis.fwd;
         [KSPField] public string AffectedPartTags = string.Empty;
@@ -102,12 +102,28 @@ namespace AT_Utils
         private double reactivateAtUT = -1;
 
         [KSPField] public string AnimatorID = string.Empty;
+
         private IAnimator animator;
-        protected Damper damper;
         protected ResourcePump socket;
+        protected readonly List<Damper> dampers = new List<Damper>();
+        protected Transform attractor;
+        private Vector3 attractorAxis;
+        private string[] tags;
 
         public bool HasDamper { get; private set; }
-        public bool HasAttractor => HasDamper && damper.HasAttractor;
+        public bool HasAttractor { get; private set; }
+
+        private bool _damperActive;
+
+        private bool damperActive
+        {
+            get => _damperActive;
+            set
+            {
+                _damperActive = value;
+                dampers.ForEach(d => d.enabled = value);
+            }
+        }
 
         public static ATMagneticDamper GetDamper(Part p, string id) =>
             string.IsNullOrEmpty(id)
@@ -133,32 +149,81 @@ namespace AT_Utils
             return info.ToStringAndRelease();
         }
 
+        public override void OnLoad(ConfigNode node)
+        {
+            base.OnLoad(node);
+            if(!string.IsNullOrEmpty(Sensors))
+                return;
+            var sensor = node.GetValue("Sensor");
+            if(string.IsNullOrEmpty(sensor))
+                return;
+            Sensors = sensor;
+            this.Log(
+                $"WARNING: part {part.name} uses deprecated config for ATMagneticDamper. Use 'Sensors' instead of 'Sensor'.");
+        }
+
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
             HasDamper = false;
+            HasAttractor = false;
             EnergyConsumptionK = Utils.ClampL(EnergyConsumptionK, 1e-6f);
-            if(!string.IsNullOrEmpty(Sensor))
+            damperActive = DamperEnabled;
+            if(!string.IsNullOrEmpty(Sensors))
             {
-                var sensor = part.FindModelComponent<MeshFilter>(Sensor);
-                if(sensor != null)
+                foreach(var sensorName in Utils.ParseLine(Sensors, Utils.Whitespace))
                 {
+                    var sensor = part.FindModelComponent<MeshFilter>(sensorName);
+                    if(sensor == null)
+                    {
+                        this.Log($"Unable to find {sensorName} MeshFilter in {part.name}");
+                        continue;
+                    }
                     sensor.gameObject.layer = state == StartState.Editor ? 21 : 2;
                     sensor.AddCollider(true);
-                    damper = sensor.gameObject.AddComponent<Damper>();
+                    var damper = sensor.gameObject.AddComponent<Damper>();
                     damper.Init(this);
                     damper.enabled = DamperEnabled;
+                    dampers.Add(damper);
+                    HasDamper = true;
+                }
+                if(HasDamper)
+                {
                     socket = part.CreateSocket();
+                    if(!string.IsNullOrEmpty(AffectedPartTags))
+                        tags = Utils.ParseLine(AffectedPartTags, Utils.Comma);
+                    if(!string.IsNullOrEmpty(AttractorLocation))
+                    {
+                        attractor = part.FindModelTransform(AttractorLocation);
+                        if(attractor != null)
+                        {
+                            HasAttractor = true;
+                            switch(AttractorMainAxis)
+                            {
+                                case AttractorAxis.right:
+                                    attractorAxis = Vector3.right;
+                                    break;
+                                case AttractorAxis.up:
+                                    attractorAxis = Vector3.up;
+                                    break;
+                                case AttractorAxis.fwd:
+                                    attractorAxis = Vector3.forward;
+                                    break;
+                                default:
+                                    attractorAxis = Vector3.forward;
+                                    break;
+                            }
+                        }
+                    }
                     animator = part.GetAnimator(AnimatorID);
                     if(DamperEnabled)
                         animator?.Open();
                     else
                         animator?.Close();
-                    HasDamper = true;
                 }
             }
             var damper_controllable = HasDamper && EnableControls;
-            var attractor_controllable = damper_controllable && damper.HasAttractor;
+            var attractor_controllable = damper_controllable && HasAttractor;
             Fields[nameof(DamperEnabled)].OnValueModified += onDamperToggle;
             Utils.EnableField(Fields[nameof(DamperEnabled)], damper_controllable);
             Utils.EnableField(Fields[nameof(Attenuation)], damper_controllable);
@@ -173,7 +238,7 @@ namespace AT_Utils
         private void OnDestroy()
         {
             if(HasDamper)
-                Destroy(damper);
+                dampers.ForEach(Destroy);
             Fields[nameof(DamperEnabled)].OnValueModified -= onDamperToggle;
         }
 
@@ -184,7 +249,7 @@ namespace AT_Utils
         {
             if(!HighLogic.LoadedSceneIsFlight || FlightDriver.Pause)
                 return;
-            if(!HasDamper || !DamperEnabled || !damper.enabled)
+            if(!HasDamper || !DamperEnabled || !damperActive)
                 return;
             if(socket == null)
                 return;
@@ -194,7 +259,7 @@ namespace AT_Utils
             if(!socket.PartialTransfer)
                 return;
             animator?.Close();
-            damper.enabled = false;
+            damperActive = false;
             reactivateAtUT = Planetarium.GetUniversalTime() + ReactivateAfterSeconds;
             Utils.Message(ReactivateAfterSeconds,
                 $"[{part.Title()}] Damper deactivated due to the lack of EC. Activating in {ReactivateAfterSeconds}");
@@ -208,11 +273,11 @@ namespace AT_Utils
             if(!HasDamper || !DamperEnabled)
                 return;
             if(reactivateAtUT > 0
-               && !damper.enabled
+               && !damperActive
                && Planetarium.GetUniversalTime() > reactivateAtUT)
             {
                 animator?.Open();
-                damper.enabled = true;
+                damperActive = true;
                 reactivateAtUT = -1;
                 Utils.Message($"[{part.Title()}] Damper reactivated");
             }
@@ -222,7 +287,7 @@ namespace AT_Utils
         {
             if(!HasDamper)
                 return;
-            damper.enabled = DamperEnabled;
+            damperActive = DamperEnabled;
             if(DamperEnabled)
                 animator?.Open();
             else
@@ -249,11 +314,6 @@ namespace AT_Utils
         protected class Damper : MonoBehaviour
         {
             private ATMagneticDamper controller;
-            private Transform attractor;
-            private Vector3 attractorAxis;
-            private string[] tags;
-
-            public bool HasAttractor => attractor != null;
 
             private struct VesselInfo
             {
@@ -296,29 +356,6 @@ namespace AT_Utils
             public void Init(ATMagneticDamper damper_module)
             {
                 controller = damper_module;
-                if(!string.IsNullOrEmpty(controller.AttractorLocation))
-                    attractor = controller.part.FindModelTransform(controller.AttractorLocation);
-                if(!string.IsNullOrEmpty(controller.AffectedPartTags))
-                    tags = Utils.ParseLine(controller.AffectedPartTags, Utils.Comma);
-                if(attractor != null)
-                {
-                    controller.AttractorEnabled = true;
-                    switch(controller.AttractorMainAxis)
-                    {
-                        case AttractorAxis.right:
-                            attractorAxis = Vector3.right;
-                            break;
-                        case AttractorAxis.up:
-                            attractorAxis = Vector3.up;
-                            break;
-                        case AttractorAxis.fwd:
-                            attractorAxis = Vector3.forward;
-                            break;
-                        default:
-                            attractorAxis = Vector3.forward;
-                            break;
-                    }
-                }
                 StartCoroutine(damp_packed_vessels());
             }
 
@@ -330,10 +367,13 @@ namespace AT_Utils
                     return;
                 var A = controller.Attenuation / 100f;
                 var total_energy = 0f;
-                var attractorEnabled = controller.AttractorEnabled && attractor != null;
-                var attractorPosition = attractorEnabled ? attractor.position : Vector3.zero;
-                var attractorAxisW =
-                    attractorEnabled ? attractor.rotation * attractorAxis : Vector3.zero;
+                var attractorEnabled = controller.HasAttractor && controller.AttractorEnabled;
+                var attractorPosition = attractorEnabled
+                    ? controller.attractor.position
+                    : Vector3.zero;
+                var attractorAxisW = attractorEnabled
+                    ? controller.attractor.rotation * controller.attractorAxis
+                    : Vector3.zero;
                 var h = controller.part.Rigidbody;
                 var nBodies = dampedBodies.Count;
                 for(var i = 0; i < nBodies; i++)
@@ -483,7 +523,8 @@ namespace AT_Utils
                     return;
                 if(p.vessel.isEVA && !controller.AffectKerbals)
                     return;
-                if(tags != null && !tags.Any(t => p.partInfo.tags.Contains(t)))
+                if(controller.tags != null
+                   && !controller.tags.Any(t => p.partInfo.tags.Contains(t)))
                     return;
                 if(!p.packed && !controller.part.packed)
                 {
