@@ -225,6 +225,7 @@ namespace AT_Utils
             var damper_controllable = HasDamper && EnableControls;
             var attractor_controllable = damper_controllable && HasAttractor;
             Fields[nameof(DamperEnabled)].OnValueModified += onDamperToggle;
+            Utils.EnableField(Fields[nameof(MaxForce)], HasDamper);
             Utils.EnableField(Fields[nameof(DamperEnabled)], damper_controllable);
             Utils.EnableField(Fields[nameof(Attenuation)], damper_controllable);
             Actions[nameof(ToggleAction)].active = damper_controllable;
