@@ -267,7 +267,7 @@ namespace AT_Utils
                     $"[{part.Title()}] Damper deactivated due to the lack of EC. Activating in {ReactivateAfterSeconds}");
             }
             if(EnergyToThermalK > 0)
-                part.AddThermalFlux(EnergyToThermalK * socket.Result);
+                part.AddThermalFlux(EnergyToThermalK * socket.Result / TimeWarp.fixedDeltaTime);
         }
 
         public override void OnUpdate()
