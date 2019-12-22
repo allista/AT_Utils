@@ -71,7 +71,7 @@ namespace AT_Utils
 
         [KSPField(guiActive = true,
             guiActiveEditor = true,
-            guiName = "Attractor Max. Force",
+            guiName = "Damper Max. Force",
             guiUnits = "kN",
             guiFormat = "F1")]
         public float MaxForce = 100f;
