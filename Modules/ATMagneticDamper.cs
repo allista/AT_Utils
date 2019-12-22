@@ -90,6 +90,7 @@ namespace AT_Utils
 
         private const float RelativeVelocityThreshold = 0.1f;
         [KSPField] public float EnergyConsumptionK = 1f;
+        [KSPField] public float EnergyToThermalK = 0.1f;
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensors = string.Empty;
         [KSPField] public string AttractorLocation = string.Empty;
@@ -257,13 +258,16 @@ namespace AT_Utils
             drainEnergy(IdleEnergyConsumption);
             if(!socket.TransferResource())
                 return;
-            if(!socket.PartialTransfer)
-                return;
-            animator?.Close();
-            damperActive = false;
-            reactivateAtUT = Planetarium.GetUniversalTime() + ReactivateAfterSeconds;
-            Utils.Message(ReactivateAfterSeconds,
-                $"[{part.Title()}] Damper deactivated due to the lack of EC. Activating in {ReactivateAfterSeconds}");
+            if(socket.PartialTransfer)
+            {
+                animator?.Close();
+                damperActive = false;
+                reactivateAtUT = Planetarium.GetUniversalTime() + ReactivateAfterSeconds;
+                Utils.Message(ReactivateAfterSeconds,
+                    $"[{part.Title()}] Damper deactivated due to the lack of EC. Activating in {ReactivateAfterSeconds}");
+            }
+            if(EnergyToThermalK > 0)
+                part.AddThermalFlux(EnergyToThermalK * socket.Result);
         }
 
         public override void OnUpdate()
