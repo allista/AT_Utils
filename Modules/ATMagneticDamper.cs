@@ -358,10 +358,17 @@ namespace AT_Utils
                 new Dictionary<uint, VesselInfo>();
 
             /// <summary>
-            /// For damping unpacked vessels, per Rigidbody
+            /// For damping unpacked vessels, per Rigidbody.
             /// </summary>
             private readonly List<RBInfo> dampedBodies =
                 new List<RBInfo>();
+
+            /// <summary>
+            /// A set of persistentIds of Vessels that have
+            /// triggered the damper this frame. It is cleared at LateUpdate.
+            /// </summary>
+            public readonly HashSet<uint> VesselsInside = 
+                new HashSet<uint>();
 
             public void Init(ATMagneticDamper damper_module)
             {
@@ -536,6 +543,7 @@ namespace AT_Utils
                 if(controller.tags != null
                    && !controller.tags.Any(t => p.partInfo.tags.Contains(t)))
                     return;
+                VesselsInside.Add(p.vessel.persistentId);
                 if(!p.packed && !controller.part.packed)
                 {
                     var r = col.attachedRigidbody;
@@ -544,6 +552,11 @@ namespace AT_Utils
                 }
                 else
                     track_packed_vessel(p);
+            }
+
+            private void LateUpdate()
+            {
+                VesselsInside.Clear();
             }
         }
     }
