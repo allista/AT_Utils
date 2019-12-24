@@ -111,20 +111,28 @@ namespace AT_Utils
         private Vector3 attractorAxis;
         private string[] tags;
 
+        /// <summary>
+        /// For holding damped packed vessels in place. 
+        /// </summary>
+        private readonly Dictionary<uint, VesselInfo> dampedVessels =
+            new Dictionary<uint, VesselInfo>();
+
+        /// <summary>
+        /// For damping unpacked vessels, per Rigidbody.
+        /// </summary>
+        private readonly Dictionary<int, RBInfo> dampedBodies =
+            new Dictionary<int, RBInfo>();
+
+        /// <summary>
+        /// A set of persistentIds of Vessels that have
+        /// triggered the damper this frame. It is cleared at LateUpdate.
+        /// </summary>
+        public readonly HashSet<uint> VesselsInside =
+            new HashSet<uint>();
+
         public bool HasDamper { get; private set; }
         public bool HasAttractor { get; private set; }
-
-        private bool _damperActive;
-
-        private bool damperActive
-        {
-            get => _damperActive;
-            set
-            {
-                _damperActive = value;
-                dampers.ForEach(d => d.enabled = value);
-            }
-        }
+        private bool damperActive;
 
         public static ATMagneticDamper GetDamper(Part p, string id) =>
             string.IsNullOrEmpty(id)
@@ -216,6 +224,7 @@ namespace AT_Utils
                         animator?.Open();
                     else
                         animator?.Close();
+                    StartCoroutine(dampPackedVessels());
                 }
             }
             var damper_controllable = HasDamper && EnableControls;
@@ -245,7 +254,7 @@ namespace AT_Utils
             sensor.AddCollider(true);
             var damper = sensor.gameObject.AddComponent<Damper>();
             damper.Init(this);
-            damper.enabled = DamperEnabled;
+            damper.enabled = true;
             dampers.Add(damper);
         }
 
@@ -261,6 +270,7 @@ namespace AT_Utils
             if(socket == null)
                 return;
             drainEnergy(IdleEnergyConsumption);
+            dampRigidBodies();
             if(!socket.TransferResource())
                 return;
             if(socket.PartialTransfer)
@@ -273,6 +283,152 @@ namespace AT_Utils
             }
             if(EnergyToThermalK > 0)
                 part.AddThermalFlux(EnergyToThermalK * socket.Result / TimeWarp.fixedDeltaTime);
+        }
+
+        private void dampRigidBodies()
+        {
+            if(dampedBodies.Count <= 0 || part.Rigidbody == null)
+                return;
+            var A = Attenuation / 100f;
+            var total_energy = 0f;
+            var attractorEnabled = HasAttractor && AttractorEnabled;
+            var attractorPosition = attractorEnabled
+                ? attractor.position
+                : Vector3.zero;
+            var attractorAxisW = attractorEnabled
+                ? attractor.rotation * attractorAxis
+                : Vector3.zero;
+            var h = part.Rigidbody;
+            var rbIds = dampedBodies.Keys.ToList();
+            foreach(var rbId in rbIds)
+            {
+                var b = dampedBodies[rbId];
+                if(b.rb == null || b.part == null)
+                    continue;
+                if(b.part.packed)
+                {
+                    trackPackedVessel(b.part);
+                    continue;
+                }
+                var dist = b.rb.position - h.position;
+                b.relV = b.rb.velocity
+                         - h.velocity
+                         - Vector3.Cross(h.angularVelocity, dist);
+                if(A > 0)
+                {
+                    b.dAv = A * (h.angularVelocity - b.rb.angularVelocity);
+                    b.dP = A * b.rb.mass * b.relV;
+                }
+                if(attractorEnabled)
+                {
+                    var toAttractor = b.rb.worldCenterOfMass - attractorPosition;
+                    if(!toAttractor.IsZero())
+                    {
+                        var toAttractorDist = toAttractor.magnitude;
+                        toAttractor /= toAttractorDist;
+                        var rVel2attractor = -Vector3.Dot(b.relV, toAttractor);
+                        var dV = Mathf.Min(
+                            part.crashTolerance * 0.9f - rVel2attractor,
+                            TimeWarp.fixedDeltaTime * AttractorPower);
+                        if(dV > 0)
+                        {
+                            if(InvertAttractor)
+                            {
+                                var toCenter = Vector3.ProjectOnPlane(
+                                    toAttractor,
+                                    attractorAxisW);
+                                toAttractor = 2 * toCenter - toAttractor;
+                                toAttractor.Normalize();
+                            }
+                            if(!InvertAttractor && toAttractorDist < 1)
+                                dV *= toAttractorDist;
+                            b.dP += b.rb.mass * dV * toAttractor;
+                        }
+                    }
+                }
+                b.dP = b.dP.ClampMagnitudeH(MaxForce * TimeWarp.fixedDeltaTime);
+                var dL2 = Vector3.Dot(b.dAv.SquaredComponents(), b.rb.inertiaTensor);
+                var dP2 = b.dP.sqrMagnitude
+                          * Utils.ClampH(b.relV.magnitude / RelativeVelocityThreshold, 1);
+                total_energy += dP2 / b.rb.mass + dP2 / h.mass + dL2;
+                dampedBodies[rbId] = b;
+            }
+            if(total_energy > 0)
+            {
+                var energy_consumption = total_energy
+                                         / TimeWarp.fixedDeltaTime
+                                         * EnergyConsumptionK;
+                var K = 1f;
+                if(energy_consumption > MaxEnergyConsumption)
+                {
+                    K = Mathf.Sqrt(MaxEnergyConsumption / energy_consumption);
+                    energy_consumption = MaxEnergyConsumption;
+                }
+                foreach(var rbId in rbIds)
+                {
+                    var b = dampedBodies[rbId];
+                    if(b.rb == null)
+                        continue;
+                    if(K < 1)
+                    {
+                        b.dP *= K;
+                        b.dAv *= K;
+                    }
+                    b.rb.AddTorque(b.dAv, ForceMode.VelocityChange);
+                    b.rb.AddForce(-b.dP, ForceMode.Impulse);
+                    h.AddForceAtPosition(b.dP, b.rb.position, ForceMode.Impulse);
+                }
+                drainEnergy(energy_consumption);
+            }
+            dampedBodies.Clear();
+        }
+
+        private IEnumerator<YieldInstruction> dampPackedVessels()
+        {
+            while(true)
+            {
+                yield return new WaitForFixedUpdate();
+                if(dampedVessels.Count <= 0)
+                    continue;
+                var T = transform;
+                foreach(var vsl_info in dampedVessels.Values.ToList())
+                {
+                    if(vsl_info.vessel != null && vsl_info.vessel.packed)
+                    {
+                        if(!vsl_info.inited)
+                        {
+                            vsl_info.SetPosRot(
+                                T.InverseTransformPoint(
+                                    vsl_info.vessel.vesselTransform.position),
+                                Quaternion.Inverse(T.rotation)
+                                * vsl_info.vessel.vesselTransform.rotation);
+                            dampedVessels[vsl_info.id] = vsl_info;
+                        }
+                        vsl_info.vessel.SetPosition(
+                            transform.TransformPoint(vsl_info.position));
+                        vsl_info.vessel.SetRotation(T.rotation * vsl_info.rotation, false);
+                        if(vsl_info.energyConsumption > 0)
+                            drainEnergy(vsl_info.energyConsumption);
+                    }
+                    else
+                        dampedVessels.Remove(vsl_info.id);
+                }
+            }
+            // ReSharper disable once IteratorNeverReturns
+        }
+
+        private void trackPackedVessel(Part p)
+        {
+            if(dampedVessels.ContainsKey(p.vessel.persistentId))
+                return;
+            dampedVessels[p.vessel.persistentId] = new VesselInfo
+            {
+                id = p.vessel.persistentId,
+                vessel = p.vessel,
+                energyConsumption = p.TotalMass()
+                                    * EnergyConsumptionK
+                                    * 0.01f
+            };
         }
 
         public override void OnUpdate()
@@ -291,6 +447,11 @@ namespace AT_Utils
                 reactivateAtUT = -1;
                 Utils.Message($"[{part.Title()}] Damper reactivated");
             }
+        }
+
+        private void LateUpdate()
+        {
+            VesselsInside.Clear();
         }
 
         private void onDamperToggle(object value)
@@ -321,212 +482,45 @@ namespace AT_Utils
         public void InvertAttractorAction(KSPActionParam data) =>
             InvertAttractor = !InvertAttractor;
 
+        private struct VesselInfo
+        {
+            public uint id;
+            public Vessel vessel;
+            public Vector3 position;
+            public Quaternion rotation;
+            public float energyConsumption;
+            public bool inited;
+
+            public void SetPosRot(Vector3 pos, Quaternion rot)
+            {
+                position = pos;
+                rotation = rot;
+                inited = true;
+            }
+        }
+
+        private struct RBInfo
+        {
+            public Part part;
+            public Rigidbody rb;
+            public Vector3 relV;
+            public Vector3 dP;
+            public Vector3 dAv;
+        }
+
         protected class Damper : MonoBehaviour
         {
             private ATMagneticDamper controller;
 
-            private struct VesselInfo
-            {
-                public uint id;
-                public Vessel vessel;
-                public Vector3 position;
-                public Quaternion rotation;
-                public float energyConsumption;
-                public bool inited;
-
-                public void SetPosRot(Vector3 pos, Quaternion rot)
-                {
-                    position = pos;
-                    rotation = rot;
-                    inited = true;
-                }
-            }
-
-            private struct RBInfo
-            {
-                public Part part;
-                public Rigidbody rb;
-                public Vector3 relV;
-                public Vector3 dP;
-                public Vector3 dAv;
-            }
-
-            /// <summary>
-            /// For holding damped packed vessels in place. 
-            /// </summary>
-            private readonly Dictionary<uint, VesselInfo> dampedVessels =
-                new Dictionary<uint, VesselInfo>();
-
-            /// <summary>
-            /// For damping unpacked vessels, per Rigidbody.
-            /// </summary>
-            private readonly List<RBInfo> dampedBodies =
-                new List<RBInfo>();
-
-            /// <summary>
-            /// A set of persistentIds of Vessels that have
-            /// triggered the damper this frame. It is cleared at LateUpdate.
-            /// </summary>
-            public readonly HashSet<uint> VesselsInside = 
-                new HashSet<uint>();
-
             public void Init(ATMagneticDamper damper_module)
             {
                 controller = damper_module;
-                StartCoroutine(damp_packed_vessels());
-            }
-
-            private void FixedUpdate()
-            {
-                if(FlightDriver.Pause || controller == null)
-                    return;
-                if(dampedBodies.Count <= 0 || controller.part.Rigidbody == null)
-                    return;
-                var A = controller.Attenuation / 100f;
-                var total_energy = 0f;
-                var attractorEnabled = controller.HasAttractor && controller.AttractorEnabled;
-                var attractorPosition = attractorEnabled
-                    ? controller.attractor.position
-                    : Vector3.zero;
-                var attractorAxisW = attractorEnabled
-                    ? controller.attractor.rotation * controller.attractorAxis
-                    : Vector3.zero;
-                var h = controller.part.Rigidbody;
-                var nBodies = dampedBodies.Count;
-                for(var i = 0; i < nBodies; i++)
-                {
-                    var b = dampedBodies[i];
-                    if(b.rb == null || b.part == null)
-                        continue;
-                    if(b.part.packed)
-                    {
-                        track_packed_vessel(b.part);
-                        continue;
-                    }
-                    var dist = b.rb.position - h.position;
-                    b.relV = b.rb.velocity
-                             - h.velocity
-                             - Vector3.Cross(h.angularVelocity, dist);
-                    if(A > 0)
-                    {
-                        b.dAv = A * (h.angularVelocity - b.rb.angularVelocity);
-                        b.dP = A * b.rb.mass * b.relV;
-                    }
-                    if(attractorEnabled)
-                    {
-                        var toAttractor = b.rb.worldCenterOfMass - attractorPosition;
-                        if(!toAttractor.IsZero())
-                        {
-                            var toAttractorDist = toAttractor.magnitude;
-                            toAttractor /= toAttractorDist;
-                            var rVel2attractor = -Vector3.Dot(b.relV, toAttractor);
-                            var dV = Mathf.Min(
-                                controller.part.crashTolerance * 0.9f - rVel2attractor,
-                                TimeWarp.fixedDeltaTime * controller.AttractorPower);
-                            if(dV > 0)
-                            {
-                                if(controller.InvertAttractor)
-                                {
-                                    var toCenter = Vector3.ProjectOnPlane(
-                                        toAttractor,
-                                        attractorAxisW);
-                                    toAttractor = 2 * toCenter - toAttractor;
-                                    toAttractor.Normalize();
-                                }
-                                if(!controller.InvertAttractor && toAttractorDist < 1)
-                                    dV *= toAttractorDist;
-                                b.dP += b.rb.mass * dV * toAttractor;
-                            }
-                        }
-                    }
-                    b.dP = b.dP.ClampMagnitudeH(controller.MaxForce * TimeWarp.fixedDeltaTime);
-                    var dL2 = Vector3.Dot(b.dAv.SquaredComponents(), b.rb.inertiaTensor);
-                    var dP2 = b.dP.sqrMagnitude
-                              * Utils.ClampH(b.relV.magnitude / RelativeVelocityThreshold, 1);
-                    total_energy += dP2 / b.rb.mass + dP2 / h.mass + dL2;
-                    dampedBodies[i] = b;
-                }
-                if(total_energy > 0)
-                {
-                    var energy_consumption = total_energy
-                                             / TimeWarp.fixedDeltaTime
-                                             * controller.EnergyConsumptionK;
-                    var K = 1f;
-                    if(energy_consumption > controller.MaxEnergyConsumption)
-                    {
-                        K = Mathf.Sqrt(controller.MaxEnergyConsumption / energy_consumption);
-                        energy_consumption = controller.MaxEnergyConsumption;
-                    }
-                    for(var i = 0; i < nBodies; i++)
-                    {
-                        var b = dampedBodies[i];
-                        if(b.rb == null)
-                            continue;
-                        if(K < 1)
-                        {
-                            b.dP *= K;
-                            b.dAv *= K;
-                        }
-                        b.rb.AddTorque(b.dAv, ForceMode.VelocityChange);
-                        b.rb.AddForce(-b.dP, ForceMode.Impulse);
-                        h.AddForceAtPosition(b.dP, b.rb.position, ForceMode.Impulse);
-                    }
-                    controller.drainEnergy(energy_consumption);
-                }
-                dampedBodies.Clear();
-            }
-
-            private IEnumerator<YieldInstruction> damp_packed_vessels()
-            {
-                while(true)
-                {
-                    yield return new WaitForFixedUpdate();
-                    if(dampedVessels.Count <= 0)
-                        continue;
-                    var T = transform;
-                    foreach(var vsl_info in dampedVessels.Values.ToList())
-                    {
-                        if(vsl_info.vessel != null && vsl_info.vessel.packed)
-                        {
-                            if(!vsl_info.inited)
-                            {
-                                vsl_info.SetPosRot(
-                                    T.InverseTransformPoint(
-                                        vsl_info.vessel.vesselTransform.position),
-                                    Quaternion.Inverse(T.rotation)
-                                    * vsl_info.vessel.vesselTransform.rotation);
-                                dampedVessels[vsl_info.id] = vsl_info;
-                            }
-                            vsl_info.vessel.SetPosition(
-                                transform.TransformPoint(vsl_info.position));
-                            vsl_info.vessel.SetRotation(T.rotation * vsl_info.rotation, false);
-                            if(vsl_info.energyConsumption > 0)
-                                controller.drainEnergy(vsl_info.energyConsumption);
-                        }
-                        else
-                            dampedVessels.Remove(vsl_info.id);
-                    }
-                }
-                // ReSharper disable once IteratorNeverReturns
-            }
-
-            private void track_packed_vessel(Part p)
-            {
-                if(dampedVessels.ContainsKey(p.vessel.persistentId))
-                    return;
-                dampedVessels[p.vessel.persistentId] = new VesselInfo
-                {
-                    id = p.vessel.persistentId,
-                    vessel = p.vessel,
-                    energyConsumption = p.TotalMass()
-                                        * controller.EnergyConsumptionK
-                                        * 0.01f
-                };
             }
 
             private void OnTriggerStay(Collider col)
             {
-                if(!enabled
+                if(controller == null
+                   || !controller.damperActive
                    || col == null
                    || col.attachedRigidbody == null)
                     return;
@@ -543,20 +537,17 @@ namespace AT_Utils
                 if(controller.tags != null
                    && !controller.tags.Any(t => p.partInfo.tags.Contains(t)))
                     return;
-                VesselsInside.Add(p.vessel.persistentId);
+                controller.VesselsInside.Add(p.vessel.persistentId);
                 if(!p.packed && !controller.part.packed)
                 {
-                    var r = col.attachedRigidbody;
-                    dampedBodies.Add(new RBInfo { rb = r, part = p });
-                    dampedVessels.Remove(p.vessel.persistentId);
+                    var rb = col.attachedRigidbody;
+                    var rbId = rb.GetInstanceID();
+                    if(!controller.dampedBodies.ContainsKey(rbId))
+                        controller.dampedBodies.Add(rbId, new RBInfo { rb = rb, part = p });
+                    controller.dampedVessels.Remove(p.vessel.persistentId);
                 }
                 else
-                    track_packed_vessel(p);
-            }
-
-            private void LateUpdate()
-            {
-                VesselsInside.Clear();
+                    controller.trackPackedVessel(p);
             }
         }
     }
