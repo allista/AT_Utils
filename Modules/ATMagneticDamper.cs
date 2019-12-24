@@ -106,7 +106,7 @@ namespace AT_Utils
 
         private IAnimator animator;
         protected ResourcePump socket;
-        protected readonly List<Damper> dampers = new List<Damper>();
+        protected readonly List<Sensor> sensors = new List<Sensor>();
         protected Transform attractor;
         private Vector3 attractorAxis;
         private string[] tags;
@@ -188,7 +188,7 @@ namespace AT_Utils
                         this.Log($"Unable to find {sensorName} MeshFilter in {part.name}");
                         continue;
                     }
-                    addDamper(sensor);
+                    addSensor(sensor);
                     HasDamper = true;
                 }
                 if(HasDamper)
@@ -244,18 +244,18 @@ namespace AT_Utils
         private void OnDestroy()
         {
             if(HasDamper)
-                dampers.ForEach(Destroy);
+                sensors.ForEach(Destroy);
             Fields[nameof(DamperEnabled)].OnValueModified -= onDamperToggle;
         }
 
-        protected void addDamper(MeshFilter sensor)
+        protected void addSensor(MeshFilter sensorMesh)
         {
-            sensor.gameObject.layer = HighLogic.LoadedSceneIsEditor ? 21 : 2;
-            sensor.AddCollider(true);
-            var damper = sensor.gameObject.AddComponent<Damper>();
-            damper.Init(this);
-            damper.enabled = true;
-            dampers.Add(damper);
+            sensorMesh.gameObject.layer = HighLogic.LoadedSceneIsEditor ? 21 : 2;
+            sensorMesh.AddCollider(true);
+            var sensor = sensorMesh.gameObject.AddComponent<Sensor>();
+            sensor.Init(this);
+            sensor.enabled = true;
+            sensors.Add(sensor);
         }
 
         private void drainEnergy(float rate) =>
@@ -508,7 +508,7 @@ namespace AT_Utils
             public Vector3 dAv;
         }
 
-        protected class Damper : MonoBehaviour
+        protected class Sensor : MonoBehaviour
         {
             private ATMagneticDamper controller;
 
