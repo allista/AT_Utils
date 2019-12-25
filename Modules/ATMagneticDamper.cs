@@ -90,7 +90,7 @@ namespace AT_Utils
 
         private const float RelativeVelocityThreshold = 0.1f;
         [KSPField] public float EnergyConsumptionK = 1f;
-        [KSPField] public float EnergyToThermalK = 0.1f;
+        [KSPField] public float ThermalLossesRatio = 0.1f;
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensors = string.Empty;
         [KSPField] public string AttractorLocation = string.Empty;
@@ -281,8 +281,8 @@ namespace AT_Utils
                 Utils.Message(ReactivateAfterSeconds,
                     $"[{part.Title()}] Damper deactivated due to the lack of EC. Activating in {ReactivateAfterSeconds}");
             }
-            if(EnergyToThermalK > 0)
-                part.AddThermalFlux(EnergyToThermalK * socket.Result / TimeWarp.fixedDeltaTime);
+            if(ThermalLossesRatio > 0)
+                part.AddThermalFlux(ThermalLossesRatio * socket.Result / TimeWarp.fixedDeltaTime);
         }
 
         private void dampRigidBodies()
