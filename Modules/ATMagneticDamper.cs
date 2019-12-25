@@ -100,6 +100,7 @@ namespace AT_Utils
         [KSPField] public bool AffectKerbals;
         [KSPField] public bool VariableAttractorForce;
         [KSPField] public bool EnableControls = true;
+        [KSPField] public bool GroupPAWFields = true;
         [KSPField] public float ReactivateAfterSeconds = 5f;
         private double reactivateAtUT = -1;
 
@@ -247,6 +248,20 @@ namespace AT_Utils
                 attractor_controllable && VariableAttractorForce);
             Utils.EnableField(Fields[nameof(InvertAttractor)], attractor_controllable);
             Actions[nameof(ToggleAttractorAction)].active = attractor_controllable;
+            // setup PAW group
+            if(GroupPAWFields)
+            {
+                var group = new BasePAWGroup(
+                    $"{GetType().Name}_{GetInstanceID()}",
+                    string.IsNullOrEmpty(DamperID)
+                        ? "Magnetic Damper"
+                        : Utils.ParseCamelCase(DamperID),
+                    false);
+                foreach(var field in Fields)
+                {
+                    field.group = group;
+                }
+            }
         }
 
         private void OnDestroy()
