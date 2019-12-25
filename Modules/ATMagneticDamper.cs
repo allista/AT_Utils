@@ -131,7 +131,7 @@ namespace AT_Utils
         public readonly HashSet<uint> VesselsInside =
             new HashSet<uint>();
 
-        public bool HasDamper { get; private set; }
+        private bool hasSensor;
         public bool HasAttractor { get; private set; }
         private bool damperActive;
 
@@ -176,7 +176,7 @@ namespace AT_Utils
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
-            HasDamper = false;
+            hasSensor = false;
             HasAttractor = false;
             EnergyConsumptionK = Utils.ClampL(EnergyConsumptionK, 1e-6f);
             thermalLossesK = 1 + ThermalLossesRatio;
@@ -192,9 +192,9 @@ namespace AT_Utils
                         continue;
                     }
                     addSensor(sensor);
-                    HasDamper = true;
+                    hasSensor = true;
                 }
-                if(HasDamper)
+                if(hasSensor)
                 {
                     socket = part.CreateSocket();
                     if(!string.IsNullOrEmpty(AffectedPartTags))
@@ -230,10 +230,15 @@ namespace AT_Utils
                     StartCoroutine(dampPackedVessels());
                 }
             }
-            var damper_controllable = HasDamper && EnableControls;
+            if(!hasSensor)
+            {
+                this.EnableModule(false);
+                return;
+            }
+            // setup visibility of actions, events and various PAW fields
+            var damper_controllable = hasSensor && EnableControls;
             var attractor_controllable = damper_controllable && HasAttractor;
             Fields[nameof(DamperEnabled)].OnValueModified += onDamperToggle;
-            Utils.EnableField(Fields[nameof(MaxForce)], HasDamper);
             Utils.EnableField(Fields[nameof(DamperEnabled)], damper_controllable);
             Utils.EnableField(Fields[nameof(Attenuation)], damper_controllable);
             Actions[nameof(ToggleAction)].active = damper_controllable;
@@ -246,7 +251,7 @@ namespace AT_Utils
 
         private void OnDestroy()
         {
-            if(HasDamper)
+            if(hasSensor)
                 sensors.ForEach(Destroy);
             Fields[nameof(DamperEnabled)].OnValueModified -= onDamperToggle;
         }
@@ -268,7 +273,7 @@ namespace AT_Utils
         {
             if(!HighLogic.LoadedSceneIsFlight || FlightDriver.Pause)
                 return;
-            if(!HasDamper || !DamperEnabled || !damperActive)
+            if(!DamperEnabled || !damperActive)
                 return;
             if(socket == null)
                 return;
@@ -440,7 +445,7 @@ namespace AT_Utils
             base.OnUpdate();
             if(!HighLogic.LoadedSceneIsFlight || FlightDriver.Pause)
                 return;
-            if(!HasDamper || !DamperEnabled)
+            if(!DamperEnabled)
                 return;
             if(reactivateAtUT > 0
                && !damperActive
@@ -460,8 +465,6 @@ namespace AT_Utils
 
         private void onDamperToggle(object value)
         {
-            if(!HasDamper)
-                return;
             damperActive = DamperEnabled;
             if(DamperEnabled)
                 animator?.Open();
