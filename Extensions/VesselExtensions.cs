@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace AT_Utils
@@ -175,5 +176,27 @@ namespace AT_Utils
             }
             return bounds.extents.magnitude;
         }
+
+        #region VesselRanges
+        private static readonly List<FieldInfo> situation_ranges = typeof(VesselRanges)
+            .GetFields(BindingFlags.Public | BindingFlags.Instance)
+            .Where(fi => fi.FieldType == typeof(VesselRanges.Situation))
+            .ToList();
+
+        public static VesselRanges SetUnpackDistance(this Vessel vessel, float distance)
+        {
+            var orig_ranges = new VesselRanges(vessel.vesselRanges);
+            foreach(var fi in situation_ranges)
+            {
+                if(!(fi.GetValue(vessel.vesselRanges) is VesselRanges.Situation sit))
+                    continue;
+                sit.pack = distance * 1.5f;
+                sit.unpack = distance;
+                sit.unload = distance * 2.5f;
+                sit.load = distance * 2f;
+            }
+            return orig_ranges;
+        }
+        #endregion
     }
 }
