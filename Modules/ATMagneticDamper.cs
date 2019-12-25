@@ -148,6 +148,7 @@ namespace AT_Utils
             info.AppendLine($"Max.Force: {MaxForce:F1} kN");
             info.AppendLine($"Max.EC Current: {MaxEnergyConsumption:F1} ec/s");
             info.AppendLine($"Idle EC Current: {IdleEnergyConsumption:F1} ec/s");
+            info.AppendLine($"Thermal Losses: {ThermalLossesRatio:P1}");
             if(string.IsNullOrEmpty(AttractorLocation))
                 info.AppendLine("Has attractor");
             info.AppendLine(string.IsNullOrEmpty(AffectedPartTags)
