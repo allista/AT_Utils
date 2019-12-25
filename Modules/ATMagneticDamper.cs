@@ -91,6 +91,7 @@ namespace AT_Utils
         private const float RelativeVelocityThreshold = 0.1f;
         [KSPField] public float EnergyConsumptionK = 1f;
         [KSPField] public float ThermalLossesRatio = 0.1f;
+        private float thermalLossesK = 1f;
         [KSPField] public string DamperID = string.Empty;
         [KSPField] public string Sensors = string.Empty;
         [KSPField] public string AttractorLocation = string.Empty;
@@ -178,6 +179,7 @@ namespace AT_Utils
             HasDamper = false;
             HasAttractor = false;
             EnergyConsumptionK = Utils.ClampL(EnergyConsumptionK, 1e-6f);
+            thermalLossesK = 1 + ThermalLossesRatio;
             damperActive = DamperEnabled;
             if(!string.IsNullOrEmpty(Sensors))
             {
@@ -358,7 +360,8 @@ namespace AT_Utils
             {
                 var energy_consumption = total_energy
                                          / TimeWarp.fixedDeltaTime
-                                         * EnergyConsumptionK;
+                                         * EnergyConsumptionK
+                                         * thermalLossesK;
                 var K = 1f;
                 if(energy_consumption > MaxEnergyConsumption)
                 {
