@@ -69,6 +69,15 @@ namespace AT_Utils
         [UI_Toggle(scene = UI_Scene.All, enabledText = "Reverse", disabledText = "Direct")]
         public bool InvertAttractor;
 
+        [KSPField(isPersistant = true,
+            guiName = "Auto Enable",
+            guiActive = true,
+            guiActiveEditor = true)]
+        [UI_Toggle(scene = UI_Scene.All)]
+        public bool AutoEnable;
+
+        public event Callback OnDamperAutoEnabled;
+
         [KSPField(guiActive = true,
             guiActiveEditor = true,
             guiName = "Damper Max. Force",
@@ -242,6 +251,7 @@ namespace AT_Utils
             Fields[nameof(DamperEnabled)].OnValueModified += onDamperToggle;
             Utils.EnableField(Fields[nameof(DamperEnabled)], damper_controllable);
             Utils.EnableField(Fields[nameof(Attenuation)], damper_controllable);
+            Utils.EnableField(Fields[nameof(AutoEnable)], damper_controllable);
             Actions[nameof(ToggleAction)].active = damper_controllable;
             Utils.EnableField(Fields[nameof(AttractorEnabled)], attractor_controllable);
             Utils.EnableField(Fields[nameof(AttractorPower)],
@@ -542,7 +552,6 @@ namespace AT_Utils
             private void OnTriggerStay(Collider col)
             {
                 if(controller == null
-                   || !controller.damperActive
                    || col == null
                    || col.attachedRigidbody == null)
                     return;
@@ -560,6 +569,17 @@ namespace AT_Utils
                    && !controller.tags.Any(t => p.partInfo.tags.Contains(t)))
                     return;
                 controller.VesselsInside.Add(p.vessel.persistentId);
+                if(!controller.damperActive)
+                {
+                    if(!controller.DamperEnabled
+                       && controller.AutoEnable)
+                    {
+                        controller.EnableDamper(true);
+                        controller.OnDamperAutoEnabled?.Invoke();
+                    }
+                    else
+                        return;
+                }
                 if(!p.packed && !controller.part.packed)
                 {
                     var rb = col.attachedRigidbody;
