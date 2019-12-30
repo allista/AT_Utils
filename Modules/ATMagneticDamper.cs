@@ -327,6 +327,7 @@ namespace AT_Utils
             if(dampedBodies.Count <= 0 || part.Rigidbody == null)
                 return;
             var A = Attenuation / 100f;
+            var total_dP = 0f;
             var total_energy = 0f;
             var attractorEnabled = HasAttractor && AttractorEnabled;
             var attractorPosition = attractorEnabled
@@ -383,25 +384,29 @@ namespace AT_Utils
                         }
                     }
                 }
-                b.dP = b.dP.ClampMagnitudeH(MaxForce * TimeWarp.fixedDeltaTime);
                 var dL2 = Vector3.Dot(b.dAv.SquaredComponents(), b.rb.inertiaTensor);
                 var dP2 = b.dP.sqrMagnitude
                           * Utils.ClampH(b.relV.magnitude / RelativeVelocityThreshold, 1);
+                total_dP += Mathf.Sqrt(dP2);
                 total_energy += dP2 / b.rb.mass + dP2 / h.mass + dL2;
                 dampedBodies[rbId] = b;
             }
             if(total_energy > 0)
             {
+                var K = 1f;
                 var energy_consumption = total_energy
                                          / TimeWarp.fixedDeltaTime
                                          * EnergyConsumptionK
                                          * thermalLossesK;
-                var K = 1f;
                 if(energy_consumption > MaxEnergyConsumption)
                 {
                     K = Mathf.Sqrt(MaxEnergyConsumption / energy_consumption);
                     energy_consumption = MaxEnergyConsumption;
+                    total_dP *= K;
                 }
+                var max_dP = MaxForce * TimeWarp.fixedDeltaTime;
+                if(total_dP > max_dP)
+                    K *= total_dP / max_dP;
                 foreach(var rbId in rbIds)
                 {
                     var b = dampedBodies[rbId];
