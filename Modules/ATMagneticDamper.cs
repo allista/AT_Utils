@@ -110,6 +110,7 @@ namespace AT_Utils
         [KSPField] public bool VariableAttractorForce;
         [KSPField] public bool EnableControls = true;
         [KSPField] public bool GroupPAWFields = true;
+        [KSPField] public float AutoDeactivateAfterSeconds = 5f;
         [KSPField] public float ReactivateAfterSeconds = 5f;
         private double reactivateAtUT = -1;
 
@@ -120,6 +121,7 @@ namespace AT_Utils
         protected readonly List<Sensor> sensors = new List<Sensor>();
         protected Transform attractor;
         private Vector3 attractorAxis;
+        protected Timer deactivateTimer = new Timer();
         private string[] tags;
 
         /// <summary>
@@ -191,6 +193,7 @@ namespace AT_Utils
             EnergyConsumptionK = Utils.ClampL(EnergyConsumptionK, 1e-6f);
             thermalLossesK = 1 + ThermalLossesRatio;
             damperActive = DamperEnabled;
+            deactivateTimer.Period = AutoDeactivateAfterSeconds;
             if(!string.IsNullOrEmpty(Sensors))
             {
                 foreach(var sensorName in Utils.ParseLine(Sensors, Utils.Whitespace))
@@ -480,6 +483,17 @@ namespace AT_Utils
                 damperActive = true;
                 reactivateAtUT = -1;
                 Utils.Message($"[{part.Title()}] Damper reactivated");
+                return;
+            }
+            if(AutoEnable)
+            {
+                if(VesselsInside.Count == 0)
+                {
+                    if(deactivateTimer.TimePassed)
+                        EnableDamper(false);
+                }
+                else
+                    deactivateTimer.Reset();
             }
         }
 
