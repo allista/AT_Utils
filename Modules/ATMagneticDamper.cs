@@ -119,9 +119,9 @@ namespace AT_Utils
         private IAnimator animator;
         protected ResourcePump socket;
         protected readonly List<Sensor> sensors = new List<Sensor>();
-        protected Transform attractor;
-        private Vector3 attractorAxis;
         protected Timer deactivateTimer = new Timer();
+        public Transform attractor { get; private set; }
+        public Vector3 attractorAxis { get; private set; }
         private string[] tags;
 
         /// <summary>
