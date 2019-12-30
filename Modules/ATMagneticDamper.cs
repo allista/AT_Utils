@@ -298,6 +298,38 @@ namespace AT_Utils
         private void drainEnergy(float rate) =>
             socket.RequestTransfer(rate * TimeWarp.fixedDeltaTime);
 
+        public float GetForceForAcceleration(
+            float mass,
+            float accelerationRequest,
+            out float energyCurrent
+        )
+        {
+            // Everything is calculated for the fixedDeltaTime
+            // because of the simplification used to to calculate dE,
+            // namely, dE is calculated as if the relative velocity is always 0.
+            // With this simplification energyCurrent depends on dt, so we need to use
+            // the same dt that is used to apply actual forces in FixedUpdate.
+            var dP = mass * accelerationRequest * TimeWarp.fixedDeltaTime;
+            var max_dP = MaxForce * TimeWarp.fixedDeltaTime;
+            this.Log($"m {mass}, a {accelerationRequest}, dP {dP}, max dP {max_dP}"); //debug
+            if(dP > max_dP)
+                dP = max_dP;
+            var dP2 = dP * dP;
+            energyCurrent = (dP2 / mass + dP2 / part.TotalMass())
+                            / TimeWarp.fixedDeltaTime
+                            * EnergyConsumptionK
+                            * thermalLossesK;
+            if(energyCurrent > MaxEnergyConsumption)
+            {
+                dP *= Mathf.Sqrt(MaxEnergyConsumption / energyCurrent);
+                this.Log(
+                    $"energyCurrent {energyCurrent} > {MaxEnergyConsumption}, dP {dP}"); //debug
+                energyCurrent = MaxEnergyConsumption;
+            }
+            energyCurrent += IdleEnergyConsumption;
+            return dP / TimeWarp.fixedDeltaTime;
+        }
+
         private void FixedUpdate()
         {
             if(!HighLogic.LoadedSceneIsFlight || FlightDriver.Pause)
@@ -384,6 +416,12 @@ namespace AT_Utils
                         }
                     }
                 }
+                // To calculate dE we use the following simplification:
+                // relative velocity is considered to be always zero.
+                // This results in a much simpler equation for total dE
+                // that allows to easily back-propagate the decreasing
+                // coefficient when MaxForce or MaxEnergyConsumption
+                // is limiting the resulting dP.
                 var dL2 = Vector3.Dot(b.dAv.SquaredComponents(), b.rb.inertiaTensor);
                 var dP2 = b.dP.sqrMagnitude
                           * Utils.ClampH(b.relV.magnitude / RelativeVelocityThreshold, 1);
