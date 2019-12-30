@@ -122,6 +122,7 @@ namespace AT_Utils
         protected Timer deactivateTimer = new Timer();
         public Transform attractor { get; private set; }
         public Vector3 attractorAxis { get; private set; }
+        public Vector3 attractorAxisW => attractor.rotation * attractorAxis;
         private string[] tags;
 
         /// <summary>
@@ -331,8 +332,8 @@ namespace AT_Utils
             var attractorPosition = attractorEnabled
                 ? attractor.position
                 : Vector3.zero;
-            var attractorAxisW = attractorEnabled
-                ? attractor.rotation * attractorAxis
+            var axis = attractorEnabled
+                ? attractorAxisW
                 : Vector3.zero;
             var h = part.Rigidbody;
             var rbIds = dampedBodies.Keys.ToList();
@@ -372,7 +373,7 @@ namespace AT_Utils
                             {
                                 var toCenter = Vector3.ProjectOnPlane(
                                     toAttractor,
-                                    attractorAxisW);
+                                    axis);
                                 toAttractor = 2 * toCenter - toAttractor;
                                 toAttractor.Normalize();
                             }
