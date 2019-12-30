@@ -19,20 +19,6 @@ namespace AT_Utils
         [KSPField] public string detachSndPath = string.Empty;
         public FXGroup fxSndAttach, fxSndDetach;
 
-
-        public override void OnAwake()
-        {
-            base.OnAwake();
-            GameEvents.onPartPack.Add(onPartPack);
-            GameEvents.onPartUnpack.Add(onPartUnpack);
-        }
-
-        private void OnDestroy()
-        {
-            GameEvents.onPartPack.Remove(onPartPack);
-            GameEvents.onPartUnpack.Remove(onPartUnpack);
-        }
-
         public override void OnStart(StartState state)
         {
             base.OnStart(state);
@@ -46,16 +32,17 @@ namespace AT_Utils
             update_part_events();
         }
 
-        void onPartPack(Part p)
-        {
-            if(p == null || p != part)
-                return;
-            detatch_anchor();
-        }
+        /// <summary>
+        /// This is a receiver of the component message sent from Part
+        /// </summary>
+        private void OnPartPack() => detatch_anchor();
 
-        void onPartUnpack(Part p)
+        /// <summary>
+        /// This is a receiver of the component message sent from Part
+        /// </summary>
+        private void OnPartUnpack()
         {
-            if(!isAttached || p == null || p != part)
+            if(!isAttached)
                 return;
             setup_ground_contact();
             ForceAttach();
