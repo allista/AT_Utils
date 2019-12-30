@@ -21,8 +21,15 @@ namespace AT_Utils
             guiActiveEditor = true,
             guiActiveUnfocused = true,
             unfocusedRange = 50)]
-        [UI_Toggle(scene = UI_Scene.All)]
+        [UI_Toggle(scene = UI_Scene.All, enabledText = "Active", disabledText = "Inactive")]
         public bool DamperEnabled;
+
+        [KSPField(isPersistant = true,
+            guiName = "Field Activation",
+            guiActive = true,
+            guiActiveEditor = true)]
+        [UI_Toggle(scene = UI_Scene.All, enabledText = "Auto", disabledText = "Manual")]
+        public bool AutoEnable;
 
         [KSPField(isPersistant = true,
             guiActive = true,
@@ -68,13 +75,6 @@ namespace AT_Utils
             unfocusedRange = 50)]
         [UI_Toggle(scene = UI_Scene.All, enabledText = "Reverse", disabledText = "Direct")]
         public bool InvertAttractor;
-
-        [KSPField(isPersistant = true,
-            guiName = "Auto Enable",
-            guiActive = true,
-            guiActiveEditor = true)]
-        [UI_Toggle(scene = UI_Scene.All)]
-        public bool AutoEnable;
 
         public event Callback OnDamperAutoEnabled;
 
