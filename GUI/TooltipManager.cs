@@ -120,6 +120,7 @@ namespace AT_Utils
         {
             if(!GUIWindowBase.HUD_enabled)
                 return;
+            Styles.Init();
             GUI.depth = -1000;
             DrawToolTipOnScreen();
 #if DEBUG
