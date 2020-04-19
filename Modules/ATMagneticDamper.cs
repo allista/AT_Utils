@@ -313,7 +313,6 @@ namespace AT_Utils
             // the same dt that is used to apply actual forces in FixedUpdate.
             var dP = mass * accelerationRequest * TimeWarp.fixedDeltaTime;
             var max_dP = MaxForce * TimeWarp.fixedDeltaTime;
-            this.Log($"m {mass}, a {accelerationRequest}, dP {dP}, max dP {max_dP}"); //debug
             if(dP > max_dP)
                 dP = max_dP;
             var dP2 = dP * dP;
@@ -324,8 +323,6 @@ namespace AT_Utils
             if(energyCurrent > MaxEnergyConsumption)
             {
                 dP *= Mathf.Sqrt(MaxEnergyConsumption / energyCurrent);
-                this.Log(
-                    $"energyCurrent {energyCurrent} > {MaxEnergyConsumption}, dP {dP}"); //debug
                 energyCurrent = MaxEnergyConsumption;
             }
             energyCurrent += IdleEnergyConsumption;
