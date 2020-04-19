@@ -18,6 +18,13 @@ namespace AT_Utils.UI
             toggle.SetIsOnWithoutNotify(isOn);
             toggle.GetComponent<ToggleColorizer>()?.UpdateColor();
         }
+
+        public static void SetInteractable(this Selectable selectable, bool interactable)
+        {
+            if(selectable.interactable == interactable)
+                return;
+            selectable.interactable = interactable;
+            selectable.GetComponent<Colorizer>()?.UpdateColor();
         }
     }
 }

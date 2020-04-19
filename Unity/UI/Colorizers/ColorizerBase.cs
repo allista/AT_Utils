@@ -30,6 +30,8 @@ namespace AT_Utils.UI
             setting?.onColorChanged.RemoveListener(onColorChanged);
         }
 
+        public void UpdateColor() => onColorChanged(setting);
+
         protected abstract void onColorChanged(Color color);
     }
 }
