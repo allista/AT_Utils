@@ -272,6 +272,7 @@ namespace AT_Utils
                         ? "Magnetic Damper"
                         : Utils.ParseCamelCase(DamperID),
                     false);
+                group.startCollapsed = !EnableControls;
                 foreach(var field in Fields)
                 {
                     field.group = group;
