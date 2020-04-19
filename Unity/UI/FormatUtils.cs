@@ -11,6 +11,8 @@ namespace AT_Utils.UI
 {
     public static class FormatUtils
     {
+        public const float G0 = 9.80665f; //m/s2
+
         public static string formatVeryBigValue(float value, string unit, string format = "F1")
         {
             var mod = "";
