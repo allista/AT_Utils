@@ -543,6 +543,8 @@ namespace AT_Utils
 
         private void LateUpdate()
         {
+            if(!HighLogic.LoadedSceneIsFlight || FlightDriver.Pause)
+                return;
             VesselsInside.Clear();
         }
 
