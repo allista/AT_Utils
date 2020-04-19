@@ -476,7 +476,7 @@ namespace AT_Utils
                 var T = transform;
                 foreach(var vsl_info in dampedVessels.Values.ToList())
                 {
-                    if(vsl_info.vessel != null && vsl_info.vessel.packed)
+                    if(vsl_info.vessel != null)
                     {
                         if(!vsl_info.inited)
                         {
@@ -492,9 +492,10 @@ namespace AT_Utils
                         vsl_info.vessel.SetRotation(T.rotation * vsl_info.rotation, false);
                         if(vsl_info.energyConsumption > 0)
                             drainEnergy(vsl_info.energyConsumption);
+                        if(vsl_info.vessel.packed)
+                            continue;
                     }
-                    else
-                        dampedVessels.Remove(vsl_info.id);
+                    dampedVessels.Remove(vsl_info.id);
                 }
             }
             // ReSharper disable once IteratorNeverReturns
