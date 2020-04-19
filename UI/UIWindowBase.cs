@@ -97,7 +97,6 @@ namespace AT_Utils
                 this.SaveState();
                 GameEvents.onGamePause.Remove(onGamePause);
                 GameEvents.onGamePause.Remove(onGameUnpause);
-                pos = Controller.transform.localPosition;
                 GameObject gameObject;
                 (gameObject = Controller.gameObject).SetActive(false);
                 Object.Destroy(gameObject);
