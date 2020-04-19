@@ -77,6 +77,7 @@ namespace AT_Utils
         public bool InvertAttractor;
 
         public event Callback OnDamperAutoEnabled;
+        public event Callback OnDamperAutoDisabled;
 
         [KSPField(guiActive = true,
             guiActiveEditor = true,
@@ -534,7 +535,10 @@ namespace AT_Utils
                 if(VesselsInside.Count == 0)
                 {
                     if(deactivateTimer.TimePassed)
+                    {
                         EnableDamper(false);
+                        OnDamperAutoDisabled?.Invoke();
+                    }
                 }
                 else
                     deactivateTimer.Reset();
