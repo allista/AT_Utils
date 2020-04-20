@@ -49,8 +49,11 @@ namespace AT_Utils
         public T state { get; protected set; }
         readonly Dictionary<T, Callback> callbacks = new Dictionary<T, Callback>();
 
-        public Multiplexer() 
-        { if(!typeof(T).IsEnum) throw new ArgumentException("Multiplexer<T> T must be an enumerated type"); }
+        static Multiplexer()
+        {
+            if(!typeof(T).IsEnum)
+                throw new ArgumentException("Multiplexer<T> T must be an enumerated type");
+        }
 
         #region Logic
         public static implicit operator bool(Multiplexer<T> m) { return !m[default(T)]; }

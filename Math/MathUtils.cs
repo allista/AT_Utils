@@ -269,6 +269,15 @@ namespace AT_Utils
                                   * axis.normalized * vec.magnitude;
             return vec;
         }
+
+        public static QuaternionD FromToRotation(Vector3d fromV, Vector3d toV)
+        {
+            var cross = Vector3d.Cross(fromV, toV);
+            var dot = Vector3d.Dot(fromV, toV);
+            var wval = dot + Math.Sqrt(fromV.sqrMagnitude * toV.sqrMagnitude);
+            var norm = 1.0 / Math.Sqrt(cross.sqrMagnitude + wval * wval);
+            return new QuaternionD(cross.x * norm, cross.y * norm, cross.z * norm, wval * norm);
+        }
     }
 }
 
