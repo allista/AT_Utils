@@ -1,6 +1,44 @@
 #AT Utils ChangeLog
 
-* **v1.9.0**
+* **v1.9.1**
+    * MagneticDamper
+        * dampPackedVessels works one last time for just-upacked vessels
+        * PAW group starts collapsed if controls are disabled in MODULE
+        * added OnDamperAutoDisabled callback
+        * do not execute late update when not in flight or in pause
+        * added GetforceForAcceleration public method
+        * limiting the total force acted upon ALL rigid bodies in the field
+        * added public attractorAxisW property
+        * made attractor transform and attractorAxis public
+        * added auto-deactivation by timer if damper is empty
+        * renamed AutoEnable gui text to "Field Activation: Auto/Manual"
+        * added AutoEnable PAW toggle and OndamperAutoEnabled callback
+        * added dynamic PAW grouping
+        * disable the module if there's no sensor
+        * thermal losses are included in energy spent by the damper
+        * added Thermal Losses to part tooltip in Editor
+        * renamed EnergyToThermalK to ThermalLossesRatio for clarity
+        * rename Damper to Sensor and dampers to sensors
+        * moved all dampening logic from Damper to the main module
+        * added Damper.VesselsInside set of persistentIds
+        * extracted addDamper protected method from OnStart
+        * AddThermalFlux is in kW, not kJ
+        * generate heat flux while working
+        * MaxField should be inactive when there's no damper
+        * corrected MaxField guiName to Damper Max. Force
+        * using multiple Sensors and thus multiple Dampers
+    * Added CargoAccelerators assets as a symbolic link; added CA bundle definition
+    * Added LabelFigure prefab to AT_Utils.UI
+    * Added FormatUtils.G0 constant
+    * Added ColorizerBase.UpdateColor and Selectable.SetInteractable extension
+    * Added Orbital/OrbitalUtils that extends Utils class
+    * Added Math/PhysicsUtils that extends Utils class; added AngularAcceleration
+    * Added Utils.FromToRottation - QuaternionD version, since native is broken
+    * Moved SetUnpackDistance from TCA to VesselExtensions
+    * Fixed NRE in DEBUG label in TooltipManager
+    * Fixed ATGroundAnchor that was not working after vessel switch
+
+* v1.9.0
     * Core:
         * Added UniversalDrill to BadParts as per @pmborg finding
         * Fixed singleton implementation of BackupLogger
