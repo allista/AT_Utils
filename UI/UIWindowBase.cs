@@ -1,4 +1,4 @@
-//   UIWindowBase.cs
+﻿//   UIWindowBase.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
@@ -97,16 +97,15 @@ namespace AT_Utils
 
         public void Close()
         {
-            if(Controller != null)
-            {
-                this.SaveState();
-                GameEvents.onGamePause.Remove(onGamePause);
-                GameEvents.onGamePause.Remove(onGameUnpause);
-                GameObject gameObject;
-                (gameObject = Controller.gameObject).SetActive(false);
-                Object.Destroy(gameObject);
-                Controller = null;
-            }
+            if(Controller == null)
+                return;
+            this.SaveState();
+            GameEvents.onGamePause.Remove(onGamePause);
+            GameEvents.onGamePause.Remove(onGameUnpause);
+            GameObject gameObject;
+            (gameObject = Controller.gameObject).SetActive(false);
+            Object.Destroy(gameObject);
+            Controller = null;
         }
 
         public bool IsShown => !in_progress && Controller != null;
