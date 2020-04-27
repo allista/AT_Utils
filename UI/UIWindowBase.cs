@@ -1,4 +1,4 @@
-﻿//   UIWindowBase.cs
+//   UIWindowBase.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
@@ -17,6 +17,7 @@ namespace AT_Utils
 
         protected virtual string prefab_name => typeof(T).Name;
         GameObject prefab;
+        private bool prefabNotFound;
 
         public T Controller { get; private set; }
 
@@ -38,7 +39,7 @@ namespace AT_Utils
 
         public IEnumerator Show()
         {
-            if(in_progress || Controller != null)
+            if(in_progress || Controller != null || bundle.BundleNotFound || prefabNotFound)
                 yield break;
             in_progress = true;
             if(prefab == null)
@@ -47,7 +48,11 @@ namespace AT_Utils
                     yield return null;
                 prefab = bundle.GetAsset(prefab_name);
                 if(prefab == null)
+                {
+                    Utils.Log($"Prefab {prefab_name} is not found in {bundle}");
+                    prefabNotFound = true;
                     goto end;
+                }
             }
             var obj = Object.Instantiate(prefab, DialogCanvasUtil.DialogCanvasRect);
             Controller = obj.GetComponent<T>();

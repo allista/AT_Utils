@@ -4,8 +4,6 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2018 Allis Tauri
-using KSPAssets;
-using KSPAssets.Loaders;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,57 +12,55 @@ namespace AT_Utils
 {
     public class UIBundle
     {
-        readonly string BUNDLE;
-        BundleDefinition bundle_def;
-        readonly Dictionary<string,GameObject> loaded_assets = new Dictionary<string, GameObject>();
+        private readonly string BUNDLE;
+        public bool BundleNotFound { get; private set; }
+        private AssetBundle bundle;
+        private AssetBundleCreateRequest bundleReq;
+        private readonly Dictionary<string,GameObject> loaded_assets = new Dictionary<string, GameObject>();
 
-        public UIBundle(string bundle_path)
+        public UIBundle(string game_data_path)
         {
-            BUNDLE = bundle_path;
+            BUNDLE = game_data_path;
         }
 
-        IEnumerable load(AssetDefinition asset)
+        ~UIBundle()
         {
-            AssetLoader.Loader loader = null;
-            if(!AssetLoader.LoadAssets(l => { loader = l; }, asset))
-            {
-                Utils.Log("Asset load request invalid: {}", asset.path);
-                yield break;
-            }
-            while(loader == null)
-                yield return null;
-            if(loader.objects[0] == null)
-            {
-                Utils.Log("Failed loading asset: {}", asset.path);
-                yield break;
-            }
-            var obj = loader.objects[0] as GameObject;
-            if(obj == null)
-            {
-                Utils.Log("Loaded object is not a GO: {}", asset.path);
-                yield break;
-            }
-            loaded_assets[asset.name] = obj;
+            if(bundle != null) 
+                bundle.Unload(true);
         }
+
 
         public IEnumerable LoadAsset(string name)
         {
             if(loaded_assets.ContainsKey(name))
                 yield break;
-            if(bundle_def == null)
-                bundle_def = AssetLoader.GetBundleDefinition(BUNDLE);
-            if(bundle_def != null)
+            if(BundleNotFound)
+                yield break;
+            if(bundle == null && bundleReq == null)
             {
-                var asset = AssetLoader.GetAssetDefinitionWithName(bundle_def, name);
-                if(asset != null)
+                bundleReq = AssetBundle.LoadFromFileAsync(Utils.PathChain(KSPUtil.ApplicationRootPath, "GameData", BUNDLE));
+                yield return bundleReq;
+                bundle = bundleReq.assetBundle;
+                bundleReq = null;
+                if(bundle == null)
                 {
-                    foreach(var _ in load(asset))
-                        yield return null;
+                    Utils.Log($"Unable to load {BUNDLE} bundle.");
+                    BundleNotFound = false;
+                    yield break;
                 }
             }
+            while(bundleReq != null)
+                yield return null;
+            var assetReq = bundle.LoadAssetAsync<GameObject>(name);
+            yield return assetReq;
+            if(assetReq.asset == null)
+                Utils.Log($"Unable to load {name} asset from {BUNDLE}.");
+            loaded_assets[name] = assetReq.asset as GameObject;
         }
 
         public GameObject GetAsset(string name) => 
             loaded_assets.TryGetValue(name, out var obj) ? obj : null;
+
+        public override string ToString() => BUNDLE;
     }
 }
