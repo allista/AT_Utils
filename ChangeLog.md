@@ -1,6 +1,11 @@
 #AT Utils ChangeLog
 
-* **v1.9.1**
+* **v1.9.2**
+    * Fixed UI bundle loading
+    * Changed Min/Max KSP versions to 1.9.0 - 1.9.1
+    * Changed references to KSP-1.9.1
+
+* v1.9.1
     * MagneticDamper
         * dampPackedVessels works one last time for just-upacked vessels
         * PAW group starts collapsed if controls are disabled in MODULE
