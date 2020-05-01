@@ -1,9 +1,10 @@
-//   AT_Utils_UI.cs
+﻿//   AT_Utils_UI.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2018 Allis Tauri
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;

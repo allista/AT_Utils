@@ -16,18 +16,16 @@ namespace AT_Utils
 {
     public static partial class Utils
     {
-        public static ResourceInfo ElectricCharge = new ResourceInfo("ElectricCharge");
-        
-        static Dictionary<string,int> _layers = new Dictionary<string, int>();
+        public static readonly ResourceInfo ElectricCharge = new ResourceInfo("ElectricCharge");
+
+        private static readonly Dictionary<string, int> _layers = new Dictionary<string, int>();
 
         public static int GetLayer(string name)
         {
-            int layer;
-            if(!_layers.TryGetValue(name, out layer))
-            {
-                layer = 1 << LayerMask.NameToLayer(name);
-                _layers[name] = layer;
-            }
+            if(_layers.TryGetValue(name, out var layer))
+                return layer;
+            layer = 1 << LayerMask.NameToLayer(name);
+            _layers[name] = layer;
             return layer;
         }
 
@@ -43,52 +41,103 @@ namespace AT_Utils
         /// The camel case components matching regexp.
         /// From: http://stackoverflow.com/questions/155303/net-how-can-you-split-a-caps-delimited-string-into-an-array
         /// </summary>
-        const string CamelCaseRegexp = "([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))";
-        static Regex CCR = new Regex(CamelCaseRegexp);
-        public static string ParseCamelCase(string s) { return CCR.Replace(s, "$1 "); }
+        private const string CamelCaseRegexp = "([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))";
+
+        private static readonly Regex CCR = new Regex(CamelCaseRegexp);
+
+        public static string ParseCamelCase(string s) => CCR.Replace(s, "$1 ");
 
         public static readonly char[] Delimiters = { ' ', '\t', ',', ';' };
         public static readonly char[] Whitespace = { ' ', '\t' };
         public static readonly char[] Semicolon = { ';' };
         public static readonly char[] Comma = { ',' };
 
-        public static string[] ParseLine(string line, char[] delims, bool trim = true)
+        public static string[] ParseLine(string line, char[] delimiters, bool trim = true)
         {
-            if(string.IsNullOrEmpty(line)) return new string[] { };
-            var array = line.Split(delims, StringSplitOptions.RemoveEmptyEntries);
-            if(trim) { for(int i = 0, len = array.Length; i < len; i++) array[i] = array[i].Trim(); }
+            if(string.IsNullOrEmpty(line))
+                return new string[] { };
+            var array = line.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+            if(!trim)
+                return array;
+            for(int i = 0, len = array.Length; i < len; i++)
+                array[i] = array[i].Trim();
             return array;
         }
 
         public static string formatVeryBigValue(float value, string unit, string format = "F1")
         {
-            string mod = "";
-            if(value > 1e24) { value /= 1e24f; mod = "Y"; }
-            else if(value > 1e21) { value /= 1e21f; mod = "Z"; }
-            else if(value > 1e18) { value /= 1e18f; mod = "E"; }
-            else if(value > 1e15) { value /= 1e15f; mod = "P"; }
-            else if(value > 1e12) { value /= 1e12f; mod = "T"; }
-            else return formatBigValue(value, unit, format);
+            string mod;
+            if(value > 1e24)
+            {
+                value /= 1e24f;
+                mod = "Y";
+            }
+            else if(value > 1e21)
+            {
+                value /= 1e21f;
+                mod = "Z";
+            }
+            else if(value > 1e18)
+            {
+                value /= 1e18f;
+                mod = "E";
+            }
+            else if(value > 1e15)
+            {
+                value /= 1e15f;
+                mod = "P";
+            }
+            else if(value > 1e12)
+            {
+                value /= 1e12f;
+                mod = "T";
+            }
+            else
+                return formatBigValue(value, unit, format);
             return value.ToString(format) + mod + unit;
         }
 
         public static string formatBigValue(float value, string unit, string format = "F1")
         {
-            string mod = "";
-            if(value > 1e9) { value /= 1e9f; mod = "G"; }
-            else if(value > 1e6) { value /= 1e6f; mod = "M"; }
-            else if(value > 1e3) { value /= 1e3f; mod = "k"; }
+            var mod = "";
+            if(value > 1e9)
+            {
+                value /= 1e9f;
+                mod = "G";
+            }
+            else if(value > 1e6)
+            {
+                value /= 1e6f;
+                mod = "M";
+            }
+            else if(value > 1e3)
+            {
+                value /= 1e3f;
+                mod = "k";
+            }
             return value.ToString(format) + mod + unit;
         }
 
         public static string formatSmallValue(float value, string unit, string format = "F1")
         {
-            string mod = "";
+            var mod = "";
             if(value < 1)
             {
-                if(value > 1e-3) { value *= 1e3f; mod = "m"; }
-                else if(value > 1e-6) { value *= 1e6f; mod = "μ"; }
-                else if(value > 1e-9) { value *= 1e9f; mod = "n"; }
+                if(value > 1e-3)
+                {
+                    value *= 1e3f;
+                    mod = "m";
+                }
+                else if(value > 1e-6)
+                {
+                    value *= 1e6f;
+                    mod = "μ";
+                }
+                else if(value > 1e-9)
+                {
+                    value *= 1e9f;
+                    mod = "n";
+                }
             }
             return value.ToString(format) + mod + unit;
         }
@@ -122,12 +171,13 @@ namespace AT_Utils
                 return (units * 1e9f).ToString("n1") + "nu";
             if(units >= 1e-13f) //to fully use the last digit 
                 return (units * 1e12f).ToString("n1") + "pu";
-            return "0.0u"; //effectivly zero
+            return "0.0u"; // effectively zero
         }
 
-        struct _DateTime
+        private readonly struct _DateTime
         {
-            public int seconds, minutes, hours, days, years;
+            public readonly int seconds, minutes, hours, days, years;
+
             public _DateTime(double time, int year_len, int day_len)
             {
                 years = (int)(time / year_len);
@@ -143,34 +193,26 @@ namespace AT_Utils
         public static string formatTimeDelta(double delta)
         {
             var dt = new _DateTime(delta, KSPUtil.dateTimeFormatter.Year, KSPUtil.dateTimeFormatter.Day);
-            return string.Format("{0}y {1,3}d {2,2:}:{3:00}:{4:00}",
-                                 dt.years, dt.days, dt.hours, dt.minutes, dt.seconds);
+            return $"{dt.years}y {dt.days,3}d {dt.hours,2}:{dt.minutes:00}:{dt.seconds:00}";
         }
 
-        public static string formatDimensions(Vector3 size)
-        { return string.Format("{0:F2}m x {1:F2}m x {2:F2}m", size.x, size.y, size.z); }
+        public static string formatDimensions(Vector3 size) => $"{size.x:F2}m x {size.y:F2}m x {size.z:F2}m";
 
-        public static string formatVector(Vector3 v)
-        { return string.Format("({0}, {1}, {2}); |v| = {3}", v.x, v.y, v.z, v.magnitude); }
+        public static string formatVector(Vector3 v) => $"({v.x}, {v.y}, {v.z}); |v| = {v.magnitude}";
 
-        public static string formatVector(Vector3d v)
-        { return string.Format("({0}, {1}, {2}); |v| = {3}", v.x, v.y, v.z, v.magnitude); }
+        public static string formatVector(Vector3d v) => $"({v.x}, {v.y}, {v.z}); |v| = {v.magnitude}";
 
-        public static string formatComponents(Vector3 v)
-        {
-            return string.Format("[{0: 0.000;-0.000; 0.000;}, {1: 0.000;-0.000; 0.000;}, {2: 0.000;-0.000; 0.000;}]",
-                                 v.x, v.y, v.z);
-        }
+        public static string formatComponents(Vector3 v) =>
+            $"[{v.x: 0.000;-0.000; 0.000;}, {v.y: 0.000;-0.000; 0.000;}, {v.z: 0.000;-0.000; 0.000;}]";
 
         public static string formatCB(CelestialBody cb)
         {
-            if(cb == null) return "Body:   null";
+            if(cb == null)
+                return "Body:   null";
             return Utils.Format(
-                "Body:   {}\n" +
-                "\trotation: {} s\n" +
-                "\tradius:   {}\n" +
-                "\trot angle {} deg",
-                cb.bodyName, cb.rotationPeriod,
+                "Body:   {}\n" + "\trotation: {} s\n" + "\tradius:   {}\n" + "\trot angle {} deg",
+                cb.bodyName,
+                cb.rotationPeriod,
                 formatBigValue((float)cb.Radius, "m"),
                 cb.rotationAngle);
         }
@@ -178,115 +220,131 @@ namespace AT_Utils
         public static string formatOrbit(Orbit o)
         {
             return Utils.Format(
-                "{}\n" +
-                "PeA:    {} m\n" +
-                "ApA:    {} m\n" +
-                "PeR:    {} m\n" +
-                "ApR:    {} m\n" +
-                "SMA:    {} m\n" +
-                "SmA:    {} m\n" +
-                "Ecc:    {}\n" +
-                "Inc:    {} deg\n" +
-                "LAN:    {} deg\n" +
-                "MA:     {} rad\n" +
-                "TA:     {} rad\n" +
-                "AoP:    {} deg\n" +
-                "Period: {} s\n" +
-                "epoch:   {}\n" +
-                "T@epoch: {} s\n" +
-                "T:       {} s\n" +
-                "T2Pe     {} s\n" +
-                "T2Ap     {} s\n" +
-                "StartUT  {}  StartTrans: {}\n" +
-                "EndUT    {}, EndTrans:   {}\n" +
-                "Vel: {} m/s\n" +
-                "Pos: {} m\n",
+                "{}\n"
+                + "PeA:    {} m\n"
+                + "ApA:    {} m\n"
+                + "PeR:    {} m\n"
+                + "ApR:    {} m\n"
+                + "SMA:    {} m\n"
+                + "SmA:    {} m\n"
+                + "Ecc:    {}\n"
+                + "Inc:    {} deg\n"
+                + "LAN:    {} deg\n"
+                + "MA:     {} rad\n"
+                + "TA:     {} rad\n"
+                + "AoP:    {} deg\n"
+                + "Period: {} s\n"
+                + "epoch:   {}\n"
+                + "T@epoch: {} s\n"
+                + "T:       {} s\n"
+                + "T2Pe     {} s\n"
+                + "T2Ap     {} s\n"
+                + "StartUT  {}  StartTrans: {}\n"
+                + "EndUT    {}, EndTrans:   {}\n"
+                + "Vel: {} m/s\n"
+                + "Pos: {} m\n",
                 formatCB(o.referenceBody),
-                o.PeA, o.ApA,
-                o.PeR, o.ApR,
-                o.semiMajorAxis, o.semiMinorAxis,
-                o.eccentricity, o.inclination, o.LAN, o.meanAnomaly, o.trueAnomaly, o.argumentOfPeriapsis,
-                o.period, o.epoch, o.ObTAtEpoch, o.ObT,
-                o.timeToPe, o.timeToAp,
-                o.StartUT, o.patchStartTransition,
-                o.EndUT, o.patchEndTransition,
-                formatVector(o.vel), formatVector(o.pos));
+                o.PeA,
+                o.ApA,
+                o.PeR,
+                o.ApR,
+                o.semiMajorAxis,
+                o.semiMinorAxis,
+                o.eccentricity,
+                o.inclination,
+                o.LAN,
+                o.meanAnomaly,
+                o.trueAnomaly,
+                o.argumentOfPeriapsis,
+                o.period,
+                o.epoch,
+                o.ObTAtEpoch,
+                o.ObT,
+                o.timeToPe,
+                o.timeToAp,
+                o.StartUT,
+                o.patchStartTransition,
+                o.EndUT,
+                o.patchEndTransition,
+                formatVector(o.vel),
+                formatVector(o.pos));
         }
 
         public static string formatPatches(Orbit o, string tag)
         {
             var with_tag = !string.IsNullOrEmpty(tag);
-            var ret = with_tag ?
-                Format("===================== {} : {} =======================\n{}",
-                       tag, Planetarium.GetUniversalTime(), o) :
-                formatOrbit(o);
+            var ret = with_tag
+                ? Format("===================== {} : {} =======================\n{}",
+                    tag,
+                    Planetarium.GetUniversalTime(),
+                    o)
+                : formatOrbit(o);
             ret += "\n";
-            if(o.nextPatch != null &&
-               o.nextPatch.referenceBody != null &&
-               o.patchEndTransition != Orbit.PatchTransitionType.FINAL)
+            if(o.nextPatch != null
+               && o.nextPatch.referenceBody != null
+               && o.patchEndTransition != Orbit.PatchTransitionType.FINAL)
                 ret += formatPatches(o.nextPatch, "");
             if(with_tag)
                 ret += "===================================================================\n";
             return ret;
         }
 
-        public static string formatBounds(Bounds b, string name = "")
-        {
-            return string.Format("Bounds:  {0}\n" +
-                                 "Center:  {1}\n" +
-                                 "Extents: {2}\n" +
-                                 "Min:     {3}\n" +
-                                 "Max:     {4}\n" +
-                                 "Volume:  {5}",
-                                 name, b.center, b.extents, b.min, b.max,
-                                 b.size.x * b.size.y * b.size.z);
-        }
+        public static string formatBounds(Bounds b, string name = "") =>
+            $"Bounds:  {name}\nCenter:  {b.center}\nExtents: {b.extents}\nMin:     {b.min}\nMax:     {b.max}\nVolume:  {b.size.x * b.size.y * b.size.z}";
 
-        public static string formatException(Exception ex)
-        { return string.Format("{0}\n{1}\n{2}", ex.Message, ex.Source, ex.StackTrace); }
+        public static string formatException(Exception ex) => $"{ex.Message}\n{ex.Source}\n{ex.StackTrace}";
 
         public static string Format(string s, params object[] args)
         {
-            if(args == null || args.Length == 0) return s;
+            if(args == null || args.Length == 0)
+                return s;
             convert_args(args);
             for(int i = 0, argsLength = args.Length; i < argsLength; i++)
             {
                 var ind = s.IndexOf("{}", StringComparison.InvariantCulture);
-                if(ind >= 0) s = s.Substring(0, ind) + "{" + i + "}" + s.Substring(ind + 2);
-                else s += string.Format(" arg{0}: {{{0}}}", i);
+                if(ind >= 0)
+                    s = s.Substring(0, ind) + "{" + i + "}" + s.Substring(ind + 2);
+                else
+                    s += string.Format(" arg{0}: {{{0}}}", i);
             }
             return string.Format(s.Replace("{}", "[no arg]"), args);
         }
 
-        static void convert_args(object[] args)
+        private static void convert_args(object[] args)
         {
             for(int i = 0, argsL = args.Length; i < argsL; i++)
             {
                 var arg = args[i];
-                if(arg is string) continue;
-                else if(arg == null) args[i] = "null";
-                else if(arg is Vector3) args[i] = formatVector((Vector3)arg);
-                else if(arg is Vector3d) args[i] = formatVector((Vector3d)arg);
-                else if(arg is CelestialBody) args[i] = formatCB((CelestialBody)arg);
-                else if(arg is Orbit) args[i] = formatOrbit((Orbit)arg);
-                else if(arg is Bounds) args[i] = formatBounds((Bounds)arg);
-                else if(arg is Exception) args[i] = formatException((Exception)arg);
+                if(arg is string)
+                    continue;
+                if(arg == null)
+                    args[i] = "null";
+                else if(arg is Vector3)
+                    args[i] = formatVector((Vector3)arg);
+                else if(arg is Vector3d)
+                    args[i] = formatVector((Vector3d)arg);
+                else if(arg is CelestialBody)
+                    args[i] = formatCB((CelestialBody)arg);
+                else if(arg is Orbit)
+                    args[i] = formatOrbit((Orbit)arg);
+                else if(arg is Bounds)
+                    args[i] = formatBounds((Bounds)arg);
+                else if(arg is Exception)
+                    args[i] = formatException((Exception)arg);
                 else if(arg is Transform)
                 {
                     var T = arg as Transform;
-                    args[i] = string.Format("{0}: pos {1}, rot {2}", T.name, T.position, T.rotation.eulerAngles);
+                    args[i] = $"{T.name}: pos {T.position}, rot {T.rotation.eulerAngles}";
                 }
                 else if(arg is IEnumerable)
                 {
                     var arr = (arg as IEnumerable).Cast<object>().ToArray();
                     convert_args(arr);
-                    args[i] = string.Join("\n", new[]
-                    {
-                        "Count: "+arr.Length,
-                        "[", string.Join(",\n", arr.Cast<string>().ToArray()), "]"
-                    });
+                    args[i] = string.Join("\n",
+                        new[] { "Count: " + arr.Length, "[", string.Join(",\n", arr.Cast<string>().ToArray()), "]" });
                 }
-                else args[i] = arg.ToString();
+                else
+                    args[i] = arg.ToString();
             }
         }
 
@@ -294,12 +352,18 @@ namespace AT_Utils
         {
             var mod_name = "AT_Utils";
             var stack = new StackTrace(2);
-            foreach(var f in stack.GetFrames())
+            var frames = stack.GetFrames();
+            if(frames != null)
             {
-                var method = f.GetMethod();
-                if(log_re.IsMatch(method.Name)) continue;
-                mod_name = method.DeclaringType.Assembly.GetName().Name;
-                break;
+                foreach(var f in frames)
+                {
+                    var method = f.GetMethod();
+                    if(log_re.IsMatch(method.Name))
+                        continue;
+                    if(method.DeclaringType != null)
+                        mod_name = method.DeclaringType.Assembly.GetName().Name;
+                    break;
+                }
             }
 #if DEBUG
             UnityEngine.Debug.Log(stack);
@@ -308,6 +372,7 @@ namespace AT_Utils
         }
 
         static readonly Regex log_re = new Regex("[Ll]og");
+
         public static void Log(string msg, params object[] args)
         {
             msg = prepare_message(msg);
@@ -347,13 +412,10 @@ namespace AT_Utils
             }
         }
 
-        //from http://stackoverflow.com/questions/716399/c-sharp-how-do-you-get-a-variables-name-as-it-was-physically-typed-in-its-dec
-        //second answer
-        public static string PropertyName<T>(T obj) { return typeof(T).GetProperties()[0].Name; }
-
         public static bool PartIsPurchased(string name)
         {
-            if(PartLoader.Instance == null) return false;
+            if(PartLoader.Instance == null)
+                return false;
             var info = PartLoader.getPartInfoByName(name);
             return info != null && PartIsPurchased(info);
         }
@@ -368,8 +430,8 @@ namespace AT_Utils
         public static Vector3[] BoundCorners(Bounds b)
         {
             var corners = new Vector3[8];
-            Vector3 min = b.min;
-            Vector3 max = b.max;
+            var min = b.min;
+            var max = b.max;
             corners[0] = new Vector3(min.x, min.y, min.z); //left-bottom-back
             corners[1] = new Vector3(min.x, min.y, max.z); //left-bottom-front
             corners[2] = new Vector3(min.x, max.y, min.z); //left-top-back
@@ -402,7 +464,7 @@ namespace AT_Utils
         //KSP-provided System.dll declares Path.Combine(strin[]) as internal O_o
         public static string PathChain(params string[] paths)
         {
-            string path = "";
+            var path = "";
             for(int p = 0, len = paths.Length; p < len; p++)
                 path = Path.Combine(path, paths[p]);
             return path;
@@ -429,12 +491,14 @@ namespace AT_Utils
 
         public static void SaveGame(string name, bool with_message = true)
         {
-            Game game = HighLogic.CurrentGame.Updated();
+            var game = HighLogic.CurrentGame.Updated();
             game.startScene = GameScenes.FLIGHT;
             GamePersistence.SaveGame(game, name, HighLogic.SaveFolder, SaveMode.OVERWRITE);
-            if(with_message) Message("Game saved as: {0}", name);
+            if(with_message)
+                Message("Game saved as: {0}", name);
         }
 
+        // ReSharper disable once IteratorNeverReturns
         public static IEnumerator<YieldInstruction> SlowUpdate(Action action, float period = 1)
         {
             while(true)
@@ -478,7 +542,9 @@ namespace AT_Utils
     public static class WaitWithPhysics
     {
         public static void DelayPhysicsForSeconds(float dt)
-        { OrbitPhysicsManager.HoldVesselUnpack(Mathf.CeilToInt(dt / TimeWarp.fixedDeltaTime) + 1); }
+        {
+            OrbitPhysicsManager.HoldVesselUnpack(Mathf.CeilToInt(dt / TimeWarp.fixedDeltaTime) + 1);
+        }
 
         public static WaitForSeconds ForSeconds(float dt)
         {
@@ -503,10 +569,10 @@ namespace AT_Utils
     {
         public void Add(K key, V value)
         {
-            List<V> lst;
-            if(TryGetValue(key, out lst))
+            if(TryGetValue(key, out var lst))
                 lst.Add(value);
-            else this[key] = new List<V> { value };
+            else
+                this[key] = new List<V> { value };
         }
     }
 }
