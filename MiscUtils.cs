@@ -322,6 +322,17 @@ namespace AT_Utils
 #endif
         }
 
+        public static void Debug(string msg, params object[] args)
+        {
+#if DEBUG
+            Log($"DEBUG: {msg}", args);
+#endif
+        }
+
+        public static void Info(string msg, params object[] args) => Log($"INFO: {msg}", args);
+        public static void Warning(string msg, params object[] args) => Log($"WARNING: {msg}", args);
+        public static void Error(string msg, params object[] args) => Log($"ERROR: {msg}", args);
+
         public static void Log2File(string filename, string msg, params object[] args)
         {
             using(var f = new StreamWriter(filename, true))

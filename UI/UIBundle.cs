@@ -53,7 +53,7 @@ namespace AT_Utils
                 bundleReq = null;
                 if(bundle == null)
                 {
-                    Utils.Log($"Unable to load {BUNDLE} bundle.");
+                    Utils.Error($"Unable to load {bundlePath} bundle.");
                     BundleNotFound = false;
                     yield break;
                 }
@@ -66,7 +66,7 @@ namespace AT_Utils
             var assetReq = bundle.LoadAssetAsync<GameObject>(name);
             yield return assetReq;
             if(assetReq.asset == null)
-                Utils.Log($"Unable to load {name} asset from {BUNDLE}.");
+                Utils.Error($"Unable to load {name} asset from {bundlePath}.");
             loaded_assets[name] = assetReq.asset as GameObject;
         }
 
