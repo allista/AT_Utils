@@ -373,20 +373,33 @@ namespace AT_Utils
 
         static readonly Regex log_re = new Regex("[Ll]og");
 
-        public static void Log(string msg, params object[] args)
+
+        public static void Log(string msg)
         {
             msg = prepare_message(msg);
-            if(args.Length > 0)
-            {
-                convert_args(args);
-                msg = Format(msg, args);
-            }
             UnityEngine.Debug.Log(msg);
 #if DEBUG
             BackupLogger.LogRaw(msg);
 #endif
         }
+        
+        public static void Log(string msg, params object[] args)
+        {
+            if(args.Length > 0)
+            {
+                convert_args(args);
+                msg = Format(msg, args);
+            }
+            Log(msg);
+        }
 
+        public static void Debug(string msg)
+        {
+#if DEBUG
+            Log($"DEBUG: {msg}");
+#endif
+        }
+        
         public static void Debug(string msg, params object[] args)
         {
 #if DEBUG
@@ -394,21 +407,23 @@ namespace AT_Utils
 #endif
         }
 
+        public static void Info(string msg) => Log($"INFO: {msg}");
         public static void Info(string msg, params object[] args) => Log($"INFO: {msg}", args);
+        public static void Warning(string msg) => Log($"WARNING: {msg}");
         public static void Warning(string msg, params object[] args) => Log($"WARNING: {msg}", args);
+        public static void Error(string msg) => Log($"ERROR: {msg}");
         public static void Error(string msg, params object[] args) => Log($"ERROR: {msg}", args);
 
         public static void Log2File(string filename, string msg, params object[] args)
         {
             using(var f = new StreamWriter(filename, true))
             {
-                msg = prepare_message(msg);
                 if(args.Length > 0)
                 {
                     convert_args(args);
                     msg = Format(msg, args);
                 }
-                f.WriteLine(msg);
+                f.WriteLine(prepare_message(msg));
             }
         }
 
