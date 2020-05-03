@@ -13,24 +13,35 @@ obj/**
 *.user
 
 *.pdb
+*.pdb.meta
 
 .vs
 Unity/Temp
+Unity/Logs
 Unity/Library
 Unity/ProjectSettings
-Unity/Assets/PartTools
-Unity/Assets/Plugins
-Unity/Assets/SquadCore
-
-*.meta
+Unity/AssetBundles
 Unity/Assembly-CSharp-Editor.csproj
 Unity/Assembly-CSharp.csproj
+Unity/UnityPackageManager/manifest.json
 Unity/Assets/Editor/KSPCurveEditor.cs
 Unity/Assets/Editor/TextMeshProResolver.cs
+Unity/Assets/PartTools
+Unity/Assets/Plugins/KSPAssets
+Unity/Assets/SquadCore
+Unity/Assets/TextMesh Pro
+Unity/.idea
 Unity/AT_Utils.sln
-Unity/AssetBundles
-Unity/UnityPackageManager/manifest.json
-/Unity/Assets/XML/squadcore_bundle.xml
-/Unity/Assets/TextMesh Pro
-/Unity/.idea
-/Unity/Logs
+
+Unity/Assets/XML/squadcore_bundle.xml
+Unity/Assets/XML/squadcore_bundle.xml.meta
+Unity/Assets/Editor/FindMissingScripts.cs.cs.meta
+Unity/Assets/Editor/FindMissingScriptsRecursive.cs.meta
+Unity/Assets/Editor/KSPCurveEditor.cs.meta
+Unity/Assets/Plugins/KSPAssets.meta
+Unity/Assembly-CSharp-Editor-firstpass.csproj
+Unity/Assembly-CSharp-firstpass.csproj
+Unity/PartTools.cfg
+Unity/Assets/PartTools.meta
+Unity/Assets/SquadCore.meta
+Unity/Packages/manifest.json

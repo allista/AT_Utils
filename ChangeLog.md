@@ -1,6 +1,12 @@
 #AT Utils ChangeLog
 
-* **v1.9.2**
+* **v1.9.3**
+    * Added all relevant .meta files from Unity project
+    * Added Utils.Log and its variants without params
+    * Added Utils.Debug .Info .Warning and .Error log methods
+    * Fixed loading of UI from bundles after scene switch
+
+* v1.9.2
     * Fixed UI bundle loading
     * Changed Min/Max KSP versions to 1.9.0 - 1.9.1
     * Changed references to KSP-1.9.1

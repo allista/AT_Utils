@@ -49,7 +49,7 @@ namespace AT_Utils
                 prefab = bundle.GetAsset(prefab_name);
                 if(prefab == null)
                 {
-                    Utils.Log($"Prefab {prefab_name} is not found in {bundle}");
+                    Utils.Error($"Prefab {prefab_name} is not found in {bundle}");
                     prefabNotFound = true;
                     goto end;
                 }
@@ -59,7 +59,7 @@ namespace AT_Utils
             obj.SetActive(false);
             if(Controller == null)
             {
-                Utils.Log("{} does not have {} component: {}",
+                Utils.Error("{} does not have {} component: {}",
                     obj,
                     typeof(T).Name,
                     obj.GetComponents<MonoBehaviour>());
