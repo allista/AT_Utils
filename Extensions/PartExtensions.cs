@@ -252,8 +252,12 @@ namespace AT_Utils
         public static void Log(this MonoBehaviour mb, string msg, params object[] args) =>
             Utils.Log(string.Format("{0}: {1}", mb.GetID(), msg), args);
 
-        public static void Log(this Part p, string msg, params object[] args) =>
-            Utils.Log(string.Format("{0}: {1}", p.GetID(), msg), args);
+        public static void Log(this Part p, string msg, params object[] args) => Utils.Log($"{p.GetID()}: {msg}", args);
+        public static void Log(this Part p, string msg) => Utils.Log($"{p.GetID()}: {msg}");
+        public static void Debug(this Part p, string msg) => Utils.Debug($"{p.GetID()}: {msg}");
+        public static void Info(this Part p, string msg) => Utils.Info($"{p.GetID()}: {msg}");
+        public static void Warning(this Part p, string msg) => Utils.Warning($"{p.GetID()}: {msg}");
+        public static void Error(this Part p, string msg) => Utils.Error($"{p.GetID()}: {msg}");
         #endregion
 
         #region Misc

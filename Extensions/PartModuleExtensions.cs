@@ -21,6 +21,10 @@ namespace AT_Utils
         }
 
         public static void Log(this PartModule pm, string msg) => Utils.Log($"{pm.GetID()}: {msg}");
+        public static void Debug(this PartModule pm, string msg) => Utils.Debug($"{pm.GetID()}: {msg}");
+        public static void Info(this PartModule pm, string msg) => Utils.Info($"{pm.GetID()}: {msg}");
+        public static void Warning(this PartModule pm, string msg) => Utils.Warning($"{pm.GetID()}: {msg}");
+        public static void Error(this PartModule pm, string msg) => Utils.Error($"{pm.GetID()}: {msg}");
 
         public static void Log(this PartModule pm, string msg, params object[] args) =>
             Utils.Log($"{pm.GetID()}: {msg}", args);
