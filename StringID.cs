@@ -1,4 +1,4 @@
-﻿//   StringID.cs
+//   StringID.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
@@ -58,10 +58,8 @@ namespace AT_Utils
                       part.Title(), part.persistentId);
 
         public static string GetID(this PartModule part_module) =>
-        part_module == null ?
-        "_part_module" :
-        string.Format("{0}:{1}[{2:X}]",
-                      part_module.part.GetID(),
-                      part_module.ClassName, part_module.GetHashCode());
+            part_module == null
+                ? "_part_module"
+                : $"{GetID(part_module.part)}:{part_module.GetType().Name}[{part_module.GetHashCode():X}]";
     }
 }
