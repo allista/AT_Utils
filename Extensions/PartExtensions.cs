@@ -257,36 +257,6 @@ namespace AT_Utils
         #endregion
 
         #region Misc
-        //directly from Part disassembly
-        public static PartModule.StartState StartState(this Part part)
-        {
-            var _state = PartModule.StartState.None;
-            if(HighLogic.LoadedSceneIsEditor)
-                _state |= PartModule.StartState.Editor;
-            else if(HighLogic.LoadedSceneIsFlight && part.vessel != null)
-            {
-                if(part.vessel.situation == Vessel.Situations.PRELAUNCH)
-                {
-                    _state |= PartModule.StartState.PreLaunch;
-                    _state |= PartModule.StartState.Landed;
-                }
-                if(part.vessel.situation == Vessel.Situations.DOCKED)
-                    _state |= PartModule.StartState.Docked;
-                if(part.vessel.situation == Vessel.Situations.ORBITING
-                   || part.vessel.situation == Vessel.Situations.ESCAPING)
-                    _state |= PartModule.StartState.Orbital;
-                if(part.vessel.situation == Vessel.Situations.SUB_ORBITAL)
-                    _state |= PartModule.StartState.SubOrbital;
-                if(part.vessel.situation == Vessel.Situations.SPLASHED)
-                    _state |= PartModule.StartState.Splashed;
-                if(part.vessel.situation == Vessel.Situations.FLYING)
-                    _state |= PartModule.StartState.Flying;
-                if(part.vessel.situation == Vessel.Situations.LANDED)
-                    _state |= PartModule.StartState.Landed;
-            }
-            return _state;
-        }
-
         public static void HighlightAlways(this Part p, Color c)
         {
             p.highlightColor = c;
