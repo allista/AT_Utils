@@ -8,8 +8,7 @@ namespace AT_Utils
     public static class PartExtensions
     {
         #region from MechJeb2 PartExtensions
-        public static bool HasModule<T>(this Part p) where T : PartModule =>
-            p.Modules.GetModule<T>() != null;
+        public static bool HasModule<T>(this Part p) where T : PartModule => p.Modules.GetModule<T>() != null;
 
         public static float TotalMass(this Part p) => p.mass + p.GetResourceMass();
         #endregion
@@ -79,8 +78,7 @@ namespace AT_Utils
             return passages;
         }
 
-        public static ResourcePump CreateSocket(this Part p) =>
-            new ResourcePump(p, Utils.ElectricCharge.id);
+        public static ResourcePump CreateSocket(this Part p) => new ResourcePump(p, Utils.ElectricCharge.id);
         #endregion
 
         #region Resources and Phys-Props
@@ -250,7 +248,7 @@ namespace AT_Utils
                 : "";
 
         public static void Log(this MonoBehaviour mb, string msg, params object[] args) =>
-            Utils.Log(string.Format("{0}: {1}", mb.GetID(), msg), args);
+            Utils.Log($"{mb.GetID()}: {msg}", args);
 
         public static void Log(this Part p, string msg, params object[] args) => Utils.Log($"{p.GetID()}: {msg}", args);
         public static void Log(this Part p, string msg) => Utils.Log($"{p.GetID()}: {msg}");

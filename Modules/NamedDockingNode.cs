@@ -1,4 +1,4 @@
-﻿//   NamedDockingNode.cs
+//   NamedDockingNode.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
@@ -14,14 +14,14 @@ namespace AT_Utils
         [KSPField(isPersistant = true)]
         public string PortName = "";
 
-        protected SimpleTextEntry name_editor;
+        private SimpleTextEntry name_editor;
 
-        Dictionary<BaseEvent, string> event_names = new Dictionary<BaseEvent, string>();
+        private readonly Dictionary<BaseEvent, string> event_names = new Dictionary<BaseEvent, string>();
 
-        protected void update_event_names()
+        private void update_event_names()
         {
             foreach(var e in event_names)
-                e.Key.guiName = string.Format("{0}: {1}", e.Value, PortName);
+                e.Key.guiName = $"{e.Value}: {PortName}";
         }
 
         public override void OnAwake()
