@@ -1,4 +1,4 @@
-//   NamedDockingNode.cs
+﻿//   NamedDockingNode.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
@@ -38,7 +38,7 @@ namespace AT_Utils
                 event_names.Add(evt, evt.guiName);
         }
 
-        protected void OnDestroy()
+        protected virtual void OnDestroy()
         {
             Destroy(name_editor);
         }
