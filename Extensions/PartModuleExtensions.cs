@@ -13,10 +13,9 @@ namespace AT_Utils
             params object[] args
         )
         {
-            Utils.Message(6,
-                "WARNING: {0}.\n" + "Configuration of \"{1}\" is INVALID.",
-                string.Format(msg, args),
-                pm.Title());
+            msg = string.Format(msg, args);
+            pm.Error(msg);
+            Utils.Message(6, $"WARNING: {msg}.\nConfiguration of \"{pm.Title()}\" is INVALID.");
             pm.enabled = pm.isEnabled = false;
         }
 
