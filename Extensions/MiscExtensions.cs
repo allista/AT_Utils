@@ -42,6 +42,15 @@ namespace AT_Utils
             n.AddValue(name,
                 ConfigNode.WriteQuaternion(new Quaternion(r.x, r.y, r.width, r.height)));
 
+        public static string ToConfigString(this IConfigNode inode)
+        {
+            if(inode == null)
+                return "";
+            var node = new ConfigNode(inode.GetID());
+            inode.Save(node);
+            return node.ToString();
+        }
+
         public static Rect GetRect(this ConfigNode n, string name)
         {
             try
