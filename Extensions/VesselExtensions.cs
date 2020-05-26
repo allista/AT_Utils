@@ -8,6 +8,12 @@ namespace AT_Utils
 {
     public static class VesselExtensions
     {
+        public static void Log(this Vessel v, string msg) => Utils.Log($"{v.GetID()}: {msg}");
+        public static void Debug(this Vessel v, string msg) => Utils.Debug($"{v.GetID()}: {msg}");
+        public static void Info(this Vessel v, string msg) => Utils.Info($"{v.GetID()}: {msg}");
+        public static void Warning(this Vessel v, string msg) => Utils.Warning($"{v.GetID()}: {msg}");
+        public static void Error(this Vessel v, string msg) => Utils.Error($"{v.GetID()}: {msg}");
+
         public static void Log(this Vessel v, string msg, params object[] args) =>
             Utils.Log($"{v.GetID()}: {msg}", args);
 
