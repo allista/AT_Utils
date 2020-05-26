@@ -189,17 +189,26 @@ namespace AT_Utils
             .Where(fi => fi.FieldType == typeof(VesselRanges.Situation))
             .ToList();
 
-        public static VesselRanges SetUnpackDistance(this Vessel vessel, float distance)
+        public static VesselRanges SetUnpackDistance(this Vessel vessel, float distance, bool ifGreater = false)
         {
+            var doNotCompare = !ifGreater;
+            var pack = distance * 1.5f;
+            var unpack = distance;
+            var load = distance * 2f;
+            var unload = distance * 2.5f;
             var orig_ranges = new VesselRanges(vessel.vesselRanges);
             foreach(var fi in situation_ranges)
             {
                 if(!(fi.GetValue(vessel.vesselRanges) is VesselRanges.Situation sit))
                     continue;
-                sit.pack = distance * 1.5f;
-                sit.unpack = distance;
-                sit.unload = distance * 2.5f;
-                sit.load = distance * 2f;
+                if(doNotCompare || sit.pack < pack)
+                    sit.pack = pack;
+                if(doNotCompare || sit.unpack < unpack)
+                    sit.unpack = unpack;
+                if(doNotCompare || sit.unload < unload)
+                    sit.unload = unload;
+                if(doNotCompare || sit.load < load)
+                    sit.load = load;
             }
             return orig_ranges;
         }
