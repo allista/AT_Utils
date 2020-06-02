@@ -112,6 +112,7 @@
     <ItemGroup>
         <Compile Include="Addons\ComputationBalancer.cs" />
         <Compile Include="Construction\ConstructionSkill.cs" />
+        <Compile Include="Construction\ConstructionUtils.cs" />
         <Compile Include="Extensions\CollectionsExtensions.cs" />
         <Compile Include="Extensions\MiscExtensions.cs" />
         <Compile Include="Extensions\OrbitalExtensions.cs" />
