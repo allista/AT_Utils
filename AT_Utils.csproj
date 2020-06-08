@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -230,6 +230,9 @@
     </ItemGroup>
     <ItemGroup>
         <None Include=".gitignore" />
+        <None Include="GameData\000_AT_Utils\Cryogenics.cfg" />
+        <None Include="GameData\000_AT_Utils\TankConfigs.cfg" />
+        <None Include="GameData\000_AT_Utils\TankTypes.cfg" />
         <None Include="README.md" />
     </ItemGroup>
     <ItemGroup>
