@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -113,6 +113,7 @@
         <Compile Include="Addons\ComputationBalancer.cs" />
         <Compile Include="Construction\ConstructionSkill.cs" />
         <Compile Include="Construction\ConstructionUtils.cs" />
+        <Compile Include="Debugging\DebugWindowController.cs" />
         <Compile Include="Extensions\CollectionsExtensions.cs" />
         <Compile Include="Extensions\MiscExtensions.cs" />
         <Compile Include="Extensions\OrbitalExtensions.cs" />

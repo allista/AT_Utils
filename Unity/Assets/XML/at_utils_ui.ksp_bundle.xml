@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<KSPBundleDefinition xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" UrlName="at_utils_ui.ksp" Name="at_utils_ui.ksp" CreatedTime="-8586226501405008588">
+<KSPBundleDefinition xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" UrlName="at_utils_ui.ksp" Name="at_utils_ui.ksp" CreatedTime="-8586100043449500808">
   <Author>Allis Tauri</Author>
   <Info>allista@gmail.com</Info>
   <Assets>
     <Asset Name="Button" Path="Assets/UI/Prefabs/Button.prefab" Type="GameObject" Url="UI/Prefabs/Button" AutoLoad="false" />
     <Asset Name="ColorItem" Path="Assets/UI/Prefabs/ColorItem.prefab" Type="GameObject" Url="UI/Prefabs/ColorItem" AutoLoad="false" />
     <Asset Name="ColorList" Path="Assets/UI/Prefabs/ColorList.prefab" Type="GameObject" Url="UI/Prefabs/ColorList" AutoLoad="false" />
+    <Asset Name="DebugWindow" Path="Assets/UI/Prefabs/DebugWindow.prefab" Type="GameObject" Url="UI/Prefabs/DebugWindow" AutoLoad="false" />
     <Asset Name="FloatControl" Path="Assets/UI/Prefabs/FloatControl.prefab" Type="GameObject" Url="UI/Prefabs/FloatControl" AutoLoad="false" />
     <Asset Name="Indicator" Path="Assets/UI/Prefabs/Indicator.prefab" Type="GameObject" Url="UI/Prefabs/Indicator" AutoLoad="false" />
     <Asset Name="Label" Path="Assets/UI/Prefabs/Label.prefab" Type="GameObject" Url="UI/Prefabs/Label" AutoLoad="false" />

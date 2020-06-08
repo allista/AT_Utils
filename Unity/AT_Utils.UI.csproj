@@ -73,6 +73,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="UI\ClickableLabel.cs" />
+        <Compile Include="UI\DebugWindow.cs" />
         <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Enums\ColorValues.cs" />
         <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Events\ColorChangedEvent.cs" />
         <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Events\HSVChangedEvent.cs" />
