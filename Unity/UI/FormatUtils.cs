@@ -83,23 +83,22 @@ namespace AT_Utils.UI
         public static string formatSmallValue(float value, string unit, string format = "F1")
         {
             var mod = "";
-            if(value < 1)
+            if(value > 1)
+                mod = "";
+            else if(value > 1e-3)
             {
-                if(value > 1e-3)
-                {
-                    value *= 1e3f;
-                    mod = "m";
-                }
-                else if(value > 1e-6)
-                {
-                    value *= 1e6f;
-                    mod = "μ";
-                }
-                else if(value > 1e-9)
-                {
-                    value *= 1e9f;
-                    mod = "n";
-                }
+                value *= 1e3f;
+                mod = "m";
+            }
+            else if(value > 1e-6)
+            {
+                value *= 1e6f;
+                mod = "μ";
+            }
+            else if(value > 1e-9)
+            {
+                value *= 1e9f;
+                mod = "n";
             }
             return $"{value.ToString(format)}{mod}{unit}";
         }
