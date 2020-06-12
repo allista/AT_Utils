@@ -78,8 +78,7 @@ namespace AT_Utils.UI
 
         private void parse(string str_value)
         {
-            float val;
-            if(float.TryParse(str_value, out val))
+            if(float.TryParse(str_value, out var val))
                 changeValueAndNotify(val);
         }
     }
