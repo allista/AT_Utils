@@ -23,13 +23,13 @@ namespace AT_Utils.UI
 
         public float step = 1;
         public int decimals = 1;
-        string format = "F1";
+        private string format = "F1";
 
         public Button incrementButton;
         public Button decrementButton;
         public InputField input;
 
-        void Awake()
+        private void Awake()
         {
             input.contentType = InputField.ContentType.DecimalNumber;
             input.onEndEdit.AddListener(parse);
@@ -73,11 +73,11 @@ namespace AT_Utils.UI
             return false;
         }
 
-        void increment() => changeValueAndNotify(value + step);
+        private void increment() => changeValueAndNotify(value + step);
 
-        void decrement() => changeValueAndNotify(value - step);
+        private void decrement() => changeValueAndNotify(value - step);
 
-        void parse(string str_value)
+        private void parse(string str_value)
         {
             float val;
             if(float.TryParse(str_value, out val))
