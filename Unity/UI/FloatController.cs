@@ -62,14 +62,14 @@ namespace AT_Utils.UI
 
         public override bool SetValueWithoutNotify(float newValue)
         {
-            var val = (float)Math.Round(clampValue(newValue), decimals);
-            if(!value.Equals(val))
-            {
-                value = val;
-                input.text = value.ToString(format);
-                return true;
-            }
-            return false;
+            newValue = clampValue(newValue);
+            if(decimals >= 0)
+                newValue = (float)Math.Round(newValue, decimals);
+            input.SetTextWithoutNotify(newValue.ToString(format));
+            if(value.Equals(newValue))
+                return false;
+            value = newValue;
+            return true;
         }
 
         private void increment() => changeValueAndNotify(value + step);
