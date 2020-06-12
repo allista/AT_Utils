@@ -26,7 +26,9 @@ namespace AT_Utils.UI
 
         public Button incrementButton;
         public Button decrementButton;
+        public Button doneButton;
         public InputField input;
+        public Text suffix;
 
         private void Awake()
         {
