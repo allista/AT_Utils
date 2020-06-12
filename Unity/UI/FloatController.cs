@@ -18,8 +18,7 @@ namespace AT_Utils.UI
         public float max = float.MaxValue;
         public override float Max { get => max; set => max = value; }
 
-        readonly FloatEvent _onValueChanged = new FloatEvent();
-        public override FloatEvent onValueChanged => _onValueChanged;
+        public override FloatEvent onValueChanged { get; } = new FloatEvent();
 
         public float step = 1;
         public int decimals = 1;
