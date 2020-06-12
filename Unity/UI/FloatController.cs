@@ -30,13 +30,34 @@ namespace AT_Utils.UI
 
         private void Awake()
         {
+            updateFormat();
+            updateIncDecButtons();
+            incrementButton.onClick.AddListener(increment);
+            decrementButton.onClick.AddListener(decrement);
             input.contentType = InputField.ContentType.DecimalNumber;
             input.onEndEdit.AddListener(parse);
-            if(decimals >= 0)
-                format = string.Format("F{0}", decimals);
-            else
-                format = "R";
             input.text = value.ToString(format);
+        }
+
+        public void SetDecimals(int newDecimals)
+        {
+            decimals = newDecimals;
+            updateFormat();
+        }
+
+        private void updateFormat()
+        {
+            format = decimals >= 0 ? $"F{decimals}" : "R";
+        }
+
+        public void SetStep(float newStep)
+        {
+            step = newStep;
+            updateIncDecButtons();
+        }
+
+        private void updateIncDecButtons()
+        {
             if(step.Equals(0))
             {
                 incrementButton.gameObject.SetActive(false);
@@ -44,8 +65,8 @@ namespace AT_Utils.UI
             }
             else
             {
-                incrementButton.onClick.AddListener(increment);
-                decrementButton.onClick.AddListener(decrement);
+                incrementButton.gameObject.SetActive(true);
+                decrementButton.gameObject.SetActive(true);
                 var txt = incrementButton.GetComponentInChildren<Text>();
                 if(txt != null) txt.text = string.Format("+{0}", step);
                 txt = decrementButton.GetComponentInChildren<Text>();
