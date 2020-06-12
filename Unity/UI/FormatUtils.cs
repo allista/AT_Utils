@@ -115,21 +115,6 @@ namespace AT_Utils.UI
             return $"{(mass * 1e6f):n0}g";
         }
 
-        public static string formatUnits(float units)
-        {
-            units = Mathf.Abs(units);
-            if(units >= 1f)
-                return units.ToString("n2") + "u";
-            if(units >= 1e-3f)
-                return (units * 1e3f).ToString("n1") + "mu";
-            if(units >= 1e-6f)
-                return (units * 1e6f).ToString("n1") + "μu";
-            if(units >= 1e-9f)
-                return (units * 1e9f).ToString("n1") + "nu";
-            if(units >= 1e-13f) //to fully use the last digit 
-                return (units * 1e12f).ToString("n1") + "pu";
-            return "0.0u"; //effectivly zero
-        }
         public static string formatVolume(double volume) =>
             volume < 1f
                 ? $"{(volume * 1e3f):n0}L"
