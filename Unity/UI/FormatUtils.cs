@@ -5,6 +5,7 @@
 //
 //  Copyright (c) 2019 Allis Tauri
 
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace AT_Utils.UI
@@ -12,6 +13,16 @@ namespace AT_Utils.UI
     public static class FormatUtils
     {
         public const float G0 = 9.80665f; //m/s2
+
+        /// <summary>
+        /// The camel case components matching regexp.
+        /// From: http://stackoverflow.com/questions/155303/net-how-can-you-split-a-caps-delimited-string-into-an-array
+        /// </summary>
+        private const string CamelCaseRegexp = "([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))";
+
+        private static readonly Regex CCR = new Regex(CamelCaseRegexp);
+
+        public static string ParseCamelCase(string s) => CCR.Replace(s, "$1 ");
 
         public static string formatVeryBigValue(float value, string unit, string format = "F1")
         {
