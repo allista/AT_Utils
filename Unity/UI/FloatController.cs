@@ -67,10 +67,13 @@ namespace AT_Utils.UI
             {
                 incrementButton.gameObject.SetActive(true);
                 decrementButton.gameObject.SetActive(true);
+                var stepDisplay = FormatUtils.formatBigValue(step, "");
                 var txt = incrementButton.GetComponentInChildren<Text>();
-                if(txt != null) txt.text = string.Format("+{0}", step);
+                if(txt != null)
+                    txt.text = $"+{stepDisplay}";
                 txt = decrementButton.GetComponentInChildren<Text>();
-                if(txt != null) txt.text = string.Format("-{0}", step);
+                if(txt != null)
+                    txt.text = $"-{stepDisplay}";
             }
         }
 
