@@ -75,6 +75,8 @@ namespace AT_Utils.UI
                 value /= 1e3f;
                 mod = "k";
             }
+            else
+                return formatSmallValue(value, unit, format);
             return $"{value.ToString(format)}{mod}{unit}";
         }
 
