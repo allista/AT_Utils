@@ -39,6 +39,13 @@ namespace AT_Utils.UI
             input.text = value.ToString(format);
         }
 
+        private void OnDestroy()
+        {
+            input.onEndEdit.RemoveAllListeners();
+            incrementButton.onClick.RemoveAllListeners();
+            decrementButton.onClick.RemoveAllListeners();
+        }
+
         public void SetDecimals(int newDecimals)
         {
             decimals = newDecimals;
@@ -75,13 +82,6 @@ namespace AT_Utils.UI
                 if(txt != null)
                     txt.text = $"-{stepDisplay}";
             }
-        }
-
-        void OnDestroy()
-        {
-            input.onEndEdit.RemoveListener(parse);
-            incrementButton.onClick.RemoveListener(increment);
-            decrementButton.onClick.RemoveListener(decrement);
         }
 
         public override bool SetValueWithoutNotify(float newValue)
