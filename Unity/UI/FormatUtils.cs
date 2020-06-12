@@ -54,7 +54,7 @@ namespace AT_Utils.UI
             }
             else
                 return formatBigValue(value, unit, format);
-            return value.ToString(format) + mod + unit;
+            return $"{value.ToString(format)}{mod}{unit}";
         }
 
         public static string formatBigValue(float value, string unit, string format = "F1")
@@ -75,7 +75,7 @@ namespace AT_Utils.UI
                 value /= 1e3f;
                 mod = "k";
             }
-            return value.ToString(format) + mod + unit;
+            return $"{value.ToString(format)}{mod}{unit}";
         }
 
         public static string formatSmallValue(float value, string unit, string format = "F1")
@@ -99,23 +99,16 @@ namespace AT_Utils.UI
                     mod = "n";
                 }
             }
-            return value.ToString(format) + mod + unit;
+            return $"{value.ToString(format)}{mod}{unit}";
         }
 
         public static string formatMass(float mass)
         {
             if(mass >= 0.1f)
-                return mass.ToString("n2") + "t";
+                return $"{mass:n2}t";
             if(mass >= 0.001f)
-                return (mass * 1e3f).ToString("n1") + "kg";
-            return (mass * 1e6f).ToString("n0") + "g";
-        }
-
-        public static string formatVolume(double volume)
-        {
-            if(volume < 1f)
-                return (volume * 1e3f).ToString("n0") + "L";
-            return volume.ToString("n1") + "m3";
+                return $"{(mass * 1e3f):n1}kg";
+            return $"{(mass * 1e6f):n0}g";
         }
 
         public static string formatUnits(float units)
@@ -133,6 +126,10 @@ namespace AT_Utils.UI
                 return (units * 1e12f).ToString("n1") + "pu";
             return "0.0u"; //effectivly zero
         }
+        public static string formatVolume(double volume) =>
+            volume < 1f
+                ? $"{(volume * 1e3f):n0}L"
+                : $"{volume:n1}m3";
 
         public static string formatDimensions(Vector3 size)
         {
