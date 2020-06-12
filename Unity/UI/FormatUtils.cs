@@ -106,6 +106,8 @@ namespace AT_Utils.UI
 
         public static string formatMass(float mass)
         {
+            if(mass > 1)
+                return formatBigValue(mass, "t", "n1");
             if(mass >= 0.1f)
                 return $"{mass:n2}t";
             if(mass >= 0.001f)
