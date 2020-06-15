@@ -193,7 +193,11 @@ namespace AT_Utils
         public static string formatTimeDelta(double delta)
         {
             var dt = new _DateTime(delta, KSPUtil.dateTimeFormatter.Year, KSPUtil.dateTimeFormatter.Day);
-            return $"{dt.years}y {dt.days,3}d {dt.hours,2}:{dt.minutes:00}:{dt.seconds:00}";
+            if(dt.years > 0)
+                return $"{dt.years}y {dt.days,3}d {dt.hours,2}:{dt.minutes:00}:{dt.seconds:00}";
+            if(dt.days > 0)
+                return $"{dt.days,3}d {dt.hours,2}:{dt.minutes:00}:{dt.seconds:00}";
+            return $"{dt.hours,2}:{dt.minutes:00}:{dt.seconds:00}";
         }
 
         public static string formatDimensions(Vector3 size) => $"{size.x:F2}m x {size.y:F2}m x {size.z:F2}m";
