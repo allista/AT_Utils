@@ -6,15 +6,19 @@
 //  Copyright (c) 2018 Allis Tauri
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace AT_Utils
 {
+    [SuppressMessage("ReSharper", "VirtualMemberNeverOverridden.Global"),
+     SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class ATGroundAnchor : PartModule
     {
         [KSPField] public string AnimatorID = string.Empty;
-        IAnimator animator;
+        private IAnimator animator;
 
         [KSPField] public bool Controllable = true;
         [KSPField(isPersistant = true)] protected bool isAttached;
@@ -41,11 +45,13 @@ namespace AT_Utils
         /// <summary>
         /// This is a receiver of the component message sent from Part
         /// </summary>
+        [UsedImplicitly]
         private void OnPartPack() => detach_anchor();
 
         /// <summary>
         /// This is a receiver of the component message sent from Part
         /// </summary>
+        [UsedImplicitly]
         private void OnPartUnpack()
         {
             if(isAttached)
@@ -76,6 +82,8 @@ namespace AT_Utils
         {
             if(fxSndAttach.audio != null)
                 fxSndAttach.audio.Play();
+            // IAnimator is usually a MonoBehaviour, so null propagation would bypass the lifecycle checks
+            // ReSharper disable once UseNullPropagation
             if(animator != null)
                 animator.Open();
         }
@@ -84,6 +92,8 @@ namespace AT_Utils
         {
             if(fxSndDetach.audio != null)
                 fxSndDetach.audio.Play();
+            // IAnimator is usually a MonoBehaviour, so null propagation would bypass the lifecycle checks
+            // ReSharper disable once UseNullPropagation
             if(animator != null)
                 animator.Close();
         }
@@ -98,7 +108,7 @@ namespace AT_Utils
             engaged = false;
         }
 
-        bool can_attach()
+        private bool can_attach()
         {
             //always check relative velocity and acceleration
             if(!vessel.Landed)
@@ -106,6 +116,7 @@ namespace AT_Utils
                 Utils.Message("There's nothing to attach the anchor to");
                 return false;
             }
+            // ReSharper disable once InvertIf
             if(vessel.GetSrfVelocity().sqrMagnitude > 1f)
             {
                 Utils.Message("Cannot attach the anchor while mooving");
@@ -145,7 +156,7 @@ namespace AT_Utils
         {
             if(vessel == null || !vessel.loaded)
                 return;
-            for(int i = 0, nparts = vessel.parts.Count; i < nparts; i++)
+            for(int i = 0, count = vessel.parts.Count; i < count; i++)
             {
                 var r = vessel.parts[i].Rigidbody;
                 if(r == null)
