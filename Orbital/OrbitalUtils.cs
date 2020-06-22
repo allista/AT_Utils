@@ -84,5 +84,15 @@ namespace AT_Utils
             vessel.flightPlanNode = newFlightPlan;
             vessel.Log("New flightPlanNode: {}", vessel.flightPlanNode); //debug
         }
+
+        public static void ClearManeuverNodes(Vessel vessel)
+        {
+            vessel.flightPlanNode.ClearData();
+            if(vessel.patchedConicSolver == null)
+                return;
+            var nodes = vessel.patchedConicSolver.maneuverNodes;
+            for(var i = nodes.Count - 1; i >= 0; i--)
+                nodes[i].RemoveSelf();
+        }
     }
 }
