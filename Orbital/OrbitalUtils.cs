@@ -82,7 +82,7 @@ namespace AT_Utils
             else
                 newFlightPlan.AddNode(newNodeCfg);
             vessel.flightPlanNode = newFlightPlan;
-            vessel.Log("New flightPlanNode: {}", vessel.flightPlanNode); //debug
+            vessel.Debug($"New flightPlanNode: {vessel.flightPlanNode}");
         }
 
         public static void ClearManeuverNodes(Vessel vessel)
