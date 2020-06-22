@@ -5,6 +5,10 @@
 //
 //  Copyright (c) 2018 Allis Tauri
 
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
 namespace AT_Utils
 {
     public class ATGroundAnchor : PartModule
@@ -14,6 +18,8 @@ namespace AT_Utils
 
         [KSPField] public bool Controllable = true;
         [KSPField(isPersistant = true)] protected bool isAttached;
+        private Coroutine engage_coro;
+        private bool engaged;
 
         [KSPField] public string attachSndPath = string.Empty;
         [KSPField] public string detachSndPath = string.Empty;
@@ -28,38 +34,38 @@ namespace AT_Utils
             if(!string.IsNullOrEmpty(detachSndPath))
                 Utils.createFXSound(part, fxSndDetach, detachSndPath, false);
             if(isAttached)
-                setup_ground_contact();
+                attach_anchor();
             update_part_events();
         }
 
         /// <summary>
         /// This is a receiver of the component message sent from Part
         /// </summary>
-        private void OnPartPack() => detatch_anchor();
+        private void OnPartPack() => detach_anchor();
 
         /// <summary>
         /// This is a receiver of the component message sent from Part
         /// </summary>
         private void OnPartUnpack()
         {
-            if(!isAttached)
+            if(isAttached)
+                attach_anchor();
+        }
+
+        private void FixedUpdate()
+        {
+            if(!isAttached
+               || !engaged
+               || !HighLogic.LoadedSceneIsFlight
+               || vessel == null
+               || !vessel.loaded
+               || vessel.packed)
                 return;
             setup_ground_contact();
-            ForceAttach();
+            DumpVelocity();
         }
 
-        void FixedUpdate()
-        {
-            if(!HighLogic.LoadedSceneIsFlight || vessel == null || !vessel.loaded || vessel.packed)
-                return;
-            if(isAttached)
-            {
-                setup_ground_contact();
-                DumpVelocity();
-            }
-        }
-
-        void setup_ground_contact()
+        private void setup_ground_contact()
         {
             part.PermanentGroundContact = true;
             if(vessel != null)
@@ -82,7 +88,15 @@ namespace AT_Utils
                 animator.Close();
         }
 
-        protected virtual void detatch_anchor() { }
+        protected virtual void detach_anchor()
+        {
+            if(engage_coro != null)
+            {
+                StopCoroutine(engage_coro);
+                engage_coro = null;
+            }
+            engaged = false;
+        }
 
         bool can_attach()
         {
@@ -100,10 +114,31 @@ namespace AT_Utils
             return true;
         }
 
-        void update_part_events()
+        protected virtual void attach_anchor()
         {
-            Events["Attach"].active = Controllable && !isAttached;
-            Events["Detach"].active = Controllable && isAttached;
+            if(engage_coro == null)
+                engage_coro = StartCoroutine(engage_on_ground_contact());
+        }
+
+        private IEnumerator<YieldInstruction> engage_on_ground_contact()
+        {
+            engaged = false;
+            while(!engaged)
+            {
+                engaged = vessel.Parts.Any(p => p.GroundContact);
+                yield return null;
+            }
+            setup_ground_contact();
+            update_part_events();
+        }
+
+        private void update_part_events()
+        {
+            var evt = Events[nameof(ToggleAnchor)];
+            evt.active = Controllable;
+            evt.guiName = isAttached
+                ? "Detach Anchor"
+                : "Attach Anchor";
         }
 
         public void DumpVelocity()
@@ -122,29 +157,33 @@ namespace AT_Utils
 
         public void ForceAttach()
         {
-            detatch_anchor();
-            DumpVelocity();
             if(!isAttached)
+            {
+                attach_anchor();
                 on_anchor_attached();
+            }
             isAttached = true;
             update_part_events();
         }
 
-        [KSPEvent(guiActive = true, guiName = "Attach Anchor", active = true)]
-        public void Attach()
-        {
-            if(can_attach())
-                ForceAttach();
-        }
-
-        [KSPEvent(guiActive = true, guiName = "Detach Anchor", active = false)]
         public void Detach()
         {
-            detatch_anchor();
             if(isAttached)
+            {
+                detach_anchor();
                 on_anchor_detached();
+            }
             isAttached = false;
             update_part_events();
+        }
+
+        [KSPEvent(guiActive = true, guiName = "Attach Anchor", active = true)]
+        public void ToggleAnchor()
+        {
+            if(isAttached)
+                Detach();
+            else if(can_attach())
+                ForceAttach();
         }
     }
 }
