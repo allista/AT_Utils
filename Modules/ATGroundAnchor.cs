@@ -119,7 +119,7 @@ namespace AT_Utils
             // ReSharper disable once InvertIf
             if(vessel.GetSrfVelocity().sqrMagnitude > 1f)
             {
-                Utils.Message("Cannot attach the anchor while mooving");
+                Utils.Message("Cannot attach the anchor while moving");
                 return false;
             }
             return true;
