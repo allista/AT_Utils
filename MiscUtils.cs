@@ -308,7 +308,7 @@ namespace AT_Utils
             {
                 var ind = s.IndexOf("{}", StringComparison.InvariantCulture);
                 if(ind >= 0)
-                    s = s.Substring(0, ind) + "{" + i + "}" + s.Substring(ind + 2);
+                    s = $"{s.Substring(0, ind)}{{{i}}}{s.Substring(ind + 2)}";
                 else
                     s += string.Format(" arg{0}: {{{0}}}", i);
             }
