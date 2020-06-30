@@ -319,36 +319,52 @@ namespace AT_Utils
             for(int i = 0, argsL = args.Length; i < argsL; i++)
             {
                 var arg = args[i];
-                if(arg is string)
-                    continue;
-                if(arg == null)
-                    args[i] = "null";
-                else if(arg is Vector3)
-                    args[i] = formatVector((Vector3)arg);
-                else if(arg is Vector3d)
-                    args[i] = formatVector((Vector3d)arg);
-                else if(arg is CelestialBody)
-                    args[i] = formatCB((CelestialBody)arg);
-                else if(arg is Orbit)
-                    args[i] = formatOrbit((Orbit)arg);
-                else if(arg is Bounds)
-                    args[i] = formatBounds((Bounds)arg);
-                else if(arg is Exception)
-                    args[i] = formatException((Exception)arg);
-                else if(arg is Transform)
+                switch(arg)
                 {
-                    var T = arg as Transform;
-                    args[i] = $"{T.name}: pos {T.position}, rot {T.rotation.eulerAngles}";
+                    case string _:
+                        continue;
+                    case null:
+                        args[i] = "null";
+                        break;
+                    case Vector3 vector3:
+                        args[i] = formatVector(vector3);
+                        break;
+                    case Vector3d vector3d:
+                        args[i] = formatVector(vector3d);
+                        break;
+                    case CelestialBody body:
+                        args[i] = formatCB(body);
+                        break;
+                    case Orbit orbit:
+                        args[i] = formatOrbit(orbit);
+                        break;
+                    case Bounds bounds:
+                        args[i] = formatBounds(bounds);
+                        break;
+                    case Exception exc:
+                        args[i] = formatException(exc);
+                        break;
+                    case IConfigNode node:
+                        args[i] = node.ToConfigString();
+                        break;
+                    case Transform t:
+                        args[i] = $"{t.name}: pos {t.position}, rot {t.rotation.eulerAngles}";
+                        break;
+                    case IEnumerable enumerable:
+                    {
+                        var arr = enumerable.Cast<object>().ToArray();
+                        convert_args(arr);
+                        args[i] = string.Join("\n",
+                            $"Count: {arr.Length}",
+                            "[",
+                            string.Join(",\n", arr.Cast<string>().ToArray()),
+                            "]");
+                        break;
+                    }
+                    default:
+                        args[i] = arg.ToString();
+                        break;
                 }
-                else if(arg is IEnumerable)
-                {
-                    var arr = (arg as IEnumerable).Cast<object>().ToArray();
-                    convert_args(arr);
-                    args[i] = string.Join("\n",
-                        new[] { "Count: " + arr.Length, "[", string.Join(",\n", arr.Cast<string>().ToArray()), "]" });
-                }
-                else
-                    args[i] = arg.ToString();
             }
         }
 
