@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace AT_Utils
 {
@@ -349,6 +350,9 @@ namespace AT_Utils
                         break;
                     case Transform t:
                         args[i] = $"{t.name}: pos {t.position}, rot {t.rotation.eulerAngles}";
+                        break;
+                    case Object obj:
+                        args[i] = obj.GetID();
                         break;
                     case IEnumerable enumerable:
                     {
