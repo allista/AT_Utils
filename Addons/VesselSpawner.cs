@@ -155,11 +155,9 @@ namespace AT_Utils
                 new VesselCrewManifest());
             launched_vessel = FlightGlobals.Vessels[FlightGlobals.Vessels.Count - 1];
             on_vessel_positioned?.Invoke(launched_vessel);
-            while(!launched_vessel.loaded)
-            {
-                FlightCameraOverride.UpdateDurationSeconds(1);
-                yield return new WaitForFixedUpdate();
-            }
+            //AssembleForLaunch calls Vessel.Initialize which sets Vessel.loaded = true
+            //so the onVesselLoaded GameEvent is never fired
+            onVesselLoaded?.Invoke(launched_vessel);
             while(launched_vessel.packed)
             {
                 launched_vessel.precalc.isEasingGravity = true;
@@ -221,6 +219,9 @@ namespace AT_Utils
                 FlightDriver.FlightStateCache);
             launched_vessel = FlightGlobals.Vessels[FlightGlobals.Vessels.Count - 1];
             on_vessel_positioned?.Invoke(launched_vessel);
+            //AssembleForLaunchUnlanded calls Vessel.Initialize which sets Vessel.loaded = true
+            //so the onVesselLoaded GameEvent is never fired
+            onVesselLoaded?.Invoke(launched_vessel);
             //launch the vessel
             yield return StartCoroutine(launch_moving_vessel(spawn_transform,
                 spawn_offset,
