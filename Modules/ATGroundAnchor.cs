@@ -21,6 +21,11 @@ namespace AT_Utils
         private IAnimator animator;
 
         [KSPField] public bool Controllable = true;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Auto-attach Anchor")]
+        [UI_Toggle(scene = UI_Scene.All, enabledText = "Enabled", disabledText = "Disabled")]
+        public bool AutoAttach;
+
         [KSPField(isPersistant = true)] protected bool isAttached;
         private Coroutine engage_coro;
         private bool engaged;
@@ -71,6 +76,14 @@ namespace AT_Utils
             DumpVelocity();
         }
 
+        private void Update()
+        {
+            if(!AutoAttach || isAttached)
+                return;
+            if(can_attach(out _))
+                ForceAttach();
+        }
+
         private void setup_ground_contact()
         {
             part.PermanentGroundContact = true;
@@ -108,18 +121,19 @@ namespace AT_Utils
             engaged = false;
         }
 
-        private bool can_attach()
+        private bool can_attach(out string error)
         {
+            error = string.Empty;
             //always check relative velocity and acceleration
             if(!vessel.Landed)
             {
-                Utils.Message("There's nothing to attach the anchor to");
+                error = "There's nothing to attach the anchor to";
                 return false;
             }
             // ReSharper disable once InvertIf
             if(vessel.GetSrfVelocity().sqrMagnitude > 1f)
             {
-                Utils.Message("Cannot attach the anchor while moving");
+                error = "Cannot attach the anchor while moving";
                 return false;
             }
             return true;
@@ -153,6 +167,7 @@ namespace AT_Utils
             evt.guiName = isAttached
                 ? "Detach Anchor"
                 : "Attach Anchor";
+            Fields[nameof(AutoAttach)].guiActive = Controllable;
         }
 
         public void DumpVelocity()
@@ -188,6 +203,7 @@ namespace AT_Utils
                 on_anchor_detached();
             }
             isAttached = false;
+            AutoAttach = false;
             update_part_events();
         }
 
@@ -196,8 +212,10 @@ namespace AT_Utils
         {
             if(isAttached)
                 Detach();
-            else if(can_attach())
+            else if(can_attach(out var error))
                 ForceAttach();
+            else
+                Utils.Message(error);
         }
     }
 }
