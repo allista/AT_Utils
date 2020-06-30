@@ -22,7 +22,7 @@ namespace AT_Utils
 
         public static string GetID(this object o) => o == null ? "_object" : GetSystemID(o);
 
-        public static string GetID(this Object o) => o == null ? "_Object" : GetSystemID(o);
+        public static string GetID(this Object o) => o == null ? "_Object" : GetObjectID(o);
 
         public static string GetID(this GameObject o) => o == null ? "_GO" : GetObjectID(o);
 
