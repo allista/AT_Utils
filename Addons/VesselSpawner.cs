@@ -394,51 +394,38 @@ namespace AT_Utils
             launched_vessel.permanentGroundContact = false;
         }
 
-        IEnumerable push_and_spin_launched_vessel(Vector3 dV)
+        IEnumerator push_and_spin_launched_vessel(Vector3 dV, float accelerationTime)
         {
             FlightCameraOverride.UpdateDurationSeconds(1);
             var startP = part.Rigidbody.worldCenterOfMass;
             var startAV = part.Rigidbody.angularVelocity;
-            var startAVm = startAV.sqrMagnitude;
-            var vel = (Vector3d)part.Rigidbody.velocity;
-            vel += Vector3d.Cross(startAV, launched_vessel.CoM - startP);
-            if(!dV.IsZero())
+            var vel = part.Rigidbody.velocity;
+            foreach(var p in launched_vessel.Parts)
             {
-                //conserve momentum
-                var hM = vessel.GetTotalMass();
-                var lM = launched_vessel.GetTotalMass();
-                var lvel = dV * hM / (hM + lM);
-                vel += lvel;
-                part.Rigidbody.AddForce(-lvel * lM, ForceMode.Impulse);
+
+                if(p.Rigidbody == null)
+                    continue;
+                p.Rigidbody.angularVelocity = startAV;
+                p.Rigidbody.velocity = vel + Vector3.Cross(startAV, p.Rigidbody.worldCenterOfMass - startP);
             }
-            launched_vessel.SetWorldVelocity(vel);
-            for(int i = 0; i < 10; i++)
+            if(dV.IsZero())
+                yield break;
+            var launchedMass = launched_vessel.GetTotalMass();
+            var ddV = dV / accelerationTime; // this is for the launched vessel
+            var impulseChangeSpeed = ddV * -launchedMass; // this is for the host
+            while(accelerationTime > 0)
             {
-                //this is a hack for incorrect VelocityChange mode (or whatever causing this);
-                //if the startAV is applied once, the resulting vessel.angularVelocity is 2-3 times bigger
-                var deltaAV = startAV
-                              - launched_vessel.transform.rotation
-                              * launched_vessel.angularVelocity;
-                var deltaAVm = deltaAV.sqrMagnitude;
-                if(deltaAVm < 1e-5)
-                    break;
-                var av = deltaAVm > startAVm
-                    ? deltaAV.ClampMagnitudeH(startAVm * Mathf.Sqrt(1 / deltaAVm))
-                    : deltaAV / 3;
-                var CoM = launched_vessel.CoM;
-                foreach(Part p in launched_vessel.Parts)
+                var dt = Math.Min(TimeWarp.fixedDeltaTime, accelerationTime);
+                var frameDeltaV = ddV * dt;
+                foreach(var p in launched_vessel.Parts)
                 {
                     if(p.Rigidbody != null)
-                    {
-                        p.Rigidbody.AddTorque(av, ForceMode.VelocityChange);
-                        p.Rigidbody.AddForce(Vector3.Cross(av, p.Rigidbody.worldCenterOfMass - CoM),
-                            ForceMode.VelocityChange);
-                    }
+                        p.Rigidbody.AddForce(frameDeltaV, ForceMode.VelocityChange);
                 }
-                FlightCameraOverride.UpdateDurationSeconds(1);
+                part.Rigidbody.AddForce(impulseChangeSpeed * dt, ForceMode.Impulse);
+                accelerationTime -= dt;
                 yield return null;
                 FlightCameraOverride.UpdateDurationSeconds(1);
-                yield return null;
             }
         }
 
@@ -534,13 +521,16 @@ namespace AT_Utils
             launched_vessel.situation = vessel.situation;
             set_launched_parts_state(PartStates.IDLE);
             ignore_launched_vessel_colliders(false);
-            foreach(var _ in push_and_spin_launched_vessel(spawn_transform.TransformDirection(dV)))
+            var spinner = push_and_spin_launched_vessel(spawn_transform.TransformDirection(dV),
+                Utils.Clamp(dV.magnitude / 10, 0.1f, 3f));
+            onFixedUpdate = () =>
             {
+                if(spinner.MoveNext())
+                    return;
+                onFixedUpdate = null;
+            };
+            while(onFixedUpdate != null)
                 yield return null;
-                if(launched_vessel == null)
-                    yield break;
-                launched_vessel.IgnoreGForces(10);
-            }
             FlightGlobals.ForceSetActiveVessel(launched_vessel);
         }
 
