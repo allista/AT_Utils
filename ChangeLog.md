@@ -1,6 +1,30 @@
 #AT Utils ChangeLog
 
-* **v1.9.3**
+* **v1.9.4**
+    * CC Moved hangar resource tanks to FuelTank category
+    * OrbitalUtils: added ClearManeuverNodes method
+    * OrbitalUtils: added Node2OrbitalDeltaV method
+    * ATGroundAnchor checks for ground contact before engaging
+    * Added CC patch for the Hyper Propulsion mod
+    * ATMagneticDamper: added AttractorMaxPower option
+    * Improved Utils.formatTimeDelta
+    * CC added resource max amount and max mass display + minor improvements
+    * Corrected NEEDS of various TANKTYPEs
+    * Added DebugWindowController static debug helper
+    * Moved CC configs to AT_Utils GameData and removed CC-Core
+    * Moved common construction logic to AT_Utils/Construction
+    * Moved ConstructionSkill to AT_Utils to also use it in CA
+    * Added ifGreater optional argument to SetUnpackDistance
+    * NamedDockingNode updates all Events/Actions/Fields
+    * Added Vessel.Log-Error logging extensions
+    * Added IConfigNode.ToConfigString extension for debugging
+    * PartModule.ConfigurationInvalid also logs as Error
+    * Added Part/Module.Debug/Info/Warning/Error logging methods
+    * Fixed NRE in PartModule.GetID
+    * Removed redundant Part.StartState() extension
+    * Added PartModule.Log(string) extension to avoid props array allocation
+
+* v1.9.3
     * Added all relevant .meta files from Unity project
     * Added Utils.Log and its variants without params
     * Added Utils.Debug .Info .Warning and .Error log methods
