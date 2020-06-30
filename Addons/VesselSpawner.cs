@@ -213,11 +213,10 @@ namespace AT_Utils
             root.Translate(spawn_transform.TransformPointUnscaled(spawn_offset), Space.World);
             root.RotateAround(spawn_transform.position, axis, angle);
             //initialize new vessel
-            AssembleForLaunchUnlanded(construct,
+            launched_vessel = AssembleForLaunchUnlanded(construct,
                 new Orbit(vessel.orbit),
                 part.flagURL,
                 FlightDriver.FlightStateCache);
-            launched_vessel = FlightGlobals.Vessels[FlightGlobals.Vessels.Count - 1];
             on_vessel_positioned?.Invoke(launched_vessel);
             //AssembleForLaunchUnlanded calls Vessel.Initialize which sets Vessel.loaded = true
             //so the onVesselLoaded GameEvent is never fired
