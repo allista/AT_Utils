@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace AT_Utils
@@ -236,6 +237,28 @@ namespace AT_Utils
                         attached_part.partTransform.position += delta;
                 }
             }
+        }
+
+        private static readonly FieldInfo partInertiaTensorFI = typeof(Part).GetField(
+            "inertiaTensor",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+
+        public static void UpdateInertiaTensor(this Part part)
+        {
+            if(part.rb == null)
+                return;
+            part.rb.ResetInertiaTensor();
+            var inertiaTensor = part.rb.inertiaTensor / Mathf.Max(1f, part.rb.mass);
+            partInertiaTensorFI.SetValue(part, inertiaTensor);
+        }
+
+        public static void UpdateCoMOffset(this Part part, Vector3 newCoMOffset)
+        {
+            part.CoMOffset = newCoMOffset;
+            if(part.rb == null)
+                return;
+            part.rb.centerOfMass = part.CoMOffset;
+            part.UpdateInertiaTensor();
         }
         #endregion
 
