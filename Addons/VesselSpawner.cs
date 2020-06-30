@@ -483,7 +483,7 @@ namespace AT_Utils
             }
             catch(Exception e)
             {
-                Utils.Log(
+                Utils.Warning(
                     $"Exception occured during launched_vessel.SetPosition/Rotation call. Ignoring it:\n{e.StackTrace}");
             }
         }
