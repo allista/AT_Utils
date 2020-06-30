@@ -38,7 +38,7 @@ namespace AT_Utils
             if(!string.IsNullOrEmpty(detachSndPath))
                 Utils.createFXSound(part, fxSndDetach, detachSndPath, false);
             if(isAttached)
-                attach_anchor();
+                attach_on_ground_contact();
             update_part_events();
         }
 
@@ -127,20 +127,23 @@ namespace AT_Utils
 
         protected virtual void attach_anchor()
         {
+            engaged = true;
+            setup_ground_contact();
+            update_part_events();
+        }
+
+        private void attach_on_ground_contact()
+        {
             if(engage_coro == null)
                 engage_coro = StartCoroutine(engage_on_ground_contact());
         }
 
         private IEnumerator<YieldInstruction> engage_on_ground_contact()
         {
-            engaged = false;
-            while(!engaged)
-            {
-                engaged = vessel.Parts.Any(p => p.GroundContact);
+            while(!vessel.Parts.Any(p => p.GroundContact))
                 yield return null;
-            }
-            setup_ground_contact();
-            update_part_events();
+            attach_anchor();
+            engage_coro = null;
         }
 
         private void update_part_events()
