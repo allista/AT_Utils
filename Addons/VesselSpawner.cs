@@ -375,9 +375,10 @@ namespace AT_Utils
             for(int j = 0, nparts = launched_vessel.parts.Count; j < nparts; j++)
             {
                 var p = launched_vessel.parts[j];
-                var r = p.Rigidbody;
-                r.angularVelocity *= mult;
-                r.velocity *= mult;
+                if(p == null|| p.Rigidbody == null)
+                    continue;
+                p.Rigidbody.angularVelocity *= mult;
+                p.Rigidbody.velocity *= mult;
             }
         }
 
