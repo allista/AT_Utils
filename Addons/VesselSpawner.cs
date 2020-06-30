@@ -63,11 +63,6 @@ namespace AT_Utils
             onVesselLoaded?.Invoke(launched_vessel);
         }
 
-        private void onLoadedInFlight(Vessel vsl)
-        {
-            launched_vessel.Parts.ForEach(p => p.partTransform = p.transform);
-        }
-
         private void onLaunchedVesselOffRails(Vessel vsl)
         {
             if(launched_vessel != vsl || launched_vessel == null)
