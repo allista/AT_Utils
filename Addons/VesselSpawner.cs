@@ -396,7 +396,10 @@ namespace AT_Utils
 
         IEnumerator push_and_spin_launched_vessel(Vector3 dV, float accelerationTime)
         {
-            FlightCameraOverride.UpdateDurationSeconds(1);
+            FlightCameraOverride.AnchorForSeconds(FlightCameraOverride.Mode.Hold,
+                launched_vessel.transform,
+                1, 
+                true);
             var startP = part.Rigidbody.worldCenterOfMass;
             var startAV = part.Rigidbody.angularVelocity;
             var vel = part.Rigidbody.velocity;
