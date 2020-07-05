@@ -5,15 +5,30 @@
 //
 //  Copyright (c) 2018 Allis Tauri
 
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using JetBrains.Annotations;
+using UnityEngine;
+
 namespace AT_Utils
 {
+    [SuppressMessage("ReSharper", "VirtualMemberNeverOverridden.Global"),
+     SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class ATGroundAnchor : PartModule
     {
         [KSPField] public string AnimatorID = string.Empty;
-        IAnimator animator;
+        private IAnimator animator;
 
         [KSPField] public bool Controllable = true;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Auto-attach Anchor")]
+        [UI_Toggle(scene = UI_Scene.All, enabledText = "Enabled", disabledText = "Disabled")]
+        public bool AutoAttach;
+
         [KSPField(isPersistant = true)] protected bool isAttached;
+        private Coroutine engage_coro;
+        private bool engaged;
 
         [KSPField] public string attachSndPath = string.Empty;
         [KSPField] public string detachSndPath = string.Empty;
@@ -28,38 +43,48 @@ namespace AT_Utils
             if(!string.IsNullOrEmpty(detachSndPath))
                 Utils.createFXSound(part, fxSndDetach, detachSndPath, false);
             if(isAttached)
-                setup_ground_contact();
+                attach_on_ground_contact();
             update_part_events();
         }
 
         /// <summary>
         /// This is a receiver of the component message sent from Part
         /// </summary>
-        private void OnPartPack() => detatch_anchor();
+        [UsedImplicitly]
+        private void OnPartPack() => detach_anchor();
 
         /// <summary>
         /// This is a receiver of the component message sent from Part
         /// </summary>
+        [UsedImplicitly]
         private void OnPartUnpack()
         {
-            if(!isAttached)
+            if(isAttached)
+                attach_anchor();
+        }
+
+        private void FixedUpdate()
+        {
+            if(!isAttached
+               || !engaged
+               || !HighLogic.LoadedSceneIsFlight
+               || vessel == null
+               || !vessel.loaded
+               || vessel.packed)
                 return;
             setup_ground_contact();
-            ForceAttach();
+            DumpVelocity();
         }
 
-        void FixedUpdate()
+        private void Update()
         {
-            if(!HighLogic.LoadedSceneIsFlight || vessel == null || !vessel.loaded || vessel.packed)
+            if(!AutoAttach || isAttached)
                 return;
-            if(isAttached)
-            {
-                setup_ground_contact();
-                DumpVelocity();
-            }
+            if(can_attach(out _))
+                ForceAttach();
         }
 
-        void setup_ground_contact()
+        private void setup_ground_contact()
         {
             part.PermanentGroundContact = true;
             if(vessel != null)
@@ -70,6 +95,8 @@ namespace AT_Utils
         {
             if(fxSndAttach.audio != null)
                 fxSndAttach.audio.Play();
+            // IAnimator is usually a MonoBehaviour, so null propagation would bypass the lifecycle checks
+            // ReSharper disable once UseNullPropagation
             if(animator != null)
                 animator.Open();
         }
@@ -78,39 +105,76 @@ namespace AT_Utils
         {
             if(fxSndDetach.audio != null)
                 fxSndDetach.audio.Play();
+            // IAnimator is usually a MonoBehaviour, so null propagation would bypass the lifecycle checks
+            // ReSharper disable once UseNullPropagation
             if(animator != null)
                 animator.Close();
         }
 
-        protected virtual void detatch_anchor() { }
-
-        bool can_attach()
+        protected virtual void detach_anchor()
         {
+            if(engage_coro != null)
+            {
+                StopCoroutine(engage_coro);
+                engage_coro = null;
+            }
+            engaged = false;
+        }
+
+        private bool can_attach(out string error)
+        {
+            error = string.Empty;
             //always check relative velocity and acceleration
             if(!vessel.Landed)
             {
-                Utils.Message("There's nothing to attach the anchor to");
+                error = "There's nothing to attach the anchor to";
                 return false;
             }
+            // ReSharper disable once InvertIf
             if(vessel.GetSrfVelocity().sqrMagnitude > 1f)
             {
-                Utils.Message("Cannot attach the anchor while mooving");
+                error = "Cannot attach the anchor while moving";
                 return false;
             }
             return true;
         }
 
-        void update_part_events()
+        protected virtual void attach_anchor()
         {
-            Events["Attach"].active = Controllable && !isAttached;
-            Events["Detach"].active = Controllable && isAttached;
+            engaged = true;
+            setup_ground_contact();
+            update_part_events();
+        }
+
+        private void attach_on_ground_contact()
+        {
+            if(engage_coro == null)
+                engage_coro = StartCoroutine(engage_on_ground_contact());
+        }
+
+        private IEnumerator<YieldInstruction> engage_on_ground_contact()
+        {
+            while(!vessel.Parts.Any(p => p.GroundContact))
+                yield return null;
+            attach_anchor();
+            engage_coro = null;
+        }
+
+        private void update_part_events()
+        {
+            var evt = Events[nameof(ToggleAnchor)];
+            evt.active = Controllable;
+            evt.guiName = isAttached
+                ? "Detach Anchor"
+                : "Attach Anchor";
+            Fields[nameof(AutoAttach)].guiActive = Controllable;
         }
 
         public void DumpVelocity()
         {
             if(vessel == null || !vessel.loaded)
                 return;
-            for(int i = 0, nparts = vessel.parts.Count; i < nparts; i++)
+            for(int i = 0, count = vessel.parts.Count; i < count; i++)
             {
                 var r = vessel.parts[i].Rigidbody;
                 if(r == null)
@@ -122,29 +186,36 @@ namespace AT_Utils
 
         public void ForceAttach()
         {
-            detatch_anchor();
-            DumpVelocity();
             if(!isAttached)
+            {
+                attach_anchor();
                 on_anchor_attached();
+            }
             isAttached = true;
             update_part_events();
         }
 
-        [KSPEvent(guiActive = true, guiName = "Attach Anchor", active = true)]
-        public void Attach()
-        {
-            if(can_attach())
-                ForceAttach();
-        }
-
-        [KSPEvent(guiActive = true, guiName = "Detach Anchor", active = false)]
         public void Detach()
         {
-            detatch_anchor();
             if(isAttached)
+            {
+                detach_anchor();
                 on_anchor_detached();
+            }
             isAttached = false;
+            AutoAttach = false;
             update_part_events();
+        }
+
+        [KSPEvent(guiActive = true, guiName = "Attach Anchor", active = true)]
+        public void ToggleAnchor()
+        {
+            if(isAttached)
+                Detach();
+            else if(can_attach(out var error))
+                ForceAttach();
+            else
+                Utils.Message(error);
         }
     }
 }

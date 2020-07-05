@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace AT_Utils
@@ -8,8 +9,7 @@ namespace AT_Utils
     public static class PartExtensions
     {
         #region from MechJeb2 PartExtensions
-        public static bool HasModule<T>(this Part p) where T : PartModule =>
-            p.Modules.GetModule<T>() != null;
+        public static bool HasModule<T>(this Part p) where T : PartModule => p.Modules.GetModule<T>() != null;
 
         public static float TotalMass(this Part p) => p.mass + p.GetResourceMass();
         #endregion
@@ -79,8 +79,7 @@ namespace AT_Utils
             return passages;
         }
 
-        public static ResourcePump CreateSocket(this Part p) =>
-            new ResourcePump(p, Utils.ElectricCharge.id);
+        public static ResourcePump CreateSocket(this Part p) => new ResourcePump(p, Utils.ElectricCharge.id);
         #endregion
 
         #region Resources and Phys-Props
@@ -239,6 +238,28 @@ namespace AT_Utils
                 }
             }
         }
+
+        private static readonly FieldInfo partInertiaTensorFI = typeof(Part).GetField(
+            "inertiaTensor",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+
+        public static void UpdateInertiaTensor(this Part part)
+        {
+            if(part.rb == null)
+                return;
+            part.rb.ResetInertiaTensor();
+            var inertiaTensor = part.rb.inertiaTensor / Mathf.Max(1f, part.rb.mass);
+            partInertiaTensorFI.SetValue(part, inertiaTensor);
+        }
+
+        public static void UpdateCoMOffset(this Part part, Vector3 newCoMOffset)
+        {
+            part.CoMOffset = newCoMOffset;
+            if(part.rb == null)
+                return;
+            part.rb.centerOfMass = part.CoMOffset;
+            part.UpdateInertiaTensor();
+        }
         #endregion
 
         #region Logging
@@ -250,43 +271,17 @@ namespace AT_Utils
                 : "";
 
         public static void Log(this MonoBehaviour mb, string msg, params object[] args) =>
-            Utils.Log(string.Format("{0}: {1}", mb.GetID(), msg), args);
+            Utils.Log($"{mb.GetID()}: {msg}", args);
 
-        public static void Log(this Part p, string msg, params object[] args) =>
-            Utils.Log(string.Format("{0}: {1}", p.GetID(), msg), args);
+        public static void Log(this Part p, string msg, params object[] args) => Utils.Log($"{p.GetID()}: {msg}", args);
+        public static void Log(this Part p, string msg) => Utils.Log($"{p.GetID()}: {msg}");
+        public static void Debug(this Part p, string msg) => Utils.Debug($"{p.GetID()}: {msg}");
+        public static void Info(this Part p, string msg) => Utils.Info($"{p.GetID()}: {msg}");
+        public static void Warning(this Part p, string msg) => Utils.Warning($"{p.GetID()}: {msg}");
+        public static void Error(this Part p, string msg) => Utils.Error($"{p.GetID()}: {msg}");
         #endregion
 
         #region Misc
-        //directly from Part disassembly
-        public static PartModule.StartState StartState(this Part part)
-        {
-            var _state = PartModule.StartState.None;
-            if(HighLogic.LoadedSceneIsEditor)
-                _state |= PartModule.StartState.Editor;
-            else if(HighLogic.LoadedSceneIsFlight && part.vessel != null)
-            {
-                if(part.vessel.situation == Vessel.Situations.PRELAUNCH)
-                {
-                    _state |= PartModule.StartState.PreLaunch;
-                    _state |= PartModule.StartState.Landed;
-                }
-                if(part.vessel.situation == Vessel.Situations.DOCKED)
-                    _state |= PartModule.StartState.Docked;
-                if(part.vessel.situation == Vessel.Situations.ORBITING
-                   || part.vessel.situation == Vessel.Situations.ESCAPING)
-                    _state |= PartModule.StartState.Orbital;
-                if(part.vessel.situation == Vessel.Situations.SUB_ORBITAL)
-                    _state |= PartModule.StartState.SubOrbital;
-                if(part.vessel.situation == Vessel.Situations.SPLASHED)
-                    _state |= PartModule.StartState.Splashed;
-                if(part.vessel.situation == Vessel.Situations.FLYING)
-                    _state |= PartModule.StartState.Flying;
-                if(part.vessel.situation == Vessel.Situations.LANDED)
-                    _state |= PartModule.StartState.Landed;
-            }
-            return _state;
-        }
-
         public static void HighlightAlways(this Part p, Color c)
         {
             p.highlightColor = c;

@@ -45,6 +45,7 @@ namespace AT_Utils
             unit = "%")]
         public float Attenuation = 50f;
 
+        [KSPField] public float AttractorMaxPower = 100f;
         [KSPField(isPersistant = true,
             guiActive = true,
             guiActiveEditor = true,
@@ -259,10 +260,9 @@ namespace AT_Utils
             Utils.EnableField(Fields[nameof(AutoEnable)], damper_controllable);
             Actions[nameof(ToggleAction)].active = damper_controllable;
             Utils.EnableField(Fields[nameof(AttractorEnabled)], attractor_controllable);
-            Utils.EnableField(Fields[nameof(AttractorPower)],
-                attractor_controllable && VariableAttractorForce);
             Utils.EnableField(Fields[nameof(InvertAttractor)], attractor_controllable);
             Actions[nameof(ToggleAttractorAction)].active = attractor_controllable;
+            setupAttractorPowerControl(attractor_controllable);
             // setup PAW group
             if(GroupPAWFields)
             {
@@ -278,6 +278,16 @@ namespace AT_Utils
                     field.group = group;
                 }
             }
+        }
+
+        private void setupAttractorPowerControl(bool attractorControllable)
+        {
+            var fi = Fields[nameof(AttractorPower)];
+            Utils.EnableField(fi, attractorControllable && VariableAttractorForce);
+            if(fi.uiControlEditor is UI_FloatEdit editorUI)
+                editorUI.maxValue = AttractorMaxPower;
+            if(fi.uiControlFlight is UI_FloatEdit flightUI)
+                flightUI.maxValue = AttractorMaxPower;
         }
 
         private void OnDestroy()

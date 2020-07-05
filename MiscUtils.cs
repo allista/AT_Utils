@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace AT_Utils
 {
@@ -193,7 +194,11 @@ namespace AT_Utils
         public static string formatTimeDelta(double delta)
         {
             var dt = new _DateTime(delta, KSPUtil.dateTimeFormatter.Year, KSPUtil.dateTimeFormatter.Day);
-            return $"{dt.years}y {dt.days,3}d {dt.hours,2}:{dt.minutes:00}:{dt.seconds:00}";
+            if(dt.years > 0)
+                return $"{dt.years}y {dt.days,3}d {dt.hours,2}:{dt.minutes:00}:{dt.seconds:00}";
+            if(dt.days > 0)
+                return $"{dt.days,3}d {dt.hours,2}:{dt.minutes:00}:{dt.seconds:00}";
+            return $"{dt.hours,2}:{dt.minutes:00}:{dt.seconds:00}";
         }
 
         public static string formatDimensions(Vector3 size) => $"{size.x:F2}m x {size.y:F2}m x {size.z:F2}m";
@@ -303,7 +308,7 @@ namespace AT_Utils
             {
                 var ind = s.IndexOf("{}", StringComparison.InvariantCulture);
                 if(ind >= 0)
-                    s = s.Substring(0, ind) + "{" + i + "}" + s.Substring(ind + 2);
+                    s = $"{s.Substring(0, ind)}{{{i}}}{s.Substring(ind + 2)}";
                 else
                     s += string.Format(" arg{0}: {{{0}}}", i);
             }
@@ -315,36 +320,55 @@ namespace AT_Utils
             for(int i = 0, argsL = args.Length; i < argsL; i++)
             {
                 var arg = args[i];
-                if(arg is string)
-                    continue;
-                if(arg == null)
-                    args[i] = "null";
-                else if(arg is Vector3)
-                    args[i] = formatVector((Vector3)arg);
-                else if(arg is Vector3d)
-                    args[i] = formatVector((Vector3d)arg);
-                else if(arg is CelestialBody)
-                    args[i] = formatCB((CelestialBody)arg);
-                else if(arg is Orbit)
-                    args[i] = formatOrbit((Orbit)arg);
-                else if(arg is Bounds)
-                    args[i] = formatBounds((Bounds)arg);
-                else if(arg is Exception)
-                    args[i] = formatException((Exception)arg);
-                else if(arg is Transform)
+                switch(arg)
                 {
-                    var T = arg as Transform;
-                    args[i] = $"{T.name}: pos {T.position}, rot {T.rotation.eulerAngles}";
+                    case string _:
+                        continue;
+                    case null:
+                        args[i] = "null";
+                        break;
+                    case Vector3 vector3:
+                        args[i] = formatVector(vector3);
+                        break;
+                    case Vector3d vector3d:
+                        args[i] = formatVector(vector3d);
+                        break;
+                    case CelestialBody body:
+                        args[i] = formatCB(body);
+                        break;
+                    case Orbit orbit:
+                        args[i] = formatOrbit(orbit);
+                        break;
+                    case Bounds bounds:
+                        args[i] = formatBounds(bounds);
+                        break;
+                    case Exception exc:
+                        args[i] = formatException(exc);
+                        break;
+                    case IConfigNode node:
+                        args[i] = node.ToConfigString();
+                        break;
+                    case Transform t:
+                        args[i] = $"{t.name}: pos {t.position}, rot {t.rotation.eulerAngles}";
+                        break;
+                    case Object obj:
+                        args[i] = obj.GetID();
+                        break;
+                    case IEnumerable enumerable:
+                    {
+                        var arr = enumerable.Cast<object>().ToArray();
+                        convert_args(arr);
+                        args[i] = string.Join("\n",
+                            $"Count: {arr.Length}",
+                            "[",
+                            string.Join(",\n", arr.Cast<string>().ToArray()),
+                            "]");
+                        break;
+                    }
+                    default:
+                        args[i] = arg.ToString();
+                        break;
                 }
-                else if(arg is IEnumerable)
-                {
-                    var arr = (arg as IEnumerable).Cast<object>().ToArray();
-                    convert_args(arr);
-                    args[i] = string.Join("\n",
-                        new[] { "Count: " + arr.Length, "[", string.Join(",\n", arr.Cast<string>().ToArray()), "]" });
-                }
-                else
-                    args[i] = arg.ToString();
             }
         }
 

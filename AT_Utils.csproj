@@ -111,6 +111,9 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Addons\ComputationBalancer.cs" />
+        <Compile Include="Construction\ConstructionSkill.cs" />
+        <Compile Include="Construction\ConstructionUtils.cs" />
+        <Compile Include="Debugging\DebugWindowController.cs" />
         <Compile Include="Extensions\CollectionsExtensions.cs" />
         <Compile Include="Extensions\MiscExtensions.cs" />
         <Compile Include="Extensions\OrbitalExtensions.cs" />
@@ -121,6 +124,7 @@
         <Compile Include="Interfaces\IAnimator.cs" />
         <Compile Include="Math\PhysicsUtils.cs" />
         <Compile Include="Orbital\OrbitalUtils.cs" />
+        <Compile Include="OrderedDict.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="KSP_AVC_Updater.cs" />
         <Compile Include="Math\Vector6.cs" />
@@ -228,6 +232,9 @@
     </ItemGroup>
     <ItemGroup>
         <None Include=".gitignore" />
+        <None Include="GameData\000_AT_Utils\Cryogenics.cfg" />
+        <None Include="GameData\000_AT_Utils\TankConfigs.cfg" />
+        <None Include="GameData\000_AT_Utils\TankTypes.cfg" />
         <None Include="README.md" />
     </ItemGroup>
     <ItemGroup>

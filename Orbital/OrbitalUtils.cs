@@ -12,6 +12,17 @@ namespace AT_Utils
                 Vector3d.Dot(orbitalDeltaV, prograde));
         }
 
+        public static Vector3d Node2OrbitalDeltaV(Orbit o, Vector3d nodeDeltaV, double UT)
+        {
+            var norm = o.GetOrbitNormal().normalized;
+            var prograde = o.getOrbitalVelocityAtUT(UT).normalized;
+            var radial = Vector3d.Cross(prograde, norm).normalized;
+            return radial * nodeDeltaV.x + norm * nodeDeltaV.y + prograde * nodeDeltaV.z;
+        }
+
+        public static Vector3d Node2OrbitalDeltaV(ManeuverNode node, Orbit o = null) =>
+            Node2OrbitalDeltaV(o ?? node.patch, node.DeltaV, node.UT);
+
         public static void AddNode(Vessel vessel, Vector3d orbitalDeltaV, double UT)
         {
             var node = vessel.patchedConicSolver.AddManeuverNode(UT);
@@ -71,7 +82,17 @@ namespace AT_Utils
             else
                 newFlightPlan.AddNode(newNodeCfg);
             vessel.flightPlanNode = newFlightPlan;
-            vessel.Log("New flightPlanNode: {}", vessel.flightPlanNode); //debug
+            vessel.Debug($"New flightPlanNode: {vessel.flightPlanNode}");
+        }
+
+        public static void ClearManeuverNodes(Vessel vessel)
+        {
+            vessel.flightPlanNode.ClearData();
+            if(vessel.patchedConicSolver == null)
+                return;
+            var nodes = vessel.patchedConicSolver.maneuverNodes;
+            for(var i = nodes.Count - 1; i >= 0; i--)
+                nodes[i].RemoveSelf();
         }
     }
 }

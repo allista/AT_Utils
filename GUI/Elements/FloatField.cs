@@ -52,7 +52,15 @@ namespace AT_Utils
             return false;
         }
 
-        public bool Draw(string suffix, float increment = 0, string iformat = null, int suffix_width = -1, GUIStyle style = null)
+        public bool Draw(
+            string suffix,
+            float increment = 0,
+            string iformat = null,
+            int suffix_width = -1,
+            GUIStyle style = null,
+            int field_width = 70,
+            string suffix_tooltip = ""
+        )
         {
             bool updated = false;
             GUILayout.BeginHorizontal();
@@ -67,10 +75,11 @@ namespace AT_Utils
             }
             GUI.SetNextControlName(field_name);
             svalue = GUILayout.TextField(svalue, svalue.Equals(formated_value)? (style ?? Styles.enabled) : Styles.white,
-                                         GUILayout.ExpandWidth(true), GUILayout.MinWidth(70));
-            if(!string.IsNullOrEmpty(suffix)) 
-                GUILayout.Label(suffix, Styles.label, suffix_width < 0? 
-                                GUILayout.ExpandWidth(false) : GUILayout.Width(suffix_width));
+                                         GUILayout.ExpandWidth(true), GUILayout.MinWidth(field_width));
+            if(!string.IsNullOrEmpty(suffix))
+                GUILayout.Label(new GUIContent(suffix, suffix_tooltip),
+                    Styles.label,
+                    suffix_width < 0 ? GUILayout.ExpandWidth(false) : GUILayout.Width(suffix_width));
             GUILayout.EndHorizontal();
             updated |= TrySetValue();
             return updated;
