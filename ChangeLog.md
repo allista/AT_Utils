@@ -1,6 +1,9 @@
 #AT Utils ChangeLog
 
-* **v1.9.4**
+* **v1.9.4.1**
+    * Compiled against KSP-1.10
+
+* v1.9.4
     * CC Moved hangar resource tanks to FuelTank category
     * OrbitalUtils: added ClearManeuverNodes method
     * OrbitalUtils: added Node2OrbitalDeltaV method
