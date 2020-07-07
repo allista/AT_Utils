@@ -4,6 +4,7 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2019 Allis Tauri
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -14,9 +15,9 @@ namespace AT_Utils.UI
         public string text;
         public float delay = 0.3f;
         public TooltipView.TooltipPosition position = TooltipView.TooltipPosition.BOTTOM;
-        float enterTime = -1;
+        private float enterTime = -1;
 
-        void Update()
+        private void Update()
         {
             if(enterTime < 0
                || Time.realtimeSinceStartup - enterTime < delay)
