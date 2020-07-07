@@ -18,12 +18,11 @@ namespace AT_Utils.UI
 
         void Update()
         {
-            if(enterTime > 0 && Time.realtimeSinceStartup - enterTime > delay)
-            {
-                enterTime = -1;
-                if(TooltipView.Instance != null)
-                    TooltipView.Instance.ShowTooltip(text, position);
-            }
+            if(enterTime < 0
+               || Time.realtimeSinceStartup - enterTime < delay)
+                return;
+            enterTime = -1;
+            show();
         }
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -37,6 +36,21 @@ namespace AT_Utils.UI
             enterTime = -1;
             if(TooltipView.Instance != null)
                 TooltipView.Instance.HideTooltip();
+        }
+
+        public void SetText(string newText)
+        {
+            var oldText = text;
+            text = newText;
+            if(TooltipView.IsShown
+               && oldText == TooltipView.CurrentTooltip)
+                show();
+        }
+
+        private void show()
+        {
+            if(TooltipView.Instance != null)
+                TooltipView.Instance.ShowTooltip(text, position);
         }
     }
 }
