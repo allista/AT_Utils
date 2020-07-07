@@ -155,7 +155,7 @@ namespace AT_Utils.UI
         public void removeOnColorChangeListner(UnityAction<Color> action) =>
         onColorChanged.RemoveListener(action);
 
-        public static implicit operator Color(ColorSetting c) => c.color;
+        public static implicit operator Color(ColorSetting c) => c?.color ?? Color.white;
     }
 
     public class SimpleGradient
