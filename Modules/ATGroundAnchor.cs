@@ -78,7 +78,9 @@ namespace AT_Utils
 
         private void Update()
         {
-            if(!AutoAttach || isAttached)
+            if(!AutoAttach
+               || isAttached
+               || !HighLogic.LoadedSceneIsFlight)
                 return;
             if(can_attach(out _))
                 ForceAttach();
