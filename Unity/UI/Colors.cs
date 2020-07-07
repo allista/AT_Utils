@@ -156,6 +156,8 @@ namespace AT_Utils.UI
         onColorChanged.RemoveListener(action);
 
         public static implicit operator Color(ColorSetting c) => c?.color ?? Color.white;
+
+        public override string ToString() => $"Color: {_html}";
     }
 
     public class SimpleGradient
