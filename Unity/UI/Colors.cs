@@ -4,6 +4,7 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2018 Allis Tauri
+
 using System;
 using System.Reflection;
 using System.Collections.Generic;
@@ -34,15 +35,15 @@ namespace AT_Utils.UI
 
         public static SimpleGradient FractionGradient;
 
-        public static SortedList<string, ColorSetting> All { get; } 
+        public static SortedList<string, ColorSetting> All { get; }
 
         static Colors()
         {
             All = new SortedList<string, ColorSetting>();
-            foreach(var fi in typeof(Colors).GetFields(BindingFlags.Static|BindingFlags.Public)
-                    .Where(fi => fi.FieldType == typeof(ColorSetting)))
+            foreach(var fi in typeof(Colors).GetFields(BindingFlags.Static | BindingFlags.Public)
+                .Where(fi => fi.FieldType == typeof(ColorSetting)))
                 All.Add(fi.Name, fi.GetValue(null) as ColorSetting);
-            FractionGradient = new SimpleGradient(new [] { Danger, Warning, Good });
+            FractionGradient = new SimpleGradient(new[] { Danger, Warning, Good });
         }
 
         public static void SetDefaults()
@@ -60,11 +61,7 @@ namespace AT_Utils.UI
             Selected2.color = ColorSetting.magenta;
         }
 
-        public static ColorSetting GetColor(string key)
-        {
-            ColorSetting color;
-            return All.TryGetValue(key, out color)? color : null;
-        }
+        public static ColorSetting GetColor(string key) => All.TryGetValue(key, out var color) ? color : null;
 
         public IColored GetColored(string key) => GetColor(key);
     }
@@ -72,9 +69,9 @@ namespace AT_Utils.UI
     [Serializable]
     public class ColorSetting : IColored
     {
-        Color _color = Color.white;
-        string _html = "#FFFFFFFF";
-        string _tag = "<color=#FFFFFFFF>{0}</color>";
+        private Color _color = Color.white;
+        private string _html = "#FFFFFFFF";
+        private string _tag = "<color=#FFFFFFFF>{0}</color>";
 
         public ColorChangedEvent onColorChanged = new ColorChangedEvent();
 
@@ -103,7 +100,7 @@ namespace AT_Utils.UI
 
         public Color color
         {
-            get { return _color; }
+            get => _color;
             set
             {
                 if(_color == value)
@@ -117,8 +114,8 @@ namespace AT_Utils.UI
 
         public string html
         {
-            get { return _html; }
-            set 
+            get => _html;
+            set
             {
                 if(_html == value)
                     return;
@@ -129,13 +126,11 @@ namespace AT_Utils.UI
 
         public Color Alpha(float a) => new Color(_color.r, _color.g, _color.b, a);
 
-        public string Tag(string msg) =>
-        string.Format(_tag, msg);
+        public string Tag(string msg) => string.Format(_tag, msg);
 
-        public string Tag(string msg, params object[] args) =>
-        Tag(string.Format(msg, args));
+        public string Tag(string msg, params object[] args) => Tag(string.Format(msg, args));
 
-        void parse()
+        private void parse()
         {
             if(!ColorUtility.TryParseHtmlString(_html, out _color))
             {
@@ -147,13 +142,11 @@ namespace AT_Utils.UI
             update_tag();
         }
 
-        void update_tag()=> _tag = "<color=" + _html + ">{0}</color>";
+        private void update_tag() => _tag = "<color=" + _html + ">{0}</color>";
 
-        public void addOnColorChangeListner(UnityAction<Color> action) =>
-        onColorChanged.AddListener(action);
+        public void addOnColorChangeListner(UnityAction<Color> action) => onColorChanged.AddListener(action);
 
-        public void removeOnColorChangeListner(UnityAction<Color> action) =>
-        onColorChanged.RemoveListener(action);
+        public void removeOnColorChangeListner(UnityAction<Color> action) => onColorChanged.RemoveListener(action);
 
         public static implicit operator Color(ColorSetting c) => c?.color ?? Color.white;
 
@@ -162,13 +155,13 @@ namespace AT_Utils.UI
 
     public class SimpleGradient
     {
-        Gradient gradient;
-        ColorSetting[] colors;
-        int len, last;
+        private Gradient gradient;
+        private ColorSetting[] colors;
+        private int len, last;
 
-        static readonly GradientAlphaKey[] alpha_keys = {
-            new GradientAlphaKey{alpha=1, time=0},
-            new GradientAlphaKey{alpha=1, time=1}
+        private static readonly GradientAlphaKey[] alpha_keys =
+        {
+            new GradientAlphaKey { alpha = 1, time = 0 }, new GradientAlphaKey { alpha = 1, time = 1 }
         };
 
         public static implicit operator Gradient(SimpleGradient g) => g.gradient;
@@ -191,11 +184,11 @@ namespace AT_Utils.UI
                 colors[i].onColorChanged.RemoveListener(update);
         }
 
-        void update(Color _ = default(Color))
+        private void update(Color _ = default(Color))
         {
             if(len > 1)
             {
-                gradient = new Gradient{ mode = GradientMode.Blend };
+                gradient = new Gradient { mode = GradientMode.Blend };
                 GradientColorKey[] keys = new GradientColorKey[len];
                 for(int i = 0; i < last; i++)
                     keys[i] = new GradientColorKey { color = colors[i], time = (float)i / len };
