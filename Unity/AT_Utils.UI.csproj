@@ -87,6 +87,7 @@
         <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UI\SVBoxSlider.cs" />
         <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UtilityScripts\BoxSlider.cs" />
         <Compile Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\UtilityScripts\HSVUtil.cs" />
+        <Compile Include="UI\Utils.cs" />
         <None Include="UI\HSV-Color-Picker-Unity\Assets\HSVPicker\Resources\Shaders\Compute\GenerateSVTexture.compute" />
         <Compile Include="UI\ColorList.cs" />
         <Compile Include="UI\ColorItem.cs" />
