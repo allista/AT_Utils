@@ -19,17 +19,6 @@ namespace AT_Utils.UI
     [Serializable]
     public class Colors : IColorProvider
     {
-        static Colors instance;
-        public static Colors Instance
-        {
-            get
-            {
-                if(instance == null)
-                    instance = new Colors();
-                return Instance;
-            }
-        }
-
         public static ColorSetting Neutral = ColorSetting.white;
         public static ColorSetting Enabled = ColorSetting.green;
         public static ColorSetting Active = ColorSetting.yellow;
