@@ -32,7 +32,7 @@ namespace AT_Utils.UI
         public static ColorSetting Selected1 = ColorSetting.cyan;
         public static ColorSetting Selected2 = ColorSetting.magenta;
 
-        public static SimpleGradient FractionGradient = new SimpleGradient();
+        public static SimpleGradient FractionGradient;
 
         public static SortedList<string, ColorSetting> All { get; } 
 
