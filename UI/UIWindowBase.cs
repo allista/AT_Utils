@@ -141,11 +141,11 @@ namespace AT_Utils
 
         public bool IsShown => !in_progress && Controller != null;
 
-        public void Toggle(MonoBehaviour monoBehaviour)
+        public void Toggle(MonoBehaviour monoBehaviour, bool condition = true)
         {
             if(IsShown)
                 Close();
-            else
+            else if(condition)
                 Show(monoBehaviour);
         }
     }
