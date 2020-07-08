@@ -31,9 +31,9 @@ namespace AT_Utils
 
     public static class PluginState
     {
-        static Dictionary<string, PluginConfiguration> configs = new Dictionary<string, PluginConfiguration>();
+        private static readonly Dictionary<string, PluginConfiguration> configs = new Dictionary<string, PluginConfiguration>();
 
-        static PluginConfiguration get_config(Type object_type)
+        private static PluginConfiguration get_config(Type object_type)
         {
             var config_path = AssemblyLoader.GetPathByType(object_type);
             if(configs.TryGetValue(config_path, out var cfg))
@@ -47,7 +47,7 @@ namespace AT_Utils
             return cfg;
         }
 
-        static readonly MethodInfo get_value = typeof(PluginConfiguration)
+        private static readonly MethodInfo get_value = typeof(PluginConfiguration)
             .GetMethods(BindingFlags.Public | BindingFlags.Instance)
             .SingleOrDefault(mi => mi.Name == "GetValue" && mi.GetParameters().Length == 2);
 

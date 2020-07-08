@@ -5,9 +5,9 @@
 //
 //  Copyright (c) 2019 Allis Tauri
 
-using UnityEngine;
 using System.Collections;
 using AT_Utils.UI;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace AT_Utils
@@ -15,11 +15,11 @@ namespace AT_Utils
     [PersistState]
     public abstract class UIWindowBase<T> : ICachedState where T : MonoBehaviour
     {
-        readonly UIBundle bundle;
+        private readonly UIBundle bundle;
         private readonly string inputLockName;
 
         protected virtual string prefab_name => typeof(T).Name;
-        GameObject prefab;
+        private GameObject prefab;
         private bool prefabNotFound;
 
         public T Controller { get; private set; }
@@ -54,7 +54,6 @@ namespace AT_Utils
         protected virtual void onGameUnpause() {}
         protected virtual void onGameSaved(ConfigNode node) => this.SaveState();
 
-        bool in_progress;
         protected virtual void onPointerEnter(PointerEventData eventData)
         {
             Utils.LockControls(inputLockName);
@@ -65,6 +64,7 @@ namespace AT_Utils
             Utils.LockControls(inputLockName, false);
         }
 
+        private bool in_progress;
 
         public IEnumerator Show()
         {
