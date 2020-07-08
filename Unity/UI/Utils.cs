@@ -7,8 +7,9 @@ namespace AT_Utils.UI
     public class UI_Utils
     {
         public static List<Dropdown.OptionData> namesToOptions(IEnumerable<string> names) =>
-            names.Select(name =>
+            names?.Select(name =>
                     new Dropdown.OptionData(FormatUtils.ParseCamelCase(name)))
-                .ToList();
+                .ToList()
+            ?? new List<Dropdown.OptionData>();
     }
 }
