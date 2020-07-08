@@ -15,6 +15,7 @@ namespace AT_Utils
 
         protected override void init_controller()
         {
+            base.init_controller();
             Controller.SetTitle("Color Scheme of AT Mods");
             Controller.closeButton.onClick.AddListener(OnClose);
             Controller.saveButton.onClick.AddListener(OnSave);

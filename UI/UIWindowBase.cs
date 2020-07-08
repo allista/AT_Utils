@@ -7,6 +7,8 @@
 
 using UnityEngine;
 using System.Collections;
+using AT_Utils.UI;
+using UnityEngine.EventSystems;
 
 namespace AT_Utils
 {
@@ -14,6 +16,7 @@ namespace AT_Utils
     public abstract class UIWindowBase<T> : ICachedState where T : MonoBehaviour
     {
         readonly UIBundle bundle;
+        private readonly string inputLockName;
 
         protected virtual string prefab_name => typeof(T).Name;
         GameObject prefab;
@@ -28,14 +31,36 @@ namespace AT_Utils
         protected UIWindowBase(UIBundle bundle)
         {
             this.bundle = bundle;
+            inputLockName = $"{prefab_name}-{base.GetHashCode():X}";
         }
 
-        protected abstract void init_controller();
+        ~UIWindowBase()
+        {
+            Utils.LockControls(inputLockName, false);
+        }
+
+        protected virtual void init_controller()
+        {
+            if(!(Controller is ScreenBoundRect window))
+                return;
+            window.onPointerEnterEvent.AddListener(onPointerEnter);
+            window.onPointerExitEvent.AddListener(onPointerExit);
+        }
 
         protected virtual void onGamePause() {}
         protected virtual void onGameUnpause() {}
 
         bool in_progress;
+        protected virtual void onPointerEnter(PointerEventData eventData)
+        {
+            Utils.LockControls(inputLockName);
+        }
+
+        protected virtual void onPointerExit(PointerEventData eventData)
+        {
+            Utils.LockControls(inputLockName, false);
+        }
+
 
         public IEnumerator Show()
         {
@@ -102,6 +127,7 @@ namespace AT_Utils
             this.SaveState();
             GameEvents.onGamePause.Remove(onGamePause);
             GameEvents.onGamePause.Remove(onGameUnpause);
+            Utils.LockControls(inputLockName, false);
             GameObject gameObject;
             (gameObject = Controller.gameObject).SetActive(false);
             Object.Destroy(gameObject);

@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace AT_Utils.UI
 {
-    public class DragableRect : MonoBehaviour, IBeginDragHandler, IDragHandler
+    public class DragableRect : OnHoverTrigger, IBeginDragHandler, IDragHandler
     {
         protected RectTransform rectTransform;
         protected Vector3 pointerOffset;

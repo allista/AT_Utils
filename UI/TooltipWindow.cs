@@ -10,7 +10,5 @@ namespace AT_Utils
     public class TooltipWindow : UIWindowBase<TooltipView>
     {
         public TooltipWindow() : base(AT_UtilsGlobals.Instance.AssetBundle) { }
-
-        protected override void init_controller() { }
     }
 }
