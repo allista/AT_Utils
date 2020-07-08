@@ -17,7 +17,6 @@ namespace AT_Utils
         PartSelector part_selector;
         SubassemblySelector subassembly_selector;
         CraftBrowserDialog vessel_selector;
-        public EditorFacility Facility { get; private set; }
         public Action<ShipConstruct> process_construct = delegate { };
 
         public void Awake()
