@@ -49,8 +49,7 @@ namespace AT_Utils
 
         static readonly MethodInfo get_value = typeof(PluginConfiguration)
             .GetMethods(BindingFlags.Public | BindingFlags.Instance)
-            .Where(mi => mi.Name == "GetValue" && mi.GetParameters().Length == 2)
-            .SingleOrDefault();
+            .SingleOrDefault(mi => mi.Name == "GetValue" && mi.GetParameters().Length == 2);
 
         public static void LoadState(this object obj, string basename = "")
         {
