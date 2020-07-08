@@ -45,19 +45,18 @@ namespace AT_Utils
             process_loaded_construct(construct);
         }
 
-        void vessel_selected(string filename, CraftBrowserDialog.LoadType t)
+        void vessel_selected(ConfigNode node, CraftBrowserDialog.LoadType t)
         {
             vessel_selector = null;
             //load vessel config
-            var node = ConfigNode.Load(filename);
-            if(node == null) return;
             var construct = new ShipConstruct();
             if(!construct.LoadShip(node))
             {
-                Utils.Log("Unable to load ShipConstruct from {}. " +
+                var shipName = node.GetValue("ship");
+                Utils.Error($"Unable to load ShipConstruct '{shipName}'. " +
                           "This usually means that some parts are missing " +
-                          "or some modules failed to initialize.", filename);
-                Utils.Message("Unable to load {0}", filename);
+                          "or some modules failed to initialize.");
+                Utils.Message("Unable to load {0}", shipName);
                 return;
             }
             //check if it's possible to launch such vessel
