@@ -19,6 +19,7 @@ namespace AT_Utils.UI
         public override float Max { get => max; set => max = value; }
 
         public override FloatEvent onValueChanged { get; } = new FloatEvent();
+        public FloatEvent onDoneEditing { get; } = new FloatEvent();
 
         public float step = 1;
         public int decimals = 1;
@@ -36,6 +37,7 @@ namespace AT_Utils.UI
             updateIncDecButtons();
             incrementButton.onClick.AddListener(increment);
             decrementButton.onClick.AddListener(decrement);
+            doneButton.onClick.AddListener(done);
             input.contentType = InputField.ContentType.DecimalNumber;
             input.onEndEdit.AddListener(parse);
             input.text = value.ToString(format);
@@ -46,6 +48,7 @@ namespace AT_Utils.UI
             input.onEndEdit.RemoveAllListeners();
             incrementButton.onClick.RemoveAllListeners();
             decrementButton.onClick.RemoveAllListeners();
+            doneButton.onClick.RemoveAllListeners();
         }
 
         public void SetDecimals(int newDecimals)
@@ -101,6 +104,8 @@ namespace AT_Utils.UI
         private void increment() => changeValueAndNotify(value + step);
 
         private void decrement() => changeValueAndNotify(value - step);
+
+        private void done() => onDoneEditing?.Invoke(value);
 
         private void parse(string str_value)
         {
