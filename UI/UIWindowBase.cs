@@ -32,11 +32,14 @@ namespace AT_Utils
         {
             this.bundle = bundle;
             inputLockName = $"{prefab_name}-{base.GetHashCode():X}";
+            GameEvents.onGameStateSave.Add(onGameSaved);
         }
 
         ~UIWindowBase()
         {
+            GameEvents.onGameStateSave.Remove(onGameSaved);
             Utils.LockControls(inputLockName, false);
+            this.SaveState();
         }
 
         protected virtual void init_controller()
@@ -49,6 +52,7 @@ namespace AT_Utils
 
         protected virtual void onGamePause() {}
         protected virtual void onGameUnpause() {}
+        protected virtual void onGameSaved(ConfigNode node) => this.SaveState();
 
         bool in_progress;
         protected virtual void onPointerEnter(PointerEventData eventData)
@@ -69,6 +73,7 @@ namespace AT_Utils
             in_progress = true;
             if(prefab == null)
             {
+                this.LoadState();
                 foreach(var _ in bundle.LoadAsset(prefab_name))
                     yield return null;
                 prefab = bundle.GetAsset(prefab_name);
