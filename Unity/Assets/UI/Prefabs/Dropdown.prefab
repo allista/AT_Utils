@@ -616,7 +616,6 @@ GameObject:
   - component: {fileID: 4242498043517884386}
   - component: {fileID: 546511700580551317}
   - component: {fileID: 4314642150160430069}
-  - component: {fileID: 694372637108230358}
   m_Layer: 5
   m_Name: Dropdown
   m_TagString: Untagged
@@ -774,21 +773,6 @@ MonoBehaviour:
   text: {fileID: 3838911914967992341}
   image: {fileID: 3592270767083624081}
   selectable: {fileID: 4242498043517884386}
---- !u!114 &694372637108230358
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4269202529219022858}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -382320990, guid: 23fd6eb82728348aba7ba3f92873da24, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  text: 
-  delay: 0.3
-  position: 1
 --- !u!1 &5486145550177627884
 GameObject:
   m_ObjectHideFlags: 0
@@ -879,6 +863,7 @@ GameObject:
   - component: {fileID: 8423268188146963067}
   - component: {fileID: 8511776146886682018}
   - component: {fileID: 3838911914967992341}
+  - component: {fileID: 989613336085246123}
   m_Layer: 5
   m_Name: Label
   m_TagString: Untagged
@@ -947,6 +932,21 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 
+--- !u!114 &989613336085246123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6793770525504753010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -382320990, guid: 23fd6eb82728348aba7ba3f92873da24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: 
+  delay: 0.3
+  position: 1
 --- !u!1 &6874539898914787896
 GameObject:
   m_ObjectHideFlags: 0
