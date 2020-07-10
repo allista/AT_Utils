@@ -39,7 +39,13 @@ namespace AT_Utils
         {
             GameEvents.onGameStateSave.Remove(onGameSaved);
             Utils.LockControls(inputLockName, false);
-            this.SaveState();
+            Close();
+        }
+
+        private void saveState()
+        {
+            if(initialized)
+                this.SaveState();
         }
 
         protected virtual void init_controller()
@@ -52,7 +58,7 @@ namespace AT_Utils
 
         protected virtual void onGamePause() {}
         protected virtual void onGameUnpause() {}
-        protected virtual void onGameSaved(ConfigNode node) => this.SaveState();
+        protected virtual void onGameSaved(ConfigNode node) => saveState();
 
         protected virtual void onPointerEnter(PointerEventData eventData)
         {
@@ -129,7 +135,7 @@ namespace AT_Utils
         {
             if(Controller == null)
                 return;
-            this.SaveState();
+            saveState();
             GameEvents.onGamePause.Remove(onGamePause);
             GameEvents.onGamePause.Remove(onGameUnpause);
             Utils.LockControls(inputLockName, false);
