@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace AT_Utils.UI
 {
-    public class UI_Utils
+    public static class UI_Utils
     {
         public static List<Dropdown.OptionData>
             namesToOptions(IEnumerable<string> names, bool convertCamelCase = true) =>
