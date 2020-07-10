@@ -31,7 +31,7 @@ namespace AT_Utils
         protected UIWindowBase(UIBundle bundle)
         {
             this.bundle = bundle;
-            inputLockName = $"{prefab_name}-{base.GetHashCode():X}";
+            inputLockName = $"{typeof(T).Name}-{base.GetHashCode():X}";
             GameEvents.onGameStateSave.Add(onGameSaved);
         }
 
