@@ -207,6 +207,7 @@
         <Compile Include="GUI\ToolbarWrapper.cs" />
         <Compile Include="GUI\AppToolbar.cs" />
         <Compile Include="Debugging\WorldSpaceTrace.cs" />
+        <Compile Include="UI\DialogController.cs" />
         <Compile Include="UI\UIBundle.cs" />
         <Compile Include="UI\UIWindowBase.cs" />
         <Compile Include="UI\ColorListWindow.cs" />
