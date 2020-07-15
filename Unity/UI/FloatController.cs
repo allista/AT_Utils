@@ -37,7 +37,8 @@ namespace AT_Utils.UI
             updateIncDecButtons();
             incrementButton.onClick.AddListener(increment);
             decrementButton.onClick.AddListener(decrement);
-            doneButton.onClick.AddListener(done);
+            if(doneButton != null)
+                doneButton.onClick.AddListener(done);
             input.contentType = InputField.ContentType.DecimalNumber;
             input.onEndEdit.AddListener(parse);
             input.text = value.ToString(format);
@@ -48,7 +49,8 @@ namespace AT_Utils.UI
             input.onEndEdit.RemoveAllListeners();
             incrementButton.onClick.RemoveAllListeners();
             decrementButton.onClick.RemoveAllListeners();
-            doneButton.onClick.RemoveAllListeners();
+            if(doneButton != null)
+                doneButton.onClick.RemoveAllListeners();
         }
 
         public void SetDecimals(int newDecimals)
