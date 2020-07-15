@@ -151,7 +151,7 @@ namespace AT_Utils.UI
         private void OnDestroy()
         {
             if(gameObject.activeInHierarchy)
-                invokeOnClose();
+                sendEvent(onClose, nameof(onClose));
             onConfirm.RemoveAllListeners();
             onCancel.RemoveAllListeners();
             onClose.RemoveAllListeners();
@@ -159,21 +159,21 @@ namespace AT_Utils.UI
             cancelButton.onClick.RemoveAllListeners();
         }
 
-        private void invokeOnClose()
+        private void sendEvent(UnityEvent @event, string eventName)
         {
             try
             {
-                onClose.Invoke();
+                @event.Invoke();
             }
             catch(Exception e)
             {
-                Debug.LogError($"[AT_Utils: SimpleDialog] exception in onClose: {e}", this);
+                Debug.LogError($"[AT_Utils: SimpleDialog] exception in {eventName}: {e}", this);
             }
         }
 
         private void close()
         {
-            invokeOnClose();
+            sendEvent(onClose, nameof(onClose));
             gameObject.SetActive(false);
             if(DestroyOnClose)
                 Destroy(gameObject);
@@ -181,27 +181,13 @@ namespace AT_Utils.UI
 
         private void handleConfirm()
         {
-            try
-            {
-                onConfirm.Invoke();
-            }
-            catch(Exception e)
-            {
-                Debug.LogError($"[AT_Utils: SimpleDialog] exception in onConfirm: {e}", this);
-            }
+            sendEvent(onConfirm, nameof(onConfirm));
             close();
         }
 
         private void handleCancel()
         {
-            try
-            {
-                onCancel.Invoke();
-            }
-            catch(Exception e)
-            {
-                Debug.LogError($"[AT_Utils: SimpleDialog] exception in onCancel: {e}", this);
-            }
+            sendEvent(onCancel, nameof(onCancel));
             close();
         }
 
