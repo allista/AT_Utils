@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -7,6 +8,7 @@ namespace AT_Utils.UI
 {
     public class DialogFactory : MonoBehaviour
     {
+        private static readonly HashSet<object> contexts = new HashSet<object>();
         private static DialogFactory Instance { get; set; }
 
         protected virtual RectTransform dialogParent => GetComponentInParent<Canvas>()?.transform as RectTransform;
@@ -25,6 +27,7 @@ namespace AT_Utils.UI
             DontDestroyOnLoad(gameObject);
             if(prefab != null)
                 prefab.SetActive(false);
+            contexts.Clear();
         }
 
         protected virtual void setupDialog(SimpleDialog dialog) { }
@@ -41,17 +44,23 @@ namespace AT_Utils.UI
             return dialog;
         }
 
+        public static bool ContextIsActive(object context) => contexts.Contains(context);
+
         public static SimpleDialog Create(
             string message,
             string title,
             UnityAction onConfirm,
             UnityAction onCancel = null,
             UnityAction onClose = null,
+            UnityAction onDestroy = null,
             string confirmText = "Yes",
             string cancelText = "No",
-            bool destroyOnClose = true
+            bool destroyOnClose = true,
+            object context = null
         )
         {
+            if(context != null && contexts.Contains(context))
+                return null;
             var dialog = newInstance();
             if(dialog == null)
                 return null;
@@ -63,11 +72,18 @@ namespace AT_Utils.UI
             dialog.title.text = title;
             dialog.message.text = message;
             dialog.DestroyOnClose = destroyOnClose;
+            if(context != null)
+            {
+                contexts.Add(context);
+                dialog.onDestroy.AddListener(() => contexts.Remove(context));
+            }
             dialog.onConfirm.AddListener(onConfirm);
             if(onCancel != null)
                 dialog.onCancel.AddListener(onCancel);
             if(onClose != null)
                 dialog.onClose.AddListener(onClose);
+            if(onDestroy != null)
+                dialog.onDestroy.AddListener(onDestroy);
             return dialog;
         }
 
@@ -77,12 +93,23 @@ namespace AT_Utils.UI
             UnityAction onConfirm,
             UnityAction onCancel = null,
             UnityAction onClose = null,
+            UnityAction onDestroy = null,
             string confirmText = "Yes",
             string cancelText = "No",
-            bool destroyOnClose = true
+            bool destroyOnClose = true,
+            object context = null
         )
         {
-            var dialog = Create(message, title, onConfirm, onCancel, onClose, confirmText, cancelText, destroyOnClose);
+            var dialog = Create(message,
+                title,
+                onConfirm,
+                onCancel,
+                onClose,
+                onDestroy,
+                confirmText,
+                cancelText,
+                destroyOnClose,
+                context);
             if(dialog == null)
                 return null;
             dialog.Show();
@@ -91,25 +118,53 @@ namespace AT_Utils.UI
 
         public static SimpleDialog Info(
             string message,
-            string title
+            string title,
+            object context = null
         ) =>
-            Show(message, title, null, null, null, "Close", null);
+            Show(message,
+                title,
+                null,
+                null,
+                null,
+                null,
+                "Close",
+                null,
+                context: context);
 
         public static SimpleDialog Warning(
             string message,
-            string title = null
+            string title = null,
+            object context = null
         ) =>
-            Show(message, title ?? "Warning", null, null, null, "Close", null);
+            Show(message,
+                title ?? "Warning",
+                null,
+                null,
+                null,
+                null,
+                "Close",
+                null,
+                context: context);
 
         public static SimpleDialog Danger(
             string message,
             UnityAction onConfirm,
             UnityAction onCancel = null,
             UnityAction onClose = null,
-            string title = null
+            UnityAction onDestroy = null,
+            string title = null,
+            object context = null
         )
         {
-            var dialog = Create(message, title ?? "Warning", onConfirm, onCancel, onClose, "Yes", "Cancel");
+            var dialog = Create(message,
+                title ?? "Warning",
+                onConfirm,
+                onCancel,
+                onClose,
+                onDestroy,
+                "Yes",
+                "Cancel",
+                context: context);
             if(dialog == null)
                 return null;
             dialog.confirmButtonColorizer.SetColor(Colors.Danger);
@@ -124,6 +179,7 @@ namespace AT_Utils.UI
         public UnityEvent onConfirm = new UnityEvent();
         public UnityEvent onCancel = new UnityEvent();
         public UnityEvent onClose = new UnityEvent();
+        public UnityEvent onDestroy = new UnityEvent();
 
         public Button
             confirmButton,
@@ -152,9 +208,11 @@ namespace AT_Utils.UI
         {
             if(gameObject.activeInHierarchy)
                 sendEvent(onClose, nameof(onClose));
+            sendEvent(onDestroy, nameof(onDestroy));
             onConfirm.RemoveAllListeners();
             onCancel.RemoveAllListeners();
             onClose.RemoveAllListeners();
+            onDestroy.RemoveAllListeners();
             confirmButton.onClick.RemoveAllListeners();
             cancelButton.onClick.RemoveAllListeners();
         }
