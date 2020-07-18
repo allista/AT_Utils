@@ -1,4 +1,4 @@
-﻿//   UIWindowBase.cs
+//   UIWindowBase.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
@@ -131,11 +131,14 @@ namespace AT_Utils
                 pos = Controller.transform.localPosition;
         }
 
+        protected virtual void onClose() { }
+
         public void Close()
         {
             if(Controller == null)
                 return;
             saveState();
+            onClose();
             GameEvents.onGamePause.Remove(onGamePause);
             GameEvents.onGamePause.Remove(onGameUnpause);
             Utils.LockControls(inputLockName, false);
