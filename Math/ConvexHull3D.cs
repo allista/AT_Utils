@@ -435,9 +435,7 @@ namespace AT_Utils
                 triangles[vi+1] = lookup[f.v1];
                 triangles[vi+2] = lookup[f.v2];
             }
-            var mesh = new Mesh();
-            mesh.vertices  = Points.ToArray();
-            mesh.triangles = triangles;
+            var mesh = new Mesh { vertices = Points.ToArray(), triangles = triangles };
             mesh.RecalculateNormals();
             mesh.RecalculateTangents();
             mesh.RecalculateBounds();
