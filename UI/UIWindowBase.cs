@@ -105,16 +105,9 @@ namespace AT_Utils
             init_controller();
             GameEvents.onGamePause.Add(onGamePause);
             GameEvents.onGameUnpause.Add(onGameUnpause);
-            obj.SetActive(true);
-            if(!initialized)
-            {
-                var rectT = (RectTransform)obj.transform;
-                var rect = rectT.rect;
-                var pivot = rectT.pivot;
-                pos = new Vector3(-rect.width * pivot.x, rect.height * pivot.y);
-                initialized = true;
-            }
             obj.transform.localPosition = pos;
+            initialized = true;
+            obj.SetActive(true);
             end:
             in_progress = false;
         }
