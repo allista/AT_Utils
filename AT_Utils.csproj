@@ -123,6 +123,7 @@
         <Compile Include="Extensions\VesselExtensions.cs" />
         <Compile Include="Interfaces\IAnimator.cs" />
         <Compile Include="Math\PhysicsUtils.cs" />
+        <Compile Include="MeshUtils\Utils.cs" />
         <Compile Include="Orbital\OrbitalUtils.cs" />
         <Compile Include="OrderedDict.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
