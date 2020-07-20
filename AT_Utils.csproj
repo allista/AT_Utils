@@ -160,7 +160,6 @@
         <Compile Include="GUI\TooltipManager.cs" />
         <Compile Include="GUI\Dialogs\SimpleDialog.cs" />
         <Compile Include="GUI\Dialogs\SimpleTextEntry.cs" />
-        <Compile Include="GUI\Dialogs\SimpleWarning.cs" />
         <Compile Include="GUI\Windows\CrewTransferWindow.cs" />
         <Compile Include="GUI\Windows\ResourceTransferWindow.cs" />
         <Compile Include="GUI\Elements\FloatField.cs" />
