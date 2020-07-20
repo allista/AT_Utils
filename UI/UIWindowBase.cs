@@ -1,4 +1,4 @@
-//   UIWindowBase.cs
+﻿//   UIWindowBase.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
@@ -56,8 +56,8 @@ namespace AT_Utils
             window.onPointerExitEvent.AddListener(onPointerExit);
         }
 
-        protected virtual void onGamePause() {}
-        protected virtual void onGameUnpause() {}
+        protected virtual void onGamePause() { }
+        protected virtual void onGameUnpause() { }
         protected virtual void onGameSaved(ConfigNode node) => saveState();
 
         protected virtual void onPointerEnter(PointerEventData eventData)
@@ -72,7 +72,7 @@ namespace AT_Utils
 
         private bool in_progress;
 
-        public IEnumerator Show()
+        private IEnumerator Show()
         {
             if(in_progress || Controller != null || bundle.BundleNotFound || prefabNotFound)
                 yield break;
