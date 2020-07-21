@@ -18,13 +18,13 @@ namespace AT_Utils
         public static T Instance { get; private set; }
 
         public static bool InstanceEnabled 
-        { get { return Instance && Instance.window_enabled; } }
+        { get { return Instance != null && Instance.window_enabled; } }
 
         public static void ShowInstance(bool show)
-        { if(Instance) Instance.Show(show); }
+        { if(Instance != null) Instance.Show(show); }
 
         public static void ToggleInstance()
-        { if(Instance) Instance.Show(!Instance.window_enabled); }
+        { if(Instance != null) Instance.Show(!Instance.window_enabled); }
 
         public static void ShowWithButton(bool show, ApplicationLauncherButton button)
         {
