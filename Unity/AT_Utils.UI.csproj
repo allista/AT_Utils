@@ -63,11 +63,8 @@
             <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UI">
-            <HintPath>../../KSP-test/KSP_test_1.10.0/KSP_Data/Managed/UnityEngine.UI.dll</HintPath>
+          <HintPath>.\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
             <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\AT_KSP_Plugins\AT_Utils\Unity\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>..\..\KSP-test\KSP_test_1.10.0\KSP_Data\Managed\UnityEngine.UIModule.dll</HintPath>
