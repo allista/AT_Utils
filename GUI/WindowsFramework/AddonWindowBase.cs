@@ -29,22 +29,13 @@ namespace AT_Utils
         public static void ShowWithButton(bool show, ApplicationLauncherButton button)
         {
             if(Instance == null) return;
-            if(button == null) ShowInstance(show);
+            Instance.Show(show);
+            if(button == null)
+                return;
+            if(Instance.window_enabled)
+                button.SetTrue(false);
             else
-            {
-                if(show)
-                {
-                    if(!Instance.window_enabled) 
-                        Instance.Show(true);
-                    button.SetTrue(false);
-                }
-                else
-                {
-                    if(Instance.window_enabled) 
-                        Instance.Show(false); 
-                    button.SetFalse(false);
-                }
-            }
+                button.SetFalse(false);
         }
 
         public static void ToggleWithButton(ApplicationLauncherButton button)
