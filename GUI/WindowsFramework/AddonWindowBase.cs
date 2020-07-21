@@ -49,8 +49,8 @@ namespace AT_Utils
 
         public static void ToggleWithButton(ApplicationLauncherButton button)
         {
-            if(button == null) ToggleInstance();
-            else if(Instance) ShowWithButton(!Instance.window_enabled, button);
+            if(Instance != null)
+                ShowWithButton(!Instance.window_enabled, button);
         }
 
         readonly ActionDamper save_timer = new ActionDamper(10);
