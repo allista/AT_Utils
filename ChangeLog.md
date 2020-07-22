@@ -1,6 +1,61 @@
-#AT Utils ChangeLog
+# AT Utils ChangeLog
 
-* **v1.9.4.1**
+
+* **v1.9.5**
+    * Fixed and refactored `HSVPicker`
+    * Fixed `AddonWindowBase.Toggle/ShowWithButton` logic
+    * GUIWindowBase.Show only executes when the state is changing
+    * UI
+        * Added ButtonIcon prefab with an Image instead of Text as content
+        * **Replaced the old SimpleDialog with DialogFactory.Danger**
+        * **UIBundles are singletons and load synchronously on creation**
+        * `UIWindowBase`
+            * does not try to calculate central position of the
+        new window; instead, relying on the prefab anchor+pivot.
+            * added protected `onClose` hook
+            * automatically saving and loading config options
+            * *added input locking on mouse enter/exit, close, destroy*
+            * added optional bool `condition` argument to `Toggle` method
+        * `FloatController`
+            * added `onDoneEditing FloatEvent` that is called on click of the
+            _optional_ `doneButton`
+            * added `suffix` text
+            * increment/decrement buttons display formatted step
+            * added `SetStep` and `SetDecimals` methods
+            * fixed value clamping in case of no decimals
+        * Added `Dropdown.SetOptionsSafe` extension
+        * Added `DialogFactory:SimpleDialog` uGUI framework to replace the old
+        dialogs
+        * Added InfoPane prefab
+        * Added ScrollView prefab
+        * Reimplemented from scratch the Dropdown prefab
+        * Updated Button, LRChooser and Text prefabs
+        * Made `Utils` class static
+            * Added `namesToOptions` method for Dropdown options creation
+        * `DebugWindow`: using `ScreenBoundRect` rather than `DragableRect` as
+        ancestor class
+        * Added `TooltipTrigger.SetText` method
+        * Added `BaseColorizer.SetColor` method that accepts
+        either `name` or `ColorSetting`
+        * `Colors`
+            * added `ColorSetting.ToString`
+            * operator `ColorSetting=>Color` always returns a `Color`
+            * `FractionGradient` is initialized in static constructor
+            * removed unused `Instance` prop+field
+        * Added all prefabs to CommonUI scene
+        * `FormatUtils`
+            * `formatMass` calls `formatBigValue` for mass > 1t
+            * `formatBigValue` calls `formatSmallValue` for values smaller
+        than 1k
+            * added `ParseCamelCase` method
+    * Added `MeshUtils` part of `Utils` class with utility methods for creation
+    of `Meshes` and corresponding `GameObjects`.
+    * `PluginState`: fixed possible NRE in `get_config`
+    * Fixed `ShipConstructLoader`: using `CraftBrowserDialog.Spawn` variant
+    with `onConfigNodeSelected` callback
+    * Fixed `ATGroundAnchor.Update` in Editor
+
+* v1.9.4.1
     * Compiled against KSP-1.10
 
 * v1.9.4
