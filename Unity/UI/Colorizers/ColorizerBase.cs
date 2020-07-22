@@ -18,16 +18,37 @@ namespace AT_Utils.UI
         {
             if(string.IsNullOrEmpty(Color))
                 return;
-            setting = Colors.GetColor(Color);
-            if(setting == null)
-                return;
-            onColorChanged(setting);
-            setting.onColorChanged.AddListener(onColorChanged);
+            SetColor(Color);
         }
 
         protected virtual void OnDestroy()
         {
             setting?.onColorChanged.RemoveListener(onColorChanged);
+        }
+
+        public void SetColor(ColorSetting newSetting)
+        {
+            newSetting ??= Colors.Neutral;
+            Color = newSetting.html;
+            updateSetting(newSetting);
+        }
+
+        public void SetColor(string color)
+        {
+            Color = color;
+            var newSetting = Colors.GetColor(Color);
+            if(newSetting != null)
+                updateSetting(newSetting);
+            else
+                SetColor(new ColorSetting(Color));
+        }
+
+        private void updateSetting(ColorSetting newSetting)
+        {
+            setting?.onColorChanged.RemoveListener(onColorChanged);
+            setting = newSetting;
+            onColorChanged(setting);
+            setting.onColorChanged.AddListener(onColorChanged);
         }
 
         public void UpdateColor() => onColorChanged(setting);

@@ -5,40 +5,37 @@ namespace AT_Utils.UI
 {
     public class ColorItem : MonoBehaviour
     {
-        [SerializeField]
-        Image colorDisplay;
+        [SerializeField] private Image colorDisplay;
 
-        [SerializeField]
-        InputField colorHTML;
+        [SerializeField] private InputField colorHTML;
 
-        [SerializeField]
-        Text pickerToggleText;
+        [SerializeField] private Text pickerToggleText;
 
         public ColorPicker picker;
         public Toggle pickerToggle;
 
-        IColored colored;
+        private IColored colored;
 
-        void Awake()
+        private void Awake()
         {
             colorHTML.readOnly = true;
             pickerToggle.onValueChanged.AddListener(togglePicker);
         }
 
-        void displayColor(Color color)
+        private void displayColor(Color color)
         {
             colorDisplay.color = color;
-            colorHTML.text = "#" + ColorUtility.ToHtmlStringRGBA(color);
+            colorHTML.text = $"#{ColorUtility.ToHtmlStringRGBA(color)}";
             if(picker != null && pickerToggle.isOn)
                 picker.CurrentColor = color;
         }
 
-        public void SetColored(IColored colored, string name)
+        public void SetColored(IColored newColored, string colorName)
         {
-            this.colored = colored;
-            pickerToggleText.text = name;
-            displayColor(colored.color);
-            colored.addOnColorChangeListner(displayColor);
+            this.colored = newColored;
+            pickerToggleText.text = colorName;
+            displayColor(newColored.color);
+            newColored.addOnColorChangeListner(displayColor);
         }
 
         public void ChangeColor(Color color)
@@ -49,7 +46,7 @@ namespace AT_Utils.UI
                 displayColor(color);
         }
 
-        void togglePicker(bool toggle)
+        private void togglePicker(bool toggle)
         {
             if(picker == null) return;
             if(toggle)
@@ -59,6 +56,7 @@ namespace AT_Utils.UI
             }
             else
                 picker.onValueChanged.RemoveListener(ChangeColor);
+            // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
             if(pickerToggle.group != null)
                 picker.gameObject.SetActive(pickerToggle.group.AnyTogglesOn());
             else

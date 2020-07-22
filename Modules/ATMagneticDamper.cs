@@ -172,7 +172,7 @@ namespace AT_Utils
                 : $"Affects only: {AffectedPartTags}");
             if(AffectKerbals)
                 info.AppendLine("WARNING: Affects kerbals!");
-            return info.ToStringAndRelease();
+            return info.ToStringAndRelease().Trim();
         }
 
         public override void OnLoad(ConfigNode node)

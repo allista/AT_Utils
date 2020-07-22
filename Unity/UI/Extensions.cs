@@ -5,6 +5,7 @@
 //
 //  Copyright (c) 2019 Allis Tauri
 
+using System.Collections.Generic;
 using UnityEngine.UI;
 
 namespace AT_Utils.UI
@@ -25,6 +26,13 @@ namespace AT_Utils.UI
                 return;
             selectable.interactable = interactable;
             selectable.GetComponent<Colorizer>()?.UpdateColor();
+        }
+
+        public static void SetOptionsSafe(this Dropdown dropdown, List<Dropdown.OptionData> newOptions)
+        {
+            dropdown.options = newOptions;
+            if(dropdown.value >= dropdown.options.Count)
+                dropdown.SetValueWithoutNotify(dropdown.options.Count - 1);
         }
     }
 }

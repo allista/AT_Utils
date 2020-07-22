@@ -18,39 +18,30 @@ namespace AT_Utils
         public static T Instance { get; private set; }
 
         public static bool InstanceEnabled 
-        { get { return Instance && Instance.window_enabled; } }
+        { get { return Instance != null && Instance.window_enabled; } }
 
         public static void ShowInstance(bool show)
-        { if(Instance) Instance.Show(show); }
+        { if(Instance != null) Instance.Show(show); }
 
         public static void ToggleInstance()
-        { if(Instance) Instance.Show(!Instance.window_enabled); }
+        { if(Instance != null) Instance.Show(!Instance.window_enabled); }
 
         public static void ShowWithButton(bool show, ApplicationLauncherButton button)
         {
             if(Instance == null) return;
-            if(button == null) ShowInstance(show);
+            Instance.Show(show);
+            if(button == null)
+                return;
+            if(Instance.window_enabled)
+                button.SetTrue(false);
             else
-            {
-                if(show)
-                {
-                    if(!Instance.window_enabled) 
-                        Instance.Show(true);
-                    button.SetTrue(false);
-                }
-                else
-                {
-                    if(Instance.window_enabled) 
-                        Instance.Show(false); 
-                    button.SetFalse(false);
-                }
-            }
+                button.SetFalse(false);
         }
 
         public static void ToggleWithButton(ApplicationLauncherButton button)
         {
-            if(button == null) ToggleInstance();
-            else if(Instance) ShowWithButton(!Instance.window_enabled, button);
+            if(Instance != null)
+                ShowWithButton(!Instance.window_enabled, button);
         }
 
         readonly ActionDamper save_timer = new ActionDamper(10);

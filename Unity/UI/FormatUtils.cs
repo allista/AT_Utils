@@ -5,6 +5,7 @@
 //
 //  Copyright (c) 2019 Allis Tauri
 
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace AT_Utils.UI
@@ -12,6 +13,16 @@ namespace AT_Utils.UI
     public static class FormatUtils
     {
         public const float G0 = 9.80665f; //m/s2
+
+        /// <summary>
+        /// The camel case components matching regexp.
+        /// From: http://stackoverflow.com/questions/155303/net-how-can-you-split-a-caps-delimited-string-into-an-array
+        /// </summary>
+        private const string CamelCaseRegexp = "([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))";
+
+        private static readonly Regex CCR = new Regex(CamelCaseRegexp);
+
+        public static string ParseCamelCase(string s) => CCR.Replace(s, "$1 ");
 
         public static string formatVeryBigValue(float value, string unit, string format = "F1")
         {
@@ -43,7 +54,7 @@ namespace AT_Utils.UI
             }
             else
                 return formatBigValue(value, unit, format);
-            return value.ToString(format) + mod + unit;
+            return $"{value.ToString(format)}{mod}{unit}";
         }
 
         public static string formatBigValue(float value, string unit, string format = "F1")
@@ -64,64 +75,49 @@ namespace AT_Utils.UI
                 value /= 1e3f;
                 mod = "k";
             }
-            return value.ToString(format) + mod + unit;
+            else
+                return formatSmallValue(value, unit, format);
+            return $"{value.ToString(format)}{mod}{unit}";
         }
 
         public static string formatSmallValue(float value, string unit, string format = "F1")
         {
             var mod = "";
-            if(value < 1)
+            if(value > 1)
+                mod = "";
+            else if(value > 1e-3)
             {
-                if(value > 1e-3)
-                {
-                    value *= 1e3f;
-                    mod = "m";
-                }
-                else if(value > 1e-6)
-                {
-                    value *= 1e6f;
-                    mod = "μ";
-                }
-                else if(value > 1e-9)
-                {
-                    value *= 1e9f;
-                    mod = "n";
-                }
+                value *= 1e3f;
+                mod = "m";
             }
-            return value.ToString(format) + mod + unit;
+            else if(value > 1e-6)
+            {
+                value *= 1e6f;
+                mod = "μ";
+            }
+            else if(value > 1e-9)
+            {
+                value *= 1e9f;
+                mod = "n";
+            }
+            return $"{value.ToString(format)}{mod}{unit}";
         }
 
         public static string formatMass(float mass)
         {
+            if(mass > 1)
+                return formatBigValue(mass, "t", "n1");
             if(mass >= 0.1f)
-                return mass.ToString("n2") + "t";
+                return $"{mass:n2}t";
             if(mass >= 0.001f)
-                return (mass * 1e3f).ToString("n1") + "kg";
-            return (mass * 1e6f).ToString("n0") + "g";
+                return $"{(mass * 1e3f):n1}kg";
+            return $"{(mass * 1e6f):n0}g";
         }
 
-        public static string formatVolume(double volume)
-        {
-            if(volume < 1f)
-                return (volume * 1e3f).ToString("n0") + "L";
-            return volume.ToString("n1") + "m3";
-        }
-
-        public static string formatUnits(float units)
-        {
-            units = Mathf.Abs(units);
-            if(units >= 1f)
-                return units.ToString("n2") + "u";
-            if(units >= 1e-3f)
-                return (units * 1e3f).ToString("n1") + "mu";
-            if(units >= 1e-6f)
-                return (units * 1e6f).ToString("n1") + "μu";
-            if(units >= 1e-9f)
-                return (units * 1e9f).ToString("n1") + "nu";
-            if(units >= 1e-13f) //to fully use the last digit 
-                return (units * 1e12f).ToString("n1") + "pu";
-            return "0.0u"; //effectivly zero
-        }
+        public static string formatVolume(double volume) =>
+            volume < 1f
+                ? $"{(volume * 1e3f):n0}L"
+                : $"{volume:n1}m3";
 
         public static string formatDimensions(Vector3 size)
         {

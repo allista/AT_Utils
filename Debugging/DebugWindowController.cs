@@ -25,6 +25,7 @@ namespace AT_Utils
 
         protected override void init_controller()
         {
+            base.init_controller();
             Controller.title.text = title;
             Controller.closeButton.onClick.AddListener(Close);
             Controller.SetContent(contentCache);

@@ -16,6 +16,8 @@ namespace AT_Utils.UI
     {
         public enum TooltipPosition { BOTTOM, TOP };
         public static TooltipView Instance { get; private set; }
+        public static bool IsShown => Instance != null && Instance.gameObject.activeInHierarchy;
+        public static string CurrentTooltip => Instance != null ? Instance.tooltipText.text : null;
 
         Canvas canvas;
         public Text tooltipText;

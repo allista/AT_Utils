@@ -123,6 +123,7 @@
         <Compile Include="Extensions\VesselExtensions.cs" />
         <Compile Include="Interfaces\IAnimator.cs" />
         <Compile Include="Math\PhysicsUtils.cs" />
+        <Compile Include="MeshUtils\Utils.cs" />
         <Compile Include="Orbital\OrbitalUtils.cs" />
         <Compile Include="OrderedDict.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
@@ -159,7 +160,6 @@
         <Compile Include="GUI\TooltipManager.cs" />
         <Compile Include="GUI\Dialogs\SimpleDialog.cs" />
         <Compile Include="GUI\Dialogs\SimpleTextEntry.cs" />
-        <Compile Include="GUI\Dialogs\SimpleWarning.cs" />
         <Compile Include="GUI\Windows\CrewTransferWindow.cs" />
         <Compile Include="GUI\Windows\ResourceTransferWindow.cs" />
         <Compile Include="GUI\Elements\FloatField.cs" />
@@ -207,6 +207,7 @@
         <Compile Include="GUI\ToolbarWrapper.cs" />
         <Compile Include="GUI\AppToolbar.cs" />
         <Compile Include="Debugging\WorldSpaceTrace.cs" />
+        <Compile Include="UI\DialogController.cs" />
         <Compile Include="UI\UIBundle.cs" />
         <Compile Include="UI\UIWindowBase.cs" />
         <Compile Include="UI\ColorListWindow.cs" />

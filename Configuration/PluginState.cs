@@ -31,26 +31,25 @@ namespace AT_Utils
 
     public static class PluginState
     {
-        static Dictionary<string, PluginConfiguration> configs = new Dictionary<string, PluginConfiguration>();
+        private static readonly Dictionary<string, PluginConfiguration> configs = new Dictionary<string, PluginConfiguration>();
 
-        static PluginConfiguration get_config(Type object_type)
+        private static PluginConfiguration get_config(Type object_type)
         {
-            PluginConfiguration cfg;
             var config_path = AssemblyLoader.GetPathByType(object_type);
-            if(!configs.TryGetValue(config_path, out cfg))
-            {
-                var create_for_type = typeof(PluginConfiguration).GetMethod("CreateForType");
-                create_for_type = create_for_type.MakeGenericMethod(new[] { object_type });
-                cfg = create_for_type.Invoke(null, new object[] { null }) as PluginConfiguration;
-                configs[config_path] = cfg;
-            }
+            if(configs.TryGetValue(config_path, out var cfg))
+                return cfg;
+            var create_for_type = typeof(PluginConfiguration).GetMethod("CreateForType");
+            if(create_for_type == null)
+                return null;
+            create_for_type = create_for_type.MakeGenericMethod(object_type);
+            cfg = create_for_type.Invoke(null, new object[] { null }) as PluginConfiguration;
+            configs[config_path] = cfg;
             return cfg;
         }
 
-        static readonly MethodInfo get_value = typeof(PluginConfiguration)
+        private static readonly MethodInfo get_value = typeof(PluginConfiguration)
             .GetMethods(BindingFlags.Public | BindingFlags.Instance)
-            .Where(mi => mi.Name == "GetValue" && mi.GetParameters().Length == 2)
-            .SingleOrDefault();
+            .SingleOrDefault(mi => mi.Name == "GetValue" && mi.GetParameters().Length == 2);
 
         public static void LoadState(this object obj, string basename = "")
         {

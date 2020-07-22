@@ -5,7 +5,6 @@
 //
 //  Copyright (c) 2018 Allis Tauri
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -14,13 +13,26 @@ namespace AT_Utils
 {
     public class UIBundle
     {
+        private static readonly Dictionary<string, UIBundle> bundles = new Dictionary<string, UIBundle>();
+
+        public static UIBundle Create(string game_data_path)
+        {
+            if(bundles.TryGetValue(game_data_path, out var bundle)
+               && bundle != null)
+                return bundle;
+            bundle = new UIBundle(game_data_path);
+            bundles[game_data_path] = bundle;
+            bundle.loadBundleSync();
+            Utils.Info($"Registered UIBundle: {game_data_path}");
+            return bundle;
+        }
+
         private readonly string bundlePath;
         public bool BundleNotFound { get; private set; }
         private AssetBundle bundle;
-        private AssetBundleCreateRequest bundleReq;
         private readonly Dictionary<string, GameObject> loaded_assets = new Dictionary<string, GameObject>();
 
-        public UIBundle(string game_data_path)
+        private UIBundle(string game_data_path)
         {
             bundlePath = Utils.PathChain(KSPUtil.ApplicationRootPath,
                 "GameData",
@@ -33,35 +45,28 @@ namespace AT_Utils
                 bundle.Unload(true);
         }
 
+        private bool findLoadedBundle()
+        {
+            bundle = AssetBundle
+                .GetAllLoadedAssetBundles()
+                .FirstOrDefault(a => a.name == bundlePath);
+            return bundle != null;
+        }
 
-        public IEnumerable LoadAsset(string name)
+        private void loadBundleSync()
+        {
+            if(!findLoadedBundle())
+                bundle = AssetBundle.LoadFromFile(bundlePath);
+            if(bundle != null)
+                return;
+            Utils.Error($"Unable to load bundle: {bundlePath}");
+            BundleNotFound = false;
+        }
+
+        public IEnumerable<YieldInstruction> LoadAsset(string name)
         {
             if(loaded_assets.ContainsKey(name))
                 yield break;
-            if(BundleNotFound)
-                yield break;
-            if(bundle == null)
-            {
-                bundle = AssetBundle
-                    .GetAllLoadedAssetBundles()
-                    .FirstOrDefault(a => a.name == bundlePath);
-            }
-            if(bundle == null && bundleReq == null)
-            {
-                bundleReq = AssetBundle.LoadFromFileAsync(bundlePath);
-                yield return bundleReq;
-                bundle = bundleReq.assetBundle;
-                bundleReq = null;
-                if(bundle == null)
-                {
-                    Utils.Error($"Unable to load {bundlePath} bundle.");
-                    BundleNotFound = false;
-                    yield break;
-                }
-                bundle.name = bundlePath;
-            }
-            while(bundleReq != null)
-                yield return null;
             if(bundle == null)
                 yield break;
             var assetReq = bundle.LoadAssetAsync<GameObject>(name);

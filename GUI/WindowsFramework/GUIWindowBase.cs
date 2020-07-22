@@ -62,6 +62,8 @@ namespace AT_Utils
 
         public virtual void Show(bool show)
         {
+            if(window_enabled == show)
+                return;
             window_enabled = show;
             if(!show) UnlockControls();
             update_content();
