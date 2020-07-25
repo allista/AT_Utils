@@ -129,6 +129,11 @@ namespace AT_Utils
                                          GUILayout.Height(100)).clampToScreen();
         }
 
+        protected override bool can_draw()
+        {
+            return base.can_draw() && !HighLogic.LoadedSceneIsEditor;
+        }
+
         protected virtual void MainWindow(int windowID)
         {
             GUILayout.BeginVertical();
