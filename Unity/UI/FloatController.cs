@@ -96,9 +96,9 @@ namespace AT_Utils.UI
             newValue = clampValue(newValue);
             if(decimals >= 0)
                 newValue = (float)Math.Round(newValue, decimals);
-            input.SetTextWithoutNotify(newValue.ToString(format));
             if(value.Equals(newValue))
                 return false;
+            input.SetTextWithoutNotify(newValue.ToString(format));
             value = newValue;
             return true;
         }
