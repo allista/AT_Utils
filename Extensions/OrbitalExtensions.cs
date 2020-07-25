@@ -47,14 +47,14 @@ namespace AT_Utils
         public static AtmosphereParams AtmoParamsAtAltitude(this CelestialBody body, double alt) =>
             new AtmosphereParams(body, alt);
 
-        public static double ApAUT(this Orbit orb) => Planetarium.GetUniversalTime() + orb.timeToAp;
+        public static double ApAUT(this Orbit orb) => orb.StartUT + orb.timeToAp;
 
-        public static double PeAUT(this Orbit orb) => Planetarium.GetUniversalTime() + orb.timeToPe;
+        public static double PeAUT(this Orbit orb) => orb.StartUT + orb.timeToPe;
 
         public static Vector3d ApV(this Orbit orb) =>
-            orb.getRelativePositionAtUT(Planetarium.GetUniversalTime() + orb.timeToAp);
+            orb.getRelativePositionAtUT(orb.StartUT + orb.timeToAp);
 
         public static Vector3d PeV(this Orbit orb) =>
-            orb.getRelativePositionAtUT(Planetarium.GetUniversalTime() + orb.timeToPe);
+            orb.getRelativePositionAtUT(orb.StartUT + orb.timeToPe);
     }
 }
