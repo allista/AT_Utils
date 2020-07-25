@@ -29,6 +29,11 @@ namespace AT_Utils
         void SyncState();
     }
 
+    public interface IConditionalSaveState
+    {
+        bool ShouldSaveState();
+    }
+
     public static class PluginState
     {
         private static readonly Dictionary<string, PluginConfiguration> configs = new Dictionary<string, PluginConfiguration>();
@@ -82,6 +87,11 @@ namespace AT_Utils
 
         public static void SaveState(this object obj, string basename = "")
         {
+            if(obj is IConditionalSaveState customPersistState)
+            {
+                if(!customPersistState.ShouldSaveState())
+                    return;
+            }
             if(obj is ICachedState cached_state_obj)
                 cached_state_obj.SyncState();
             var T = obj.GetType();

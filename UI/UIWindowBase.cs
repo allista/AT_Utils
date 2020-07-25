@@ -13,7 +13,7 @@ using UnityEngine.EventSystems;
 namespace AT_Utils
 {
     [PersistState]
-    public abstract class UIWindowBase<T> : ICachedState where T : MonoBehaviour
+    public abstract class UIWindowBase<T> : IConditionalSaveState, ICachedState where T : MonoBehaviour
     {
         private readonly UIBundle bundle;
         private readonly string inputLockName;
@@ -41,6 +41,8 @@ namespace AT_Utils
             Utils.LockControls(inputLockName, false);
             Close();
         }
+
+        public bool ShouldSaveState() => initialized;
 
         private void saveState()
         {
