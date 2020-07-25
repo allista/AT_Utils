@@ -50,7 +50,7 @@ namespace AT_Utils
         {
             if(Instance != null)
             { 
-                Destroy(this);
+                Destroy(gameObject);
                 return; 
             }
             base.Awake();
