@@ -37,49 +37,46 @@ namespace AT_Utils
         public override void Awake()
         {
             base.Awake();
-            if(Instance != null)
+            if(Instance != this)
+                return;
+            if(scenarios != null)
+                return;
+            Utils.Info("ScenarioTester: initializing scenarios");
+            scenarios = new SortedList<string, SortedList<string, ITestScenario>>();
+            foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
+                Type[] types;
+                try { types = assembly.GetTypes(); }
+                catch(Exception) { types = Type.EmptyTypes; }
+                var assemblyName = Utils.ParseCamelCase(assembly.GetName().Name);
+                foreach(var type in types)
+                {
+                    if(type.IsAbstract
+                       || !type.GetInterfaces().Contains(typeof(ITestScenario)))
+                        continue;
+                    var constructorInfo = type.GetConstructor(Type.EmptyTypes);
+                    if(constructorInfo == null)
+                        continue;
+                    SortedList<string,ITestScenario> assemblyScenarios;
+                    if(!scenarios.TryGetValue(assemblyName, out assemblyScenarios))
+                    {
+                        assemblyScenarios = new SortedList<string, ITestScenario>();
+                        scenarios.Add(assemblyName, assemblyScenarios);
+                    }
+                    assemblyScenarios.Add(Utils.ParseCamelCase(type.Name).Replace("_", " "), 
+                        constructorInfo.Invoke(null) as ITestScenario);
+                    Utils.Info("Added {}.{} to testing scenarios.", assemblyName, type.Name);
+                }
+            }
+            if(scenarios.Count == 0)
+            {
+                Utils.Info("ScenarioTester: no scenarios were found.");
                 Destroy(gameObject);
                 return;
             }
-            if(scenarios == null)
-            {
-                scenarios = new SortedList<string, SortedList<string, ITestScenario>>();
-                foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    Type[] types;
-                    try { types = assembly.GetTypes(); }
-                    catch(Exception) { types = Type.EmptyTypes; }
-                    var aname = Utils.ParseCamelCase(assembly.GetName().Name);
-                    foreach(var type in types) 
-                    {
-                        if(!type.IsAbstract &&
-                           type.GetInterfaces().Contains(typeof(ITestScenario)))
-                        {
-                            var cinfo = type.GetConstructor(Type.EmptyTypes);
-                            if(cinfo != null)
-                            {
-                                SortedList<string,ITestScenario> lst;
-                                if(!scenarios.TryGetValue(aname, out lst))
-                                {
-                                    lst = new SortedList<string, ITestScenario>();
-                                    scenarios.Add(aname, lst);
-                                }
-                                lst.Add(Utils.ParseCamelCase(type.Name).Replace("_", " "), 
-                                        cinfo.Invoke(null) as ITestScenario);
-                                Utils.Log("Added {}.{} to testing scenarios.", aname, type.Name);
-                            }
-                        }
-                    }
-                }
-                if(scenarios.Count == 0) Destroy(gameObject);
-                else
-                {
-                    DontDestroyOnLoad(this);
-                    Show(true);
-                }
-            }
-            else Destroy(gameObject);
+            Utils.Info("ScenarioTester initialized");
+            DontDestroyOnLoad(this);
+            Show(true);
         }
 
         protected virtual void setup_test(ITestScenario test)
