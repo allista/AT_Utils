@@ -1,4 +1,4 @@
-//   UIWindowBase.cs
+﻿//   UIWindowBase.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
@@ -17,6 +17,7 @@ namespace AT_Utils
     {
         private readonly UIBundle bundle;
         private readonly string inputLockName;
+        private readonly bool standalone;
 
         protected virtual string prefab_name => typeof(T).Name;
         private GameObject prefab;
@@ -28,9 +29,10 @@ namespace AT_Utils
 
         [ConfigOption] protected bool initialized;
 
-        protected UIWindowBase(UIBundle bundle)
+        protected UIWindowBase(UIBundle bundle, bool standalone = true)
         {
             this.bundle = bundle;
+            this.standalone = standalone;
             inputLockName = $"{typeof(T).Name}-{base.GetHashCode():X}";
             GameEvents.onGameStateSave.Add(onGameSaved);
         }
@@ -46,7 +48,7 @@ namespace AT_Utils
 
         private void saveState()
         {
-            if(initialized)
+            if(standalone)
                 this.SaveState();
         }
 
@@ -84,7 +86,8 @@ namespace AT_Utils
             in_progress = true;
             if(prefab == null)
             {
-                this.LoadState();
+                if(standalone)
+                    this.LoadState();
                 foreach(var _ in bundle.LoadAsset(prefab_name))
                     yield return null;
                 prefab = bundle.GetAsset(prefab_name);
