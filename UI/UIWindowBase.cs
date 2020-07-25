@@ -1,4 +1,4 @@
-﻿//   UIWindowBase.cs
+//   UIWindowBase.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
@@ -38,7 +38,7 @@ namespace AT_Utils
         ~UIWindowBase()
         {
             GameEvents.onGameStateSave.Remove(onGameSaved);
-            Utils.LockControls(inputLockName, false);
+            unlockControls();
             Close();
         }
 
@@ -64,13 +64,16 @@ namespace AT_Utils
 
         protected virtual void onPointerEnter(PointerEventData eventData)
         {
-            Utils.LockControls(inputLockName);
+            lockControls();
         }
 
         protected virtual void onPointerExit(PointerEventData eventData)
         {
-            Utils.LockControls(inputLockName, false);
+            unlockControls();
         }
+
+        protected void lockControls() => Utils.LockControls(inputLockName);
+        protected void unlockControls() => Utils.LockControls(inputLockName, false);
 
         private bool in_progress;
 
@@ -136,7 +139,7 @@ namespace AT_Utils
             onClose();
             GameEvents.onGamePause.Remove(onGamePause);
             GameEvents.onGamePause.Remove(onGameUnpause);
-            Utils.LockControls(inputLockName, false);
+            unlockControls();
             GameObject gameObject;
             (gameObject = Controller.gameObject).SetActive(false);
             Object.Destroy(gameObject);
