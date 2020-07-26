@@ -12,9 +12,8 @@ namespace AT_Utils.UI
     public class ToggleColorizer : MonoBehaviour
     {
         Toggle toggle;
+        public Text toggleText;
 
-        [SerializeField]
-        Text toggleText;
 
         void Awake()
         {

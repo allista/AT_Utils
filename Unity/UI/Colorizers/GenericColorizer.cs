@@ -11,14 +11,9 @@ namespace AT_Utils.UI
 {
     public class Colorizer : ColorizerBase
     {
-        [SerializeField]
-        Text text;
-
-        [SerializeField]
-        Image image;
-
-        [SerializeField]
-        Selectable selectable;
+        public Text text;
+        public Image image;
+        public Selectable selectable;
 
         public void SetInteractable(bool interactable)
         {
