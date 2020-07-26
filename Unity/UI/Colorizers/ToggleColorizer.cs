@@ -1,4 +1,4 @@
-﻿//   ToggleColorizer.cs
+//   ToggleColorizer.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
@@ -21,13 +21,22 @@ namespace AT_Utils.UI
             toggle = gameObject.GetComponent<Toggle>();
             if(toggle != null)
             {
-                toggle.onValueChanged.AddListener(isOn => UpdateColor());
-                Colors.Enabled.onColorChanged.AddListener(c => UpdateColor());
-                Colors.Active.onColorChanged.AddListener(c => UpdateColor());
+                toggle.onValueChanged.AddListener(onStateChanged);
+                Colors.Enabled.onColorChanged.AddListener(onColorChanged);
+                Colors.Active.onColorChanged.AddListener(onColorChanged);
+                Colors.Inactive.onColorChanged.AddListener(onColorChanged);
                 UpdateColor();
             }
             else
                 enabled = false;
+        }
+
+        private void OnDestroy()
+        {
+            toggle.onValueChanged.RemoveListener(onStateChanged);
+            Colors.Enabled.onColorChanged.RemoveListener(onColorChanged);
+            Colors.Active.onColorChanged.RemoveListener(onColorChanged);
+            Colors.Inactive.onColorChanged.RemoveListener(onColorChanged);
         }
 
         public void SetInteractable(bool interactable)
@@ -54,5 +63,8 @@ namespace AT_Utils.UI
                            ? Colors.Active
                            : Colors.Inactive));
         }
+
+        private void onColorChanged(Color c) => UpdateColor();
+        private void onStateChanged(bool isOn) => UpdateColor();
     }
 }
