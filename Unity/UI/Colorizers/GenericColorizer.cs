@@ -17,11 +17,11 @@ namespace AT_Utils.UI
 
         public void SetInteractable(bool interactable)
         {
-            if(selectable != null)
-            {
-                selectable.interactable = interactable;
-                onColorChanged(setting);
-            }
+            if(selectable == null
+               || selectable.interactable == interactable)
+                return;
+            selectable.interactable = interactable;
+            onColorChanged(setting);
         }
 
         protected override void onColorChanged(Color color)
