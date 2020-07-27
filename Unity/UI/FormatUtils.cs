@@ -24,7 +24,12 @@ namespace AT_Utils.UI
 
         public static string ParseCamelCase(string s) => CCR.Replace(s, "$1 ");
 
-        public static string formatVeryBigValue(float value, string unit, string format = "F1")
+        public static string formatVeryBigValue(
+            float value,
+            string unit,
+            string format = "F1",
+            bool formatSmaller = false
+        )
         {
             var mod = "";
             if(value > 1e24)
@@ -52,12 +57,17 @@ namespace AT_Utils.UI
                 value /= 1e12f;
                 mod = "T";
             }
-            else
-                return formatBigValue(value, unit, format);
+            else if(formatSmaller)
+                return formatBigValue(value, unit, format, true);
             return $"{value.ToString(format)}{mod}{unit}";
         }
 
-        public static string formatBigValue(float value, string unit, string format = "F1")
+        public static string formatBigValue(
+            float value,
+            string unit,
+            string format = "F1",
+            bool formatSmaller = false
+        )
         {
             var mod = "";
             if(value > 1e9)
@@ -75,7 +85,7 @@ namespace AT_Utils.UI
                 value /= 1e3f;
                 mod = "k";
             }
-            else
+            else if(formatSmaller)
                 return formatSmallValue(value, unit, format);
             return $"{value.ToString(format)}{mod}{unit}";
         }
