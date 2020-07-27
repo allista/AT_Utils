@@ -104,6 +104,15 @@ namespace AT_Utils.UI
             return true;
         }
 
+        public override void SetInteractable(bool interactable)
+        {
+            input.SetInteractable(interactable);
+            incrementButton.SetInteractable(interactable);
+            decrementButton.SetInteractable(interactable);
+            if(doneButton != null)
+                doneButton.SetInteractable(interactable);
+        }
+
         private void increment() => changeValueAndNotify(value + step);
 
         private void decrement() => changeValueAndNotify(value - step);
