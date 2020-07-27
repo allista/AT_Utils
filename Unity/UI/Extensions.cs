@@ -17,7 +17,7 @@ namespace AT_Utils.UI
             if(toggle.isOn == isOn)
                 return;
             toggle.SetIsOnWithoutNotify(isOn);
-            toggle.GetComponent<ToggleColorizer>()?.UpdateColor();
+            toggle.GetComponent<IColorizer>()?.UpdateColor();
         }
 
         public static void SetInteractable(this Selectable selectable, bool interactable)
@@ -25,7 +25,7 @@ namespace AT_Utils.UI
             if(selectable.interactable == interactable)
                 return;
             selectable.interactable = interactable;
-            selectable.GetComponent<Colorizer>()?.UpdateColor();
+            selectable.GetComponent<IColorizer>()?.UpdateColor();
         }
 
         public static void SetOptionsSafe(this Dropdown dropdown, List<Dropdown.OptionData> newOptions)

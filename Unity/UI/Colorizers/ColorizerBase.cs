@@ -9,7 +9,11 @@ using UnityEngine;
 
 namespace AT_Utils.UI
 {
-    public abstract class ColorizerBase : MonoBehaviour
+    public interface IColorizer
+    {
+        void UpdateColor();
+    }
+    public abstract class ColorizerBase : MonoBehaviour, IColorizer
     {
         public string Color;
         protected ColorSetting setting { get; private set; }

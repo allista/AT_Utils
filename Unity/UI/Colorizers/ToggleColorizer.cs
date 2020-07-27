@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace AT_Utils.UI
 {
-    public class ToggleColorizer : MonoBehaviour
+    public class ToggleColorizer : MonoBehaviour, IColorizer
     {
         Toggle toggle;
         public Text toggleText;
