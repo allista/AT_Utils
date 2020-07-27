@@ -62,7 +62,7 @@ namespace AT_Utils.UI
 
         private void updateFormat()
         {
-            format = decimals >= 0 ? $"F{decimals}" : "R";
+            format = decimals >= 0 ? $"F{decimals}" : "G9";
         }
 
         public void SetStep(float newStep)
