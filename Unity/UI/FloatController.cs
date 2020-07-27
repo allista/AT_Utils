@@ -24,6 +24,7 @@ namespace AT_Utils.UI
         public float step = 1;
         public int decimals = 1;
         private string format = "F1";
+        public string stepFormat = "F1";
 
         public Button incrementButton;
         public Button decrementButton;
@@ -81,7 +82,7 @@ namespace AT_Utils.UI
             {
                 incrementButton.gameObject.SetActive(true);
                 decrementButton.gameObject.SetActive(true);
-                var stepDisplay = FormatUtils.formatBigValue(step, "");
+                var stepDisplay = FormatUtils.formatBigValue(step, "", stepFormat);
                 var txt = incrementButton.GetComponentInChildren<Text>();
                 if(txt != null)
                     txt.text = $"+{stepDisplay}";
