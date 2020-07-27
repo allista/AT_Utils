@@ -4,6 +4,7 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2018 Allis Tauri
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,13 +27,14 @@ namespace AT_Utils.UI
 
         protected override void onColorChanged(Color color)
         {
-            if(selectable != null 
+            if(selectable != null
                && !selectable.interactable)
                 color = Colors.Inactive;
             if(text != null)
                 text.color = color;
             if(image != null)
                 image.color = color;
+            // ReSharper disable once InvertIf
             if(selectable != null)
             {
                 var colors = selectable.colors;

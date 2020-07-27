@@ -26,17 +26,22 @@ namespace AT_Utils.UI
         private string format = "F1";
         public string stepFormat = "F1";
 
-        public Button incrementButton;
-        public Button decrementButton;
-        public Button doneButton;
-        public InputField input;
-        public Text suffix;
+        public Button
+            incrementButton,
+            decrementButton,
+            doneButton;
 
         public TooltipTrigger
             incrementTooltip,
             decrementTooltip,
             doneTooltip,
             inputTooltip;
+
+        public InputField
+            input;
+
+        public Text
+            suffix;
 
         private void Awake()
         {

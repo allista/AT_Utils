@@ -1,9 +1,10 @@
-//   ToggleColorizer.cs
+﻿//   ToggleColorizer.cs
 //
 //  Author:
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2018 Allis Tauri
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,11 +13,10 @@ namespace AT_Utils.UI
     [RequireComponent(typeof(Toggle))]
     public class ToggleColorizer : MonoBehaviour, IColorizer
     {
-        Toggle toggle;
+        private Toggle toggle;
         public Text toggleText;
 
-
-        void Awake()
+        private void Awake()
         {
             toggle = gameObject.GetComponent<Toggle>();
             if(toggle != null)
@@ -45,7 +45,7 @@ namespace AT_Utils.UI
             UpdateColor();
         }
 
-        void changeColor(Color color)
+        private void changeColor(Color color)
         {
             toggleText.color = color;
             var colors = toggle.colors;
@@ -58,10 +58,10 @@ namespace AT_Utils.UI
             if(toggle == null)
                 return;
             changeColor(toggle.isOn
-                        ? Colors.Enabled
-                        : (toggle.interactable
-                           ? Colors.Active
-                           : Colors.Inactive));
+                ? Colors.Enabled
+                : (toggle.interactable
+                    ? Colors.Active
+                    : Colors.Inactive));
         }
 
         private void onColorChanged(Color c) => UpdateColor();
