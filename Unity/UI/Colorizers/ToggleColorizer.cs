@@ -9,6 +9,7 @@ using UnityEngine.UI;
 
 namespace AT_Utils.UI
 {
+    [RequireComponent(typeof(Toggle))]
     public class ToggleColorizer : MonoBehaviour, IColorizer
     {
         Toggle toggle;
