@@ -32,6 +32,12 @@ namespace AT_Utils.UI
         public InputField input;
         public Text suffix;
 
+        public TooltipTrigger
+            incrementTooltip,
+            decrementTooltip,
+            doneTooltip,
+            inputTooltip;
+
         private void Awake()
         {
             updateFormat();

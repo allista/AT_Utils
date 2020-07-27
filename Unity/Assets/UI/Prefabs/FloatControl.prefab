@@ -114,6 +114,7 @@ GameObject:
   - component: {fileID: 114824671798738942}
   - component: {fileID: 114452410432718178}
   - component: {fileID: 114784305659907776}
+  - component: {fileID: 362228542707136102}
   m_Layer: 5
   m_Name: decButton
   m_TagString: Untagged
@@ -260,6 +261,21 @@ MonoBehaviour:
   text: {fileID: 114817706422629692}
   image: {fileID: 0}
   selectable: {fileID: 114824671798738942}
+--- !u!114 &362228542707136102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1330287162498656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -382320990, guid: 23fd6eb82728348aba7ba3f92873da24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: 
+  delay: 0.3
+  position: 0
 --- !u!1 &1354094748259864
 GameObject:
   m_ObjectHideFlags: 0
@@ -602,9 +618,14 @@ MonoBehaviour:
   max: 3.4028235e+38
   step: 1
   decimals: -1
+  stepFormat: F1
   incrementButton: {fileID: 114626573039280676}
   decrementButton: {fileID: 114824671798738942}
   doneButton: {fileID: 1622868304026091107}
+  incrementTooltip: {fileID: 7185956496046092549}
+  decrementTooltip: {fileID: 362228542707136102}
+  doneTooltip: {fileID: 6049209773525606082}
+  inputTooltip: {fileID: 914146434359773027}
   input: {fileID: 114367128347684550}
   suffix: {fileID: 114049818261158804}
 --- !u!1 &1446042208959678
@@ -748,6 +769,7 @@ GameObject:
   - component: {fileID: 114367128347684550}
   - component: {fileID: 114203434562573496}
   - component: {fileID: 8236785473983907275}
+  - component: {fileID: 914146434359773027}
   m_Layer: 5
   m_Name: TextField
   m_TagString: Untagged
@@ -926,6 +948,21 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+--- !u!114 &914146434359773027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1689892647406766}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -382320990, guid: 23fd6eb82728348aba7ba3f92873da24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: 
+  delay: 0.3
+  position: 0
 --- !u!1 &1920767807081760
 GameObject:
   m_ObjectHideFlags: 0
@@ -940,6 +977,7 @@ GameObject:
   - component: {fileID: 114626573039280676}
   - component: {fileID: 114245685357897000}
   - component: {fileID: 114768820398090796}
+  - component: {fileID: 7185956496046092549}
   m_Layer: 5
   m_Name: incButton
   m_TagString: Untagged
@@ -1086,6 +1124,21 @@ MonoBehaviour:
   text: {fileID: 114948178387421904}
   image: {fileID: 0}
   selectable: {fileID: 114626573039280676}
+--- !u!114 &7185956496046092549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1920767807081760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -382320990, guid: 23fd6eb82728348aba7ba3f92873da24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: 
+  delay: 0.3
+  position: 0
 --- !u!1001 &3477041001993417526
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1237,5 +1290,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6049209773525606082 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7184352340480732660, guid: 994b749e2921a8aa893077dec99b62b7,
+    type: 3}
+  m_PrefabInstance: {fileID: 3477041001993417526}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -382320990, guid: 23fd6eb82728348aba7ba3f92873da24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
