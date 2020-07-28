@@ -14,59 +14,79 @@ using UnityEngine;
 namespace AT_Utils
 {
     //convergent with Anatid's Vector6, but not taken from it
-    public class Vector6 
+    public class Vector6
     {
         public static Vector6 zero { get { return new Vector6(); } }
 
         public Vector3 positive, negative;
 
-        public Vector6() {}
+        public Vector6() { }
 
-        public Vector6(Vector3 pos, Vector3 neg) { positive = pos; negative = neg; }
+        public Vector6(Vector3 pos, Vector3 neg)
+        {
+            positive = pos;
+            negative = neg;
+        }
 
         public Vector6(Vector6 other)
-            : this(other.positive, other.negative) {}
+            : this(other.positive, other.negative) { }
 
-        public Vector6(float xp, float yp, float zp,
-                       float xn, float yn, float zn)
-            : this(new Vector3(xp, yp, zp), new Vector3(xn, yn, zn)) {}
+        public Vector6(
+            float xp,
+            float yp,
+            float zp,
+            float xn,
+            float yn,
+            float zn
+        )
+            : this(new Vector3(xp, yp, zp), new Vector3(xn, yn, zn)) { }
 
-        public static Vector6 operator+(Vector6 first, Vector6 second)
-        { 
+        public static Vector6 operator +(Vector6 first, Vector6 second)
+        {
             var sum = new Vector6();
-            sum.positive = first.positive+second.positive; 
-            sum.negative = first.negative+second.negative; 
+            sum.positive = first.positive + second.positive;
+            sum.negative = first.negative + second.negative;
             return sum;
         }
 
-        public bool IsZero() { return positive.IsZero() && negative.IsZero(); }
+        public bool IsZero()
+        {
+            return positive.IsZero() && negative.IsZero();
+        }
 
         public float this[int i]
         {
-            get { return i<3? positive[i] : negative[i-3]; }
-            set 
-            { 
-                if(i<3) positive[i] = value;
-                else negative[i-3] = value; 
+            get { return i < 3 ? positive[i] : negative[i - 3]; }
+            set
+            {
+                if(i < 3)
+                    positive[i] = value;
+                else
+                    negative[i - 3] = value;
             }
         }
 
         public void Add(Vector6 vec)
         {
-            positive += vec.positive; 
-            negative += vec.negative; 
+            positive += vec.positive;
+            negative += vec.negative;
         }
 
         public void Add(Vector3 vec)
         {
             for(int i = 0; i < 3; i++)
             {
-                if(vec[i] >= 0) positive[i] = positive[i]+vec[i];
-                else negative[i] = negative[i]+vec[i];
+                if(vec[i] >= 0)
+                    positive[i] = positive[i] + vec[i];
+                else
+                    negative[i] = negative[i] + vec[i];
             }
         }
 
-        public void Add(List<Vector3> vecs) { vecs.ForEach(Add); }
+        public void Add(List<Vector3> vecs)
+        {
+            vecs.ForEach(Add);
+        }
 
         public Vector3 Clamp(Vector3 vec)
         {
@@ -74,9 +94,7 @@ namespace AT_Utils
             for(int i = 0; i < 3; i++)
             {
                 var vi = vec[i];
-                cvec[i] = vi >= 0 ? 
-                    Mathf.Min(positive[i], vi) : 
-                    Mathf.Max(negative[i], vi);
+                cvec[i] = vi >= 0 ? Mathf.Min(positive[i], vi) : Mathf.Max(negative[i], vi);
             }
             return cvec;
         }
@@ -92,16 +110,14 @@ namespace AT_Utils
             for(int i = 0; i < 3; i++)
             {
                 var vi = vec[i];
-                svec[i] = vi >= 0 ? 
-                    positive[i]*Mathf.Abs(vi) : 
-                    negative[i]*Mathf.Abs(vi);
+                svec[i] = vi >= 0 ? positive[i] * Mathf.Abs(vi) : negative[i] * Mathf.Abs(vi);
             }
             return svec;
         }
 
         public void Scale(Vector6 other)
         {
-            positive.Scale( other.positive);
+            positive.Scale(other.positive);
             negative.Scale(-other.negative);
         }
 
@@ -137,18 +153,26 @@ namespace AT_Utils
         public Vector3 MaxInPlane(Vector3 normal)
         {
             var maxm = 0f;
-            var max  = Vector3.zero;
+            var max = Vector3.zero;
             var cvec = Vector3.zero;
             for(int i = 0; i < 3; i++)
             {
                 cvec[i] = positive[i];
                 cvec = Vector3.ProjectOnPlane(cvec, normal);
                 var cvecm = cvec.sqrMagnitude;
-                if(cvecm > maxm) { max = cvec; maxm = cvecm; }
+                if(cvecm > maxm)
+                {
+                    max = cvec;
+                    maxm = cvecm;
+                }
                 cvec[i] = negative[i];
                 cvec = Vector3.ProjectOnPlane(cvec, normal);
                 cvecm = cvec.sqrMagnitude;
-                if(cvecm > maxm) { max = cvec; maxm = cvecm; }
+                if(cvecm > maxm)
+                {
+                    max = cvec;
+                    maxm = cvecm;
+                }
                 cvec[i] = 0;
             }
             return max;
@@ -177,13 +201,15 @@ namespace AT_Utils
             {
                 cvec[i] = positive[i];
                 var projm = Vector3.Dot(cvec, normal);
-                if(projm > 0) proj += projm;
+                if(projm > 0)
+                    proj += projm;
                 cvec[i] = negative[i];
                 projm = Vector3.Dot(cvec, normal);
-                if(projm > 0) proj += projm;
+                if(projm > 0)
+                    proj += projm;
                 cvec[i] = 0;
             }
-            return proj*normal;
+            return proj * normal;
         }
 
         public Vector3 Slice(Vector3 normal)
@@ -194,10 +220,12 @@ namespace AT_Utils
             {
                 cvec[i] = positive[i];
                 var projm = Vector3.Dot(cvec, normal);
-                if(projm > 0) sum += cvec;
+                if(projm > 0)
+                    sum += cvec;
                 cvec[i] = negative[i];
                 projm = Vector3.Dot(cvec, normal);
-                if(projm > 0) sum += cvec;
+                if(projm > 0)
+                    sum += cvec;
                 cvec[i] = 0;
             }
             return sum;
@@ -237,10 +265,11 @@ namespace AT_Utils
         }
 
         public override string ToString()
-        { 
-            return string.Format("Vector6:\nMax {0}\n+ {1}\n- {2}", 
-                                 Max, Utils.formatVector(positive), Utils.formatVector(negative)); 
+        {
+            return string.Format("Vector6:\nMax {0}\n+ {1}\n- {2}",
+                Max,
+                Utils.formatVector(positive),
+                Utils.formatVector(negative));
         }
     }
 }
-
