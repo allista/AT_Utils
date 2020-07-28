@@ -108,6 +108,20 @@ namespace AT_Utils
         [Obsolete("Use ClampComponents instead")]
         public Vector3 Clamp(Vector3 vec) => ClampComponents(vec);
 
+        public Vector3 ClampMagnitude(Vector3 vec)
+        {
+            var scale = -1f;
+            for(var i = 0; i < 3; i++)
+            {
+                var componentI = vec[i];
+                var boundI = componentI >= 0 ? positive[i] : negative[i];
+                var scaleI = componentI / boundI;
+                if(scaleI > 1 && scaleI > scale)
+                    scale = scaleI;
+            }
+            return scale > 0 ? vec / scale : vec;
+        }
+
         public Vector6 Inverse(float inf = 0) => new Vector6(positive.Inverse(inf), negative.Inverse(inf));
 
         public Vector3 Scale(Vector3 vec)
