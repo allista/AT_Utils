@@ -7,6 +7,7 @@
 // To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ 
 // or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
@@ -91,7 +92,7 @@ namespace AT_Utils
             vectors.ForEach(Add);
         }
 
-        public Vector3 Clamp(Vector3 vec)
+        public Vector3 ClampComponents(Vector3 vec)
         {
             var clampedVector = Vector3.zero;
             for(var i = 0; i < 3; i++)
@@ -103,6 +104,9 @@ namespace AT_Utils
             }
             return clampedVector;
         }
+
+        [Obsolete("Use ClampComponents instead")]
+        public Vector3 Clamp(Vector3 vec) => ClampComponents(vec);
 
         public Vector6 Inverse(float inf = 0) => new Vector6(positive.Inverse(inf), negative.Inverse(inf));
 
