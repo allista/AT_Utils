@@ -7,18 +7,20 @@
 // To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ 
 // or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
-using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 namespace AT_Utils
 {
     //convergent with Anatid's Vector6, but not taken from it
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class Vector6
     {
-        public static Vector6 zero { get { return new Vector6(); } }
+        public static Vector6 zero => new Vector6();
 
-        public Vector3 positive, negative;
+        public Vector3 positive;
+        public Vector3 negative;
 
         public Vector6() { }
 
@@ -43,9 +45,10 @@ namespace AT_Utils
 
         public static Vector6 operator +(Vector6 first, Vector6 second)
         {
-            var sum = new Vector6();
-            sum.positive = first.positive + second.positive;
-            sum.negative = first.negative + second.negative;
+            var sum = new Vector6
+            {
+                positive = first.positive + second.positive, negative = first.negative + second.negative
+            };
             return sum;
         }
 
@@ -56,7 +59,7 @@ namespace AT_Utils
 
         public float this[int i]
         {
-            get { return i < 3 ? positive[i] : negative[i - 3]; }
+            get => i < 3 ? positive[i] : negative[i - 3];
             set
             {
                 if(i < 3)
@@ -74,7 +77,7 @@ namespace AT_Utils
 
         public void Add(Vector3 vec)
         {
-            for(int i = 0; i < 3; i++)
+            for(var i = 0; i < 3; i++)
             {
                 if(vec[i] >= 0)
                     positive[i] = positive[i] + vec[i];
@@ -83,36 +86,37 @@ namespace AT_Utils
             }
         }
 
-        public void Add(List<Vector3> vecs)
+        public void Add(List<Vector3> vectors)
         {
-            vecs.ForEach(Add);
+            vectors.ForEach(Add);
         }
 
         public Vector3 Clamp(Vector3 vec)
         {
-            var cvec = Vector3.zero;
-            for(int i = 0; i < 3; i++)
+            var clampedVector = Vector3.zero;
+            for(var i = 0; i < 3; i++)
             {
-                var vi = vec[i];
-                cvec[i] = vi >= 0 ? Mathf.Min(positive[i], vi) : Mathf.Max(negative[i], vi);
+                var componentI = vec[i];
+                clampedVector[i] = componentI >= 0
+                    ? Mathf.Min(positive[i], componentI)
+                    : Mathf.Max(negative[i], componentI);
             }
-            return cvec;
+            return clampedVector;
         }
 
-        public Vector6 Inverse(float inf = 0)
-        {
-            return new Vector6(positive.Inverse(inf), negative.Inverse(inf));
-        }
+        public Vector6 Inverse(float inf = 0) => new Vector6(positive.Inverse(inf), negative.Inverse(inf));
 
         public Vector3 Scale(Vector3 vec)
         {
-            var svec = Vector3.zero;
-            for(int i = 0; i < 3; i++)
+            var scaledVector = Vector3.zero;
+            for(var i = 0; i < 3; i++)
             {
                 var vi = vec[i];
-                svec[i] = vi >= 0 ? positive[i] * Mathf.Abs(vi) : negative[i] * Mathf.Abs(vi);
+                scaledVector[i] = vi >= 0
+                    ? positive[i] * Mathf.Abs(vi)
+                    : negative[i] * Mathf.Abs(vi);
             }
-            return svec;
+            return scaledVector;
         }
 
         public void Scale(Vector6 other)
@@ -132,10 +136,10 @@ namespace AT_Utils
         {
             get
             {
-                var mvec = Vector3.zero;
-                for(int i = 0; i < 3; i++)
-                    mvec[i] = Mathf.Max(-negative[i], positive[i]);
-                return mvec;
+                var maxVector = Vector3.zero;
+                for(var i = 0; i < 3; i++)
+                    maxVector[i] = Mathf.Max(-negative[i], positive[i]);
+                return maxVector;
             }
         }
 
@@ -143,52 +147,52 @@ namespace AT_Utils
         {
             get
             {
-                var mvec = Vector3.zero;
-                for(int i = 0; i < 3; i++)
-                    mvec[i] = Mathf.Min(-negative[i], positive[i]);
-                return mvec;
+                var minVector = Vector3.zero;
+                for(var i = 0; i < 3; i++)
+                    minVector[i] = Mathf.Min(-negative[i], positive[i]);
+                return minVector;
             }
         }
 
         public Vector3 MaxInPlane(Vector3 normal)
         {
-            var maxm = 0f;
-            var max = Vector3.zero;
-            var cvec = Vector3.zero;
-            for(int i = 0; i < 3; i++)
+            var maxMagnitude = 0f;
+            var maxVector = Vector3.zero;
+            var tempVector = Vector3.zero;
+            for(var i = 0; i < 3; i++)
             {
-                cvec[i] = positive[i];
-                cvec = Vector3.ProjectOnPlane(cvec, normal);
-                var cvecm = cvec.sqrMagnitude;
-                if(cvecm > maxm)
+                tempVector[i] = positive[i];
+                tempVector = Vector3.ProjectOnPlane(tempVector, normal);
+                var tempVectorMagnitude = tempVector.sqrMagnitude;
+                if(tempVectorMagnitude > maxMagnitude)
                 {
-                    max = cvec;
-                    maxm = cvecm;
+                    maxVector = tempVector;
+                    maxMagnitude = tempVectorMagnitude;
                 }
-                cvec[i] = negative[i];
-                cvec = Vector3.ProjectOnPlane(cvec, normal);
-                cvecm = cvec.sqrMagnitude;
-                if(cvecm > maxm)
+                tempVector[i] = negative[i];
+                tempVector = Vector3.ProjectOnPlane(tempVector, normal);
+                tempVectorMagnitude = tempVector.sqrMagnitude;
+                if(tempVectorMagnitude > maxMagnitude)
                 {
-                    max = cvec;
-                    maxm = cvecm;
+                    maxVector = tempVector;
+                    maxMagnitude = tempVectorMagnitude;
                 }
-                cvec[i] = 0;
+                tempVector[i] = 0;
             }
-            return max;
+            return maxVector;
         }
 
         public Vector3 SumInPlane(Vector3 normal)
         {
             var sum = Vector3.zero;
-            var cvec = Vector3.zero;
-            for(int i = 0; i < 3; i++)
+            var tempVector = Vector3.zero;
+            for(var i = 0; i < 3; i++)
             {
-                cvec[i] = positive[i];
-                sum += Vector3.ProjectOnPlane(cvec, normal);
-                cvec[i] = negative[i];
-                sum += Vector3.ProjectOnPlane(cvec, normal);
-                cvec[i] = 0;
+                tempVector[i] = positive[i];
+                sum += Vector3.ProjectOnPlane(tempVector, normal);
+                tempVector[i] = negative[i];
+                sum += Vector3.ProjectOnPlane(tempVector, normal);
+                tempVector[i] = 0;
             }
             return sum;
         }
@@ -196,18 +200,18 @@ namespace AT_Utils
         public Vector3 Project(Vector3 normal)
         {
             var proj = 0f;
-            var cvec = Vector3.zero;
-            for(int i = 0; i < 3; i++)
+            var tempVector = Vector3.zero;
+            for(var i = 0; i < 3; i++)
             {
-                cvec[i] = positive[i];
-                var projm = Vector3.Dot(cvec, normal);
-                if(projm > 0)
-                    proj += projm;
-                cvec[i] = negative[i];
-                projm = Vector3.Dot(cvec, normal);
-                if(projm > 0)
-                    proj += projm;
-                cvec[i] = 0;
+                tempVector[i] = positive[i];
+                var projection = Vector3.Dot(tempVector, normal);
+                if(projection > 0)
+                    proj += projection;
+                tempVector[i] = negative[i];
+                projection = Vector3.Dot(tempVector, normal);
+                if(projection > 0)
+                    proj += projection;
+                tempVector[i] = 0;
             }
             return proj * normal;
         }
@@ -215,18 +219,18 @@ namespace AT_Utils
         public Vector3 Slice(Vector3 normal)
         {
             var sum = Vector3.zero;
-            var cvec = Vector3.zero;
-            for(int i = 0; i < 3; i++)
+            var tempVector = Vector3.zero;
+            for(var i = 0; i < 3; i++)
             {
-                cvec[i] = positive[i];
-                var projm = Vector3.Dot(cvec, normal);
-                if(projm > 0)
-                    sum += cvec;
-                cvec[i] = negative[i];
-                projm = Vector3.Dot(cvec, normal);
-                if(projm > 0)
-                    sum += cvec;
-                cvec[i] = 0;
+                tempVector[i] = positive[i];
+                var projection = Vector3.Dot(tempVector, normal);
+                if(projection > 0)
+                    sum += tempVector;
+                tempVector[i] = negative[i];
+                projection = Vector3.Dot(tempVector, normal);
+                if(projection > 0)
+                    sum += tempVector;
+                tempVector[i] = 0;
             }
             return sum;
         }
@@ -234,7 +238,7 @@ namespace AT_Utils
         public Vector6 Transform(Transform T)
         {
             var tV = new Vector6();
-            for(int i = 0; i < 3; i++)
+            for(var i = 0; i < 3; i++)
             {
                 tV.Add(T.TransformDirection(negative.Component(i)));
                 tV.Add(T.TransformDirection(positive.Component(i)));
@@ -245,7 +249,7 @@ namespace AT_Utils
         public Vector6 InverseTransform(Transform T)
         {
             var tV = new Vector6();
-            for(int i = 0; i < 3; i++)
+            for(var i = 0; i < 3; i++)
             {
                 tV.Add(T.InverseTransformDirection(negative.Component(i)));
                 tV.Add(T.InverseTransformDirection(positive.Component(i)));
@@ -256,7 +260,7 @@ namespace AT_Utils
         public Vector6 Local2Local(Transform fromT, Transform toT)
         {
             var tV = new Vector6();
-            for(int i = 0; i < 3; i++)
+            for(var i = 0; i < 3; i++)
             {
                 tV.Add(toT.InverseTransformDirection(fromT.TransformDirection(negative.Component(i))));
                 tV.Add(toT.InverseTransformDirection(fromT.TransformDirection(positive.Component(i))));
@@ -266,10 +270,7 @@ namespace AT_Utils
 
         public override string ToString()
         {
-            return string.Format("Vector6:\nMax {0}\n+ {1}\n- {2}",
-                Max,
-                Utils.formatVector(positive),
-                Utils.formatVector(negative));
+            return $"Vector6:\nMax {Max}\n+ {Utils.formatVector(positive)}\n- {Utils.formatVector(negative)}";
         }
     }
 }
