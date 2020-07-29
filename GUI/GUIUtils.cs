@@ -184,10 +184,26 @@ namespace AT_Utils
             LockControls(LockName, Lock);
         }
 
-        public static void UpdatePartMenu(this Part part)
+        public static void UpdatePartMenu(this Part part, bool fireOnEditorShipModified = false)
         {
-            MonoUtilities.RefreshPartContextWindow(part);
-            UpdateEditorGUI();
+            if(UIPartActionController.Instance != null)
+            {
+                var c = UIPartActionController.Instance;
+                for(var i = c.windows.Count - 1; i >= 0; i--)
+                {
+                    var w = c.windows[i];
+                    if(w.part == part)
+                        w.displayDirty = true;
+                }
+                for(var i = c.hiddenWindows.Count - 1; i >= 0; i--)
+                {
+                    var w = c.hiddenWindows[i];
+                    if(w.part == part)
+                        w.displayDirty = true;
+                }
+            }
+            if(fireOnEditorShipModified)
+                UpdateEditorGUI();
         }
 
         public static void UpdateEditorGUI()
