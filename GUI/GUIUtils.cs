@@ -218,7 +218,7 @@ namespace AT_Utils
             msg = string.Format(msg, args);
             #if DEBUG
             Log(msg);
-            msg = string.Format("[{0:HH:mm:ss.fff}]\n{1}", DateTime.Now, msg);
+            msg = $"[{DateTime.Now:HH:mm:ss.fff}]\n{msg}";
             #endif
             ScreenMessages.PostScreenMessage(msg, duration, ScreenMessageStyle.UPPER_CENTER);
         }
