@@ -161,6 +161,7 @@ namespace AT_Utils
                 {
                     CurrentTexture = CurrentTextureDisplay;
                     set_texture();
+                    part.UpdatePartMenu();
                 }
                 yield return new WaitForSeconds(0.1f);
             }
