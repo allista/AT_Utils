@@ -327,6 +327,12 @@ namespace AT_Utils
                     case null:
                         args[i] = "null";
                         break;
+                    case float f:
+                        args[i] = f.ToString("R");
+                        break;
+                    case double d:
+                        args[i] = d.ToString("R");
+                        break;
                     case Vector3 vector3:
                         args[i] = formatVector(vector3);
                         break;

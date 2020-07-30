@@ -4,30 +4,39 @@
 //       Allis Tauri <allista@gmail.com>
 //
 //  Copyright (c) 2018 Allis Tauri
+
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace AT_Utils.UI
 {
-    public class ToggleColorizer : MonoBehaviour
+    [RequireComponent(typeof(Toggle))]
+    public class ToggleColorizer : MonoBehaviour, IColorizer
     {
-        Toggle toggle;
+        private Toggle toggle;
+        public Text toggleText;
 
-        [SerializeField]
-        Text toggleText;
-
-        void Awake()
+        private void Awake()
         {
             toggle = gameObject.GetComponent<Toggle>();
             if(toggle != null)
             {
-                toggle.onValueChanged.AddListener(isOn => UpdateColor());
-                Colors.Enabled.onColorChanged.AddListener(c => UpdateColor());
-                Colors.Active.onColorChanged.AddListener(c => UpdateColor());
+                toggle.onValueChanged.AddListener(onStateChanged);
+                Colors.Enabled.onColorChanged.AddListener(onColorChanged);
+                Colors.Active.onColorChanged.AddListener(onColorChanged);
+                Colors.Inactive.onColorChanged.AddListener(onColorChanged);
                 UpdateColor();
             }
             else
                 enabled = false;
+        }
+
+        private void OnDestroy()
+        {
+            toggle.onValueChanged.RemoveListener(onStateChanged);
+            Colors.Enabled.onColorChanged.RemoveListener(onColorChanged);
+            Colors.Active.onColorChanged.RemoveListener(onColorChanged);
+            Colors.Inactive.onColorChanged.RemoveListener(onColorChanged);
         }
 
         public void SetInteractable(bool interactable)
@@ -36,7 +45,7 @@ namespace AT_Utils.UI
             UpdateColor();
         }
 
-        void changeColor(Color color)
+        private void changeColor(Color color)
         {
             toggleText.color = color;
             var colors = toggle.colors;
@@ -49,10 +58,13 @@ namespace AT_Utils.UI
             if(toggle == null)
                 return;
             changeColor(toggle.isOn
-                        ? Colors.Enabled
-                        : (toggle.interactable
-                           ? Colors.Active
-                           : Colors.Inactive));
+                ? Colors.Enabled
+                : (toggle.interactable
+                    ? Colors.Active
+                    : Colors.Inactive));
         }
+
+        private void onColorChanged(Color c) => UpdateColor();
+        private void onStateChanged(bool isOn) => UpdateColor();
     }
 }

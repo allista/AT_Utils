@@ -20,6 +20,7 @@ namespace AT_Utils.UI
     public abstract class FloatValueUI : PanelledUI
     {
         public abstract bool SetValueWithoutNotify(float newValue);
+        public abstract void SetInteractable(bool interactable);
         public abstract FloatEvent onValueChanged { get; }
 
         protected void changeValueAndNotify(float newValue)

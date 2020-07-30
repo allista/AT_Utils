@@ -24,12 +24,24 @@ namespace AT_Utils.UI
         public float step = 1;
         public int decimals = 1;
         private string format = "F1";
+        public string stepFormat = "F1";
 
-        public Button incrementButton;
-        public Button decrementButton;
-        public Button doneButton;
-        public InputField input;
-        public Text suffix;
+        public Button
+            incrementButton,
+            decrementButton,
+            doneButton;
+
+        public TooltipTrigger
+            incrementTooltip,
+            decrementTooltip,
+            doneTooltip,
+            inputTooltip;
+
+        public InputField
+            input;
+
+        public Text
+            suffix;
 
         private void Awake()
         {
@@ -61,7 +73,7 @@ namespace AT_Utils.UI
 
         private void updateFormat()
         {
-            format = decimals >= 0 ? $"F{decimals}" : "R";
+            format = decimals >= 0 ? $"F{decimals}" : "G9";
         }
 
         public void SetStep(float newStep)
@@ -81,7 +93,7 @@ namespace AT_Utils.UI
             {
                 incrementButton.gameObject.SetActive(true);
                 decrementButton.gameObject.SetActive(true);
-                var stepDisplay = FormatUtils.formatBigValue(step, "");
+                var stepDisplay = FormatUtils.formatBigValue(step, "", stepFormat);
                 var txt = incrementButton.GetComponentInChildren<Text>();
                 if(txt != null)
                     txt.text = $"+{stepDisplay}";
@@ -96,11 +108,20 @@ namespace AT_Utils.UI
             newValue = clampValue(newValue);
             if(decimals >= 0)
                 newValue = (float)Math.Round(newValue, decimals);
-            input.SetTextWithoutNotify(newValue.ToString(format));
             if(value.Equals(newValue))
                 return false;
+            input.SetTextWithoutNotify(newValue.ToString(format));
             value = newValue;
             return true;
+        }
+
+        public override void SetInteractable(bool interactable)
+        {
+            input.SetInteractable(interactable);
+            incrementButton.SetInteractable(interactable);
+            decrementButton.SetInteractable(interactable);
+            if(doneButton != null)
+                doneButton.SetInteractable(interactable);
         }
 
         private void increment() => changeValueAndNotify(value + step);

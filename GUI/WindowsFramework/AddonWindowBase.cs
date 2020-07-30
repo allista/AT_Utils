@@ -50,12 +50,11 @@ namespace AT_Utils
         {
             if(Instance != null)
             { 
-                Destroy(this);
+                Destroy(gameObject);
                 return; 
             }
             base.Awake();
             Instance = (T)this;
-            Instance.LoadState();
             var assembly = Assembly.GetAssembly(typeof(T)).GetName();
             Title = string.Concat(assembly.Name, " - ", assembly.Version);
             GameEvents.onGameStateSave.Add(onGameStateSave);
@@ -67,7 +66,6 @@ namespace AT_Utils
             if(this != Instance)
                 return;
             GameEvents.onGameStateSave.Remove(onGameStateSave);
-            Instance.SaveState();
             Instance = null;
             base.OnDestroy();
         }

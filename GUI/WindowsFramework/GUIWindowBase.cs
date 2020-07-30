@@ -65,7 +65,11 @@ namespace AT_Utils
             if(window_enabled == show)
                 return;
             window_enabled = show;
-            if(!show) UnlockControls();
+            if(!show)
+            {
+                this.SaveState();
+                UnlockControls();
+            }
             update_content();
         }
 
@@ -87,10 +91,12 @@ namespace AT_Utils
             GameEvents.onShowUI.Add(onShowUI);
             GameEvents.onLevelWasLoadedGUIReady.Add(onLevelLoaded);
             GameEvents.onGameSceneLoadRequested.Add(onGameSceneLoad);
+            this.LoadState();
         }
 
         public virtual void OnDestroy()
         {
+            this.SaveState();
             UnlockControls();
             subwindows.ForEach(Destroy);
             GameEvents.onHideUI.Remove(onHideUI);

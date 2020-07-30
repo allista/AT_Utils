@@ -24,7 +24,38 @@ namespace AT_Utils.UI
 
         public static string ParseCamelCase(string s) => CCR.Replace(s, "$1 ");
 
-        public static string formatVeryBigValue(float value, string unit, string format = "F1")
+        public static string FixedDigitsFormat(float value, uint digits)
+        {
+            if(value < 10 && digits > 2)
+                return $"F{digits - 1}";
+            if(value < 100 && digits > 3)
+                return $"F{digits - 2}";
+            if(value < 1000 && digits > 4)
+                return $"F{digits - 3}";
+            if(value < 10000 && digits > 5)
+                return $"F{digits - 4}";
+            if(value < 100000 && digits > 6)
+                return $"F{digits - 5}";
+            return "F0";
+        }
+
+        public static string FixedDigitsFormat4(float value)
+        {
+            if(value < 10)
+                return "F3";
+            if(value < 100)
+                return "F2";
+            if(value < 1000)
+                return "F1";
+            return "F0";
+        }
+
+        public static string formatVeryBigValue(
+            float value,
+            string unit,
+            string format = "F1",
+            bool formatSmaller = false
+        )
         {
             var mod = "";
             if(value > 1e24)
@@ -52,12 +83,17 @@ namespace AT_Utils.UI
                 value /= 1e12f;
                 mod = "T";
             }
-            else
-                return formatBigValue(value, unit, format);
-            return $"{value.ToString(format)}{mod}{unit}";
+            else if(formatSmaller)
+                return formatBigValue(value, unit, format, true);
+            return $"{value.ToString(format ?? FixedDigitsFormat4(value))}{mod}{unit}";
         }
 
-        public static string formatBigValue(float value, string unit, string format = "F1")
+        public static string formatBigValue(
+            float value,
+            string unit,
+            string format = "F1",
+            bool formatSmaller = false
+        )
         {
             var mod = "";
             if(value > 1e9)
@@ -75,9 +111,9 @@ namespace AT_Utils.UI
                 value /= 1e3f;
                 mod = "k";
             }
-            else
+            else if(formatSmaller)
                 return formatSmallValue(value, unit, format);
-            return $"{value.ToString(format)}{mod}{unit}";
+            return $"{value.ToString(format ?? FixedDigitsFormat4(value))}{mod}{unit}";
         }
 
         public static string formatSmallValue(float value, string unit, string format = "F1")
@@ -100,7 +136,7 @@ namespace AT_Utils.UI
                 value *= 1e9f;
                 mod = "n";
             }
-            return $"{value.ToString(format)}{mod}{unit}";
+            return $"{value.ToString(format ?? FixedDigitsFormat4(value))}{mod}{unit}";
         }
 
         public static string formatMass(float mass)

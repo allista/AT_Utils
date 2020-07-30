@@ -113,6 +113,8 @@
         <Compile Include="Addons\ComputationBalancer.cs" />
         <Compile Include="Construction\ConstructionSkill.cs" />
         <Compile Include="Construction\ConstructionUtils.cs" />
+        <Compile Include="ControlFlow\FieldWatcher.cs" />
+        <Compile Include="ControlFlow\FloatFieldWatcher.cs" />
         <Compile Include="Debugging\DebugWindowController.cs" />
         <Compile Include="Extensions\CollectionsExtensions.cs" />
         <Compile Include="Extensions\MiscExtensions.cs" />

@@ -141,6 +141,11 @@ namespace AT_Utils
         {
             return body.GetWorldSurfacePosition(Lat, Lon, Alt);
         }
+
+        public Vector3d Normal(CelestialBody body)
+        {
+            return body.GetSurfaceNVector(Lat, Lon);
+        }
         #endregion
 
         public static string AngleToDMS(double angle)

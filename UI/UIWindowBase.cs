@@ -13,10 +13,11 @@ using UnityEngine.EventSystems;
 namespace AT_Utils
 {
     [PersistState]
-    public abstract class UIWindowBase<T> : ICachedState where T : MonoBehaviour
+    public abstract class UIWindowBase<T> : IConditionalSaveState, ICachedState where T : MonoBehaviour
     {
         private readonly UIBundle bundle;
         private readonly string inputLockName;
+        private readonly bool standalone;
 
         protected virtual string prefab_name => typeof(T).Name;
         private GameObject prefab;
@@ -28,9 +29,10 @@ namespace AT_Utils
 
         [ConfigOption] protected bool initialized;
 
-        protected UIWindowBase(UIBundle bundle)
+        protected UIWindowBase(UIBundle bundle, bool standalone = true)
         {
             this.bundle = bundle;
+            this.standalone = standalone;
             inputLockName = $"{typeof(T).Name}-{base.GetHashCode():X}";
             GameEvents.onGameStateSave.Add(onGameSaved);
         }
@@ -38,13 +40,15 @@ namespace AT_Utils
         ~UIWindowBase()
         {
             GameEvents.onGameStateSave.Remove(onGameSaved);
-            Utils.LockControls(inputLockName, false);
+            unlockControls();
             Close();
         }
 
+        public bool ShouldSaveState() => initialized;
+
         private void saveState()
         {
-            if(initialized)
+            if(standalone)
                 this.SaveState();
         }
 
@@ -62,13 +66,16 @@ namespace AT_Utils
 
         protected virtual void onPointerEnter(PointerEventData eventData)
         {
-            Utils.LockControls(inputLockName);
+            lockControls();
         }
 
         protected virtual void onPointerExit(PointerEventData eventData)
         {
-            Utils.LockControls(inputLockName, false);
+            unlockControls();
         }
+
+        protected void lockControls() => Utils.LockControls(inputLockName);
+        protected void unlockControls() => Utils.LockControls(inputLockName, false);
 
         private bool in_progress;
 
@@ -79,7 +86,8 @@ namespace AT_Utils
             in_progress = true;
             if(prefab == null)
             {
-                this.LoadState();
+                if(standalone)
+                    this.LoadState();
                 foreach(var _ in bundle.LoadAsset(prefab_name))
                     yield return null;
                 prefab = bundle.GetAsset(prefab_name);
@@ -134,7 +142,7 @@ namespace AT_Utils
             onClose();
             GameEvents.onGamePause.Remove(onGamePause);
             GameEvents.onGamePause.Remove(onGameUnpause);
-            Utils.LockControls(inputLockName, false);
+            unlockControls();
             GameObject gameObject;
             (gameObject = Controller.gameObject).SetActive(false);
             Object.Destroy(gameObject);
