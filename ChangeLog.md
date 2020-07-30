@@ -1,7 +1,58 @@
 # AT Utils ChangeLog
 
 
-* **v1.9.5**
+* **v1.9.6**
+    * **AnisotropicPartResizer** update 1.4.1
+        * fixed symmetry counterparts handling and PAW refresh
+        * improved performance by avoiding unnecessary rescales
+    * **SimpleTextureSwitcher** updates PAW of counterpars
+    when the current texture changes
+    * Reimplemented **Part.UpdatePartMenu extension**
+    to fix the `RefreshPartContextWindow` problems
+    * Added `FieldWatcher` and `FloatFieldWatcher` to conditionally
+    invoke callbacks on `BasePart.OnValueModified` event
+    * `Vector6`
+        * added `ClampMagnitude` method
+        * renamed `Clamp` method to `ClampComponents` (the `Clamp` still works
+        as before, but is marked as obsolete)
+    * **Renamed all bundles: .ksp => .bundle**
+    * `Coordinates`: added `Normal` method that returns surface
+    `NVector` of Lat/Lon
+    * **UI**
+        * `FormatUtils`:
+            * `format...Value` methods always displays **4 digits total**
+            if `format=null`
+            * added optional `bool formatSmaller` argument to
+            `format(Very)BigValue` methods to indicate that a lesser method
+            should be used if the value is sufficiently small
+        * `FloatController`:
+            * added public `TooltipTrigger` fields for all controls
+            * added `FloatValueUI.SetInteractable` method that sets
+            corresponding states for relevant controls
+            * uses more efficient `G9` format instead of `R`
+            * added `stepFormat` field to control step buttons text
+            * only set the text if the value has changed
+        * Colorizers:
+            * `ToggleColorizer`
+                * requires `Toggle` component
+                * fixed usage of `onColorChange` events
+            * all colorizers implement `IColorizer` interface to
+            allow extensions to work
+            * `GenericColorizer.SetInteractable` only executes when the
+            state changes
+        * `UIWindowBase`
+            * added `standalone` constructor argument that controls the
+            Save/Load behaviour of the window
+            * added `lock/unlockControls` protected methods
+    * `OrbitalExtensions`: fixed `ApA/PeAUT` and `ApV/PeV` methods
+    * `ScenarioTester`
+        * do not show the window in editor
+        * fixed initialization
+    * `PluginState`: added ability to save state conditionally
+    * Fixed singleton logic in `AddonWindowBase`
+    * `GUIWindowBase` manages its state, since it has `[ConfigOption]` fields
+
+* v1.9.5
     * Fixed and refactored `HSVPicker`
     * Fixed `AddonWindowBase.Toggle/ShowWithButton` logic
     * GUIWindowBase.Show only executes when the state is changing
