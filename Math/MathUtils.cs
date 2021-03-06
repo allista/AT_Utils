@@ -270,6 +270,12 @@ namespace AT_Utils
             return vec;
         }
 
+        /// <summary>
+        /// A working implementation of the FromToRotation for QuaternionD
+        /// </summary>
+        /// <param name="fromV">The starting vector</param>
+        /// <param name="toV">The end vector</param>
+        /// <returns>The quaternion describing rotation from starting to the end vector.</returns>
         public static QuaternionD FromToRotation(Vector3d fromV, Vector3d toV)
         {
             var cross = Vector3d.Cross(fromV, toV);
