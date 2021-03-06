@@ -15,6 +15,8 @@ namespace AT_Utils.UI
         private Coroutine blinker;
 
         public static bool soundEnabled = true;
+        public static bool soundPaused = false;
+        private static bool canPlay => soundEnabled && !soundPaused;
         public AudioClip signal;
         private AudioSource audio;
 
@@ -60,7 +62,7 @@ namespace AT_Utils.UI
                 return;
             if(!enable)
                 audio.Stop();
-            else if(soundEnabled && m_IsOn)
+            else if(m_IsOn && canPlay)
                 audio.Play();
         }
 
@@ -103,7 +105,7 @@ namespace AT_Utils.UI
         {
             if(m_IsOn)
             {
-                if(audio != null && soundEnabled)
+                if(canPlay && audio != null)
                     audio.Play();
                 if(blink > 0 && blinker == null)
                     blinker = StartCoroutine(doBlink());
