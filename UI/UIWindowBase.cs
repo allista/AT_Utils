@@ -158,5 +158,7 @@ namespace AT_Utils
             else if(condition)
                 Show(monoBehaviour);
         }
+
+        protected void toggleColors() => Controller.ToggleStylesUI();
     }
 }
