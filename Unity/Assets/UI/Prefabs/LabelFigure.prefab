@@ -91,7 +91,7 @@ MonoBehaviour:
   m_Script: {fileID: -382320990, guid: 23fd6eb82728348aba7ba3f92873da24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: Maneuver velocity change
+  text: 
   delay: 0.3
   position: 0
 --- !u!1001 &5519203742396342612
@@ -103,7 +103,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1902369283660894, guid: c05eb777044084405bf11357d414a02c, type: 3}
       propertyPath: m_Name
-      value: deltaV
+      value: value
       objectReference: {fileID: 0}
     - target: {fileID: 224432647891096564, guid: c05eb777044084405bf11357d414a02c,
         type: 3}
