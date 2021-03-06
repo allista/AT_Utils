@@ -195,11 +195,18 @@ namespace AT_Utils
                     if(w.part == part)
                         w.displayDirty = true;
                 }
-                for(var i = c.hiddenWindows.Count - 1; i >= 0; i--)
+                try
                 {
-                    var w = c.hiddenWindows[i];
-                    if(w.part == part)
-                        w.displayDirty = true;
+                    for(var i = c.hiddenWindows.Count - 1; i >= 0; i--)
+                    {
+                        var w = c.hiddenWindows[i];
+                        if(w.part == part)
+                            w.displayDirty = true;
+                    }
+                }
+                catch(MissingFieldException)
+                {
+                    // in KSP-1.9 there's no hiddenWindows field
                 }
             }
             if(fireOnEditorShipModified)
