@@ -51,7 +51,7 @@
             <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>../../KSP-test/KSP_test_1.8.1/KSP_Data/Managed/UnityEngine.AudioModule.dll</HintPath>
+          <HintPath>..\..\KSP-test\KSP_test_1.10.0\KSP_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
