@@ -109,11 +109,11 @@ namespace AT_Utils
             alpha_texture.Apply();
 
             //buttons
-            normal_button = GUI.skin.button.OtherColor(Color.white, Color.yellow);
+            normal_button = skin.button.OtherColor(Color.white, Color.yellow);
             normal_button.padding = new RectOffset(4, 4, 4, 4);
 
             //boxes
-            white = GUI.skin.box.OtherColor(Color.white);
+            white = skin.box.OtherColor(Color.white);
             white.padding = new RectOffset(4, 4, 4, 4);
             white.richText = true;
 
@@ -139,11 +139,11 @@ namespace AT_Utils
             set_background(tooltip, tooltip_texture);
 
             //lable
-            label = GUI.skin.label.OtherColor(Color.white);
+            label = skin.label.OtherColor(Color.white);
             label.alignment = TextAnchor.MiddleCenter;
             label.wordWrap = true;
 
-            rich_label = GUI.skin.label.OtherColor(Color.white);
+            rich_label = skin.label.OtherColor(Color.white);
             rich_label.richText = true;
             rich_label.wordWrap = true;
 
@@ -152,15 +152,15 @@ namespace AT_Utils
             boxed_label.wordWrap = true;
 
             //slider
-            slider = new GUIStyle(GUI.skin.horizontalSlider);
+            slider = new GUIStyle(skin.horizontalSlider);
             slider.margin = new RectOffset(0, 0, 0, 0);
 
-            slider_text = new GUIStyle(GUI.skin.label);
+            slider_text = new GUIStyle(skin.label);
             slider_text.alignment = TextAnchor.MiddleCenter;
             slider_text.margin = new RectOffset(0, 0, 0, 0);
 
             //list box
-            list_item = new GUIStyle(GUI.skin.box);
+            list_item = new GUIStyle(skin.box);
             list_item.normal.textColor = list_item.focused.textColor = Color.white;
             list_item.hover.textColor = list_item.active.textColor = Color.yellow;
             list_item.onNormal.textColor = list_item.onFocused.textColor =
@@ -168,7 +168,7 @@ namespace AT_Utils
             list_item.padding = new RectOffset(4, 4, 4, 4);
             set_background(list_item, black_texture);
 
-            list_box = new GUIStyle(GUI.skin.button);
+            list_box = new GUIStyle(skin.button);
             list_box.normal.textColor = list_box.focused.textColor = Color.yellow;
             list_box.hover.textColor = list_box.active.textColor = Color.green;
             list_box.onNormal.textColor = list_box.onFocused.textColor =
@@ -176,7 +176,7 @@ namespace AT_Utils
             list_box.padding = new RectOffset(4, 4, 4, 4);
 
             //borderless window
-            no_window = new GUIStyle(GUI.skin.window);
+            no_window = new GUIStyle(skin.window);
             no_window.border = new RectOffset(0, 0, 0, 0);
             no_window.contentOffset = Vector2.zero;
             no_window.padding = new RectOffset(4, 4, 4, 4);
