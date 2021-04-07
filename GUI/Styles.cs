@@ -115,6 +115,7 @@ namespace AT_Utils
             //boxes
             white = GUI.skin.box.OtherColor(Color.white);
             white.padding = new RectOffset(4, 4, 4, 4);
+            white.richText = true;
 
             white_on_black = new GUIStyle(white);
             set_background(white_on_black, black_texture);
@@ -134,7 +135,6 @@ namespace AT_Utils
             //tooltip
             tooltip = white.OtherColor(Color.black);
             tooltip.wordWrap = true;
-            tooltip.richText = true;
             tooltip.alignment = TextAnchor.MiddleCenter;
             set_background(tooltip, tooltip_texture);
 
@@ -149,7 +149,6 @@ namespace AT_Utils
 
             boxed_label = new GUIStyle(white);
             boxed_label.alignment = TextAnchor.MiddleCenter;
-            boxed_label.richText = true;
             boxed_label.wordWrap = true;
 
             //slider
