@@ -18,7 +18,8 @@ namespace AT_Utils
 
         public CrewTransferWindow()
         {
-            width = 280; height = 150;
+            width = 350;
+            height = 200;
         }
 
         public override void Awake()
@@ -36,8 +37,9 @@ namespace AT_Utils
             foreach(ProtoCrewMember kerbal in crew)
             {
                 int ki = selected.FindIndex(cr => cr.name == kerbal.name);
-                var label = string.Format("<b>{0}</b> ({1} {2})", kerbal.name, kerbal.trait, kerbal.experienceLevel);
-                if(Utils.ButtonSwitch(label, ki >= 0, "", GUILayout.ExpandWidth(true)))
+                var label =
+                    $"<b>{kerbal.name}</b> ({kerbal.trait} {kerbal.experienceLevel})\n<i>{kerbal.KerbalRef.InPart.Title()}</i>";
+                if(GUILayout.Button(label, ki >= 0 ? Styles.enabled : Styles.active, GUILayout.ExpandWidth(true)))
                 {
                     if(ki >= 0) selected.RemoveAt(ki);
                     else if(selected.Count < CrewCapacity)
