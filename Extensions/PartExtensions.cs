@@ -124,6 +124,51 @@ namespace AT_Utils
         #endregion
 
         #region Actions
+        public class CompoundPartReconnect : IDisposable
+        {
+            private readonly Dictionary<CompoundPartModule, Part> targets =
+                new Dictionary<CompoundPartModule, Part>();
+
+
+            public CompoundPartReconnect(Part part)
+            {
+                foreach(var p in part.AllConnectedParts())
+                {
+                    var cp = p as CompoundPart;
+                    if(cp == null)
+                        continue;
+                    var cpm = cp.Modules.GetModule<CompoundPartModule>();
+                    if(cpm == null)
+                        continue;
+                    if(cpm.target == null)
+                        continue;
+                    targets.Add(cpm, cpm.target);
+                    cpm.OnTargetLost();
+                }
+            }
+
+            private static void set_compound_part_target(CompoundPartModule cpm, Part target)
+            {
+                if(cpm != null && target != null)
+                    cpm.OnTargetSet(target);
+            }
+
+            public void Dispose()
+            {
+                foreach(var cpm_target in targets)
+                {
+                    cpm_target.Key.StartCoroutine(CallbackUtil.DelayedCallback(1,
+                        set_compound_part_target,
+                        cpm_target.Key,
+                        cpm_target.Value));
+                }
+                targets.Clear();
+            }
+        }
+
+        public static CompoundPartReconnect ReconnectCompoundParts(this Part p) =>
+            new CompoundPartReconnect(p);
+
         public static void BreakConnectedCompoundParts(this Part p)
         {
             //break connected compound parts
