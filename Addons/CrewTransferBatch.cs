@@ -109,6 +109,32 @@ namespace AT_Utils
             return all;
         }
 
+        public static bool moveCrew(Vessel fromV, Part toP, IEnumerable<ProtoCrewMember> crew, bool spawn = true)
+        {
+            var all = true;
+            var moved = false;
+            foreach(var kerbal in crew)
+            {
+                if(toP.CrewCapacity <= toP.protoModuleCrew.Count)
+                {
+                    all = false;
+                    break;
+                }
+                var real_kerbal = get_real_proto_crew_member(kerbal, fromV, out var fromP);
+                if(real_kerbal == null)
+                    continue;
+                if(fromP == toP)
+                    continue;
+                if(move_crew(fromP, toP, real_kerbal))
+                    moved = true;
+                else
+                    all = false;
+            }
+            if(moved)
+                update_vessel_crew(fromV, toP.vessel, spawn);
+            return all;
+        }
+
         public static bool moveCrew(Vessel fromV, Vessel toV, bool spawn = true)
         {
             var all = true;
