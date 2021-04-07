@@ -35,17 +35,16 @@ namespace AT_Utils
             return all_parts;
         }
 
-        public static Part AttachedPartWithModule<T>(this Part p) where T : PartModule
+        public static IEnumerable<Part> AllAttachedParts(this Part p)
         {
-            if(p.parent != null && p.parent.HasModule<T>())
-                return p.parent;
-            foreach(var c in p.children)
-            {
-                if(c.HasModule<T>())
-                    return c;
-            }
-            return null;
+            if(p.parent != null)
+                yield return p.parent;
+            foreach(var child in p.children)
+                yield return child;
         }
+
+        public static Part AttachedPartWithModule<T>(this Part p) where T : PartModule =>
+            p.AllAttachedParts().FirstOrDefault(c => c.HasModule<T>());
 
         public static T GetModuleInAttachedPart<T>(this Part p) where T : PartModule
         {
