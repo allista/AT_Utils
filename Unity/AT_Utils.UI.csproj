@@ -36,6 +36,7 @@
         <OutputPath>Assets/Plugins/</OutputPath>
         <DefineConstants>NIGHTBUILD</DefineConstants>
         <Optimize>true</Optimize>
+        <LangVersion>Default</LangVersion>
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="System.Core">
