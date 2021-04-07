@@ -43,7 +43,7 @@ namespace AT_Utils
         {
             var all = true;
             var moved = false;
-            foreach(var fromP in fromV.parts)
+            foreach(var fromP in fromV.Parts)
             {
                 while(fromP.protoModuleCrew.Count > 0)
                 {
@@ -65,7 +65,8 @@ namespace AT_Utils
 
         public static bool moveCrew(Vessel fromV, Part toP, bool spawn = true)
         {
-            if(toP.CrewCapacity <= toP.protoModuleCrew.Count) return false;
+            if(toP.CrewCapacity <= toP.protoModuleCrew.Count)
+                return false;
             var all = true;
             var moved = false;
             foreach(var fromP in fromV.parts)
@@ -126,8 +127,10 @@ namespace AT_Utils
         //add some crew to a part
         public static bool addCrew(ProtoPartSnapshot p, List<ProtoCrewMember> crew)
         {
-            if(crew.Count == 0) return false;
-            if(p.partInfo.partPrefab.CrewCapacity <= p.protoModuleCrew.Count) return false;
+            if(crew.Count == 0)
+                return false;
+            if(p.partInfo.partPrefab.CrewCapacity <= p.protoModuleCrew.Count)
+                return false;
             while(p.protoModuleCrew.Count < p.partInfo.partPrefab.CrewCapacity && crew.Count > 0)
             {
                 var kerbal = crew[0];
@@ -144,11 +147,11 @@ namespace AT_Utils
         {
             foreach(var p in vsl.protoPartSnapshots)
             {
-                if(crew.Count == 0) break;
+                if(crew.Count == 0)
+                    break;
                 addCrew(p, crew);
             }
         }
         #endregion
     }
 }
-
