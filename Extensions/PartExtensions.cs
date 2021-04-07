@@ -278,7 +278,12 @@ namespace AT_Utils
                 else if(attached_part.parent == part)
                 {
                     using(new PartJoinRecreate(part))
+                    {
                         attached_part.partTransform.position += delta;
+                        attached_part.UpdateOrgPos(part.vessel.rootPart);
+                        attached_part.partTransform.rotation =
+                            attached_part.vessel.vesselTransform.rotation * attached_part.orgRot;
+                    }
                 }
             }
         }
