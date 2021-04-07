@@ -163,6 +163,13 @@ namespace AT_Utils
             return fromP.protoModuleCrew.Count == 0;
         }
 
+        public static bool moveCrew(Part fromP, Vessel toV, bool spawn = true)
+        {
+            if(move_crew_from_part(fromP, toV.Parts) > 0)
+                update_vessel_crew(fromP.vessel, toV, spawn);
+            return fromP.protoModuleCrew.Count == 0;
+        }
+
         public static bool moveCrew(Vessel fromV, Part toP, bool spawn = true)
         {
             if(toP.CrewCapacity <= toP.protoModuleCrew.Count)
