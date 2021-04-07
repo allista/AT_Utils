@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CompoundParts;
 using UnityEngine;
 
 namespace AT_Utils
@@ -131,7 +132,7 @@ namespace AT_Utils
                 var cp = part as CompoundPart;
                 if(cp == null)
                     continue;
-                var cpm = cp.Modules.GetModule<CompoundParts.CompoundPartModule>();
+                var cpm = cp.Modules.GetModule<CompoundPartModule>();
                 if(cpm == null)
                     continue;
                 cpm.OnTargetLost();
