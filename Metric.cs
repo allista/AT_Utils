@@ -190,7 +190,8 @@ namespace AT_Utils
                         verts = Utils.BoundCorners(mesh.r.bounds);
                         for(int j = 0, len = verts.Length; j < len; j++)
                         {
-                            var v = p.partTransform.position + part_rot * (verts[j] - p.partTransform.position);
+                            var position = p.partTransform.position;
+                            var v = position + part_rot * (verts[j] - position);
                             if(refT != null)
                                 v = refT.InverseTransformPoint(v);
                             verts[j] = v;
