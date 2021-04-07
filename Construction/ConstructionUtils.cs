@@ -7,6 +7,27 @@ namespace AT_Utils
     public static class ConstructionUtils
     {
         /// <summary>
+        /// Filters crew by ExperienceEffect
+        /// </summary>
+        /// <param name="crew">An enumerable of ProtoCrewMembers to filter</param>
+        /// <typeparam name="E">The ExperienceEffect to search for</typeparam>
+        /// <returns>The enumerable with ProtoCrewMembers that have required experience effect</returns>
+        public static IEnumerable<ProtoCrewMember> GetCrewWithEffect<E>(IEnumerable<ProtoCrewMember> crew)
+            where E : ExperienceEffect
+        {
+            foreach(var kerbal in crew)
+            {
+                var trait = kerbal.experienceTrait;
+                for(int i = 0, traitEffectsCount = trait.Effects.Count; i < traitEffectsCount; i++)
+                {
+                    if(!(trait.Effects[i] is E))
+                        continue;
+                    yield return kerbal;
+                }
+            }
+        }
+
+        /// <summary>
         /// Computes the workforce of a single kerbal with a particular
         /// experience effect based on the experience level.
         /// </summary>
