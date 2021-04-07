@@ -9,6 +9,18 @@ namespace AT_Utils
 
 
         #region Vessel
+        private static bool move_crew(Part fromP, Part toP, ProtoCrewMember crew)
+        {
+            var success = toP.AddCrewmember(crew);
+            if(success)
+            {
+                fromP.RemoveCrewmember(crew);
+                GameEvents.onCrewTransferred.Fire(
+                    new GameEvents.HostedFromToAction<ProtoCrewMember, Part>(crew, fromP, toP));
+            }
+            return success;
+        }
+
         public static bool moveCrew(Vessel fromV, Vessel toV, List<ProtoCrewMember> crew, bool spawn = true)
         {
             if(crew.Count == 0) return false;
@@ -101,13 +113,6 @@ namespace AT_Utils
                 if(spawn) respawnCrew(fromP.vessel, toP.vessel);
             }
             return moved;
-        }
-
-        static void move_crew(Part fromP, Part toP, ProtoCrewMember crew)
-        {
-            fromP.RemoveCrewmember(crew);
-            toP.AddCrewmember(crew);
-            GameEvents.onCrewTransferred.Fire(new GameEvents.HostedFromToAction<ProtoCrewMember, Part>(crew, fromP, toP));
         }
 
         public static void respawnCrew(Vessel V)
