@@ -143,10 +143,10 @@ namespace AT_Utils
             List<Vector3> hull_points = compute_hull ? new List<Vector3>() : null;
             for(int i = 0, partsCount = parts.Count; i < partsCount; i++)
             {
-                Part p = parts[i];
+                var p = parts[i];
                 if(p == null)
+                    // EditorLogic.SortedShipList returns List<Part>{null} when all parts are deleted
                     continue;
-                //EditorLogic.SortedShipList returns List<Part>{null} when all parts are deleted
                 //check part variants
                 var variants = p.Modules.GetModule<ModulePartVariants>();
                 HashSet<string> disabledGO = null;
