@@ -366,7 +366,7 @@ namespace AT_Utils
         }
 
         //in-editor vessel metric
-        public Metric(List<Part> vessel, bool compute_hull = false, bool world_space = false)
+        public Metric(IList<Part> vessel, bool compute_hull = false, bool world_space = false)
             : this()
         {
             bounds = partsBounds(vessel, world_space ? null : vessel[0].partTransform, compute_hull);
