@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using CompoundParts;
@@ -7,6 +8,7 @@ using UnityEngine;
 
 namespace AT_Utils
 {
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public static class PartExtensions
     {
         #region from MechJeb2 PartExtensions
@@ -70,7 +72,7 @@ namespace AT_Utils
             where ModuleT : PartModule
         {
             var passages = new List<ModuleT>();
-            foreach(Part p in part.AllConnectedParts())
+            foreach(var p in part.AllConnectedParts())
                 passages.AddRange(
                     from m in p.Modules.OfType<ModuleT>()
                     where exception == null || m != exception
@@ -198,12 +200,11 @@ namespace AT_Utils
 
         public static void UpdateAttachedPartPos(this Part part, AttachNode node)
         {
-            if(node != null && node.attachedPart != null)
-            {
-                var dp = part.AttachNodeDeltaPos(node);
-                if(!dp.IsZero())
-                    part.UpdateAttachedPartPos(node.attachedPart, dp);
-            }
+            if(node == null || node.attachedPart == null)
+                return;
+            var dp = part.AttachNodeDeltaPos(node);
+            if(!dp.IsZero())
+                part.UpdateAttachedPartPos(node.attachedPart, dp);
         }
 
         public static void UpdateAttachedPartPos(this Part part, Part attached_part, Vector3 delta)
