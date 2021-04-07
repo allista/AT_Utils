@@ -113,7 +113,8 @@ namespace AT_Utils
         public static void respawnCrew(Vessel V)
         {
             V.DespawnCrew();
-            V.StartCoroutine(CallbackUtil.DelayedCallback(1, FlightGlobals.ActiveVessel.SpawnCrew));
+            FlightGlobals.ActiveVessel.StartCoroutine(CallbackUtil.DelayedCallback(1,
+                FlightGlobals.ActiveVessel.SpawnCrew));
         }
 
         public static void respawnCrew(Vessel fromV, Vessel toV)
