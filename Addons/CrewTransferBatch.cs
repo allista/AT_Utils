@@ -4,8 +4,9 @@ namespace AT_Utils
 {
     public static class CrewTransferBatch
     {
-        static bool same_crew_member(ProtoCrewMember a, ProtoCrewMember b)
-        { return a.name == b.name && a.trait == b.trait; }
+        private static bool same_crew_member(ProtoCrewMember a, ProtoCrewMember b) =>
+            a.name == b.name && a.gender == b.gender && a.trait == b.trait;
+
 
         #region Vessel
         public static bool moveCrew(Vessel fromV, Vessel toV, List<ProtoCrewMember> crew, bool spawn = true)
