@@ -6,6 +6,7 @@
 //  Copyright (c) 2016 Allis Tauri
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace AT_Utils
@@ -146,7 +147,15 @@ namespace AT_Utils
                 if(p == null)
                     continue;
                 //EditorLogic.SortedShipList returns List<Part>{null} when all parts are deleted
-                //check for weels; if it's a wheel, get all meshes under the wheel collider
+                //check part variants
+                var variants = p.Modules.GetModule<ModulePartVariants>();
+                HashSet<string> disabledGO = null;
+                if(variants != null)
+                {
+                    disabledGO = new HashSet<string>(variants.SelectedVariant.InfoGameObjects.Where(info => !info.Status)
+                        .Select(info => info.Name));
+                }
+                //check for wheels; if it's a wheel, get all meshes under the wheel collider
                 var wheel = p.Modules.GetModule<ModuleWheelBase>();
                 var wheel_transform = wheel != null
                                       && wheel.Wheel != null
@@ -169,6 +178,12 @@ namespace AT_Utils
                     //skip meshes from the blacklist
                     if(Utils.NameMatches(mesh.t.name, AT_UtilsGlobals.Instance.MeshesToSkipList))
                         continue;
+                    //skip meshes disabled by part variant
+                    if(disabledGO != null)
+                    {
+                        if(disabledGO.Contains(mesh.t.name))
+                            continue;
+                    }
                     Vector3[] verts;
                     if(bad_part)
                     {
