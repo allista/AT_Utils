@@ -9,6 +9,25 @@ namespace AT_Utils
 
 
         #region Vessel
+        private static ProtoCrewMember get_real_proto_crew_member(
+            ProtoCrewMember kerbal,
+            IShipconstruct fromShip,
+            out Part inPart
+        )
+        {
+            inPart = null;
+            foreach(var p in fromShip.Parts)
+            {
+                var real_kerbal = p.protoModuleCrew.Find(c => same_crew_member(c, kerbal));
+                if(real_kerbal != null)
+                {
+                    inPart = p;
+                    return real_kerbal;
+                }
+            }
+            return null;
+        }
+
         private static bool move_crew(Part fromP, Part toP, ProtoCrewMember crew)
         {
             var success = toP.AddCrewmember(crew);
@@ -21,35 +40,73 @@ namespace AT_Utils
             return success;
         }
 
-        public static bool moveCrew(Vessel fromV, Vessel toV, List<ProtoCrewMember> crew, bool spawn = true)
+        private static int move_crew_from_part(Part fromP, Part toP)
         {
-            if(crew.Count == 0) return false;
-            var moved = new List<ProtoCrewMember>(crew.Capacity);
+            if(fromP == toP)
+                return -1;
+            var crewToMove = fromP.protoModuleCrew.Count;
+            while(fromP.protoModuleCrew.Count > 0)
+            {
+                if(!move_crew(fromP, toP, fromP.protoModuleCrew[0]))
+                    break;
+            }
+            return crewToMove - fromP.protoModuleCrew.Count;
+        }
+
+        private static int move_crew_from_part(Part fromP, IEnumerable<Part> toV)
+        {
+            var moved = 0;
+            foreach(var toP in toV)
+            {
+                if(toP.CrewCapacity <= toP.protoModuleCrew.Count)
+                    continue;
+                var numMoved = move_crew_from_part(fromP, toP);
+                if(numMoved < 0)
+                    continue;
+                if(numMoved == 0)
+                    break;
+                moved += numMoved;
+            }
+            return moved;
+        }
+
+        private static void update_vessel_crew(Vessel fromV, Vessel toV, bool spawn)
+        {
+            if(fromV == toV)
+                Vessel.CrewWasModified(fromV);
+            else
+                Vessel.CrewWasModified(fromV, toV);
+            if(spawn)
+                respawnCrew(fromV, toV);
+        }
+
+        public static bool moveCrew(Vessel fromV, Vessel toV, IEnumerable<ProtoCrewMember> crew, bool spawn = true)
+        {
+            if(fromV == toV)
+                return false;
+            var all = true;
+            var moved = false;
             foreach(var kerbal in crew)
             {
-                Part fromP = null;
-                ProtoCrewMember real_kerbal = null;
-                foreach(var p in fromV.Parts)
+                var real_kerbal = get_real_proto_crew_member(kerbal, fromV, out var fromP);
+                if(real_kerbal == null)
+                    continue;
+                var toP = toV.Parts.Find(p => p.CrewCapacity > p.protoModuleCrew.Count);
+                if(toP == null)
                 {
-                    real_kerbal = p.protoModuleCrew.Find(c => same_crew_member(c, kerbal));
-                    if(real_kerbal != null) 
-                    {
-                        fromP = p;
-                        break;
-                    }
+                    all = false;
+                    break;
                 }
-                if(real_kerbal == null) continue;
-                var toP = toV.parts.Find(p => p.CrewCapacity > p.protoModuleCrew.Count);
-                if(toP == null) break;
-                move_crew(fromP, toP, real_kerbal);
-                moved.Add(real_kerbal);
+                if(fromP == toP)
+                    continue;
+                if(move_crew(fromP, toP, real_kerbal))
+                    moved = true;
+                else
+                    all = false;
             }
-            if(moved.Count > 0)
-            {
-                Vessel.CrewWasModified(fromV, toV);
-                if(spawn) respawnCrew(fromV, toV);
-            }
-            return moved.Count == crew.Count;
+            if(moved)
+                update_vessel_crew(fromV, toV, spawn);
+            return all;
         }
 
         public static bool moveCrew(Vessel fromV, Vessel toV, bool spawn = true)
@@ -58,21 +115,16 @@ namespace AT_Utils
             var moved = false;
             foreach(var fromP in fromV.Parts)
             {
-                while(fromP.protoModuleCrew.Count > 0)
-                {
-                    var toP = toV.parts.Find(p => p.CrewCapacity > p.protoModuleCrew.Count);
-                    if(toP == null) break;
-                    move_crew(fromP, toP, fromP.protoModuleCrew[0]);
+                if(move_crew_from_part(fromP, toV.Parts) > 0)
                     moved = true;
-                }
                 if(fromP.protoModuleCrew.Count > 0)
-                { all = false; break; }
+                {
+                    all = false;
+                    break;
+                }
             }
             if(moved)
-            {
-                Vessel.CrewWasModified(fromV, toV);
-                if(spawn) respawnCrew(fromV, toV);
-            }
+                update_vessel_crew(fromV, toV, spawn);
             return all;
         }
 
@@ -84,34 +136,26 @@ namespace AT_Utils
             var moved = false;
             foreach(var fromP in fromV.parts)
             {
-                while(toP.protoModuleCrew.Count < toP.CrewCapacity && fromP.protoModuleCrew.Count > 0)
+                var numMoved = move_crew_from_part(fromP, toP);
+                if(numMoved < 0)
+                    continue;
+                if(numMoved == 0)
                 {
-                    move_crew(fromP, toP, fromP.protoModuleCrew[0]);
-                    moved = true;
+                    all = false;
+                    break;
                 }
-                if(fromP.protoModuleCrew.Count > 0) 
-                { all = false; break; }
+                moved = true;
             }
             if(moved)
-            {
-                Vessel.CrewWasModified(fromV, toP.vessel);
-                if(spawn) respawnCrew(fromV, toP.vessel);
-            }
+                update_vessel_crew(fromV, toP.vessel, spawn);
             return all;
         }
 
         public static bool moveCrew(Part fromP, Part toP, bool spawn = true)
         {
-            if(fromP.protoModuleCrew.Count == 0 ||
-               toP.CrewCapacity <= toP.protoModuleCrew.Count) return false;
-            while(toP.protoModuleCrew.Count < toP.CrewCapacity && fromP.protoModuleCrew.Count > 0)
-                move_crew(fromP, toP, fromP.protoModuleCrew[0]);
-            var moved = fromP.protoModuleCrew.Count > 0;
+            var moved = move_crew_from_part(fromP, toP) > 0;
             if(moved)
-            {
-                Vessel.CrewWasModified(fromP.vessel, toP.vessel);
-                if(spawn) respawnCrew(fromP.vessel, toP.vessel);
-            }
+                update_vessel_crew(fromP.vessel, toP.vessel, spawn);
             return moved;
         }
 
