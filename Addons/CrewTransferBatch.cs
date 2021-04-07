@@ -154,6 +154,15 @@ namespace AT_Utils
             return all;
         }
 
+        public static bool moveCrew(Part fromP, IList<Part> toParts, bool spawn = true)
+        {
+            if(toParts.Count == 0)
+                return false;
+            if(move_crew_from_part(fromP, toParts) > 0)
+                update_vessel_crew(fromP.vessel, toParts[0].vessel, spawn);
+            return fromP.protoModuleCrew.Count == 0;
+        }
+
         public static bool moveCrew(Vessel fromV, Part toP, bool spawn = true)
         {
             if(toP.CrewCapacity <= toP.protoModuleCrew.Count)
