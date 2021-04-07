@@ -15,24 +15,23 @@ namespace AT_Utils
         #endregion
 
         #region Find Modules or Parts
-        public static List<Part> AllChildren(this Part p)
+        public static IEnumerable<Part> AllChildren(this Part p)
         {
-            var all_children = new List<Part> { };
-            foreach(Part ch in p.children)
+            foreach(var child in p.children)
             {
-                all_children.Add(ch);
-                all_children.AddRange(ch.AllChildren());
+                yield return child;
+                foreach(var descendant in child.AllChildren())
+                    yield return descendant;
             }
-            return all_children;
         }
 
-        public static List<Part> AllConnectedParts(this Part p)
+        public static IEnumerable<Part> AllConnectedParts(this Part p)
         {
-            if(p.parent != null)
-                return p.parent.AllConnectedParts();
-            var all_parts = new List<Part> { p };
-            all_parts.AddRange(p.AllChildren());
-            return all_parts;
+            while(p.parent != null)
+                p = p.parent;
+            yield return p;
+            foreach(var descendant in p.AllChildren())
+                yield return descendant;
         }
 
         public static IEnumerable<Part> AllAttachedParts(this Part p)
