@@ -119,9 +119,9 @@ namespace AT_Utils
 
         public static void respawnCrew(Vessel fromV, Vessel toV)
         {
-            fromV.DespawnCrew();
-            toV.DespawnCrew();
-            toV.StartCoroutine(CallbackUtil.DelayedCallback(1, FlightGlobals.ActiveVessel.SpawnCrew));
+            if(fromV != toV)
+                fromV.DespawnCrew();
+            respawnCrew(toV);
         }
         #endregion
 
