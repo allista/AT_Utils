@@ -374,6 +374,9 @@ namespace AT_Utils
             bounds_area = boundsArea(bounds);
         }
 
+        public Metric(IEnumerable<Part> vessel, bool compute_hull = false, bool world_space = false)
+            : this(vessel is IList<Part> list ? list : vessel.ToList(), compute_hull, world_space) { }
+
         public Metric(IShipconstruct vessel, bool compute_hull = false, bool world_space = false)
             : this()
         {
