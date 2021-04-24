@@ -378,12 +378,7 @@ namespace AT_Utils
             : this(vessel is IList<Part> list ? list : vessel.ToList(), compute_hull, world_space) { }
 
         public Metric(IShipconstruct vessel, bool compute_hull = false, bool world_space = false)
-            : this()
-        {
-            bounds = partsBounds(vessel.Parts, world_space ? null : vessel.Parts[0].partTransform, compute_hull);
-            bounds_volume = boundsVolume(bounds);
-            bounds_area = boundsArea(bounds);
-        }
+            : this(vessel.Parts, compute_hull, world_space) { }
         #endregion
 
         //public methods
