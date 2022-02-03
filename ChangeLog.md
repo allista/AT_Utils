@@ -1,7 +1,63 @@
 # AT Utils ChangeLog
 
 
-* **v1.9.6**
+* **v1.10.0**
+    * KSP: reference changed 1.10.1 => 1.11.1
+    * **APR**
+        * `update_attach_nodes`: 
+            * fixed possible NRE
+            * extracted partTransform into local variable for better performance
+        * `PartUpdaterBase`: 
+            * added `OnInit` to separate `OnStart`-only logic from `OnLoad`+`OnStart`
+            * made `SaveDefaults` protected rather than public
+            * made `Init` protected rather than public
+    * **MultiAnimators**
+        * Using `Part.UpdateCoMOffset` to set CoM in `MultiGeometryAnimator`
+    * `Metric`:
+        * `Metric(IShipconstruct)` calls `Metric(List<Part>)`
+        * added Metric(IEnumerable<Part>)`
+        * expanded `Metric(vessel)` typing to `IList<Part>` for wider usage
+        * improved `partBounds` performance by saving transform position
+        * added support for `PartVariants`
+    * `Styles`: 
+        * using newly instantiated skin during `Init` to get default styles
+        * all box-derived styles support rich-text
+    * `CrewTransferBatch`: 
+        * added `moveCrew(fromP, toV)`
+        * added `moveCrew(fromP, IList<Part> toParts)`
+        * added `moveCrew(fromV, toP, IEnumerable<ProtoCrewMember>)`
+        * extracted and improved common logic of crew transfer
+        * fixed `move_crew` logic
+        * `respawnCrew(fromV, toV)`: despawns in `fromV` only if `fromV != toV`
+        * `respawnCrew(Vessel)`: always spawns crew in `ActiveVessel`
+        * `same_crew_member` takes gender into account
+    * `CrewTransferWindow`: 
+        * added display of the crew hosting part title
+        * removed redundant using
+    * **ConstructionUtils**: added `GetCrewWithEffect IEnumerable`
+    * **PartExtensions**:
+        * `UpdateAttachedPartPosFlight`: updating child's `orgPos`
+        * added `CompoundPartReconnect disposable`
+        * using `CompoundParts` namespace
+        * reimplemented `AllChildren` and `AllConnectedParts` as `IEnumerable`
+        * added `AllAttachedParts`
+    * **MathUtils**
+        * added `SameSign` function for `float` and `double` parameters
+        * added docs for `FromToRotation`
+    * **UI/Textures**: 
+        * added cogwheels icon
+        * added helmet icon
+        * added `InfoPanel` script that uses `ClickableLabel` to display a list of messages
+    * `Indicator`: fixed sound not playing after pause/unpause
+    * LabelFigure prefab: removed default tooltip text and renamed GO for value
+    * `UIWindowBase`: added `toggleColors` protected method
+    * GUIUtils: made `UpdatePartMenu` more robust for older KSP versions
+    * MiscUtils: added `StopTimeWarp` that takes into account auto-warp
+    * Interfaces: added `ISpaceUser` interface for future Hangar+GC cooperation
+    * Merge pull request #24 from HebaruSan/patch-1
+        * Fix compatibility in remote version file (KSP 1.10.x)
+
+* v1.9.6
     * **AnisotropicPartResizer** update 1.4.1
         * fixed symmetry counterparts handling and PAW refresh
         * improved performance by avoiding unnecessary rescales
