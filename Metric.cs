@@ -6,6 +6,7 @@
 //  Copyright (c) 2016 Allis Tauri
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace AT_Utils
@@ -142,11 +143,19 @@ namespace AT_Utils
             List<Vector3> hull_points = compute_hull ? new List<Vector3>() : null;
             for(int i = 0, partsCount = parts.Count; i < partsCount; i++)
             {
-                Part p = parts[i];
+                var p = parts[i];
                 if(p == null)
+                    // EditorLogic.SortedShipList returns List<Part>{null} when all parts are deleted
                     continue;
-                //EditorLogic.SortedShipList returns List<Part>{null} when all parts are deleted
-                //check for weels; if it's a wheel, get all meshes under the wheel collider
+                //check part variants
+                var variants = p.Modules.GetModule<ModulePartVariants>();
+                HashSet<string> disabledGO = null;
+                if(variants != null)
+                {
+                    disabledGO = new HashSet<string>(variants.SelectedVariant.InfoGameObjects.Where(info => !info.Status)
+                        .Select(info => info.Name));
+                }
+                //check for wheels; if it's a wheel, get all meshes under the wheel collider
                 var wheel = p.Modules.GetModule<ModuleWheelBase>();
                 var wheel_transform = wheel != null
                                       && wheel.Wheel != null
@@ -169,13 +178,20 @@ namespace AT_Utils
                     //skip meshes from the blacklist
                     if(Utils.NameMatches(mesh.t.name, AT_UtilsGlobals.Instance.MeshesToSkipList))
                         continue;
+                    //skip meshes disabled by part variant
+                    if(disabledGO != null)
+                    {
+                        if(disabledGO.Contains(mesh.t.name))
+                            continue;
+                    }
                     Vector3[] verts;
                     if(bad_part)
                     {
                         verts = Utils.BoundCorners(mesh.r.bounds);
                         for(int j = 0, len = verts.Length; j < len; j++)
                         {
-                            var v = p.partTransform.position + part_rot * (verts[j] - p.partTransform.position);
+                            var position = p.partTransform.position;
+                            var v = position + part_rot * (verts[j] - position);
                             if(refT != null)
                                 v = refT.InverseTransformPoint(v);
                             verts[j] = v;
@@ -350,7 +366,7 @@ namespace AT_Utils
         }
 
         //in-editor vessel metric
-        public Metric(List<Part> vessel, bool compute_hull = false, bool world_space = false)
+        public Metric(IList<Part> vessel, bool compute_hull = false, bool world_space = false)
             : this()
         {
             bounds = partsBounds(vessel, world_space ? null : vessel[0].partTransform, compute_hull);
@@ -358,13 +374,11 @@ namespace AT_Utils
             bounds_area = boundsArea(bounds);
         }
 
+        public Metric(IEnumerable<Part> vessel, bool compute_hull = false, bool world_space = false)
+            : this(vessel is IList<Part> list ? list : vessel.ToList(), compute_hull, world_space) { }
+
         public Metric(IShipconstruct vessel, bool compute_hull = false, bool world_space = false)
-            : this()
-        {
-            bounds = partsBounds(vessel.Parts, world_space ? null : vessel.Parts[0].partTransform, compute_hull);
-            bounds_volume = boundsVolume(bounds);
-            bounds_area = boundsArea(bounds);
-        }
+            : this(vessel.Parts, compute_hull, world_space) { }
         #endregion
 
         //public methods

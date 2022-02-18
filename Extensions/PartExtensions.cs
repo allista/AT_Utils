@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using CompoundParts;
 using UnityEngine;
 
 namespace AT_Utils
 {
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public static class PartExtensions
     {
         #region from MechJeb2 PartExtensions
@@ -15,37 +18,35 @@ namespace AT_Utils
         #endregion
 
         #region Find Modules or Parts
-        public static List<Part> AllChildren(this Part p)
+        public static IEnumerable<Part> AllChildren(this Part p)
         {
-            var all_children = new List<Part> { };
-            foreach(Part ch in p.children)
+            foreach(var child in p.children)
             {
-                all_children.Add(ch);
-                all_children.AddRange(ch.AllChildren());
+                yield return child;
+                foreach(var descendant in child.AllChildren())
+                    yield return descendant;
             }
-            return all_children;
         }
 
-        public static List<Part> AllConnectedParts(this Part p)
+        public static IEnumerable<Part> AllConnectedParts(this Part p)
+        {
+            while(p.parent != null)
+                p = p.parent;
+            yield return p;
+            foreach(var descendant in p.AllChildren())
+                yield return descendant;
+        }
+
+        public static IEnumerable<Part> AllAttachedParts(this Part p)
         {
             if(p.parent != null)
-                return p.parent.AllConnectedParts();
-            var all_parts = new List<Part> { p };
-            all_parts.AddRange(p.AllChildren());
-            return all_parts;
+                yield return p.parent;
+            foreach(var child in p.children)
+                yield return child;
         }
 
-        public static Part AttachedPartWithModule<T>(this Part p) where T : PartModule
-        {
-            if(p.parent != null && p.parent.HasModule<T>())
-                return p.parent;
-            foreach(var c in p.children)
-            {
-                if(c.HasModule<T>())
-                    return c;
-            }
-            return null;
-        }
+        public static Part AttachedPartWithModule<T>(this Part p) where T : PartModule =>
+            p.AllAttachedParts().FirstOrDefault(c => c.HasModule<T>());
 
         public static T GetModuleInAttachedPart<T>(this Part p) where T : PartModule
         {
@@ -71,7 +72,7 @@ namespace AT_Utils
             where ModuleT : PartModule
         {
             var passages = new List<ModuleT>();
-            foreach(Part p in part.AllConnectedParts())
+            foreach(var p in part.AllConnectedParts())
                 passages.AddRange(
                     from m in p.Modules.OfType<ModuleT>()
                     where exception == null || m != exception
@@ -125,6 +126,51 @@ namespace AT_Utils
         #endregion
 
         #region Actions
+        public class CompoundPartReconnect : IDisposable
+        {
+            private readonly Dictionary<CompoundPartModule, Part> targets =
+                new Dictionary<CompoundPartModule, Part>();
+
+
+            public CompoundPartReconnect(Part part)
+            {
+                foreach(var p in part.AllConnectedParts())
+                {
+                    var cp = p as CompoundPart;
+                    if(cp == null)
+                        continue;
+                    var cpm = cp.Modules.GetModule<CompoundPartModule>();
+                    if(cpm == null)
+                        continue;
+                    if(cpm.target == null)
+                        continue;
+                    targets.Add(cpm, cpm.target);
+                    cpm.OnTargetLost();
+                }
+            }
+
+            private static void set_compound_part_target(CompoundPartModule cpm, Part target)
+            {
+                if(cpm != null && target != null)
+                    cpm.OnTargetSet(target);
+            }
+
+            public void Dispose()
+            {
+                foreach(var cpm_target in targets)
+                {
+                    cpm_target.Key.StartCoroutine(CallbackUtil.DelayedCallback(1,
+                        set_compound_part_target,
+                        cpm_target.Key,
+                        cpm_target.Value));
+                }
+                targets.Clear();
+            }
+        }
+
+        public static CompoundPartReconnect ReconnectCompoundParts(this Part p) =>
+            new CompoundPartReconnect(p);
+
         public static void BreakConnectedCompoundParts(this Part p)
         {
             //break connected compound parts
@@ -133,7 +179,7 @@ namespace AT_Utils
                 var cp = part as CompoundPart;
                 if(cp == null)
                     continue;
-                var cpm = cp.Modules.GetModule<CompoundParts.CompoundPartModule>();
+                var cpm = cp.Modules.GetModule<CompoundPartModule>();
                 if(cpm == null)
                     continue;
                 cpm.OnTargetLost();
@@ -154,12 +200,11 @@ namespace AT_Utils
 
         public static void UpdateAttachedPartPos(this Part part, AttachNode node)
         {
-            if(node != null && node.attachedPart != null)
-            {
-                var dp = part.AttachNodeDeltaPos(node);
-                if(!dp.IsZero())
-                    part.UpdateAttachedPartPos(node.attachedPart, dp);
-            }
+            if(node == null || node.attachedPart == null)
+                return;
+            var dp = part.AttachNodeDeltaPos(node);
+            if(!dp.IsZero())
+                part.UpdateAttachedPartPos(node.attachedPart, dp);
         }
 
         public static void UpdateAttachedPartPos(this Part part, Part attached_part, Vector3 delta)
@@ -234,7 +279,12 @@ namespace AT_Utils
                 else if(attached_part.parent == part)
                 {
                     using(new PartJoinRecreate(part))
+                    {
                         attached_part.partTransform.position += delta;
+                        attached_part.UpdateOrgPos(part.vessel.rootPart);
+                        attached_part.partTransform.rotation =
+                            attached_part.vessel.vesselTransform.rotation * attached_part.orgRot;
+                    }
                 }
             }
         }

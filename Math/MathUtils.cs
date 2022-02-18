@@ -270,6 +270,12 @@ namespace AT_Utils
             return vec;
         }
 
+        /// <summary>
+        /// A working implementation of the FromToRotation for QuaternionD
+        /// </summary>
+        /// <param name="fromV">The starting vector</param>
+        /// <param name="toV">The end vector</param>
+        /// <returns>The quaternion describing rotation from starting to the end vector.</returns>
         public static QuaternionD FromToRotation(Vector3d fromV, Vector3d toV)
         {
             var cross = Vector3d.Cross(fromV, toV);
@@ -278,6 +284,26 @@ namespace AT_Utils
             var norm = 1.0 / Math.Sqrt(cross.sqrMagnitude + wval * wval);
             return new QuaternionD(cross.x * norm, cross.y * norm, cross.z * norm, wval * norm);
         }
+
+        /// <summary>
+        /// Checks if the two numbers are of the same sign.
+        /// Returns true if one of the numbers is zero.
+        /// </summary>
+        /// <param name="a">First number.</param>
+        /// <param name="b">Second number.</param>
+        /// <returns>True if both numbers have the same sign, or one of them is zero.</returns>
+        public static bool SameSign(float a, float b) =>
+            a >= 0 && b >= 0 || a <= 0 && b <= 0;
+
+        /// <summary>
+        /// Checks if the two numbers are of the same sign.
+        /// Returns true if one of the numbers is zero.
+        /// </summary>
+        /// <param name="a">First number.</param>
+        /// <param name="b">Second number.</param>
+        /// <returns>True if both numbers have the same sign, or one of them is zero.</returns>
+        public static bool SameSign(double a, double b) =>
+            a >= 0 && b >= 0 || a <= 0 && b <= 0;
     }
 }
 

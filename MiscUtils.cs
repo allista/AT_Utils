@@ -65,6 +65,14 @@ namespace AT_Utils
             return array;
         }
 
+        public static void StopTimeWarp(bool instant = false)
+        {
+            if(TimeWarp.fetch == null)
+                return;
+            TimeWarp.fetch.CancelAutoWarp();
+            TimeWarp.SetRate(0, instant);
+        }
+
         public static string formatVeryBigValue(float value, string unit, string format = "F1")
         {
             string mod;
