@@ -189,8 +189,7 @@ namespace AT_Utils
 
         public Transform GetSpawnTransform(Quaternion? rotation = null)
         {
-            Vector3 spawn_offset;
-            return GetSpawnTransform(Vector3.zero, out spawn_offset, rotation);
+            return GetSpawnTransform(Vector3.zero, out _, rotation);
         }
 
         public Transform GetSpawnTransform(Bounds bounds, out Vector3 spawn_offset, Quaternion? rotation = null) =>
@@ -239,8 +238,7 @@ namespace AT_Utils
 
         public bool MetricFits(Metric metric, Quaternion? rotation = null)
         {
-            Vector3 spawn_offset;
-            var T = GetSpawnTransform(metric, out spawn_offset, rotation);
+            var T = GetSpawnTransform(metric, out Vector3 spawn_offset, rotation);
             return MetricFits(metric, T, spawn_offset);
         }
     }
