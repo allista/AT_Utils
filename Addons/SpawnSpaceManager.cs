@@ -109,9 +109,9 @@ namespace AT_Utils
 
         public void UpdateMetric()
         {
-            if(string.IsNullOrEmpty(SpawnSpace))
-                return;
-            SpaceMetric = new Metric(part, SpawnSpace, true);
+            SpaceMetric = string.IsNullOrEmpty(SpawnSpace)
+                ? new Metric(part, true)
+                : new Metric(part, SpawnSpace, true);
         }
 
         public void Init(Part part)
