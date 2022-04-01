@@ -19,21 +19,21 @@ namespace AT_Utils
         [Persistent] public string SpawnTransform = string.Empty;
         protected Transform spawn_transform, spawn_transform_rotated;
 
-        SpatialSensor Sensor;
+        private SpatialSensor Sensor;
         public bool SpawnSpaceEmpty => Sensor == null || Sensor.Empty;
 
         #region AutoRotation
-        static readonly Quaternion xrot = Quaternion.Euler(90, 0, 0);
-        static readonly Quaternion yrot = Quaternion.Euler(0, 90, 0);
-        static readonly Quaternion zrot = Quaternion.Euler(0, 0, 90);
-        static readonly Quaternion[,] swaps =
+        private static readonly Quaternion xrot = Quaternion.Euler(90, 0, 0);
+        private static readonly Quaternion yrot = Quaternion.Euler(0, 90, 0);
+        private static readonly Quaternion zrot = Quaternion.Euler(0, 0, 90);
+        private static readonly Quaternion[,] swaps =
         {
             {Quaternion.identity,     zrot,                     yrot},
             {zrot.Inverse(),         Quaternion.identity,     xrot},
             {yrot.Inverse(),         xrot.Inverse(),         Quaternion.identity}
         };
 
-        class SortedVector3
+        private class SortedVector3
         {
             public float a, b, c;
             public uint i0, i1, i2;
@@ -49,7 +49,7 @@ namespace AT_Utils
                 }
             }
 
-            void add(float d, uint i)
+            private void add(float d, uint i)
             {
                 if(d > a)
                 {
@@ -86,7 +86,7 @@ namespace AT_Utils
 
         public MeshFilter Space { get; protected set; }
         private Metric spaceMetric;
-        SortedVector3 spawn_space_sorted_size;
+        private SortedVector3 spawn_space_sorted_size;
         public Metric SpaceMetric
         {
             get => spaceMetric;
@@ -109,9 +109,9 @@ namespace AT_Utils
 
         public void UpdateMetric()
         {
-            if(string.IsNullOrEmpty(SpawnSpace))
-                return;
-            SpaceMetric = new Metric(part, SpawnSpace, true);
+            SpaceMetric = string.IsNullOrEmpty(SpawnSpace)
+                ? new Metric(part, true)
+                : new Metric(part, SpawnSpace, true);
         }
 
         public void Init(Part part)
@@ -189,8 +189,7 @@ namespace AT_Utils
 
         public Transform GetSpawnTransform(Quaternion? rotation = null)
         {
-            Vector3 spawn_offset;
-            return GetSpawnTransform(Vector3.zero, out spawn_offset, rotation);
+            return GetSpawnTransform(Vector3.zero, out _, rotation);
         }
 
         public Transform GetSpawnTransform(Bounds bounds, out Vector3 spawn_offset, Quaternion? rotation = null) =>
@@ -239,8 +238,7 @@ namespace AT_Utils
 
         public bool MetricFits(Metric metric, Quaternion? rotation = null)
         {
-            Vector3 spawn_offset;
-            var T = GetSpawnTransform(metric, out spawn_offset, rotation);
+            var T = GetSpawnTransform(metric, out Vector3 spawn_offset, rotation);
             return MetricFits(metric, T, spawn_offset);
         }
     }

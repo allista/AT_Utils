@@ -7,7 +7,7 @@
         <OutputType>Library</OutputType>
         <RootNamespace>AT_Utils</RootNamespace>
         <AssemblyName>SubmodelResizer</AssemblyName>
-        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <DebugSymbols>true</DebugSymbols>
@@ -38,19 +38,19 @@
     <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets"/>
     <ItemGroup>
         <Reference Include="Assembly-CSharp">
-            <HintPath>..\..\KSP-test\KSP_test_1.11.1\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+            <HintPath>..\..\KSP-test\KSP_test_1.12.3\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine">
-            <HintPath>..\..\KSP-test\KSP_test_1.11.1\KSP_Data\Managed\UnityEngine.dll</HintPath>
+            <HintPath>..\..\KSP-test\KSP_test_1.12.3\KSP_Data\Managed\UnityEngine.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>..\..\KSP-test\KSP_test_1.11.1\KSP_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+            <HintPath>..\..\KSP-test\KSP_test_1.12.3\KSP_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UI">
-            <HintPath>..\..\KSP-test\KSP_test_1.11.1\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+            <HintPath>..\..\KSP-test\KSP_test_1.12.3\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

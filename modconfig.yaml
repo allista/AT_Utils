@@ -1,0 +1,15 @@
+dll_path: GameData/000_AT_Utils/Plugins/000_AT_Utils.dll
+archive_path: Releases
+github_url: allista/AT_Utils
+game_data_path: GameData
+exclude_patterns:
+    - '*/config.xml'
+    - '*.user'
+    - '*.orig'
+    - '*.mdb'
+    - '*.pdb'
+    - '*/System.*.dll'
+    - '*/Mono.*.dll'
+    - '*/Unity*.dll'
+    - 'GameData/000_AT_Utils/ResourceHack.cfg'
+    - '*/AnimatedConverters.dll'
