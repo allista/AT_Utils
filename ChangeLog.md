@@ -1,5 +1,11 @@
 # AT Utils Change Log
 
+## v1.10.1 / 2022-04-01
+
+* Compiled for KSP 1.12.3
+* `SpawnSpaceManager`: updating `SpaceMetric` from part when `SpawnSpace` is not defined
+* Internal project changes for CI/CD
+
 ## v1.10.0
 
 * KSP: reference changed 1.10.1 => 1.11.1
